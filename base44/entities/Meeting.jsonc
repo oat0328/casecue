@@ -30,6 +30,10 @@
       "type": "string",
       "title": "Time"
     },
+    "location": {
+      "type": "string",
+      "title": "Location / Virtual Meeting Link"
+    },
     "agenda": {
       "type": "string",
       "title": "Agenda"

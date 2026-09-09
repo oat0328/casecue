@@ -3,7 +3,7 @@ import { Card, StatCard } from "@/components/ui/cards";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend
 } from "recharts";
-import { Users, Activity, TrendingUp, Building2, DollarSign, Repeat, FlaskConical, CheckCircle2, Gift, AlertTriangle, XCircle } from "lucide-react";
+import {   Users, Activity, TrendingUp, Building2, DollarSign, Repeat, FlaskConical, CheckCircle2, Gift, AlertTriangle, XCircle, Ban } from "lucide-react";
 
 const STATUS_COLORS = {
   demo: "#9ca3af",
@@ -28,6 +28,7 @@ export default function OverviewStats({ stats }) {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         <StatCard label="Total users" value={t.users} icon={Users} />
+        <StatCard label="Free users (no subscription)" value={t.free_users} icon={Users} />
         <StatCard label="Active (14 days)" value={t.active_14d} icon={Activity} tone="green" />
         <StatCard label="New this week" value={t.new_this_week} icon={TrendingUp} tone="blue" />
         <StatCard label="New this month" value={t.new_this_month} icon={TrendingUp} tone="blue" />
@@ -39,6 +40,7 @@ export default function OverviewStats({ stats }) {
         <StatCard label="Complimentary" value={s.complimentary} icon={Gift} />
         <StatCard label="Past due" value={s.past_due} icon={AlertTriangle} tone="amber" />
         <StatCard label="Canceled" value={s.canceled} icon={XCircle} tone="red" />
+        <StatCard label="Suspended" value={s.suspended} icon={Ban} tone="red" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4">

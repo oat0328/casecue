@@ -11,7 +11,7 @@ import RecentLists from "@/components/platform/RecentLists";
 
 export default function PlatformAdmin() {
   const { user } = useAuth();
-  const { data, loading } = useAsync(() => base44.functions.invoke("platformAdminStats"), []);
+  const { data, loading, refetch } = useAsync(() => base44.functions.invoke("platformAdminStats"), []);
   const stats = data?.data;
 
   if (user?.role !== "admin") {
@@ -43,7 +43,7 @@ export default function PlatformAdmin() {
             <OverviewStats stats={stats} />
           </TabsContent>
           <TabsContent value="customers" className="mt-6">
-            <CustomersTable customers={stats.customers} />
+            <CustomersTable customers={stats.customers} onRefresh={refetch} />
           </TabsContent>
           <TabsContent value="activity" className="mt-6">
             <RecentLists stats={stats} />

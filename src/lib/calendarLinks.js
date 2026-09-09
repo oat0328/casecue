@@ -9,7 +9,10 @@ const TYPE_LABELS = {
   Evaluation: "Evaluation Meeting",
 };
 
-const LOCATION_TEXT = "Location / virtual meeting link: see the CaseCue meeting page";
+function locationText(meeting) {
+  const loc = String(meeting?.location || "").trim();
+  return loc || "Location / virtual meeting link: see the CaseCue meeting page";
+}
 
 const REMINDER_TEXT =
   "Reminder: set a reminder for this meeting. Full details are stored securely in CaseCue — " +
@@ -94,7 +97,7 @@ export function googleCalendarUrl(meeting, student) {
     text: meetingTitle(meeting, student),
     dates,
     details: eventDescription(),
-    location: LOCATION_TEXT,
+    location: locationText(meeting),
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
@@ -126,7 +129,7 @@ export function icsFileContent(meeting, student) {
     start,
     end,
     `SUMMARY:${escapeIcs(meetingTitle(meeting, student))}`,
-    `LOCATION:${escapeIcs(LOCATION_TEXT)}`,
+    `LOCATION:${escapeIcs(locationText(meeting))}`,
     `DESCRIPTION:${escapeIcs(eventDescription())}`,
     "END:VEVENT",
     "END:VCALENDAR",
@@ -139,7 +142,7 @@ export function meetingDetailsText(meeting, student) {
     meetingTitle(meeting, student),
     `Date: ${meeting.date || "TBD"}`,
     `Time: ${meeting.time || "TBD"} (default 1 hour — confirm in CaseCue)`,
-    LOCATION_TEXT,
+    locationText(meeting),
     REMINDER_TEXT,
     `Authorized CaseCue meeting page: ${window.location.origin}/meetings`,
   ].join("\n");

@@ -46,7 +46,13 @@ export default async function(req) {
     orgs.forEach((o) => { if (orgsByType[o.org_type] !== undefined) orgsByType[o.org_type]++; });
 
     const subsByStatus = { demo: 0, complimentary: 0, trialing: 0, active: 0, past_due: 0, canceled: 0, suspended: 0, expired: 0 };
-    subs.forEach((s) => { if (subsByStatus[s.status] !== undefined) subsByStatus[s.status]++; });
+    const today = new Date().toISOString().slice(0, 10);
+    const effectiveStatus = (s) => {
+      if (s.status === 'complimentary' && s.complimentary_end && s.complimentary_end < today) return 'expired';
+      if (s.status === 'trialing' && s.trial_end && s.trial_end < today) return 'expired';
+      return s.status;
+    };
+    subs.forEach((s) => { const st = effectiveStatus(s); if (subsByStatus[st] !== undefined) subsByStatus[st]++; });
     const mrr = subs.filter((s) => s.status === 'active').reduce((sum, s) => sum + (s.monthly_price || 0), 0);
     const paidCount = subsByStatus.active + subsByStatus.past_due;
     const concluded = paidCount + subsByStatus.canceled + subsByStatus.expired;
@@ -89,7 +95,7 @@ export default async function(req) {
         org_type: org ? org.org_type : null,
         org_role: m ? m.org_role : null,
         plan: sub ? sub.plan_name : null,
-        status: sub ? sub.status : 'free',
+        status: sub ? effectiveStatus(sub) : 'free',
         monthly_price: sub ? (sub.monthly_price ?? null) : null,
         registered: u.created_date,
         trial_end: sub ? (sub.trial_end || null) : null,
@@ -123,6 +129,7 @@ export default async function(req) {
         organizations: orgs.length,
         orgs_by_type: orgsByType,
         subs_by_status: subsByStatus,
+        free_users: customers.filter((c) => c.status === 'free').length,
         mrr,
         conversion_rate: conversionRate,
       },

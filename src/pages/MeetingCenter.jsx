@@ -23,7 +23,7 @@ export default function MeetingCenter() {
   const { data: meetings, refetch } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ student_id: "", title: "", meeting_type: "IEP", date: "", time: "", agenda: "", parent_concerns: "", teacher_concerns: "" });
+  const [form, setForm] = useState({ student_id: "", title: "", meeting_type: "IEP", date: "", time: "", location: "", agenda: "", parent_concerns: "", teacher_concerns: "" });
   const [saving, setSaving] = useState(false);
   const [prep, setPrep] = useState(null);
   const [preparing, setPreparing] = useState(null);
@@ -35,7 +35,7 @@ export default function MeetingCenter() {
     setSaving(true);
     try {
       await base44.entities.Meeting.create({ ...form, status: "scheduled" });
-      setForm({ student_id: "", title: "", meeting_type: "IEP", date: "", time: "", agenda: "", parent_concerns: "", teacher_concerns: "" });
+      setForm({ student_id: "", title: "", meeting_type: "IEP", date: "", time: "", location: "", agenda: "", parent_concerns: "", teacher_concerns: "" });
       setOpen(false); refetch(); toast({ title: "Meeting scheduled" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
     finally { setSaving(false); }
@@ -70,7 +70,7 @@ export default function MeetingCenter() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="font-semibold">{m.title}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> {m.date}{m.time ? ` · ${m.time}` : ""} · {m.meeting_type} · {studentName(m.student_id)}</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> {m.date}{m.time ? ` · ${m.time}` : ""} · {m.meeting_type} · {studentName(m.student_id)}{m.location ? ` · ${m.location}` : ""}</div>
               </div>
               <div className="flex gap-2">
                 <AddToCalendar meeting={m} student={(students || []).find((x) => x.id === m.student_id)} />
@@ -114,6 +114,7 @@ export default function MeetingCenter() {
             </div>
             <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
             <div><Label>Time</Label><Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
+            <div className="col-span-2"><Label>Location / virtual meeting link</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Room 12 or https://meet.google.com/…" className="mt-1" /></div>
             <div className="col-span-2"><Label>Agenda</Label><Textarea rows={2} value={form.agenda} onChange={(e) => setForm({ ...form, agenda: e.target.value })} /></div>
             <div><Label>Parent concerns</Label><Textarea rows={2} value={form.parent_concerns} onChange={(e) => setForm({ ...form, parent_concerns: e.target.value })} /></div>
             <div><Label>Teacher concerns</Label><Textarea rows={2} value={form.teacher_concerns} onChange={(e) => setForm({ ...form, teacher_concerns: e.target.value })} /></div>

@@ -17,6 +17,7 @@ import {
 import { DEMO_LABEL, loadDemoCaseload, deleteDemoCaseload } from "@/lib/demoData";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
+import RedeemAccessCode from "@/components/settings/RedeemAccessCode";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -226,6 +227,7 @@ export default function Settings() {
               {startingCheckout ? "Opening checkout…" : "Start subscription — $24.99/mo"}
             </Button>
           )}
+          <RedeemAccessCode />
         </Card></TabsContent>
 
         <TabsContent value="notifications"><Card className="p-6 max-w-lg space-y-3">
