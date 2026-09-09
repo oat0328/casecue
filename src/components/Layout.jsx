@@ -81,7 +81,7 @@ export default function Layout() {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-72 bg-sidebar shadow-xl">
-            <button className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-sidebar-accent" onClick={() => setOpen(false)}>
+            <button aria-label="Close menu" className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-sidebar-accent" onClick={() => setOpen(false)}>
               <X className="h-5 w-5" />
             </button>
             <SidebarContent />
@@ -92,7 +92,7 @@ export default function Layout() {
       {/* Main */}
       <div className="lg:pl-64">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 backdrop-blur-md px-4 sm:px-6">
-          <button className="lg:hidden p-2 rounded-lg hover:bg-muted" onClick={() => setOpen(true)}>
+          <button aria-label="Open menu" className="lg:hidden p-2 rounded-lg hover:bg-muted" onClick={() => setOpen(true)}>
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
@@ -127,7 +127,7 @@ export default function Layout() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+        <main className="px-4 sm:px-6 lg:px-8 py-6 pb-28 max-w-7xl mx-auto">
           <Outlet />
         </main>
       </div>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 const SECTIONS = [
   { key: "present_levels", label: "Present Levels" },
@@ -69,11 +70,12 @@ export default function IEPStudio() {
 
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="p-6 lg:col-span-1 h-fit">
-          <Label className="text-sm font-semibold">Student</Label>
-          <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1.5" value={studentId} onChange={(e) => { setStudentId(e.target.value); setDraft(""); }}>
-            <option value="">Select a student…</option>
-            {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-          </select>
+          <StudentSelector
+            students={students || []}
+            value={studentId}
+            onChange={(id) => { setStudentId(id); setDraft(""); }}
+            noBottomSpace
+          />
 
           <Label className="text-sm font-semibold mt-5 block">Section to draft</Label>
           <div className="mt-2 space-y-1.5">
@@ -86,7 +88,7 @@ export default function IEPStudio() {
 
           <Label className="text-sm font-semibold mt-5 block">Additional instructions (optional)</Label>
           <Textarea rows={3} value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="e.g. focus on reading fluency" className="mt-1.5" />
-          <Button onClick={generate} disabled={loading || !studentId} className="brand-gradient text-white w-full mt-4">
+          <Button onClick={generate} disabled={loading || !studentId} className="brand-gradient text-white w-full mt-6">
             {loading ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Drafting…</> : <><Sparkles className="h-4 w-4 mr-1" /> Draft with CaseCue</>}
           </Button>
         </Card>

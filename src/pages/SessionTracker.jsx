@@ -9,6 +9,7 @@ import GroupSessionForm from "@/components/sessionTracker/GroupSessionForm";
 import MinutesDashboard from "@/components/sessionTracker/MinutesDashboard";
 import GoalProgressChart from "@/components/sessionTracker/GoalProgressChart";
 import SessionList from "@/components/sessionTracker/SessionList";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 const TABS = [
   { key: "quick", label: "Quick Entry" },
@@ -81,12 +82,12 @@ export default function SessionTracker() {
       {tab === "log" && (
         <div className="space-y-4">
           <Card className="p-4 sm:p-5">
-            <label className="text-sm font-medium block mb-2">Student</label>
-            <select className="w-full sm:w-80 min-h-[44px] rounded-lg border border-input bg-background px-3 py-2.5 text-base"
-              value={logStudentId} onChange={(e) => setLogStudentId(e.target.value)}>
-              <option value="">Select a student…</option>
-              {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-            </select>
+            <StudentSelector
+              students={students || []}
+              value={logStudentId}
+              onChange={setLogStudentId}
+              noBottomSpace
+            />
           </Card>
           {logStudentId ? (
             <>

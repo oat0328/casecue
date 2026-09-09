@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 const DOC_TYPES = ["IEP", "Evaluation", "BIP", "504", "Progress Report", "Assessment Report", "Other"];
 
@@ -66,15 +67,18 @@ export default function Documents() {
 
       <Card className="p-6 mb-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2"><Upload className="h-4 w-4 text-primary" /> Upload document</h3>
-        <div className="grid sm:grid-cols-3 gap-4 mb-4">
-          <div><Label>Student</Label>
-            <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.student_id} onChange={(e) => setForm({ ...form, student_id: e.target.value })}>
-              <option value="">—</option>
-              {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-            </select>
+        <div className="grid sm:grid-cols-3 gap-5 mb-5">
+          <div>
+            <StudentSelector
+              students={students || []}
+              value={form.student_id}
+              onChange={(id) => setForm({ ...form, student_id: id })}
+              placeholder="—"
+              noBottomSpace
+            />
           </div>
           <div><Label>Document type</Label>
-            <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.document_type} onChange={(e) => setForm({ ...form, document_type: e.target.value })}>
+            <select className="w-full min-h-[44px] rounded-lg border border-input bg-background px-3 py-2 text-sm mt-2" value={form.document_type} onChange={(e) => setForm({ ...form, document_type: e.target.value })}>
               {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>

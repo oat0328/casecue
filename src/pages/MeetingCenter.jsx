@@ -14,6 +14,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import AddToCalendar from "@/components/meetings/AddToCalendar";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 const MEETING_TYPES = ["IEP", "MET", "Evaluation", "Other"];
 
@@ -101,11 +102,14 @@ export default function MeetingCenter() {
           <DialogHeader><DialogTitle>Schedule meeting</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-2">
             <div className="col-span-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-            <div><Label>Student</Label>
-              <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.student_id} onChange={(e) => setForm({ ...form, student_id: e.target.value })}>
-                <option value="">—</option>
-                {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-              </select>
+            <div>
+              <StudentSelector
+                students={students || []}
+                value={form.student_id}
+                onChange={(id) => setForm({ ...form, student_id: id })}
+                placeholder="—"
+                noBottomSpace
+              />
             </div>
             <div><Label>Type</Label>
               <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.meeting_type} onChange={(e) => setForm({ ...form, meeting_type: e.target.value })}>

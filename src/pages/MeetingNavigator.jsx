@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import StepCard from "@/components/meetingCheatSheet/StepCard";
 import MeetingMode from "@/components/meetingCheatSheet/MeetingMode";
 import { exportMeetingNavigatorPdf } from "@/lib/pdfExport";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 // IEP Meeting Navigator: a 32-section guided workspace filled with the student's
 // verified records so the teacher can present the entire IEP meeting with confidence.
@@ -87,11 +88,12 @@ export default function MeetingNavigator() {
       />
 
       <Card className="p-5 mb-5">
-        <label className="text-sm font-medium">Student</label>
-        <select className="w-full sm:w-80 rounded-lg border border-input bg-background px-3 py-2.5 text-base mt-2" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
-          <option value="">Select a student…</option>
-          {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-        </select>
+        <StudentSelector
+          students={students || []}
+          value={studentId}
+          onChange={setStudentId}
+          noBottomSpace
+        />
       </Card>
 
       {studentId && !record && (

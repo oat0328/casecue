@@ -52,7 +52,7 @@ export default function AskCaseCueButton() {
             <div className="flex items-center gap-2 font-semibold text-sm">
               <Sparkles className="h-4 w-4" /> Ask CaseCue
             </div>
-            <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/20">
+            <button onClick={() => setOpen(false)} aria-label="Close Ask CaseCue" className="p-1 rounded-lg hover:bg-white/20">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -80,7 +80,7 @@ export default function AskCaseCueButton() {
                 placeholder="Ask a question…"
                 className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
               />
-              <button onClick={ask} disabled={loading || !question.trim()} className="rounded-lg brand-gradient text-white p-2 disabled:opacity-50">
+              <button onClick={ask} disabled={loading || !question.trim()} aria-label="Send question" className="rounded-lg brand-gradient text-white p-2 disabled:opacity-50">
                 <Send className="h-4 w-4" />
               </button>
             </div>

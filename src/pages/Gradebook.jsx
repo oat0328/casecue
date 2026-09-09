@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 export default function Gradebook() {
   const { toast } = useToast();
@@ -40,12 +41,15 @@ export default function Gradebook() {
 
       <Card className="p-6 mb-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /> Add assignment</h3>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div><Label>Student</Label>
-            <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.student_id} onChange={(e) => setForm({ ...form, student_id: e.target.value, goal_id: "" })}>
-              <option value="">Select…</option>
-              {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-            </select>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div>
+            <StudentSelector
+              students={students || []}
+              value={form.student_id}
+              onChange={(id) => setForm({ ...form, student_id: id, goal_id: "" })}
+              placeholder="Select…"
+              noBottomSpace
+            />
           </div>
           <div><Label>Link to goal</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.goal_id} onChange={(e) => setForm({ ...form, goal_id: e.target.value })}>
@@ -60,7 +64,7 @@ export default function Gradebook() {
           <div className="sm:col-span-2 lg:col-span-3"><Label>Notes</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="mt-1" /></div>
         </div>
         <div className="mt-3 text-sm text-muted-foreground">Preview: {form.score_possible > 0 ? `${form.score_earned || 0}/${form.score_possible} = ${pct(form)}%` : "Enter scores"}</div>
-        <Button onClick={add} disabled={saving} className="brand-gradient text-white mt-3"><Plus className="h-4 w-4 mr-1" /> {saving ? "Saving…" : "Add assignment"}</Button>
+        <Button onClick={add} disabled={saving} className="brand-gradient text-white mt-6"><Plus className="h-4 w-4 mr-1" /> {saving ? "Saving…" : "Add assignment"}</Button>
       </Card>
 
       <div className="space-y-2">

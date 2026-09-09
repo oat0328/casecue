@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
 } from "recharts";
@@ -63,12 +64,15 @@ export default function DataCenter() {
       {/* Log form */}
       <Card className="p-6 mb-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /> Log progress data</h3>
-        <div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div><Label>Student</Label>
-            <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.student_id} onChange={(e) => setForm({ ...form, student_id: e.target.value, goal_id: "" })}>
-              <option value="">Select…</option>
-              {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-            </select>
+        <div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div>
+            <StudentSelector
+              students={students || []}
+              value={form.student_id}
+              onChange={(id) => setForm({ ...form, student_id: id, goal_id: "" })}
+              placeholder="Select…"
+              noBottomSpace
+            />
           </div>
           <div><Label>Goal</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.goal_id} onChange={(e) => setForm({ ...form, goal_id: e.target.value })}>
@@ -89,7 +93,7 @@ export default function DataCenter() {
         <div className="mt-3 text-sm text-muted-foreground">
           Preview: {form.total > 0 ? `${form.correct || 0}/${form.total} = ${Math.round((parseFloat(form.correct||0)/parseFloat(form.total))*1000)/10}% = ${(Math.round((parseFloat(form.correct||0)/parseFloat(form.total))*100)/100)}` : "Enter correct and total"}
         </div>
-        <Button onClick={submit} disabled={saving} className="brand-gradient text-white mt-4"><Plus className="h-4 w-4 mr-1" /> {saving ? "Saving…" : "Log data"}</Button>
+        <Button onClick={submit} disabled={saving} className="brand-gradient text-white mt-6"><Plus className="h-4 w-4 mr-1" /> {saving ? "Saving…" : "Log data"}</Button>
       </Card>
 
       {/* Trends per student */}

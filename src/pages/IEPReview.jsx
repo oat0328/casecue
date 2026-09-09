@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/cards";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 const LEVEL_META = {
   good: { label: "Looks Good", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" },
@@ -64,11 +65,12 @@ export default function IEPReview() {
       <Card className="p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
           <div className="flex-1">
-            <label className="text-sm font-semibold">Select student / IEP</label>
-            <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1.5" value={studentId} onChange={(e) => { setStudentId(e.target.value); setReview(null); setFixResult({}); }}>
-              <option value="">Select a student…</option>
-              {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-            </select>
+            <StudentSelector
+              students={students || []}
+              value={studentId}
+              onChange={(id) => { setStudentId(id); setReview(null); setFixResult({}); }}
+              noBottomSpace
+            />
           </div>
           <Button onClick={runReview} disabled={running || !studentId} className="brand-gradient text-white">
             {running ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Reviewing…</> : <><Sparkles className="h-4 w-4 mr-1" /> Run CaseCue IEP Review</>}

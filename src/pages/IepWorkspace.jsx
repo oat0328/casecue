@@ -6,6 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 import DocumentStep from "@/components/iepWorkspace/DocumentStep";
 import ExtractionStep from "@/components/iepWorkspace/ExtractionStep";
 import DraftStep from "@/components/iepWorkspace/DraftStep";
@@ -55,15 +56,12 @@ export default function IepWorkspace() {
       </div>
 
       <Card className="p-5 mb-6">
-        <label className="text-sm font-medium">Student</label>
-        <select
-          className="w-full sm:w-80 rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1"
+        <StudentSelector
+          students={students || []}
           value={studentId}
-          onChange={(e) => selectStudent(e.target.value)}
-        >
-          <option value="">Select a student…</option>
-          {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-        </select>
+          onChange={selectStudent}
+          noBottomSpace
+        />
       </Card>
 
       {student && workspace && (

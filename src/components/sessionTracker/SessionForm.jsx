@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/cards";
 import QuantitativeInput from "@/components/sessionTracker/QuantitativeInput";
+import StudentSelector from "@/components/forms/StudentSelector";
 import { SERVICE_TYPES, SESSION_STATUSES, QUAL_TAGS, durationMinutes, computeQuantitative } from "@/lib/sessionCalc";
 
 const inputCls = "w-full h-11 rounded-lg border border-input bg-background px-3 text-base";
@@ -125,11 +126,15 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-5">
         <div className={quick ? "" : "sm:col-span-2"}>
-          <label className={labelCls}>Student *</label>
-          <select className={inputCls} value={form.student_id} onChange={(e) => set({ student_id: e.target.value, goal_id: "" })}>
-            <option value="">Select student…</option>
-            {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-          </select>
+          <StudentSelector
+            students={students || []}
+            value={form.student_id}
+            onChange={(id) => set({ student_id: id, goal_id: "" })}
+            label="Student"
+            placeholder="Select student…"
+            required
+            noBottomSpace
+          />
         </div>
         <div>
           <label className={labelCls}>Date *</label>
@@ -302,7 +307,7 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
         </>
       )}
 
-      <div className="flex flex-wrap gap-2 mt-5">
+      <div className="flex flex-wrap gap-2 mt-6">
         <Button className="brand-gradient text-white h-11 px-6" onClick={() => save(false)} disabled={saving}>
           {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Save Session
         </Button>

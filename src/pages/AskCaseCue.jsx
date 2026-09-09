@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/cards";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 const SUGGESTIONS = [
   "Which students need data this week?",
@@ -94,18 +95,22 @@ export default function AskCaseCue() {
           <div className="flex flex-wrap items-center gap-3 p-4 border-b border-border">
             <div className="flex items-center gap-2 font-semibold text-sm"><Sparkles className="h-4 w-4 text-primary" /> CaseCue</div>
             <div className="flex items-center gap-2 ml-auto">
-              <select value={mode} onChange={(e) => setMode(e.target.value)} className="rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs">
+              <select aria-label="Answer scope" value={mode} onChange={(e) => setMode(e.target.value)} className="rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs min-h-[36px]">
                 <option value="caseload">Full caseload</option>
                 <option value="single">Single student</option>
               </select>
-              {mode === "single" && (
-                <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className="rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs">
-                  <option value="">Select…</option>
-                  {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
-                </select>
-              )}
             </div>
           </div>
+          {mode === "single" && (
+            <div className="px-4 py-5 border-b border-border">
+              <StudentSelector
+                students={students || []}
+                value={studentId}
+                onChange={setStudentId}
+                noBottomSpace
+              />
+            </div>
+          )}
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && !loading && (

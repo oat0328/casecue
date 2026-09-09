@@ -5,12 +5,12 @@ import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { exportProgressReportPdf } from "@/lib/pdfExport";
 import EmptyState from "@/components/EmptyState";
 import ReportHistory from "@/components/progressReports/ReportHistory";
 import BulkExportCard from "@/components/progressReports/BulkExportCard";
+import StudentSelector from "@/components/forms/StudentSelector";
 
 function TrendIcon({ trend }) {
   if (trend === null || trend === undefined) return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -64,15 +64,12 @@ export default function ProgressReports() {
       <Card className="p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
           <div className="flex-1">
-            <Label>Student</Label>
-            <select
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1.5"
+            <StudentSelector
+              students={s}
               value={studentId}
-              onChange={(e) => { setStudentId(e.target.value); setReport(null); }}
-            >
-              <option value="">Select a student…</option>
-              {s.map((st) => <option key={st.id} value={st.id}>{st.first_name} {st.last_name}</option>)}
-            </select>
+              onChange={(id) => { setStudentId(id); setReport(null); }}
+              noBottomSpace
+            />
           </div>
           <Button onClick={generate} disabled={loading || !studentId} className="brand-gradient text-white">
             {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
