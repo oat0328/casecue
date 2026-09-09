@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
+import ExportBar from "@/components/shared/ExportBar";
+import SourceCitations from "@/components/shared/SourceCitations";
 
 const SECTIONS = [
   { key: "present_levels", label: "Present Levels" },
@@ -94,7 +96,17 @@ export default function SectionDrafter({ student, sections = SECTIONS }) {
         {draft && (
           <div>
             <Textarea rows={18} value={draft} onChange={(e) => setDraft(e.target.value)} className="font-body" />
-            <AiDisclaimer className="mt-4" />
+            <ExportBar
+              className="mt-4"
+              title={`${sections.find((s) => s.key === section)?.label} — ${student.first_name} ${student.last_name}`}
+              subtitle="IEP section draft"
+              filename={`Section-${sections.find((s) => s.key === section)?.label}-${student.first_name}-${student.last_name}`}
+              exclude={["save"]}
+              gated
+              sections={[{ heading: sections.find((s) => s.key === section)?.label, body: draft }]}
+            />
+            <SourceCitations studentId={student.id} className="mt-3" />
+            <AiDisclaimer className="mt-3" />
           </div>
         )}
       </Card>

@@ -7,14 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
 export default function SessionLogDialog({ open, onOpenChange, group, onSave }) {
-  const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), minutes: "30", delivery: "pull-out", notes: "" });
+  const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), minutes: "30", delivery: "pull-out", provider: "", notes: "" });
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
     setSaving(true);
     try {
       await onSave({ ...form, minutes: parseInt(form.minutes) || 0 });
-      setForm({ date: new Date().toISOString().slice(0, 10), minutes: "30", delivery: "pull-out", notes: "" });
+      setForm({ date: new Date().toISOString().slice(0, 10), minutes: "30", delivery: "pull-out", provider: "", notes: "" });
     } finally {
       setSaving(false);
     }
@@ -32,6 +32,7 @@ export default function SessionLogDialog({ open, onOpenChange, group, onSave }) 
         <div className="grid grid-cols-2 gap-4">
           <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
           <div><Label>Minutes</Label><Input type="number" value={form.minutes} onChange={(e) => setForm({ ...form, minutes: e.target.value })} /></div>
+          <div><Label>Provider</Label><Input value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })} placeholder="e.g. Ms. Chen, SLP" /></div>
           <div className="col-span-2"><Label>Delivery</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" value={form.delivery} onChange={(e) => setForm({ ...form, delivery: e.target.value })}>
               <option value="pull-out">Pull-out</option>

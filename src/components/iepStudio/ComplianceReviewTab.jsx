@@ -5,6 +5,8 @@ import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
+import ExportBar from "@/components/shared/ExportBar";
+import SourceCitations from "@/components/shared/SourceCitations";
 
 const CATEGORY_LABELS = {
   present_levels: "Present Levels",
@@ -19,7 +21,7 @@ const CATEGORY_LABELS = {
 // link to run the full review on the IEP Review page.
 export default function ComplianceReviewTab({ student }) {
   const { data: reviews } = useAsync(
-    () => base44.entities.IepReview.filter({ student_id: student.id }, '-created_date', 1),
+    () => base44.entities.IEPReview.filter({ student_id: student.id }, '-created_date', 1),
     [student?.id]
   );
   const review = (reviews || [])[0];
@@ -66,6 +68,28 @@ export default function ComplianceReviewTab({ student }) {
             )}
             {review.summary && <p className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap">{review.summary}</p>}
           </Card>
+
+          <ExportBar
+            title={`Compliance Review — ${student.first_name} ${student.last_name}`}
+            subtitle="CaseCue quality review"
+            filename={`Compliance-Review-${student.first_name}-${student.last_name}`}
+            banner="Potential issues for educator review only — CaseCue never claims compliance or makes decisions."
+            gated
+            sections={[
+              { heading: "Score", body: review.score != null ? `${review.score}/100` : "—" },
+              { heading: "Category Scores", body: Object.entries(review.category_scores || {}).map(([k, v]) => `${(CATEGORY_LABELS[k] || k).replace(/_/g, " ")}: ${v ?? "—"}`).join("\n") },
+              { heading: "Summary", body: review.summary },
+              ...(review.findings || []).map((f) => ({
+                heading: `${f.level === "high" ? "⚠ " : ""}${f.title}`,
+                body: [
+                  f.what_found && `Found: ${f.what_found}`,
+                  f.why_flagged && `Why flagged: ${f.why_flagged}`,
+                  f.suggested_action && `Suggested action: ${f.suggested_action}`,
+                ].filter(Boolean).join("\n"),
+              })),
+            ]}
+          />
+          <SourceCitations studentId={student.id} className="mb-4" />
 
           {review.findings?.length > 0 && (
             <div className="space-y-3">

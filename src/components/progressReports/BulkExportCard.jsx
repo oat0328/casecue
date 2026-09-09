@@ -71,9 +71,11 @@ export default function BulkExportCard({ students, savedReports }) {
           </div>
 
           <div className="flex flex-wrap gap-3 mt-4">
-            <Button onClick={() => run("csv")} disabled={!selectedStudents.length}>
-              <FileSpreadsheet className="h-4 w-4 mr-1" /> Export CSV
-            </Button>
+            <ExportGate documentName="Caseload records (CSV)" onExport={() => run("csv")}>
+              <Button disabled={!selectedStudents.length}>
+                <FileSpreadsheet className="h-4 w-4 mr-1" /> Export CSV
+              </Button>
+            </ExportGate>
             <ExportGate documentName="Caseload records binder" onExport={() => run("pdf")}>
               <Button disabled={!selectedStudents.length} className="brand-gradient text-white">
                 <FileText className="h-4 w-4 mr-1" /> Export PDF binder

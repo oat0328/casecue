@@ -1,11 +1,14 @@
 import React, { useMemo } from "react";
-import { FileBarChart, Download, Clock, CalendarClock, AlertCircle, Target, Users, FileWarning, TrendingUp } from "lucide-react";
+import { FileBarChart, CalendarClock, AlertCircle, Target, Users, FileWarning, TrendingUp } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 import PageHeader from "@/components/PageHeader";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import DataExportBar from "@/components/shared/DataExportBar";
+import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
+import { REPORT_DEFINITIONS } from "@/lib/caseReports";
+import { textSection, sheetFromTable, safeFilename } from "@/lib/reportExport";
+import { DATA_BANNER } from "@/components/shared/ReportBuilderPanel";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -15,11 +18,13 @@ function daysUntil(dateStr) {
 }
 
 export default function Reports() {
-  const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.list('-date', 500), []);
   const { data: meetings } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionLog.list('-date', 300), []);
+  const { data: assignments } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 200), []);
+  const { data: schedule } = useAsync(() => base44.entities.ScheduleEntry.list('-updated_date', 300), []);
 
   const s = students || [];
   const reports = useMemo(() => {
@@ -30,15 +35,7 @@ export default function Reports() {
     const goalsNoBaseline = (goals || []).filter((g) => !g.baseline);
     const upcomingMeetings = (meetings || []).filter((m) => { const d = daysUntil(m.date); return d !== null && d >= 0; });
     return { iepsDue, reevalsDue, missingData, goalsNoBaseline, upcomingMeetings, total: s.length, goalCount: (goals || []).length };
-  }, [students, goals, progress, meetings]);
-
-  const exportReport = () => {
-    const blob = new Blob([JSON.stringify({ generated: new Date().toISOString(), caseload: s, reports }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `casecue-report-${new Date().toISOString().slice(0,10)}.json`; a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "Report exported" });
-  };
+  }, [s, goals, progress, meetings]);
 
   const cards = [
     { label: "Caseload status", value: reports.total, sub: "active students", icon: Users, items: s.slice(0, 5).map((st) => `${st.first_name} ${st.last_name} — Grade ${st.grade || "?"}`) },
@@ -49,18 +46,49 @@ export default function Reports() {
     { label: "Upcoming meetings", value: reports.upcomingMeetings.length, icon: TrendingUp, items: reports.upcomingMeetings.slice(0, 5).map((m) => `${m.title} — ${m.date}`) },
   ];
 
+  const snapshotSections = useMemo(
+    () => cards.map((c) => textSection(c.label, [`${c.value} total`, ...c.items.map(String)])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [reports]
+  );
+  const caseloadRows = s.map((st) => [
+    `${st.first_name} ${st.last_name}`,
+    st.grade || "—",
+    st.eligibility_category || "—",
+    st.iep_date || "—",
+    st.annual_review_due || "—",
+    st.reevaluation_due || "—",
+    st.status || "active",
+  ]);
+
   return (
     <div>
-      <PageHeader title="Reports" subtitle="Caseload status, deadlines, missing data, and workflow insights at a glance." icon={FileBarChart}
-        actions={<Button variant="outline" onClick={exportReport}><Download className="h-4 w-4 mr-1" /> Export report</Button>} />
+      <PageHeader
+        title="Reports"
+        subtitle="Caseload status, deadlines, missing data, and workflow insights — every report printable and exportable."
+        icon={FileBarChart}
+        actions={
+          <DataExportBar
+            title="Caseload Status Snapshot"
+            subtitle={`Generated ${new Date().toLocaleDateString()} · ${s.length} student(s)`}
+            sections={snapshotSections}
+            sheets={[sheetFromTable("Caseload", ["Student", "Grade", "Eligibility", "IEP Date", "Review Due", "Reeval Due", "Status"], caseloadRows)]}
+            json={{
+              generated: new Date().toISOString(),
+              caseload: s,
+              goals: goals || [],
+              progress: progress || [],
+              meetings: meetings || [],
+              summary: { total: reports.total, goalCount: reports.goalCount, iepsDue: reports.iepsDue.length, reevalsDue: reports.reevalsDue.length, missingData: reports.missingData.length },
+            }}
+            filename={safeFilename("Caseload-Snapshot")}
+            banner={DATA_BANNER}
+            exclude={["save"]}
+          />
+        }
+      />
 
-      <Card className="p-6 mb-6">
-        <div className="flex items-center gap-2 font-semibold mb-1"><Clock className="h-4 w-4 text-primary" /> Time saved this week</div>
-        <div className="text-4xl font-bold text-gradient">4.8 hrs</div>
-        <p className="text-sm text-muted-foreground mt-1">3 IEP drafts · 2 lesson plans · 1 sub plan · 6 progress notes</p>
-      </Card>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map((c) => (
           <Card key={c.label} className="p-5">
             <div className="flex items-center justify-between">
@@ -74,6 +102,21 @@ export default function Reports() {
           </Card>
         ))}
       </div>
+
+      <ReportBuilderPanel
+        definitions={REPORT_DEFINITIONS}
+        data={{
+          students: s,
+          goals: goals || [],
+          progress: progress || [],
+          meetings: meetings || [],
+          sessions: sessions || [],
+          assignments: assignments || [],
+          schedule: schedule || [],
+        }}
+        heading="Report Generator — Student, Parent, Service, Compliance, Caseload & Meeting Reports"
+        historyMode="all"
+      />
     </div>
   );
 }

@@ -55,6 +55,11 @@
       "type": "string",
       "title": "Notes"
     },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "title": "Archived"
+    },
     "organization_id": {
       "type": "string",
       "title": "Organization ID"

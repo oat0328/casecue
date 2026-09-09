@@ -11,12 +11,18 @@ import MinutesDashboard from "@/components/sessionTracker/MinutesDashboard";
 import GoalProgressChart from "@/components/sessionTracker/GoalProgressChart";
 import SessionList from "@/components/sessionTracker/SessionList";
 import StudentSelector from "@/components/forms/StudentSelector";
+import SessionDashboard from "@/components/sessionTracker/SessionDashboard";
+import SessionCharts from "@/components/sessionTracker/SessionCharts";
+import PrintExportPanel from "@/components/sessionTracker/PrintExportPanel";
+import ComplianceReport from "@/components/sessionTracker/ComplianceReport";
+import SessionReportGenerator from "@/components/sessionTracker/SessionReportGenerator";
 
 const TABS = [
   { key: "quick", label: "Quick Entry" },
   { key: "detailed", label: "Detailed Entry" },
   { key: "group", label: "Group Session" },
   { key: "log", label: "Log & Minutes" },
+  { key: "reports", label: "Reports & Exports" },
 ];
 
 // Mobile-first Session Tracker: individual quick entry, group sessions, detailed
@@ -31,6 +37,7 @@ export default function SessionTracker() {
     []
   );
   const { data: goals } = useAsync(() => base44.entities.Goal.list(), []);
+  const { data: scheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list(), []);
 
   const recentActivities = useMemo(() => {
     const seen = [];
@@ -126,6 +133,20 @@ export default function SessionTracker() {
           ) : (
             <p className="text-sm text-muted-foreground">Select a student to see service minutes, goal progress, and the session log.</p>
           )}
+        </div>
+      )}
+      {tab === "reports" && (
+        <div className="space-y-4">
+          <SessionDashboard
+            sessions={sessions}
+            students={students}
+            goals={goals}
+            upcomingServices={(scheduleEntries || []).length}
+          />
+          <PrintExportPanel sessions={sessions} students={students} goals={goals} />
+          <SessionCharts sessions={sessions} goals={goals} />
+          <ComplianceReport sessions={sessions} students={students} />
+          <SessionReportGenerator sessions={sessions} students={students} goals={goals} />
         </div>
       )}
     </div>

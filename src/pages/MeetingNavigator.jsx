@@ -10,6 +10,7 @@ import StepCard from "@/components/meetingCheatSheet/StepCard";
 import MeetingMode from "@/components/meetingCheatSheet/MeetingMode";
 import { exportMeetingNavigatorPdf } from "@/lib/pdfExport";
 import ExportGate from "@/components/shared/ExportGate";
+import ExportBar from "@/components/shared/ExportBar";
 import StudentSelector from "@/components/forms/StudentSelector";
 
 // IEP Meeting Navigator: a 32-section guided workspace filled with the student's
@@ -127,6 +128,22 @@ export default function MeetingNavigator() {
                   </Button>
                 </ExportGate>
                 <Button variant="outline" onClick={generate} disabled={generating}>{generating ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Regenerate</Button>
+                <ExportBar
+                  title={`Meeting Preparation Packet — ${student ? `${student.first_name} ${student.last_name}` : "Student"}`}
+                  subtitle={`${steps.length}-section meeting guide`}
+                  filename={`Meeting-Guide-${student ? student.first_name : "Student"}`}
+                  exclude={["pdf"]}
+                  gated
+                  sections={steps.map((s) => ({
+                    heading: `${s.index ? s.index + ". " : ""}${s.title}`,
+                    body: [
+                      s.key_info,
+                      (s.talking_points || []).map((t) => `• ${t}`).join("\n"),
+                      (s.questions || []).map((q) => `? ${q}`).join("\n"),
+                      s.source && `Source: ${s.source}`,
+                    ].filter(Boolean).join("\n"),
+                  }))}
+                />
               </div>
             </div>
             <div className="h-2 rounded-full bg-secondary overflow-hidden mt-3">

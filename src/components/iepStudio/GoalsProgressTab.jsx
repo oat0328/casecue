@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { PlusCircle, Sparkles, Loader2 } from "lucide-react";
@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import GoalWorkPanel from "@/components/iepStudio/GoalWorkPanel";
+import GoalReportExport from "@/components/iepStudio/GoalReportExport";
 
 const STATUS_META = {
   met: { label: "Goal Met", color: "#10b981" },
@@ -32,6 +33,7 @@ export default function GoalsProgressTab({ student }) {
   const [goals, setGoals] = useState(null);
   const [progress, setProgress] = useState([]);
   const [work, setWork] = useState(null); // { goalId, data, loading }
+  const chartRefs = useRef({});
   const { toast } = useToast();
 
   const generateWork = async (goal) => {
@@ -140,7 +142,7 @@ export default function GoalsProgressTab({ student }) {
               </div>
 
               {lineData.length > 0 ? (
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-4 lg:grid-cols-2" ref={(el) => { chartRefs.current[g.id] = el; }}>
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Progress trend</h4>
                     <div className="h-48">
@@ -177,7 +179,14 @@ export default function GoalsProgressTab({ student }) {
                 <p className="text-sm text-muted-foreground">No progress data logged for this goal yet.</p>
               )}
 
-              <div className="mt-4 pt-4 border-t border-border">
+              <div className="mt-4 pt-4 border-t border-border space-y-3">
+                <GoalReportExport
+                  student={student}
+                  goal={g}
+                  entries={entries}
+                  statusLabel={meta.label}
+                  getChartEl={() => chartRefs.current[g.id]}
+                />
                 <Button
                   size="sm"
                   variant="outline"

@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import logExportAction from "@/lib/exportAudit";
 
 // Shared export pipeline for every generated CaseCue document.
 // One HTML builder feeds Print and Word (DOCX); one jsPDF writer feeds PDF;
@@ -15,7 +16,13 @@ const safeName = (t) => String(t || "casecue-document").replace(/[^a-z0-9]+/gi, 
 
 export function buildDocHtml({ title, subtitle, sections, banner }) {
   const body = (sections || [])
-    .map((s) => `<h2>${esc(s.heading)}</h2><div class="ftext">${esc(s.body) || "<em>—</em>"}</div>`)
+    .map((s) => {
+      const img = s.image
+        ? `<div class="imgwrap"><img src="${s.image}" style="max-width:100%;height:auto" /></div>`
+        : "";
+      const text = s.body ? `<div class="ftext">${esc(s.body)}</div>` : "";
+      return `<h2>${esc(s.heading)}</h2>${img}${text}`;
+    })
     .join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
   body{font-family:Calibri,Arial,sans-serif;color:#1a1a2e;margin:40px;}
@@ -47,6 +54,7 @@ function downloadBlob(blob, filename) {
 export function printDoc(opts) {
   const w = window.open("", "_blank");
   if (!w) return false;
+  logExportAction("print", opts.title);
   w.document.write(buildDocHtml(opts));
   w.document.close();
   w.focus();
@@ -56,6 +64,7 @@ export function printDoc(opts) {
 
 // Word-compatible DOCX (HTML-based, same approach as Lesson Studio exports).
 export function exportDocDocx(opts) {
+  logExportAction("docx", opts.title);
   downloadBlob(new Blob(["\ufeff", buildDocHtml(opts)], { type: "application/msword" }), `${safeName(opts.filename)}.doc`);
 }
 
@@ -82,6 +91,7 @@ const pdfSafe = (t) => String(t == null ? "" : t)
   .replace(/[^\n\x20-\x7E\xA1-\xFF]/g, "");
 
 export function exportDocPdf({ title, subtitle, sections, banner, filename }) {
+  logExportAction("pdf", title);
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const PAGE_H = 842;
   const M = 48;
@@ -114,7 +124,15 @@ export function exportDocPdf({ title, subtitle, sections, banner, filename }) {
   for (const s of sections || []) {
     if (y > PAGE_H - 90) { doc.addPage(); y = M; }
     write(s.heading, 12, true, [109, 40, 217], 3);
-    write(s.body, 11, false, [40, 40, 40], 10);
+    if (s.image && s.imageWidth && s.imageHeight) {
+      let imgW = CW;
+      let imgH = CW * (s.imageHeight / s.imageWidth);
+      const maxH = PAGE_H - M * 2 - 40;
+      if (imgH > maxH) { imgH = maxH; imgW = imgH * (s.imageWidth / s.imageHeight); }
+      if (y + imgH > PAGE_H - 60) { doc.addPage(); y = M; }
+      try { doc.addImage(s.image, "PNG", M, y, imgW, imgH); y += imgH + 8; } catch { /* skip unreadable image */ }
+    }
+    if (s.body) write(s.body, 11, false, [40, 40, 40], 10);
   }
 
   const footer = banner || DEFAULT_BANNER;
@@ -143,6 +161,7 @@ function plainText({ title, subtitle, sections }) {
 // Opens the user's email client with the document in the body. Long documents
 // are trimmed (mailto limits vary by client); the note points to the full export.
 export function emailDoc(opts) {
+  logExportAction("email", opts.title);
   const text = plainText(opts);
   const clipped = text.length > 3800;
   const body = encodeURIComponent(
@@ -158,6 +177,7 @@ export async function shareDoc(opts) {
   if (navigator.share) {
     try {
       await navigator.share({ title: opts.title, text });
+      logExportAction("share", opts.title);
       return "shared";
     } catch {
       return "cancelled";
@@ -165,6 +185,7 @@ export async function shareDoc(opts) {
   }
   try {
     await navigator.clipboard.writeText(text);
+    logExportAction("share", opts.title);
     return "copied";
   } catch {
     return "failed";

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
 import ExportBar from "@/components/shared/ExportBar";
+import SourceCitations from "@/components/shared/SourceCitations";
 
 // Tab 3 — AI Student Summary: full snapshot generated from the verified record.
 export default function AiSummaryTab({ student }) {
@@ -80,6 +81,7 @@ export default function AiSummaryTab({ student }) {
             />
             <AiDisclaimer className="flex-1 min-w-[240px]" />
           </div>
+          <SourceCitations studentId={student.id} className="mt-3" />
         </div>
       )}
     </Card>
