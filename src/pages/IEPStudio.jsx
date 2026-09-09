@@ -73,7 +73,8 @@ export default function IEPStudio() {
         <Card className="p-6 sm:p-8 brand-gradient-soft border-primary/20">
           <h2 className="text-2xl font-bold tracking-tight">Welcome to IEP Studio</h2>
           <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-2xl">
-            Everything IEP happens here — upload documents once and CaseCue automatically reads them, builds the student profile, pre-fills every section, and prepares your meeting.
+            Everything IEP happens here — upload documents once and CaseCue automatically reads them, builds the student profile, pre-fills every section, and prepares your meeting.{" "}
+            <strong className="text-foreground">Select a student above and the Upload Center appears directly below the selector — no other clicks needed.</strong>
           </p>
           <div className="grid gap-3 sm:grid-cols-5 mb-6">
             {GETTING_STARTED.map((label, i) => (
@@ -93,6 +94,11 @@ export default function IEPStudio() {
             <Button variant="outline" asChild>
               <Link to="/help">How to use IEP Studio</Link>
             </Button>
+            {(students || []).length === 0 && (
+              <Button variant="outline" asChild>
+                <Link to="/students">Add your first student</Link>
+              </Button>
+            )}
           </div>
         </Card>
       ) : (
