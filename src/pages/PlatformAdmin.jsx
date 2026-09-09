@@ -8,13 +8,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OverviewStats from "@/components/platform/OverviewStats";
 import CustomersTable from "@/components/platform/CustomersTable";
 import RecentLists from "@/components/platform/RecentLists";
+import AccessCodeManager from "@/components/platform/AccessCodeManager";
 
 export default function PlatformAdmin() {
   const { user } = useAuth();
-  const { data, loading, refetch } = useAsync(() => base44.functions.invoke("platformAdminStats"), []);
+  const { data: memberships } = useAsync(
+    () => user?.id ? base44.entities.OrganizationMembership.filter({ user_id: user.id, status: "active" }, '-created_date', 10) : Promise.resolve([]),
+    [user?.id]
+  );
+  const isPlatformOwner = (memberships || []).some((m) => m.org_role === "platform_owner");
+  const { data, loading, refetch } = useAsync(
+    () => isPlatformOwner ? base44.functions.invoke("platformAdminStats") : Promise.resolve(null),
+    [isPlatformOwner]
+  );
   const stats = data?.data;
 
-  if (user?.role !== "admin") {
+  if (!memberships) {
+    return <div className="py-24 text-center text-muted-foreground">Checking access…</div>;
+  }
+  if (!isPlatformOwner) {
     return (
       <div className="py-24 flex flex-col items-center gap-3 text-center">
         <ShieldAlert className="h-10 w-10 text-muted-foreground" />
@@ -38,6 +50,7 @@ export default function PlatformAdmin() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="customers">Customers</TabsTrigger>
             <TabsTrigger value="activity">Activity &amp; alerts</TabsTrigger>
+            <TabsTrigger value="codes">Access codes</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="mt-6">
             <OverviewStats stats={stats} />
@@ -47,6 +60,9 @@ export default function PlatformAdmin() {
           </TabsContent>
           <TabsContent value="activity" className="mt-6">
             <RecentLists stats={stats} />
+          </TabsContent>
+          <TabsContent value="codes" className="mt-6">
+            <AccessCodeManager />
           </TabsContent>
         </Tabs>
       )}

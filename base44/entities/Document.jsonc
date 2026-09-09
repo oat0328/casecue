@@ -53,11 +53,26 @@
       "type": "string",
       "enum": [
         "pending",
+        "queued",
+        "processing",
+        "ocr_processing",
         "processed",
         "failed"
       ],
       "default": "pending",
       "title": "Extraction Status"
+    },
+    "error_reason": {
+      "type": "string",
+      "title": "Processing Error Reason"
+    },
+    "last_attempted": {
+      "type": "string",
+      "title": "Last Processing Attempt"
+    },
+    "processing_results": {
+      "type": "object",
+      "title": "Saved OCR / Extraction Results"
     },
     "review_status": {
       "type": "string",

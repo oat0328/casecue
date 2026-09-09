@@ -2,6 +2,7 @@ import React from "react";
 import { Download } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { minutesSummary, detectSessionFlags, downloadCsv, STATUS_LABEL } from "@/lib/sessionCalc";
 import { exportSessionLogPdf, exportServiceMinutesPdf } from "@/lib/pdfExport";
 
@@ -17,6 +18,7 @@ function MiniStat({ label, value, tone }) {
 
 // Required vs delivered service minutes for the current week, plus data-quality flags and exports.
 export default function MinutesDashboard({ student, sessions, goals }) {
+  const { toast } = useToast();
   const summary = minutesSummary(sessions, student?.service_minutes);
   const flags = detectSessionFlags(sessions, goals);
   const thisWeek = (sessions || []).filter((s) => {
@@ -28,7 +30,17 @@ export default function MinutesDashboard({ student, sessions, goals }) {
     return d >= start && d < end;
   });
 
-  const exportCsv = () => {
+  // Clear feedback on every export — no silent failures.
+  const runExport = (label, fn) => {
+    try {
+      fn();
+      toast({ title: `${label} downloaded`, description: "Check your device's downloads folder." });
+    } catch (err) {
+      toast({ title: `${label} failed`, description: err?.message || "Something went wrong generating the file.", variant: "destructive" });
+    }
+  };
+
+  const exportCsv = () => runExport("Sessions CSV", () =>
     downloadCsv(`Sessions-${student?.first_name || "Student"}-${student?.last_name || ""}.csv`,
       ["Date", "Start", "End", "Duration (min)", "Service type", "Status", "Goal", "Activity", "Scheduled min", "Delivered min", "Correct", "Total"],
       (sessions || []).map((s) => [
@@ -37,8 +49,8 @@ export default function MinutesDashboard({ student, sessions, goals }) {
         s.scheduled_minutes ?? "", s.delivered_minutes ?? "",
         s.quantitative?.correct ?? "", s.quantitative?.total ?? "",
       ])
-    );
-  };
+    )
+  );
 
   return (
     <div className="space-y-4">
@@ -62,8 +74,8 @@ export default function MinutesDashboard({ student, sessions, goals }) {
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
           <Button size="sm" variant="outline" onClick={exportCsv}><Download className="h-3.5 w-3.5 mr-1" /> Sessions (CSV)</Button>
-          <Button size="sm" variant="outline" onClick={() => exportServiceMinutesPdf(student, summary, flags, thisWeek)}><Download className="h-3.5 w-3.5 mr-1" /> Service-minute report (PDF)</Button>
-          <Button size="sm" variant="outline" onClick={() => exportSessionLogPdf(student, sessions)}><Download className="h-3.5 w-3.5 mr-1" /> Session log (PDF)</Button>
+          <Button size="sm" variant="outline" onClick={() => runExport("Service-minute report", () => exportServiceMinutesPdf(student, summary, flags, thisWeek))}><Download className="h-3.5 w-3.5 mr-1" /> Service-minute report (PDF)</Button>
+          <Button size="sm" variant="outline" onClick={() => runExport("Session log", () => exportSessionLogPdf(student, sessions))}><Download className="h-3.5 w-3.5 mr-1" /> Session log (PDF)</Button>
         </div>
       </Card>
 

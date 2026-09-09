@@ -1,8 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { daysFromNow } from "../../shared/orgService.ts";
+import { daysFromNow, getActiveMembership } from "../../shared/orgService.ts";
 
 // Platform Owner account actions — free access grants, trials, suspension,
-// restore, and private notes. Admin-only; every action requires a reason and
+// restore, and private notes. Platform-owner-only (school admins are denied); every action requires a reason and
 // is recorded in the audit log. No Stripe, no payment information.
 const TRIAL_LENGTHS = [7, 14, 30, 60, 90];
 
@@ -11,7 +11,11 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const svc = base44.asServiceRole;
+    const membership = await getActiveMembership(svc, user.id);
+    if (!membership || membership.org_role !== 'platform_owner') {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const body = await req.json().catch(() => ({}));
     const action = body.action;
@@ -25,7 +29,6 @@ export default async function(req) {
       return Response.json({ error: 'A reason is required for this action.' }, { status: 400 });
     }
 
-    const svc = base44.asServiceRole;
     const subs = await svc.entities.Subscription.filter({ organization_id: organizationId }, '-created_date', 10);
     const sub = subs && subs.length ? subs[0] : null;
 

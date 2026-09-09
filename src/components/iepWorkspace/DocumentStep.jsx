@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FileText, Trash2, ExternalLink } from "lucide-react";
+import { FileText, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -14,9 +14,17 @@ const DOC_TYPES = [
 ];
 
 const EXTRACT_CHIP = {
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  pending: "bg-muted text-foreground border-border",
+  queued: "bg-muted text-foreground border-border",
+  processing: "bg-amber-50 text-amber-700 border-amber-200",
+  ocr_processing: "bg-amber-50 text-amber-700 border-amber-200",
   processed: "bg-emerald-50 text-emerald-700 border-emerald-200",
   failed: "bg-rose-50 text-rose-700 border-rose-200",
+};
+const EXTRACT_LABEL = {
+  pending: "Queued", queued: "Queued",
+  processing: "Processing…", ocr_processing: "OCR Processing…",
+  processed: "Ready", failed: "Failed",
 };
 
 // Secure document upload step: files are stored privately, duplicates are blocked,
@@ -78,6 +86,26 @@ export default function DocumentStep({ student, onContinue }) {
     }
   };
 
+  const [processingId, setProcessingId] = useState(null);
+  // A stuck "processing" status older than 10 minutes is stale and can be retried.
+  const isStaleProcessing = (d) =>
+    ["processing", "ocr_processing"].includes(d.extraction_status) &&
+    d.last_attempted &&
+    Date.now() - new Date(d.last_attempted).getTime() > 10 * 60 * 1000;
+
+  const processDoc = async (id) => {
+    setProcessingId(id);
+    try {
+      const res = await base44.functions.invoke("processDocument", { document_id: id });
+      toast({ title: "Document processed", description: `${res.data?.pages?.length || 0} pages summarized — the results are saved to this record.` });
+    } catch (err) {
+      toast({ title: "Processing failed", description: err?.response?.data?.error || err.message, variant: "destructive" });
+    } finally {
+      setProcessingId(null);
+      refetch();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card className="p-5 sm:p-6">
@@ -114,9 +142,19 @@ export default function DocumentStep({ student, onContinue }) {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium truncate">{d.filename}</div>
                   <div className="text-xs text-muted-foreground">{d.document_type} · uploaded {d.date_uploaded}{d.is_private ? " · private" : ""}</div>
+                  {d.error_reason && <div className="text-xs text-rose-600 mt-0.5">{d.error_reason}</div>}
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${EXTRACT_CHIP[d.extraction_status] || EXTRACT_CHIP.pending}`}>{d.extraction_status}</span>
+                {processingId === d.id ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Processing…</span>
+                ) : (
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${EXTRACT_CHIP[d.extraction_status] || EXTRACT_CHIP.pending}`}>{EXTRACT_LABEL[d.extraction_status] || d.extraction_status}</span>
+                )}
                 <div className="flex gap-1">
+                  {["pending", "queued", "failed"].includes(d.extraction_status) || isStaleProcessing(d) ? (
+                    <Button variant="outline" size="sm" onClick={() => processDoc(d.id)} disabled={processingId === d.id}>
+                      {d.extraction_status === "failed" || isStaleProcessing(d) ? "Retry" : "Process"}
+                    </Button>
+                  ) : null}
                   <Button variant="ghost" size="icon" onClick={() => openDoc(d.id)}><ExternalLink className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => remove(d)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
                 </div>

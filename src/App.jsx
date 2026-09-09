@@ -36,6 +36,7 @@ import Settings from '@/pages/Settings';
 import Admin from '@/pages/Admin';
 import OrgSetup from '@/pages/OrgSetup';
 import PlatformAdmin from '@/pages/PlatformAdmin';
+import PlatformOwnerSetup from '@/pages/PlatformOwnerSetup';
 import IepWorkspace from '@/pages/IepWorkspace';
 import MeetingNavigator from '@/pages/MeetingNavigator';
 import SessionTracker from '@/pages/SessionTracker';
@@ -56,6 +57,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/ThankYou" element={<ThankYou />} />
+            <Route path="/platform-owner-setup" element={<PlatformOwnerSetup />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
