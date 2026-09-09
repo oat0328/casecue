@@ -66,6 +66,169 @@
       },
       "title": "Student IDs"
     },
+    "source": {
+      "type": "string",
+      "enum": [
+        "assignment",
+        "topic"
+      ],
+      "default": "assignment",
+      "title": "Created From"
+    },
+    "subject": {
+      "type": "string",
+      "title": "Subject"
+    },
+    "grade": {
+      "type": "string",
+      "title": "Grade or Class"
+    },
+    "group_label": {
+      "type": "string",
+      "title": "Instructional Group Label"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "title": "Estimated Duration (minutes)"
+    },
+    "goal_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Related IEP Goal IDs"
+    },
+    "standards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "State / Common Core Standards"
+    },
+    "analysis": {
+      "type": "object",
+      "title": "Assignment Analysis"
+    },
+    "plan": {
+      "type": "object",
+      "title": "Full Lesson Plan (structured)"
+    },
+    "videos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "video_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "usage_point": {
+            "type": "string"
+          },
+          "added_by": {
+            "type": "string"
+          },
+          "added_at": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Approved Instructional Videos"
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "site": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "skill": {
+            "type": "string"
+          },
+          "licensing": {
+            "type": "string"
+          },
+          "added_at": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Saved Resource Links"
+    },
+    "practice_materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "material_type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "answer_key": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Original Practice Materials"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved"
+      ],
+      "default": "draft",
+      "title": "Status"
+    },
+    "is_template": {
+      "type": "boolean",
+      "default": false,
+      "title": "Saved As Template"
+    },
+    "audit_trail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Audit Trail (generated / edited / approved / exported)"
+    },
     "organization_id": {
       "type": "string",
       "title": "Organization ID"

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Timer } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
@@ -23,6 +24,7 @@ const TABS = [
 export default function SessionTracker() {
   const [tab, setTab] = useState("quick");
   const [logStudentId, setLogStudentId] = useState("");
+  const [searchParams] = useSearchParams();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: sessions, refetch: refetchSessions } = useAsync(
     () => base44.entities.SessionRecord.filter({}, '-date', 200),
@@ -49,9 +51,25 @@ export default function SessionTracker() {
   }, [sessions]);
 
   const lastSession = (sessions || [])[0];
-  const prefill = lastSession
+  const lastSessionPrefill = lastSession
     ? { service_type: lastSession.service_type, setting: lastSession.setting, location: lastSession.location, activity: lastSession.activity, scheduled_minutes: lastSession.scheduled_minutes }
     : null;
+
+  // Lesson Studio launches sessions with a student, goal, activity, and mastery
+  // criterion prefilled via URL params — merged over the usual smart defaults.
+  const lessonPrefill = useMemo(() => {
+    const sid = searchParams.get("student_id");
+    const gid = searchParams.get("goal_id");
+    const activity = searchParams.get("activity");
+    const note = searchParams.get("note");
+    if (!sid && !gid && !activity && !note) return null;
+    return { student_id: sid || "", goal_id: gid || "", activity: activity || "", qualitative: note || "" };
+  }, [searchParams]);
+
+  const prefill = lessonPrefill
+    ? { ...(lastSessionPrefill || {}), ...lessonPrefill }
+    : lastSessionPrefill;
+  const defaultStudentId = lessonPrefill?.student_id || "";
 
   return (
     <div>
@@ -67,12 +85,12 @@ export default function SessionTracker() {
       </div>
 
       {tab === "quick" && (
-        <SessionForm mode="quick" students={students} goals={goals} prefill={prefill}
+        <SessionForm mode="quick" students={students} goals={goals} prefill={prefill} defaultStudentId={defaultStudentId}
           recentActivities={recentActivities} favoriteGoalIds={favoriteGoalIds} recentPrompts={recentPrompts}
           onSaved={refetchSessions} />
       )}
       {tab === "detailed" && (
-        <SessionForm mode="detailed" students={students} goals={goals} prefill={prefill}
+        <SessionForm mode="detailed" students={students} goals={goals} prefill={prefill} defaultStudentId={defaultStudentId}
           recentActivities={recentActivities} favoriteGoalIds={favoriteGoalIds} recentPrompts={recentPrompts}
           onSaved={refetchSessions} />
       )}

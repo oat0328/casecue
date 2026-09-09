@@ -48,6 +48,7 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
         location: prefill.location || f.location,
         goal_id: prefill.goal_id || "",
         activity: prefill.activity || "",
+        qualitative: prefill.qualitative || f.qualitative,
         scheduled_minutes: prefill.scheduled_minutes ?? "",
       }));
     }
