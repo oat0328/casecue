@@ -11,6 +11,8 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import DeadlineAlerts from "@/components/deadlineAlerts/DeadlineAlerts";
+import OnboardingTour from "@/components/onboarding/OnboardingTour";
+import GettingStartedCard from "@/components/onboarding/GettingStartedCard";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -91,6 +93,9 @@ export default function Today() {
 
       {/* Deadline alerts */}
       <DeadlineAlerts students={students} />
+
+      <OnboardingTour />
+      <GettingStartedCard students={students} goals={goals} progress={progress} />
 
       {/* Time saved */}
       <Card className="mb-8 overflow-hidden">
