@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Sparkles, Loader2, Copy, AlertTriangle, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, Copy, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 const TYPES = [
   { key: "goal", label: "Goal Amendment" },
@@ -65,10 +66,7 @@ export default function AmendmentsTab({ student }) {
 
       {result && (
         <Card className="p-5">
-          <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 mb-4">
-            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-            <span><strong>Draft — Educator/IEP Team Review Required.</strong> Amendments must be finalized by the IEP team following your district's consent and meeting requirements.</span>
-          </div>
+          <AiDisclaimer className="mb-4" extra="Amendment language must be finalized by the IEP team following your district's consent and meeting requirements." />
 
           <div className="grid gap-4 md:grid-cols-2 mb-4">
             <div className="rounded-lg border border-border p-4">

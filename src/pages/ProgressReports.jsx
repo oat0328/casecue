@@ -11,6 +11,8 @@ import EmptyState from "@/components/EmptyState";
 import ReportHistory from "@/components/progressReports/ReportHistory";
 import BulkExportCard from "@/components/progressReports/BulkExportCard";
 import StudentSelector from "@/components/forms/StudentSelector";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
+import ExportGate from "@/components/shared/ExportGate";
 
 function TrendIcon({ trend }) {
   if (trend === null || trend === undefined) return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -92,7 +94,9 @@ export default function ProgressReports() {
             <p className="text-sm text-muted-foreground">
               Draft for <span className="font-semibold text-foreground">{report.student.first_name} {report.student.last_name}</span> · generated {report.generated_at}
             </p>
-            <Button variant="outline" onClick={download}><Download className="h-4 w-4 mr-1" /> Download PDF</Button>
+            <ExportGate documentName="Progress report" onExport={download}>
+              <Button variant="outline"><Download className="h-4 w-4 mr-1" /> Download PDF</Button>
+            </ExportGate>
           </div>
 
           <div className="space-y-4 mb-6">
@@ -125,9 +129,7 @@ export default function ProgressReports() {
             <p className="text-sm whitespace-pre-wrap">{report.overall_summary}</p>
           </Card>
 
-          <p className="text-xs text-muted-foreground italic mt-4">
-            Draft — Educator/IEP Team Review Required. Statements are generated only from your recorded data; verify before sharing with parents.
-          </p>
+          <AiDisclaimer className="mt-4" extra="Statements are generated only from your recorded data; verify before sharing with parents." />
         </>
       )}
 

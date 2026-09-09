@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { exportIepWorkspacePdf, exportWorkspaceCitationsPdf, exportWorkspaceReviewPdf } from "@/lib/pdfExport";
+import ExportGate from "@/components/shared/ExportGate";
 
 const LEVEL_STYLES = {
   good: "bg-emerald-50 border-emerald-200 text-emerald-800",
@@ -83,15 +84,15 @@ export default function ReviewStep({ workspace, save, student }) {
           <Card className="p-5">
             <h4 className="font-semibold text-sm mb-3">Export</h4>
             <div className="flex flex-wrap gap-2">
-              <Button className="brand-gradient text-white" onClick={() => exportIepWorkspacePdf(student, workspace.draft, workspace.placement)}>
-                <Download className="h-4 w-4 mr-2" /> IEP draft (PDF)
-              </Button>
-              <Button variant="outline" onClick={() => exportWorkspaceCitationsPdf(student, workspace.analysis)}>
-                <Download className="h-4 w-4 mr-2" /> Source-citation report (PDF)
-              </Button>
-              <Button variant="outline" onClick={() => exportWorkspaceReviewPdf(student, review)}>
-                <Download className="h-4 w-4 mr-2" /> Review report (PDF)
-              </Button>
+              <ExportGate documentName="New IEP draft" onExport={() => exportIepWorkspacePdf(student, workspace.draft, workspace.placement)}>
+                <Button className="brand-gradient text-white"><Download className="h-4 w-4 mr-2" /> IEP draft (PDF)</Button>
+              </ExportGate>
+              <ExportGate documentName="Source-citation report" onExport={() => exportWorkspaceCitationsPdf(student, workspace.analysis)}>
+                <Button variant="outline"><Download className="h-4 w-4 mr-2" /> Source-citation report (PDF)</Button>
+              </ExportGate>
+              <ExportGate documentName="CaseCue Review report" onExport={() => exportWorkspaceReviewPdf(student, review)}>
+                <Button variant="outline"><Download className="h-4 w-4 mr-2" /> Review report (PDF)</Button>
+              </ExportGate>
             </div>
             <p className="text-xs text-amber-700 mt-3">All exports are drafts — Educator/IEP Team Review Required.</p>
           </Card>

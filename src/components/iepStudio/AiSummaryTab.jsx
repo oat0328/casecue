@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Sparkles, Loader2, Copy, AlertTriangle } from "lucide-react";
+import { Sparkles, Loader2, Copy } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 // Tab 3 — AI Student Summary: full snapshot generated from the verified record.
 export default function AiSummaryTab({ student }) {
@@ -54,10 +55,7 @@ export default function AiSummaryTab({ student }) {
             <Button variant="outline" size="sm" onClick={() => { navigator.clipboard?.writeText(summary); toast({ title: "Copied" }); }}>
               <Copy className="h-3.5 w-3.5 mr-1" /> Copy
             </Button>
-            <div className="flex-1 min-w-[240px] flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-              <span><strong>Draft — Educator/IEP Team Review Required.</strong> Verify every detail against student data before use.</span>
-            </div>
+            <AiDisclaimer className="flex-1 min-w-[240px]" />
           </div>
         </div>
       )}

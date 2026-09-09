@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { exportBulkCsv, exportBulkRecordsPdf } from "@/lib/pdfExport";
+import ExportGate from "@/components/shared/ExportGate";
 
 // Bulk records export: pick students, then download everything as one CSV or one combined PDF binder.
 export default function BulkExportCard({ students, savedReports }) {
@@ -73,9 +74,11 @@ export default function BulkExportCard({ students, savedReports }) {
             <Button onClick={() => run("csv")} disabled={!selectedStudents.length}>
               <FileSpreadsheet className="h-4 w-4 mr-1" /> Export CSV
             </Button>
-            <Button onClick={() => run("pdf")} disabled={!selectedStudents.length} className="brand-gradient text-white">
-              <FileText className="h-4 w-4 mr-1" /> Export PDF binder
-            </Button>
+            <ExportGate documentName="Caseload records binder" onExport={() => run("pdf")}>
+              <Button disabled={!selectedStudents.length} className="brand-gradient text-white">
+                <FileText className="h-4 w-4 mr-1" /> Export PDF binder
+              </Button>
+            </ExportGate>
             <p className="text-xs text-muted-foreground self-center">
               {selectedStudents.length} of {list.length} selected
             </p>

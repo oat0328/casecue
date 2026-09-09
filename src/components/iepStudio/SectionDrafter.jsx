@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Sparkles, Loader2, Save, Copy, AlertTriangle } from "lucide-react";
+import { Sparkles, Loader2, Save, Copy } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 const SECTIONS = [
   { key: "present_levels", label: "Present Levels" },
@@ -93,10 +94,7 @@ export default function SectionDrafter({ student, sections = SECTIONS }) {
         {draft && (
           <div>
             <Textarea rows={18} value={draft} onChange={(e) => setDraft(e.target.value)} className="font-body" />
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-              <span><strong>Draft — Educator/IEP Team Review Required.</strong> This is AI-generated support content, not an official IEP decision. Verify all details against student data before use.</span>
-            </div>
+            <AiDisclaimer className="mt-4" />
           </div>
         )}
       </Card>

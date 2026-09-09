@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import StepCard from "@/components/meetingCheatSheet/StepCard";
 import MeetingMode from "@/components/meetingCheatSheet/MeetingMode";
 import { exportMeetingNavigatorPdf } from "@/lib/pdfExport";
+import ExportGate from "@/components/shared/ExportGate";
 import StudentSelector from "@/components/forms/StudentSelector";
 
 // IEP Meeting Navigator: a 32-section guided workspace filled with the student's
@@ -120,9 +121,11 @@ export default function MeetingNavigator() {
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Button className="brand-gradient text-white" onClick={() => setInMeeting(true)}><Play className="h-4 w-4 mr-2" /> Start Meeting Mode</Button>
-                <Button variant="outline" onClick={exportPacket} disabled={exporting}>
-                  {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Meeting Preparation Packet
-                </Button>
+                <ExportGate documentName="Meeting Preparation Packet" onExport={exportPacket}>
+                  <Button variant="outline" disabled={exporting}>
+                    {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Meeting Preparation Packet
+                  </Button>
+                </ExportGate>
                 <Button variant="outline" onClick={generate} disabled={generating}>{generating ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Regenerate</Button>
               </div>
             </div>

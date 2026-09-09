@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download } from "lucide-react";
 import { exportIepPdf } from "@/lib/pdfExport";
+import ExportGate from "@/components/shared/ExportGate";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -136,7 +137,9 @@ export default function StudentDetail() {
           </div>
         ) : (
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => exportIepPdf(student, goals || [])}><Download className="h-4 w-4 mr-1" /> Export IEP (PDF)</Button>
+            <ExportGate documentName="IEP draft" onExport={() => exportIepPdf(student, goals || [])}>
+              <Button variant="outline"><Download className="h-4 w-4 mr-1" /> Export IEP (PDF)</Button>
+            </ExportGate>
             <Button variant="outline" onClick={startEdit}>Edit profile</Button>
           </div>
         )}

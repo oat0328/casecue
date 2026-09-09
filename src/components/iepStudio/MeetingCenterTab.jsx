@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Loader2, Copy, AlertTriangle, ClipboardList, CalendarPlus } from "lucide-react";
+import { Sparkles, Loader2, Copy, ClipboardList, CalendarPlus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 const PACKET_FIELDS = [
   ["student_snapshot", "Student Snapshot"],
@@ -69,10 +70,7 @@ export default function MeetingCenterTab({ student, autoGenerate, onGenerated })
 
       {data && (
         <>
-          <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-            <span><strong>Draft — Educator/IEP Team Review Required.</strong> Verify every statement against the IEP before reading it in the meeting.</span>
-          </div>
+          <AiDisclaimer extra="Meeting scripts are presentation support only — verify every statement against the IEP before reading it in the meeting." />
 
           <h3 className="font-semibold">Meeting packet</h3>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">

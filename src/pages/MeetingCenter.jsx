@@ -16,6 +16,7 @@ import {
 import AddToCalendar from "@/components/meetings/AddToCalendar";
 import MeetingNotesGenerator from "@/components/meetings/MeetingNotesGenerator";
 import StudentSelector from "@/components/forms/StudentSelector";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 const MEETING_TYPES = ["IEP", "MET", "Evaluation", "Other"];
 
@@ -94,7 +95,7 @@ export default function MeetingCenter() {
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Meeting prep — {prep.meeting.title}</DialogTitle></DialogHeader>
             <div className="text-sm whitespace-pre-wrap leading-relaxed">{prep.content}</div>
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">Draft — Educator/IEP Team Review Required.</div>
+            <AiDisclaimer />
           </DialogContent>
         </Dialog>
       )}

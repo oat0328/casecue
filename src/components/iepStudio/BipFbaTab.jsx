@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Upload, Loader2, Sparkles, Copy, AlertTriangle, FileWarning } from "lucide-react";
+import { Upload, Loader2, Sparkles, Copy, FileWarning } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Card } from "@/components/ui/cards";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 const BEHAVIOR_TYPES = ["FBA", "BIP", "Behavior Log", "Discipline Report"];
 
@@ -132,10 +133,7 @@ export default function BipFbaTab({ student }) {
 
       {analysis && (
         <Card className="p-5">
-          <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 mb-4">
-            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-            <span><strong>Draft — Educator/IEP Team Review Required.</strong> Behavior conclusions must be verified by the team against the source documents.</span>
-          </div>
+          <AiDisclaimer className="mb-4" extra="Behavior conclusions must be verified by the team against the source documents. CaseCue does not conduct evaluations or determine behavioral function." />
 
           {analysis.data_gaps?.length > 0 && (
             <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-800 mb-4">
