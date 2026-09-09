@@ -7,6 +7,7 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import CustomerActions from "@/components/platform/CustomerActions";
 
 const STATUS_STYLES = {
   active: "bg-emerald-100 text-emerald-700",
@@ -33,7 +34,7 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function CustomersTable({ customers }) {
+export default function CustomersTable({ customers, onRefresh }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [orgType, setOrgType] = useState("all");
@@ -97,6 +98,7 @@ export default function CustomersTable({ customers }) {
                   <TableHead className="text-right">Students</TableHead>
                   <TableHead>Registered</TableHead>
                   <TableHead>Last login</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -117,6 +119,7 @@ export default function CustomersTable({ customers }) {
                     <TableCell className="text-right text-sm">{c.student_count}</TableCell>
                     <TableCell className="text-sm">{fmtDate(c.registered)}</TableCell>
                     <TableCell className="text-sm">{c.last_login ? fmtDate(c.last_login) : "Never"}</TableCell>
+                    <TableCell className="text-right"><CustomerActions customer={c} onDone={onRefresh} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>

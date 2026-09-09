@@ -29,6 +29,10 @@
       "default": "trialing",
       "title": "Status"
     },
+    "previous_status": {
+      "type": "string",
+      "title": "Previous Status (Restore Target)"
+    },
     "trial_end": {
       "type": "string",
       "format": "date",

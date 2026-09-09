@@ -1,0 +1,85 @@
+{
+  "name": "AccessCode",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "title": "Code"
+    },
+    "label": {
+      "type": "string",
+      "title": "Label"
+    },
+    "grant_type": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "complimentary",
+        "demo"
+      ],
+      "default": "trial",
+      "title": "Grant Type"
+    },
+    "trial_days": {
+      "type": "number",
+      "title": "Trial Days"
+    },
+    "max_redemptions": {
+      "type": "number",
+      "title": "Maximum Redemptions"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Expiration Date"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    },
+    "redemptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "user_email": {
+            "type": "string"
+          },
+          "redeemed_at": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Redemption History"
+    }
+  },
+  "required": [
+    "code"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
