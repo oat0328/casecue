@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
+import AddToCalendar from "@/components/meetings/AddToCalendar";
 
 const MEETING_TYPES = ["IEP", "MET", "Evaluation", "Other"];
 
@@ -72,6 +73,7 @@ export default function MeetingCenter() {
                 <div className="text-sm text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> {m.date}{m.time ? ` · ${m.time}` : ""} · {m.meeting_type} · {studentName(m.student_id)}</div>
               </div>
               <div className="flex gap-2">
+                <AddToCalendar meeting={m} student={(students || []).find((x) => x.id === m.student_id)} />
                 <Button variant="outline" size="sm" onClick={() => prepare(m)} disabled={preparing === m.id} className="border-primary/30 text-primary">
                   {preparing === m.id ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />} Prepare Meeting With CaseCue
                 </Button>

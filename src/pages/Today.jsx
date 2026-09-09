@@ -15,6 +15,7 @@ import DemoTour from "@/components/onboarding/DemoTour";
 import { useAuth } from "@/lib/AuthContext";
 import OnboardingTour from "@/components/onboarding/OnboardingTour";
 import GettingStartedCard from "@/components/onboarding/GettingStartedCard";
+import AddToCalendar from "@/components/meetings/AddToCalendar";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -190,7 +191,10 @@ export default function Today() {
               {stats.meetingsUpcoming.slice(0, 6).map((m) => (
                 <div key={m.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
                   <div><div className="text-sm font-medium truncate">{m.title}</div><div className="text-xs text-muted-foreground">{m.meeting_type}</div></div>
-                  <span className="text-xs text-muted-foreground">{m.date}{m.time ? ` · ${m.time}` : ""}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-muted-foreground">{m.date}{m.time ? ` · ${m.time}` : ""}</span>
+                    <AddToCalendar compact meeting={m} student={(students || []).find((s) => s.id === m.student_id)} />
+                  </div>
                 </div>
               ))}
             </div>
