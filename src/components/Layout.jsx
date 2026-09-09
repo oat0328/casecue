@@ -9,6 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import AskCaseCueButton from "@/components/AskCaseCueButton";
+import HowToUseButton from "@/components/HowToUseButton";
 import FloatingFeedbackButton from "@/components/feedback/FloatingFeedbackButton";
 import NotificationsBell from "@/components/NotificationsBell";
 import { cn } from "@/lib/utils";
@@ -99,6 +100,7 @@ export default function Layout() {
           </button>
           <div className="flex-1" />
           <NotificationsBell />
+          <HowToUseButton />
           <Button
             variant="outline"
             size="sm"

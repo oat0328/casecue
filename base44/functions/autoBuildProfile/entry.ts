@@ -36,6 +36,7 @@ const SCHEMA = {
     },
     progress_information: { type: 'string' },
     behavior_information: { type: 'string' },
+    parent_concerns: { type: 'string' },
     data_gaps: { type: 'array', items: { type: 'string' } }
   },
   required: ['strengths', 'areas_of_need', 'present_levels', 'accommodations', 'services', 'goals', 'progress_information', 'behavior_information', 'data_gaps']
@@ -76,6 +77,7 @@ STRICT EXTRACTION RULES:
 - goals: one entry per IEP goal found, with its documented baseline, target, criterion, and measurement method.
 - progress_information: any progress data, scores, or growth statements found.
 - behavior_information: any behavior, FBA, or BIP content found.
+- parent_concerns: any parent concerns or parent input documented.
 
 PROCESSED DOCUMENT CONTENT:
 ${docContext}
@@ -172,6 +174,7 @@ Return JSON matching the schema.`;
       accommodations_found: listCount(extracted.accommodations),
       services_found: Array.isArray(extracted.services) ? extracted.services.length : 0,
       behavior_supports_found: !!extracted.behavior_information,
+      parent_concerns_found: !!extracted.parent_concerns,
       missing: extracted.data_gaps || [],
     };
 

@@ -32,6 +32,7 @@ import ProgressReports from '@/pages/ProgressReports';
 import Onboarding from '@/pages/Onboarding';
 import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
+import Help from '@/pages/Help';
 import Settings from '@/pages/Settings';
 import Admin from '@/pages/Admin';
 import OrgSetup from '@/pages/OrgSetup';
@@ -87,6 +88,7 @@ function App() {
                 <Route path="/progress-reports" element={<ProgressReports />} />
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
+                <Route path="/help" element={<Help />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/platform-admin" element={<PlatformAdmin />} />

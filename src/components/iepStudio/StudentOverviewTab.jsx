@@ -22,14 +22,16 @@ const SECTIONS = [
 
 const COPILOT_PROMPTS = [
   "Summarize this student",
-  "What should be updated in this IEP?",
-  "Create new goals",
-  "Review accommodations",
+  "Build a new IEP",
+  "Review an MDT",
   "Generate SDI",
-  "Draft amendment language",
+  "Create goals",
+  "Draft amendments",
+  "Review accommodations",
+  "Analyze a BIP",
   "Create meeting notes",
-  "Create parent-friendly summary",
-  "Prepare me for this IEP meeting",
+  "Create parent summary",
+  "Prepare me for this meeting",
 ];
 
 // Tab 1 — Student Overview: the verified record at a glance.

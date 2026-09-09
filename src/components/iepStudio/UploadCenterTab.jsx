@@ -20,8 +20,10 @@ const DOC_TYPES = [
   ["Progress Report", "Progress Report"],
   ["Parent Input", "Parent Input"],
   ["Teacher Input", "Teacher Input"],
-  ["Service Provider Report", "Therapy / Service Provider Report"],
+  ["Service Provider Report", "Therapy Report (Speech / OT / PT)"],
   ["Medical Report", "Medical Report"],
+  ["Behavior Log", "Behavior Log / Report"],
+  ["Discipline Report", "Discipline Report"],
   ["Assessment Report", "Assessment Report"],
   ["504", "504 Plan"],
   ["Transition Assessment", "Transition Assessment"],
@@ -264,6 +266,8 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
               <SnapshotRow label="Accommodations Found" value={`${profileResult.snapshot?.accommodations_found || 0} item(s)`} />
               <SnapshotRow label="Services Found" value={`${profileResult.snapshot?.services_found || 0} service(s)`} />
               <SnapshotRow label="Missing Information" value={(profileResult.snapshot?.missing || []).length ? profileResult.snapshot.missing.join(", ") : "None — documents look complete"} />
+              <SnapshotRow label="Documents Reviewed" value={`${(docs || []).filter((d) => d.extraction_status === "processed").length} document(s)`} />
+              <SnapshotRow label="Parent Concerns Found" value={profileResult.snapshot?.parent_concerns_found ? "Yes — documented" : "None found"} />
             </div>
           </Card>
 

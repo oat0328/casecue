@@ -5,6 +5,8 @@ import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/cards";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import StudentSelector from "@/components/forms/StudentSelector";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import UploadCenterTab from "@/components/iepStudio/UploadCenterTab";
@@ -23,6 +25,21 @@ import ComplianceReviewTab from "@/components/iepStudio/ComplianceReviewTab";
 const ACCOMMODATION_SDI_SECTIONS = [
   { key: "accommodations", label: "Accommodations" },
   { key: "sdi", label: "SDI / Support Language" },
+];
+
+const GETTING_STARTED = ["Select Student", "Upload Documents", "Review AI Analysis", "Generate IEP Draft", "Prepare For Meeting"];
+
+const TAB_TIPS = [
+  ["overview", "Overview", "The verified student record at a glance, with the readiness score, Meeting Mode, and Copilot."],
+  ["documents", "Upload Center", "The only upload point — drag files in and CaseCue reads, analyzes, and pre-fills the profile automatically."],
+  ["summary", "AI Summary", "AI-generated summary of every uploaded document."],
+  ["builder", "IEP Builder", "The 4-step pipeline: documents → extraction review → IEP draft → review & export."],
+  ["goals", "Goals & Progress", "Goals with live progress graphs — green on track, yellow monitor, red at risk."],
+  ["accommodations", "Accommodations & SDI", "Draft and manage accommodations and specially designed instruction language."],
+  ["behavior", "BIP & FBA", "Analyze FBAs and BIPs — triggers, function of behavior, replacement behaviors, and BIP drafts."],
+  ["amendments", "Amendments", "Compare current vs. new information and generate formal amendment language."],
+  ["meeting", "Meeting Center", "One click generates the full meeting packet, page-by-page script, and talking points."],
+  ["compliance", "Compliance", "Review findings and alerts before finalizing — missing sections, weak goals, inconsistencies."],
 ];
 
 export default function IEPStudio() {
@@ -44,7 +61,7 @@ export default function IEPStudio() {
         CaseCue drafts, you decide. Every section stays a draft until the IEP team approves it — CaseCue never finalizes an IEP, makes a diagnosis, or makes a placement decision.
       </div>
 
-      <Card className="p-5 mb-6">
+      <Card className="p-5 mb-6" id="iep-studio-selector">
         <StudentSelector
           students={students || []}
           value={studentId}
@@ -54,24 +71,46 @@ export default function IEPStudio() {
       </Card>
 
       {!student ? (
-        <p className="text-muted-foreground text-sm">
-          Select a student to begin. Upload the current IEP and latest documentation, and CaseCue will extract, cite, and draft — you verify and approve every step.
-        </p>
+        <Card className="p-6 sm:p-8 brand-gradient-soft border-primary/20">
+          <h2 className="text-2xl font-bold tracking-tight">Welcome to IEP Studio</h2>
+          <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-2xl">
+            Everything IEP happens here — upload documents once and CaseCue automatically reads them, builds the student profile, pre-fills every section, and prepares your meeting.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-5 mb-6">
+            {GETTING_STARTED.map((label, i) => (
+              <div key={label} className="rounded-xl bg-card border border-border p-3.5">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full brand-gradient text-white text-xs font-bold mb-2">{i + 1}</span>
+                <p className="text-sm font-medium leading-snug">{label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              className="brand-gradient text-white"
+              onClick={() => document.getElementById("iep-studio-selector")?.querySelector("select")?.focus()}
+            >
+              Start Here
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/help">How to use IEP Studio</Link>
+            </Button>
+          </div>
+        </Card>
       ) : (
         <Tabs value={tab} onValueChange={setTab}>
           <div className="overflow-x-auto -mx-1 px-1 pb-1">
-            <TabsList className="flex-wrap h-auto gap-1 w-max min-w-full">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="documents">Upload Center</TabsTrigger>
-              <TabsTrigger value="summary">AI Summary</TabsTrigger>
-              <TabsTrigger value="builder">IEP Builder</TabsTrigger>
-              <TabsTrigger value="goals">Goals &amp; Progress</TabsTrigger>
-              <TabsTrigger value="accommodations">Accommodations &amp; SDI</TabsTrigger>
-              <TabsTrigger value="behavior">BIP &amp; FBA</TabsTrigger>
-              <TabsTrigger value="amendments">Amendments</TabsTrigger>
-              <TabsTrigger value="meeting">Meeting Center</TabsTrigger>
-              <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            </TabsList>
+            <TooltipProvider delayDuration={250}>
+              <TabsList className="flex-wrap h-auto gap-1 w-max min-w-full">
+                {TAB_TIPS.map(([value, label, tip]) => (
+                  <Tooltip key={value}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value={value}>{label}</TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[240px]">{tip}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </TabsList>
+            </TooltipProvider>
           </div>
 
           <TabsContent value="overview" className="mt-6">
