@@ -7,6 +7,7 @@ import { AuthProvider } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
+import OrgGate from '@/components/OrgGate';
 // Add page imports here
 import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
@@ -33,6 +34,8 @@ import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
 import Settings from '@/pages/Settings';
 import Admin from '@/pages/Admin';
+import OrgSetup from '@/pages/OrgSetup';
+import PlatformAdmin from '@/pages/PlatformAdmin';
 import ThankYou from '@/pages/ThankYou';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
@@ -54,6 +57,8 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
               <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/org-setup" element={<OrgSetup />} />
+              <Route element={<OrgGate />}>
               <Route element={<Layout />}>
                 <Route path="/app" element={<Today />} />
                 <Route path="/students" element={<Students />} />
@@ -74,6 +79,8 @@ function App() {
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/platform-admin" element={<PlatformAdmin />} />
+              </Route>
               </Route>
             </Route>
             <Route path="*" element={<PageNotFound />} />

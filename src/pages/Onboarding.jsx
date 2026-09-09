@@ -72,6 +72,16 @@ export default function Onboarding() {
     try {
       await persist({ choice });
       await base44.auth.updateMe({ onboarding_completed: true });
+      // Every account gets an isolated organization workspace before entering the app.
+      if (!user?.organization_id && !user?.data?.organization_id) {
+        const res = await base44.functions.invoke("setupOrganization", {
+          orgType: choice === "demo" ? "demo" : "individual_teacher",
+          name: form.school || undefined,
+          state: form.state || undefined,
+        });
+        await base44.auth.updateMe({ organization_id: res.data.organization_id });
+        await checkUserAuth();
+      }
       if (choice === "demo") {
         sessionStorage.setItem("casecue_demo_tour", "1");
         const res = await loadDemoCaseload();

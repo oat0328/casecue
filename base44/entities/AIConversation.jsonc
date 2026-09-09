@@ -36,6 +36,10 @@
       ],
       "default": "caseload",
       "title": "Mode"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
     }
   },
   "required": [
@@ -43,16 +47,44 @@
   ],
   "rls": {
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
     },
     "create": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
     },
     "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
     }
   }
 }

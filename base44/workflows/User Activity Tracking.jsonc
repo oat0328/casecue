@@ -1,0 +1,43 @@
+{
+  "name": "User Activity Tracking",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "app_user_auth",
+      "events": [
+        "signup",
+        "login"
+      ]
+    }
+  },
+  "description": "Records signups and logins in the audit log for platform reporting",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "user_activity_tracking",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "record_activity": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "recordLogin",
+            "args": {
+              "user_id": "${ .trigger.user_id }",
+              "email": "${ .trigger.email }",
+              "event_type": "${ .trigger.event_type }",
+              "auth_method": "${ .trigger.auth_method }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Record activity",
+            "description": "Audit log entry"
+          }
+        }
+      }
+    ]
+  }
+}

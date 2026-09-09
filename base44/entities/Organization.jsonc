@@ -1,0 +1,87 @@
+{
+  "name": "Organization",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "org_type": {
+      "type": "string",
+      "enum": [
+        "individual_teacher",
+        "school",
+        "district",
+        "demo"
+      ],
+      "title": "Organization Type"
+    },
+    "state": {
+      "type": "string",
+      "title": "State"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "title": "Owner User ID"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Member User IDs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended"
+      ],
+      "default": "active",
+      "title": "Status"
+    },
+    "internal_note": {
+      "type": "string",
+      "title": "Internal Note (Platform Owner only)"
+    }
+  },
+  "required": [
+    "name",
+    "org_type",
+    "owner_user_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.members": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.owner_user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

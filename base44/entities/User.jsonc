@@ -17,6 +17,10 @@
         "free"
       ],
       "default": "trial"
+    },
+    "organization_id": {
+      "type": "string",
+      "description": "The organization (tenant) this user belongs to"
     }
   },
   "required": [

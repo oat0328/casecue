@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, FileEdit, ShieldCheck, FolderOpen, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
-  FileBarChart, FlaskConical, MessageCircle, Settings, FileText
+  FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown
 } from "lucide-react";
 
 export const navItems = [
@@ -23,4 +23,5 @@ export const navItems = [
   { label: "Ask CaseCue", path: "/ask-casecue", icon: MessageCircle },
   { label: "Settings", path: "/settings", icon: Settings },
   { label: "Admin", path: "/admin", icon: ShieldCheck, adminOnly: true },
+  { label: "Platform Admin", path: "/platform-admin", icon: Crown, adminOnly: true },
 ];

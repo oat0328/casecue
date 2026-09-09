@@ -1,0 +1,97 @@
+{
+  "name": "Plan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Plan Name"
+    },
+    "code": {
+      "type": "string",
+      "title": "Plan Code"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "monthly_price": {
+      "type": "number",
+      "default": 0,
+      "title": "Monthly Price (USD)"
+    },
+    "annual_price": {
+      "type": "number",
+      "default": 0,
+      "title": "Annual Price (USD)"
+    },
+    "trial_days": {
+      "type": "number",
+      "default": 0,
+      "title": "Trial Length (days)"
+    },
+    "seats": {
+      "type": "number",
+      "default": 1,
+      "title": "Included Seats"
+    },
+    "student_limit": {
+      "type": "number",
+      "default": 15,
+      "title": "Student Limit"
+    },
+    "ai_monthly_limit": {
+      "type": "number",
+      "default": 100,
+      "title": "AI Actions Per Month"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Enabled Features"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true,
+      "title": "Publicly Listed"
+    },
+    "code_only": {
+      "type": "boolean",
+      "default": false,
+      "title": "Available Only Through Access Code"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "title": "Sort Order"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    }
+  },
+  "required": [
+    "name",
+    "code"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

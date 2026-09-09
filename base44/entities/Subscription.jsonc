@@ -1,0 +1,94 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "plan_id": {
+      "type": "string",
+      "title": "Plan ID"
+    },
+    "plan_name": {
+      "type": "string",
+      "title": "Plan Name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "demo",
+        "complimentary",
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "suspended",
+        "expired"
+      ],
+      "default": "trialing",
+      "title": "Status"
+    },
+    "trial_end": {
+      "type": "string",
+      "format": "date",
+      "title": "Trial End"
+    },
+    "complimentary_end": {
+      "type": "string",
+      "format": "date",
+      "title": "Complimentary Access End"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date",
+      "title": "Current Billing Period End"
+    },
+    "monthly_price": {
+      "type": "number",
+      "default": 0,
+      "title": "Monthly Price (USD)"
+    },
+    "seats": {
+      "type": "number",
+      "default": 1,
+      "title": "Seats"
+    },
+    "internal_note": {
+      "type": "string",
+      "title": "Internal Note (Platform Owner only)"
+    }
+  },
+  "required": [
+    "organization_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
