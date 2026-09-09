@@ -43,7 +43,7 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
   );
 
   const conflicts = useMemo(() => findConflicts(preview), [preview]);
-  const matchedIds = useMemo(() => new Set(groups.flatMap(resolveIds)), [groups]);
+  const matchedIds = useMemo(() => new Set(groups.filter((g) => g.included).flatMap(resolveIds)), [groups]);
   const unmatched = groups.flatMap((g) => (g.students || []).filter((st) => st.match_type === "unmatched"));
   const totalMinutes = groups.filter((g) => g.included).reduce((n, g) => n + (Number(g.service_minutes) || 0), 0);
   const studentLabel = (id) => {

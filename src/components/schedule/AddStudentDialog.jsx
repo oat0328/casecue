@@ -37,11 +37,13 @@ export default function AddStudentDialog({ open, onOpenChange, students, entries
     }
   };
 
-  const useRec = (r) => {
+  const applyRec = (r) => {
+    const existing = groupNames.includes(r.group_name);
     setForm((p) => ({
       ...p,
-      group_mode: groupNames.includes(r.group_name) ? "existing" : "new",
-      group_name: r.group_name || p.group_name,
+      group_mode: existing ? "existing" : "new",
+      group_name: existing ? r.group_name : p.group_name,
+      new_group_name: existing ? p.new_group_name : r.group_name,
       delivery: ["pull-out", "push-in", "consultation"].includes(r.delivery) ? r.delivery : p.delivery,
       days: DAYS.includes(r.day) ? [r.day] : p.days,
       start_time: r.start_time || p.start_time,
@@ -115,7 +117,7 @@ export default function AddStudentDialog({ open, onOpenChange, students, entries
                         <div className="text-xs text-muted-foreground mt-0.5">{r.day} · {r.start_time || "?"}–{r.end_time || "?"} · {DELIVERY_LABEL[r.delivery] || r.delivery} · {r.service_minutes || 0} min</div>
                         <p className="text-xs text-muted-foreground mt-1">{r.reasoning}</p>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => useRec(r)}><Check className="h-3.5 w-3.5" /> Use</Button>
+                      <Button size="sm" variant="outline" onClick={() => applyRec(r)}><Check className="h-3.5 w-3.5" /> Use</Button>
                     </div>
                   </div>
                 ))}
