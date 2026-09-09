@@ -159,11 +159,28 @@ Return JSON matching the schema.`;
       },
     });
 
+    // Snapshot of what was found, for the Upload Center's summary view.
+    const listCount = (v) =>
+      Array.isArray(v) ? v.length
+      : (typeof v === 'string' && v.trim()) ? v.trim().split(/\r?\n|;|\u2022/).filter(Boolean).length
+      : 0;
+    const snapshot = {
+      eligibility: extracted.eligibility_category || '',
+      strengths_found: listCount(extracted.strengths),
+      needs_found: listCount(extracted.areas_of_need),
+      goals_found: Array.isArray(extracted.goals) ? extracted.goals.length : 0,
+      accommodations_found: listCount(extracted.accommodations),
+      services_found: Array.isArray(extracted.services) ? extracted.services.length : 0,
+      behavior_supports_found: !!extracted.behavior_information,
+      missing: extracted.data_gaps || [],
+    };
+
     return Response.json({
       filled,
       kept,
       goals_created: goalsCreated,
       data_gaps: extracted.data_gaps || [],
+      snapshot,
       workspace_id: workspace.id,
     });
   } catch (error) {

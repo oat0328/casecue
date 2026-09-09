@@ -1,8 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, GraduationCap, CalendarClock, Heart, Target, FileText, Wrench, Clock } from "lucide-react";
+import { Sparkles, GraduationCap, CalendarClock, Heart, Target, FileText, Wrench, Clock, Mic } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
+import ProfileReadiness from "@/components/iepStudio/ProfileReadiness";
 
 const FACTS = [
   { label: "Eligibility", value: "eligibility_category", icon: GraduationCap },
@@ -19,15 +20,33 @@ const SECTIONS = [
   { label: "Accommodations", value: "accommodations", icon: Wrench },
 ];
 
-const COPILOT_TASKS = [
-  "Build an IEP", "Review an MDT", "Summarize an IEP", "Create goals",
-  "Generate SDI", "Draft amendments", "Analyze a BIP", "Generate meeting notes", "Create a meeting script",
+const COPILOT_PROMPTS = [
+  "Summarize this student",
+  "What should be updated in this IEP?",
+  "Create new goals",
+  "Review accommodations",
+  "Generate SDI",
+  "Draft amendment language",
+  "Create meeting notes",
+  "Create parent-friendly summary",
+  "Prepare me for this IEP meeting",
 ];
 
 // Tab 1 — Student Overview: the verified record at a glance.
-export default function StudentOverviewTab({ student }) {
+export default function StudentOverviewTab({ student, onRunMeetingMode }) {
   return (
     <div className="space-y-6">
+      <Card className="p-5 brand-gradient text-white flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 font-semibold mb-1"><Mic className="h-4 w-4" />Meeting Mode</div>
+          <p className="text-sm text-white/85">
+            One click prepares the full meeting packet, page-by-page IEP summary, talking points, and parent-friendly explanations — everything you need to walk into the IEP meeting ready.
+          </p>
+        </div>
+        <Button onClick={onRunMeetingMode} variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90 shrink-0">
+          🎤 Run Meeting Mode
+        </Button>
+      </Card>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {FACTS.map(({ label, value, icon: Icon }) => (
           <Card key={value} className="p-4">
@@ -61,13 +80,15 @@ export default function StudentOverviewTab({ student }) {
         </Card>
       </div>
 
+      <ProfileReadiness student={student} />
+
       <Card className="p-5 brand-gradient text-white">
         <div className="flex items-center gap-2 font-semibold mb-1"><Sparkles className="h-4 w-4" />CaseCue Copilot</div>
         <p className="text-sm text-white/85 mb-3">
           Your AI case manager. Ask CaseCue Copilot to build an IEP, review an MDT, summarize records, create goals, generate SDI, draft amendments, analyze a BIP, or write meeting notes — it uses every uploaded document as context.
         </p>
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {COPILOT_TASKS.map((t) => (
+          {COPILOT_PROMPTS.map((t) => (
             <span key={t} className="text-xs bg-white/15 border border-white/20 rounded-full px-2.5 py-1">{t}</span>
           ))}
         </div>

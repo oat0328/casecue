@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Loader2, Copy, AlertTriangle, ClipboardList, CalendarPlus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -24,7 +24,7 @@ const PACKET_FIELDS = [
 
 // Tab 9 — Meeting Command Center: one click generates the full Meeting Packet
 // and a read-aloud script that walks through EVERY page of the uploaded IEP.
-export default function MeetingCenterTab({ student }) {
+export default function MeetingCenterTab({ student, autoGenerate, onGenerated }) {
   const { toast } = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,10 +35,16 @@ export default function MeetingCenterTab({ student }) {
     try {
       const res = await base44.functions.invoke("generateMeetingScript", { student_id: student.id });
       setData(res.data);
+      onGenerated?.();
     } catch (e) {
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally { setLoading(false); }
   };
+
+  // "Run Meeting Mode" from elsewhere in IEP Studio auto-starts generation here.
+  useEffect(() => {
+    if (autoGenerate && !loading && !data) generate();
+  }, [autoGenerate]);
 
   return (
     <div className="space-y-6">

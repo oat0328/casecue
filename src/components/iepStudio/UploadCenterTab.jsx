@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { UploadCloud, Loader2, CheckCircle2, RefreshCw, Trash2, ExternalLink, AlertTriangle, FileText, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import ProfileReadiness from "@/components/iepStudio/ProfileReadiness";
 
 const DOC_TYPES = [
   ["IEP", "IEP (previous or current)"],
@@ -41,7 +43,7 @@ const STATUS_LABEL = {
 // IEP Studio Upload Center: drag-and-drop upload → automatic document
 // processing → automatic AI analysis → automatic student profile pre-fill.
 // The teacher's only job is to review and edit the result.
-export default function UploadCenterTab({ student, onProfileBuilt }) {
+export default function UploadCenterTab({ student, onProfileBuilt, onNavigate }) {
   const { toast } = useToast();
   const [docType, setDocType] = useState("IEP");
   const [docs, setDocs] = useState(null);
@@ -142,6 +144,13 @@ export default function UploadCenterTab({ student, onProfileBuilt }) {
     load();
   };
 
+  const SnapshotRow = ({ label, value }) => (
+    <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-2">
+      <span className="text-sm text-muted-foreground shrink-0">{label}:</span>
+      <span className="text-sm font-medium text-right">{value}</span>
+    </div>
+  );
+
   const Check = ({ done, active, label, children }) => (
     <div className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${done ? "border-emerald-200 bg-emerald-50" : active ? "border-amber-200 bg-amber-50" : "border-border bg-muted/30 opacity-60"}`}>
       {done ? <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -240,6 +249,41 @@ export default function UploadCenterTab({ student, onProfileBuilt }) {
           </Check>
         </div>
       </Card>
+
+      {/* After AI analysis: snapshot, readiness, one-click actions */}
+      {profileResult && !profileResult.error && (
+        <>
+          <Card className="p-5 sm:p-6">
+            <h3 className="font-semibold mb-4">Student Snapshot — what CaseCue found</h3>
+            <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+              <SnapshotRow label="Eligibility" value={profileResult.snapshot?.eligibility || "Not stated in documents"} />
+              <SnapshotRow label="Behavior Supports Found" value={profileResult.snapshot?.behavior_supports_found ? "Yes — documented" : "None found"} />
+              <SnapshotRow label="Strengths Found" value={`${profileResult.snapshot?.strengths_found || 0} item(s)`} />
+              <SnapshotRow label="Areas of Need Found" value={`${profileResult.snapshot?.needs_found || 0} item(s)`} />
+              <SnapshotRow label="Goals Found" value={`${profileResult.snapshot?.goals_found || 0} goal(s)`} />
+              <SnapshotRow label="Accommodations Found" value={`${profileResult.snapshot?.accommodations_found || 0} item(s)`} />
+              <SnapshotRow label="Services Found" value={`${profileResult.snapshot?.services_found || 0} service(s)`} />
+              <SnapshotRow label="Missing Information" value={(profileResult.snapshot?.missing || []).length ? profileResult.snapshot.missing.join(", ") : "None — documents look complete"} />
+            </div>
+          </Card>
+
+          <ProfileReadiness student={student} />
+
+          <Card className="p-5 sm:p-6">
+            <h3 className="font-semibold mb-1">One-click actions</h3>
+            <p className="text-sm text-muted-foreground mb-4">Everything CaseCue found is saved to {student.first_name}'s record — jump straight into generating.</p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => onNavigate?.("builder")}><ArrowRight className="h-3.5 w-3.5 mr-1" />Generate New IEP</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("amendments")}>Generate Amendment</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Script</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Cheat Sheet</Button>
+              <Button size="sm" variant="outline" asChild><Link to="/ask-casecue">Generate Parent Summary</Link></Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("goals")}>Generate Progress Summary</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("compliance")}>Review Compliance</Button>
+            </div>
+          </Card>
+        </>
+      )}
 
       {/* Documents on file */}
       <Card className="p-5 sm:p-6">

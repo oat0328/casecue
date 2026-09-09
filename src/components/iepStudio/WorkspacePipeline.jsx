@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import DocumentStep from "@/components/iepWorkspace/DocumentStep";
+import BuilderDocumentsSummary from "@/components/iepStudio/BuilderDocumentsSummary";
 import ExtractionStep from "@/components/iepWorkspace/ExtractionStep";
 import DraftStep from "@/components/iepWorkspace/DraftStep";
 import ReviewStep from "@/components/iepWorkspace/ReviewStep";
@@ -70,7 +70,7 @@ export default function WorkspacePipeline({ student }) {
         ))}
       </div>
 
-      {step === 0 && <DocumentStep student={student} onContinue={() => setStep(1)} />}
+      {step === 0 && <BuilderDocumentsSummary student={student} onContinue={() => setStep(1)} />}
       {step === 1 && <ExtractionStep workspace={workspace} save={save} onDrafted={() => setStep(2)} />}
       {step === 2 && <DraftStep workspace={workspace} save={save} student={student} onReviewed={() => setStep(3)} />}
       {step === 3 && <ReviewStep workspace={workspace} save={save} student={student} />}

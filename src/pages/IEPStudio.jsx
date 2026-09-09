@@ -29,6 +29,7 @@ export default function IEPStudio() {
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const [studentId, setStudentId] = useState("");
   const [tab, setTab] = useState("overview");
+  const [meetingAuto, setMeetingAuto] = useState(false);
   const student = (students || []).find((s) => s.id === studentId);
 
   return (
@@ -74,10 +75,13 @@ export default function IEPStudio() {
           </div>
 
           <TabsContent value="overview" className="mt-6">
-            <StudentOverviewTab student={student} />
+            <StudentOverviewTab
+              student={student}
+              onRunMeetingMode={() => { setMeetingAuto(true); setTab("meeting"); }}
+            />
           </TabsContent>
           <TabsContent value="documents" className="mt-6">
-            <UploadCenterTab student={student} onProfileBuilt={() => setTab("overview")} />
+            <UploadCenterTab student={student} onProfileBuilt={() => setTab("overview")} onNavigate={setTab} />
           </TabsContent>
           <TabsContent value="summary" className="mt-6">
             <AiSummaryTab student={student} />
@@ -98,7 +102,7 @@ export default function IEPStudio() {
             <AmendmentsTab student={student} />
           </TabsContent>
           <TabsContent value="meeting" className="mt-6">
-            <MeetingCenterTab student={student} />
+            <MeetingCenterTab student={student} autoGenerate={meetingAuto} onGenerated={() => setMeetingAuto(false)} />
           </TabsContent>
           <TabsContent value="compliance" className="mt-6">
             <ComplianceReviewTab student={student} />
