@@ -3,7 +3,8 @@ import { CASECUE_SYSTEM_PROMPT } from "../../shared/casecueContext.ts";
 
 // Substitute teacher plan built from REAL data only: student records, the
 // weekly schedule, Lesson Studio lessons with their materials and connected
-// resource links, and IEP goal areas. Returns the sources used and the
+// resource links, teacher-uploaded assignments, saved goal assignments, and
+// IEP goal areas. Returns the sources used and the
 // information CaseCue does not have — the plan never invents school-specific
 // facts, and when no lesson materials exist the sub plan includes AI-generated
 // emergency assignments labeled as such.
@@ -21,7 +22,14 @@ export default async function(req) {
     const lessons = await base44.entities.Lesson.list('-updated_date', 20);
     const schedule = await base44.entities.ScheduleEntry.list('day', 50);
     const goals = await base44.entities.Goal.list('-updated_date', 200);
-    const materials = await base44.entities.TeachingMaterial.list('-updated_date', 20);
+    // Teacher uploads may not be propagated to every runtime yet — degrade to
+    // "no uploads" instead of failing the whole plan.
+    let materials = [];
+    try {
+      materials = await base44.entities.TeachingMaterial.list('-updated_date', 20);
+    } catch (e) {
+      materials = [];
+    }
     const goalAssignments = await base44.entities.SavedReport.filter({ report_type: 'goal_assignment' }, '-created_date', 10);
 
     const sources = [];
