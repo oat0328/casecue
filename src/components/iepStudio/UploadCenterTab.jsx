@@ -327,7 +327,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("amendments")}>Generate Amendment</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Script</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate IEP Meeting Navigator</Button>
-              <Button size="sm" variant="outline" asChild><Link to="/ask-casecue">Generate Parent Summary</Link></Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("parent")}>Generate Parent Summary</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("goals")}>Generate Progress Summary</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("compliance")}>Review Compliance</Button>
             </div>

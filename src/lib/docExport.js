@@ -15,7 +15,13 @@ const safeName = (t) => String(t || "casecue-document").replace(/[^a-z0-9]+/gi, 
 
 export function buildDocHtml({ title, subtitle, sections, banner }) {
   const body = (sections || [])
-    .map((s) => `<h2>${esc(s.heading)}</h2><div class="ftext">${esc(s.body) || "<em>—</em>"}</div>`)
+    .map((s) => {
+      const img = s.image
+        ? `<div class="imgwrap"><img src="${s.image}" style="max-width:100%;height:auto" /></div>`
+        : "";
+      const text = s.body ? `<div class="ftext">${esc(s.body)}</div>` : "";
+      return `<h2>${esc(s.heading)}</h2>${img}${text}`;
+    })
     .join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
   body{font-family:Calibri,Arial,sans-serif;color:#1a1a2e;margin:40px;}
@@ -114,7 +120,15 @@ export function exportDocPdf({ title, subtitle, sections, banner, filename }) {
   for (const s of sections || []) {
     if (y > PAGE_H - 90) { doc.addPage(); y = M; }
     write(s.heading, 12, true, [109, 40, 217], 3);
-    write(s.body, 11, false, [40, 40, 40], 10);
+    if (s.image && s.imageWidth && s.imageHeight) {
+      let imgW = CW;
+      let imgH = CW * (s.imageHeight / s.imageWidth);
+      const maxH = PAGE_H - M * 2 - 40;
+      if (imgH > maxH) { imgH = maxH; imgW = imgH * (s.imageWidth / s.imageHeight); }
+      if (y + imgH > PAGE_H - 60) { doc.addPage(); y = M; }
+      try { doc.addImage(s.image, "PNG", M, y, imgW, imgH); y += imgH + 8; } catch { /* skip unreadable image */ }
+    }
+    if (s.body) write(s.body, 11, false, [40, 40, 40], 10);
   }
 
   const footer = banner || DEFAULT_BANNER;

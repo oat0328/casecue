@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { FileBarChart, Download, Clock, CalendarClock, AlertCircle, Target, Users, FileWarning, TrendingUp } from "lucide-react";
+import { FileBarChart, Download, CalendarClock, AlertCircle, Target, Users, FileWarning, TrendingUp } from "lucide-react";
+import ExportGate from "@/components/shared/ExportGate";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -52,13 +53,11 @@ export default function Reports() {
   return (
     <div>
       <PageHeader title="Reports" subtitle="Caseload status, deadlines, missing data, and workflow insights at a glance." icon={FileBarChart}
-        actions={<Button variant="outline" onClick={exportReport}><Download className="h-4 w-4 mr-1" /> Export report</Button>} />
-
-      <Card className="p-6 mb-6">
-        <div className="flex items-center gap-2 font-semibold mb-1"><Clock className="h-4 w-4 text-primary" /> Time saved this week</div>
-        <div className="text-4xl font-bold text-gradient">4.8 hrs</div>
-        <p className="text-sm text-muted-foreground mt-1">3 IEP drafts · 2 lesson plans · 1 sub plan · 6 progress notes</p>
-      </Card>
+        actions={
+          <ExportGate documentName="Caseload report" onExport={exportReport}>
+            <Button variant="outline"><Download className="h-4 w-4 mr-1" /> Export report</Button>
+          </ExportGate>
+        } />
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map((c) => (

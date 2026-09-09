@@ -4,6 +4,8 @@ import { Sparkles, GraduationCap, CalendarClock, Heart, Target, FileText, Wrench
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import ProfileReadiness from "@/components/iepStudio/ProfileReadiness";
+import ExportBar from "@/components/shared/ExportBar";
+import StudentBinder from "@/components/shared/StudentBinder";
 
 const FACTS = [
   { label: "Eligibility", value: "eligibility_category", icon: GraduationCap },
@@ -58,6 +60,27 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
         ))}
       </div>
 
+      <ExportBar
+        title={`Student Snapshot — ${student.first_name} ${student.last_name}`}
+        subtitle="Verified student record"
+        filename={`Student-Snapshot-${student.first_name}-${student.last_name}`}
+        banner="Compiled from the verified student record and uploaded documents — educator review required."
+        gated
+        sections={[
+          { heading: "Eligibility", body: student.eligibility_category },
+          { heading: "Grade", body: student.grade },
+          { heading: "IEP Date", body: student.iep_date },
+          { heading: "Annual Review Due", body: student.annual_review_due },
+          { heading: "Reevaluation Due", body: student.reevaluation_due },
+          { heading: "Strengths", body: student.strengths },
+          { heading: "Areas of Need", body: student.areas_of_need },
+          { heading: "Present Levels", body: student.present_levels },
+          { heading: "Accommodations", body: student.accommodations },
+          { heading: "Services", body: (student.services || []).join(", ") },
+          { heading: "Notes", body: student.notes },
+        ].filter((s) => s.body)}
+      />
+
       <div className="grid gap-4 lg:grid-cols-2">
         {SECTIONS.map(({ label, value, icon: Icon }) => (
           <Card key={value} className="p-5">
@@ -83,6 +106,8 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
       </div>
 
       <ProfileReadiness student={student} />
+
+      <StudentBinder student={student} />
 
       <Card className="p-5 brand-gradient text-white">
         <div className="flex items-center gap-2 font-semibold mb-1"><Sparkles className="h-4 w-4" />CaseCue Copilot</div>

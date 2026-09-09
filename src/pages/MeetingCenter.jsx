@@ -17,6 +17,7 @@ import AddToCalendar from "@/components/meetings/AddToCalendar";
 import MeetingNotesGenerator from "@/components/meetings/MeetingNotesGenerator";
 import StudentSelector from "@/components/forms/StudentSelector";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
+import ExportBar from "@/components/shared/ExportBar";
 
 const MEETING_TYPES = ["IEP", "MET", "Evaluation", "Other"];
 
@@ -105,7 +106,15 @@ export default function MeetingCenter() {
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Meeting prep — {prep.meeting.title}</DialogTitle></DialogHeader>
             <div className="text-sm whitespace-pre-wrap leading-relaxed">{prep.content}</div>
-            <AiDisclaimer />
+            <ExportBar
+              title={`Meeting Prep — ${prep.meeting.title}`}
+              subtitle="AI meeting preparation"
+              filename={`Meeting-Prep-${prep.meeting.title}`}
+              sections={[{ heading: "Meeting Preparation", body: prep.content }]}
+              gated
+              className="mt-3"
+            />
+            <AiDisclaimer className="mt-2" />
           </DialogContent>
         </Dialog>
       )}

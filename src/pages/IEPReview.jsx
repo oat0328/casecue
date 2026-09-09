@@ -7,6 +7,8 @@ import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import StudentSelector from "@/components/forms/StudentSelector";
+import ExportBar from "@/components/shared/ExportBar";
+import SourceCitations from "@/components/shared/SourceCitations";
 
 const LEVEL_META = {
   good: { label: "Looks Good", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" },
@@ -27,6 +29,7 @@ export default function IEPReview() {
   const [review, setReview] = useState(null);
   const [fixing, setFixing] = useState(null);
   const [fixResult, setFixResult] = useState({});
+  const selectedStudent = (students || []).find((s) => s.id === studentId);
 
   const runReview = async () => {
     if (!studentId) { toast({ title: "Select a student first", variant: "destructive" }); return; }
@@ -146,6 +149,31 @@ export default function IEPReview() {
                 </Card>
               );
             })}
+          </div>
+
+          <div className="mt-4 space-y-3">
+            <ExportBar
+              title={`IEP Review — ${selectedStudent ? `${selectedStudent.first_name} ${selectedStudent.last_name}` : "Student"}`}
+              subtitle="CaseCue quality review"
+              filename={`IEP-Review-${selectedStudent ? selectedStudent.first_name : "Student"}`}
+              banner="Potential issues for educator review only — CaseCue never claims compliance or makes decisions."
+              gated
+              sections={[
+                { heading: "Score", body: review.score != null ? `${review.score}/100` : "—" },
+                { heading: "Category Scores", body: Object.entries(review.category_scores || {}).map(([k, v]) => `${(CATEGORY_LABELS[k] || k).replace(/_/g, " ")}: ${v ?? "—"}`).join("\n") },
+                { heading: "Summary", body: review.summary },
+                ...findings.map((f) => ({
+                  heading: `${f.level !== "good" ? "⚠ " : ""}${f.title}`,
+                  body: [
+                    f.what_found && `Found: ${f.what_found}`,
+                    f.why_flagged && `Why flagged: ${f.why_flagged}`,
+                    f.where_found && `Where: ${f.where_found}`,
+                    f.suggested_action && `Suggested action: ${f.suggested_action}`,
+                  ].filter(Boolean).join("\n"),
+                })),
+              ]}
+            />
+            <SourceCitations studentId={studentId} />
           </div>
 
           <div className="mt-6 flex items-start gap-2 rounded-xl bg-muted p-4 text-sm text-muted-foreground">

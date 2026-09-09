@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
+import ExportBar from "@/components/shared/ExportBar";
+import SourceCitations from "@/components/shared/SourceCitations";
 
 const BEHAVIOR_TYPES = ["FBA", "BIP", "Behavior Log", "Discipline Report"];
 
@@ -78,6 +80,20 @@ export default function BipFbaTab({ student }) {
     } finally { setRunning(""); }
   };
 
+  const saveAnalysis = async () => {
+    try {
+      await base44.entities.SavedReport.create({
+        student_id: student.id,
+        student_name: `${student.first_name} ${student.last_name}`,
+        report_type: analysis.bip_draft ? "bip_draft" : "behavior_analysis",
+        content: { analysis },
+      });
+      toast({ title: "Saved to Reports history" });
+    } catch (e) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-5">
@@ -134,6 +150,26 @@ export default function BipFbaTab({ student }) {
       {analysis && (
         <Card className="p-5">
           <AiDisclaimer className="mb-4" extra="Behavior conclusions must be verified by the team against the source documents. CaseCue does not conduct evaluations or determine behavioral function." />
+
+          <ExportBar
+            title={`Behavior Analysis — ${student.first_name} ${student.last_name}`}
+            subtitle={analysis.bip_draft ? "BIP draft" : "Behavior analysis"}
+            filename={`Behavior-${student.first_name}-${student.last_name}`}
+            banner="DRAFT — Educator Review Required. Behavior conclusions must be verified against the source documents."
+            gated
+            onSave={saveAnalysis}
+            sections={[
+              { heading: "Behavior Summary", body: analysis.behavior_summary },
+              { heading: "Trigger Analysis", body: analysis.trigger_analysis },
+              { heading: "Antecedent Analysis", body: analysis.antecedent_analysis },
+              { heading: "Function of Behavior", body: analysis.function_of_behavior },
+              { heading: "Replacement Behaviors", body: (analysis.replacement_behaviors || []).join("\n") },
+              { heading: "Suggested Supports", body: (analysis.suggested_supports || []).join("\n") },
+              ...(analysis.bip_draft ? [{ heading: "BIP Draft", body: analysis.bip_draft }] : []),
+              { heading: "Information Missing", body: (analysis.data_gaps || []).join("; ") },
+            ].filter((s) => s.body)}
+          />
+          <SourceCitations studentId={student.id} className="mt-3" />
 
           {analysis.data_gaps?.length > 0 && (
             <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-800 mb-4">

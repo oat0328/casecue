@@ -20,6 +20,7 @@ import BipFbaTab from "@/components/iepStudio/BipFbaTab";
 import AmendmentsTab from "@/components/iepStudio/AmendmentsTab";
 import MeetingCenterTab from "@/components/iepStudio/MeetingCenterTab";
 import ComplianceReviewTab from "@/components/iepStudio/ComplianceReviewTab";
+import ParentSummaryTab from "@/components/iepStudio/ParentSummaryTab";
 
 // IEP Studio — the single source of truth for all IEP work: uploads, analysis,
 // drafting, goals, accommodations, behavior, amendments, meetings, compliance.
@@ -39,6 +40,7 @@ const TAB_TIPS = [
   ["behavior", "BIP & FBA", "Analyze FBAs and BIPs — triggers, function of behavior, replacement behaviors, and BIP drafts."],
   ["amendments", "Amendments", "Compare current vs. new information and generate formal amendment language."],
   ["meeting", "Meeting Center", "One click generates the full meeting packet, page-by-page script, and talking points."],
+  ["parent", "Parent Summary", "A dedicated parent-friendly summary of the verified record and progress — with full export options."],
   ["compliance", "Compliance", "Review findings and alerts before finalizing — missing sections, weak goals, inconsistencies."],
 ];
 
@@ -158,6 +160,9 @@ export default function IEPStudio() {
           </TabsContent>
           <TabsContent value="meeting" className="mt-6">
             <MeetingCenterTab student={student} autoGenerate={meetingAuto} onGenerated={() => setMeetingAuto(false)} />
+          </TabsContent>
+          <TabsContent value="parent" className="mt-6">
+            <ParentSummaryTab student={student} />
           </TabsContent>
           <TabsContent value="compliance" className="mt-6">
             <ComplianceReviewTab student={student} />

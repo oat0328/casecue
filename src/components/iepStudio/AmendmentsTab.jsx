@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, Loader2, Copy, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
+import ExportBar from "@/components/shared/ExportBar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,6 +42,20 @@ export default function AmendmentsTab({ student }) {
     } finally { setLoading(false); }
   };
 
+  const saveAmendment = async () => {
+    try {
+      await base44.entities.SavedReport.create({
+        student_id: student.id,
+        student_name: `${student.first_name} ${student.last_name}`,
+        report_type: "amendment",
+        content: { amendment: result, amendment_type: type },
+      });
+      toast({ title: "Saved to Reports history" });
+    } catch (e) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-5">
@@ -67,6 +82,22 @@ export default function AmendmentsTab({ student }) {
       {result && (
         <Card className="p-5">
           <AiDisclaimer className="mb-4" extra="Amendment language must be finalized by the IEP team following your district's consent and meeting requirements." />
+
+          <ExportBar
+            title={`Amendment — ${student.first_name} ${student.last_name}`}
+            subtitle={TYPES.find((t) => t.key === type)?.label}
+            filename={`Amendment-${student.first_name}-${student.last_name}`}
+            banner="DRAFT — Educator/IEP Team Review Required. Amendment language must be finalized by the team."
+            gated
+            onSave={saveAmendment}
+            sections={[
+              { heading: "Current IEP", body: result.current_state },
+              { heading: "Proposed Change", body: result.proposed_state },
+              { heading: "Amendment Language", body: result.amendment_language },
+              { heading: "Rationale", body: result.rationale },
+              { heading: "Before Finalizing", body: result.review_notes },
+            ].filter((s) => s.body)}
+          />
 
           <div className="grid gap-4 md:grid-cols-2 mb-4">
             <div className="rounded-lg border border-border p-4">
