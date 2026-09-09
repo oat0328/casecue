@@ -10,6 +10,7 @@ import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import DeadlineAlerts from "@/components/deadlineAlerts/DeadlineAlerts";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -87,6 +88,9 @@ export default function Today() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Today</h1>
         <p className="text-muted-foreground mt-1">What needs your attention right now.</p>
       </div>
+
+      {/* Deadline alerts */}
+      <DeadlineAlerts students={students} />
 
       {/* Time saved */}
       <Card className="mb-8 overflow-hidden">
