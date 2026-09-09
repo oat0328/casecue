@@ -7,6 +7,16 @@
         "admin",
         "user"
       ]
+    },
+    "plan": {
+      "type": "string",
+      "description": "The user's subscription plan",
+      "enum": [
+        "trial",
+        "founding_teacher",
+        "free"
+      ],
+      "default": "trial"
     }
   },
   "required": [

@@ -25,6 +25,19 @@ export default function Settings() {
   const [deletionReason, setDeletionReason] = useState("");
   const [requestingDeletion, setRequestingDeletion] = useState(false);
   const [notifications, setNotifications] = useState({ deadlines: true, meetings: true, data_reminders: true, weekly_summary: false });
+  const plan = user?.plan || user?.data?.plan || "trial";
+  const [startingCheckout, setStartingCheckout] = useState(false);
+
+  const startCheckout = async () => {
+    setStartingCheckout(true);
+    try {
+      const res = await base44.functions.invoke("create-checkout", { productId: "founding-teacher" });
+      window.location.href = res.data.redirectUrl;
+    } catch (e) {
+      toast({ title: "Could not start checkout", description: e.message, variant: "destructive" });
+      setStartingCheckout(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -159,9 +172,20 @@ export default function Settings() {
         <TabsContent value="subscription"><Card className="p-6 max-w-lg">
           <div className="text-sm font-semibold text-primary">Founding Teacher</div>
           <div className="flex items-end gap-1 mt-1"><span className="text-3xl font-bold">$24.99</span><span className="text-muted-foreground mb-1">/ month</span></div>
-          <p className="text-sm text-muted-foreground mt-1">14-day free trial · First 50 teachers</p>
-          <div className="mt-4 rounded-xl bg-muted p-4 text-sm text-muted-foreground">Billing is not yet active. You're on the free trial — no payment required.</div>
-          <Button className="brand-gradient text-white mt-4">Manage subscription</Button>
+          <p className="text-sm text-muted-foreground mt-1">14-day free trial · Cancel anytime</p>
+          <div className="mt-4 rounded-xl bg-muted p-4 text-sm">
+            {plan === "founding_teacher" && "Your Founding Teacher subscription is active. Thank you for supporting CaseCue!"}
+            {plan === "free" && "Your subscription has ended. Resubscribe anytime to restore full Founding Teacher access."}
+            {plan === "trial" && "You're on the 14-day free trial. Start your subscription now to keep full access when the trial ends — your first 14 days as a subscriber are free."}
+          </div>
+          {plan === "founding_teacher" ? (
+            <p className="text-xs text-muted-foreground mt-3">Your subscription renews monthly and can be canceled anytime through CaseCue support.</p>
+          ) : (
+            <Button onClick={startCheckout} disabled={startingCheckout} className="brand-gradient text-white mt-4">
+              {startingCheckout ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CreditCard className="h-4 w-4 mr-1" />}
+              {startingCheckout ? "Opening checkout…" : "Start subscription — $24.99/mo"}
+            </Button>
+          )}
         </Card></TabsContent>
 
         <TabsContent value="notifications"><Card className="p-6 max-w-lg space-y-3">

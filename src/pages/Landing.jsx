@@ -288,6 +288,10 @@ export default function Landing() {
             <div className="h-8 w-8 rounded-lg brand-gradient flex items-center justify-center"><Sparkles className="h-4 w-4 text-white" /></div>
             <span className="font-semibold text-foreground">CaseCue</span>
           </div>
+          <div className="flex items-center gap-4">
+            <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+          </div>
           <p>© {new Date().getFullYear()} CaseCue. Everything SPED, connected.</p>
         </div>
       </footer>
