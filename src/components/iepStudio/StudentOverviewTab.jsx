@@ -19,7 +19,7 @@ const SECTIONS = [
   { label: "Accommodations", value: "accommodations", icon: Wrench },
 ];
 
-const MONSTER_TASKS = [
+const COPILOT_TASKS = [
   "Build an IEP", "Review an MDT", "Summarize an IEP", "Create goals",
   "Generate SDI", "Draft amendments", "Analyze a BIP", "Generate meeting notes", "Create a meeting script",
 ];
@@ -62,17 +62,17 @@ export default function StudentOverviewTab({ student }) {
       </div>
 
       <Card className="p-5 brand-gradient text-white">
-        <div className="flex items-center gap-2 font-semibold mb-1"><Sparkles className="h-4 w-4" />CaseCue IEP Monster</div>
+        <div className="flex items-center gap-2 font-semibold mb-1"><Sparkles className="h-4 w-4" />CaseCue Copilot</div>
         <p className="text-sm text-white/85 mb-3">
-          Your AI case manager. Ask it to build an IEP, review an MDT, summarize records, create goals, generate SDI, draft amendments, analyze a BIP, or write meeting notes — it uses every uploaded document as context.
+          Your AI case manager. Ask CaseCue Copilot to build an IEP, review an MDT, summarize records, create goals, generate SDI, draft amendments, analyze a BIP, or write meeting notes — it uses every uploaded document as context.
         </p>
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {MONSTER_TASKS.map((t) => (
+          {COPILOT_TASKS.map((t) => (
             <span key={t} className="text-xs bg-white/15 border border-white/20 rounded-full px-2.5 py-1">{t}</span>
           ))}
         </div>
         <Button asChild size="sm" variant="secondary" className="bg-white text-primary hover:bg-white/90">
-          <Link to="/ask-casecue"><Sparkles className="h-4 w-4 mr-1.5" />Ask the IEP Monster</Link>
+          <Link to="/ask-casecue"><Sparkles className="h-4 w-4 mr-1.5" />Ask CaseCue Copilot</Link>
         </Button>
       </Card>
     </div>

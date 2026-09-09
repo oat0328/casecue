@@ -7,7 +7,7 @@ import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/cards";
 import StudentSelector from "@/components/forms/StudentSelector";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import DocumentStep from "@/components/iepWorkspace/DocumentStep";
+import UploadCenterTab from "@/components/iepStudio/UploadCenterTab";
 import WorkspacePipeline from "@/components/iepStudio/WorkspacePipeline";
 import SectionDrafter from "@/components/iepStudio/SectionDrafter";
 import StudentOverviewTab from "@/components/iepStudio/StudentOverviewTab";
@@ -61,7 +61,7 @@ export default function IEPStudio() {
           <div className="overflow-x-auto -mx-1 px-1 pb-1">
             <TabsList className="flex-wrap h-auto gap-1 w-max min-w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="documents">Upload Center</TabsTrigger>
               <TabsTrigger value="summary">AI Summary</TabsTrigger>
               <TabsTrigger value="builder">IEP Builder</TabsTrigger>
               <TabsTrigger value="goals">Goals &amp; Progress</TabsTrigger>
@@ -77,7 +77,7 @@ export default function IEPStudio() {
             <StudentOverviewTab student={student} />
           </TabsContent>
           <TabsContent value="documents" className="mt-6">
-            <DocumentStep student={student} onContinue={() => setTab("summary")} />
+            <UploadCenterTab student={student} onProfileBuilt={() => setTab("overview")} />
           </TabsContent>
           <TabsContent value="summary" className="mt-6">
             <AiSummaryTab student={student} />

@@ -18,6 +18,7 @@
       "type": "string",
       "enum": [
         "IEP",
+        "Reevaluation",
         "Evaluation",
         "Eligibility Report",
         "MDT Report",
@@ -33,6 +34,7 @@
         "Teacher Input",
         "Parent Input",
         "Service Provider Report",
+        "Medical Report",
         "Transition Assessment",
         "Other"
       ],

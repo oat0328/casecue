@@ -31,11 +31,11 @@ export default function Documents() {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
       await base44.entities.Document.create({
-        filename: file.name, file_url, student_id: form.student_id || "",
+        filename: file.name, file_url: file_uri, student_id: form.student_id || "",
         document_type: form.document_type, date_uploaded: new Date().toISOString().slice(0, 10),
-        extraction_status: "pending", review_status: "none",
+        extraction_status: "pending", review_status: "none", is_private: true,
       });
       toast({ title: "Document uploaded" });
       refetch();
@@ -68,6 +68,10 @@ export default function Documents() {
   return (
     <div>
       <PageHeader title="Documents" subtitle="Upload IEPs, evaluations, BIPs, 504s, progress reports, and assessments. Stored privately — only you can access your records." icon={FolderOpen} />
+
+      <div className="rounded-xl bg-primary/5 border border-primary/20 px-4 py-3 text-sm text-primary mb-6">
+        <strong>Doing IEP work?</strong> Upload inside <strong>IEP Studio → Upload Center</strong> instead — it reads every document automatically, builds the student profile, and pre-fills IEP sections for your review. This page is your full document library for storage and retrieval.
+      </div>
 
       <Card className="p-6 mb-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2"><Upload className="h-4 w-4 text-primary" /> Upload document</h3>
