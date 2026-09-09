@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { CASECUE_SYSTEM_PROMPT } from "../../shared/casecueContext.ts";
 import { formatDraftSections, formatDraftGoals, formatDraftAccommodations, formatDraftServices, unresolvedDecisions, formatPlacement, formatReviewFindings } from "../../shared/workspaceFormat.ts";
 
-// IEP Meeting Cheat Sheet — generates the fixed 32-step meeting guide filled with
+// IEP Meeting Navigator — generates the fixed 32-section meeting guide filled with
 // verified student data. Never invents; flags missing info for the meeting.
 export default async function(req) {
   try {
@@ -98,9 +98,13 @@ Required weekly minutes per student record: ${student.service_minutes || 'not re
       'Signatures and completion'
     ];
 
+    const pageLines = (ws.page_summaries?.pages || []).map(
+      (p) => `Page ${p.page_number} (${p.section_name || 'unlabeled'}): ${(p.important_facts || []).join(' | ') || p.summary || 'no facts extracted'}`
+    ).join('\n');
+
     const prompt = `${CASECUE_SYSTEM_PROMPT}
 
-You are building an IEP MEETING CHEAT SHEET — a step-by-step guide so a teacher can present the entire IEP without reading the full document during the meeting. The teacher presents; the team decides. You never diagnose, never finalize an IEP, and never make a placement decision.
+You are building the IEP MEETING NAVIGATOR — a 32-section guided workspace so a teacher can move confidently through the entire IEP meeting without reading the full document during the meeting. The teacher presents; the team decides. You never diagnose, never finalize an IEP, and never make a placement decision.
 
 Return a "steps" array with EXACTLY ${titles.length} steps, in this exact order with these exact titles:
 ${titles.map((t, i) => `${i + 1}. ${t}`).join('\n')}
@@ -127,6 +131,9 @@ ${docLines || 'No documents uploaded.'}
 
 EXTRACTED DOCUMENT FACTS:
 ${factLines || 'No document extraction available.'}
+
+PAGE-BY-PAGE IEP SUMMARIES (from processed documents):
+${pageLines || 'No page summaries generated yet.'}
 
 WORKING IEP DRAFT SECTIONS (from the New IEP Workspace, statuses shown):
 ${sectionLines || 'No draft generated.'}

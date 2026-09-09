@@ -9,7 +9,7 @@ export const navItems = [
   { label: "Students", path: "/students", icon: Users },
   { label: "IEP Studio", path: "/iep-studio", icon: FileEdit },
   { label: "New IEP Workspace", path: "/iep-workspace", icon: Files },
-  { label: "Meeting Cheat Sheet", path: "/meeting-cheat-sheet", icon: ClipboardList },
+  { label: "Meeting Navigator", path: "/meeting-navigator", icon: ClipboardList },
   { label: "Session Tracker", path: "/session-tracker", icon: Timer },
   { label: "IEP Review", path: "/iep-review", icon: ShieldCheck },
   { label: "Documents", path: "/documents", icon: FolderOpen },

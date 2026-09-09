@@ -81,8 +81,8 @@ export default function SessionTracker() {
       {tab === "log" && (
         <div className="space-y-4">
           <Card className="p-4 sm:p-5">
-            <label className="text-sm font-medium">Student</label>
-            <select className="w-full sm:w-80 rounded-lg border border-input bg-background px-3 py-2.5 text-base mt-1"
+            <label className="text-sm font-medium block mb-2">Student</label>
+            <select className="w-full sm:w-80 min-h-[44px] rounded-lg border border-input bg-background px-3 py-2.5 text-base"
               value={logStudentId} onChange={(e) => setLogStudentId(e.target.value)}>
               <option value="">Select a student…</option>
               {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}

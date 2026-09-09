@@ -56,7 +56,7 @@ export default function MeetingMode({ student, record, onSave, onExit, onOpenOri
       ...(meeting.parent_concerns || []).map((c) => `- ${c}`),
       (meeting.parent_concerns || []).length ? [] : ["- (record concerns raised)"],
       ``,
-      `Topics discussed (cheat-sheet steps):`,
+      `Topics discussed (meeting guide sections):`,
       ...(discussed.length ? discussed.map((t) => `- ${t}`) : ["- (none marked discussed)"]),
       ``,
       `Decisions made:`,

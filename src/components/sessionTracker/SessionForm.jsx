@@ -9,7 +9,7 @@ import QuantitativeInput from "@/components/sessionTracker/QuantitativeInput";
 import { SERVICE_TYPES, SESSION_STATUSES, QUAL_TAGS, durationMinutes, computeQuantitative } from "@/lib/sessionCalc";
 
 const inputCls = "w-full h-11 rounded-lg border border-input bg-background px-3 text-base";
-const labelCls = "block text-xs font-medium text-muted-foreground mb-1";
+const labelCls = "block text-xs font-medium text-muted-foreground mb-2";
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const nowRounded = (offsetMin = 0) => {
@@ -123,7 +123,7 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
         <button className="text-xs text-primary underline mb-3" onClick={loadDraft}>Load saved draft</button>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-5">
         <div className={quick ? "" : "sm:col-span-2"}>
           <label className={labelCls}>Student *</label>
           <select className={inputCls} value={form.student_id} onChange={(e) => set({ student_id: e.target.value, goal_id: "" })}>
@@ -210,7 +210,7 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
         </>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-5 mt-4">
             <div>
               <label className={labelCls}>Provider</label>
               <input className={inputCls} value={form.provider} onChange={(e) => set({ provider: e.target.value })} />

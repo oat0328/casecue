@@ -45,6 +45,8 @@ export default function Today() {
   const { data: meetings } = useAsync(() => base44.entities.Meeting.filter({ status: 'scheduled' }, 'date', 50), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 200), []);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.list('-date', 200), []);
+  const { data: sessionRecords } = useAsync(() => base44.entities.SessionRecord.list('-date', 200), []);
+  const { data: allTasks } = useAsync(() => base44.entities.Task.list('-updated_date', 200), []);
 
   const stats = useMemo(() => {
     const s = students || [];
@@ -68,15 +70,22 @@ export default function Today() {
     return { iepsDue, reevalsDue, meetingsUpcoming, needingData, missingBaselines, missingDocs, total: s.length };
   }, [students, tasks, meetings, goals, progress]);
 
-  const timeSaved = {
-    hours: 4.8,
-    items: [
-      { label: "3 IEP drafts", icon: FileEdit },
-      { label: "2 lesson plans", icon: BookOpen },
-      { label: "1 substitute plan", icon: ClipboardList },
-      { label: "6 progress notes", icon: ClipboardCheck },
-    ],
-  };
+  // Real activity this week — no estimated or hard-coded numbers.
+  const weekActivity = useMemo(() => {
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    const dow = (now.getDay() + 6) % 7;
+    const start = new Date(now); start.setDate(now.getDate() - dow);
+    const end = new Date(start); end.setDate(start.getDate() + 7);
+    const inWeek = (d) => { const t = new Date(`${d}T00:00:00`); return !isNaN(t) && t >= start && t < end; };
+    const sessionsThisWeek = (sessionRecords || []).filter((s) => inWeek(s.date));
+    return {
+      sessions: sessionsThisWeek.length,
+      studentsWithSessions: new Set(sessionsThisWeek.map((s) => s.student_id)).size,
+      progressPoints: (progress || []).filter((p) => inWeek(p.date)).length,
+      tasksCompleted: (allTasks || []).filter((t) => t.status === "done" && inWeek(t.updated_date?.slice(0, 10))).length,
+      meetings: (meetings || []).filter((m) => inWeek(m.date)).length,
+    };
+  }, [sessionRecords, progress, allTasks, meetings]);
 
   const attentionCards = [
     { label: "IEPs due soon", count: stats.iepsDue.length, icon: CalendarClock, tone: "amber", link: "/students" },
@@ -110,24 +119,35 @@ export default function Today() {
       <DemoTour />
       <GettingStartedCard students={students} goals={goals} progress={progress} />
 
-      {/* Time saved */}
+      {/* Real activity this week */}
       <Card className="mb-8 overflow-hidden">
         <div className="flex flex-col md:flex-row">
           <div className="brand-gradient text-white p-6 md:w-64 flex flex-col justify-center">
-            <div className="flex items-center gap-2 text-white/80 text-sm font-medium"><Clock className="h-4 w-4" /> Time Saved This Week</div>
-            <div className="text-4xl font-bold mt-1">{timeSaved.hours} hrs</div>
-            <div className="text-white/80 text-sm mt-1">saved with CaseCue</div>
+            <div className="flex items-center gap-2 text-white/80 text-sm font-medium"><Clock className="h-4 w-4" /> Your Activity This Week</div>
+            <div className="text-4xl font-bold mt-1">{weekActivity.sessions}</div>
+            <div className="text-white/80 text-sm mt-1">sessions logged</div>
           </div>
           <div className="p-6 flex-1">
-            <div className="text-sm font-medium text-muted-foreground mb-4">Breakdown</div>
+            <div className="text-sm font-medium text-muted-foreground mb-4">Counts update from your real records</div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {timeSaved.items.map((it) => (
+              {[
+                { label: "Sessions logged", value: weekActivity.sessions, icon: ClipboardCheck },
+                { label: "Students served", value: weekActivity.studentsWithSessions, icon: Users },
+                { label: "Progress data points", value: weekActivity.progressPoints, icon: TrendingUp },
+                { label: "Tasks completed", value: weekActivity.tasksCompleted, icon: ListTodo },
+              ].map((it) => (
                 <div key={it.label} className="flex items-center gap-2.5">
                   <div className="h-9 w-9 rounded-lg brand-gradient-soft flex items-center justify-center"><it.icon className="h-4 w-4 text-primary" /></div>
-                  <span className="text-sm font-medium">{it.label}</span>
+                  <div>
+                    <div className="text-lg font-bold leading-tight">{it.value}</div>
+                    <span className="text-xs font-medium text-muted-foreground">{it.label}</span>
+                  </div>
                 </div>
               ))}
             </div>
+            {weekActivity.sessions === 0 && weekActivity.progressPoints === 0 && weekActivity.tasksCompleted === 0 && (
+              <p className="text-sm text-muted-foreground mt-4">No activity recorded yet this week — these counts update automatically as you log sessions, data, and completed work.</p>
+            )}
           </div>
         </div>
       </Card>

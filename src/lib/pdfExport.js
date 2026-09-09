@@ -414,11 +414,11 @@ export function exportWorkspaceReviewPdf(student, review) {
   doc.save(`CaseCue-Review-${student?.first_name || "Student"}-${student?.last_name || ""}.pdf`);
 }
 
-// Printable meeting cheat sheet: all 32 steps with checkboxes, key info, talking points, and decisions.
-export function exportMeetingCheatSheetPdf(student, record) {
-  const doc = newDoc("IEP Meeting Cheat Sheet");
+// Meeting Preparation Packet: all 32 sections with checkboxes, key info, talking points, and decisions.
+export function exportMeetingNavigatorPdf(student, record) {
+  const doc = newDoc("Meeting Preparation Packet — IEP Meeting Navigator");
   let y = MARGIN + 28;
-  y = studentHeader(doc, y, student || {}, `${(record?.steps || []).length}-step meeting guide`);
+  y = studentHeader(doc, y, student || {}, `${(record?.steps || []).length}-section meeting guide`);
 
   (record?.steps || []).forEach((s) => {
     y = writeBlock(doc, y, `${s.discussed ? "[X]" : "[ ]"} ${s.index || ""}. ${s.title}`, { size: 11, bold: true, gap: 2 });
@@ -435,7 +435,7 @@ export function exportMeetingCheatSheetPdf(student, record) {
   });
 
   addFooter(doc, "Extracted facts and suggestions only — the IEP team makes every decision. CaseCue never finalizes an IEP.");
-  doc.save(`Meeting-Cheat-Sheet-${student?.first_name || "Student"}-${student?.last_name || ""}.pdf`);
+  doc.save(`Meeting-Preparation-Packet-${student?.first_name || "Student"}-${student?.last_name || ""}-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // Session log: one line per session with status, minutes, and performance.

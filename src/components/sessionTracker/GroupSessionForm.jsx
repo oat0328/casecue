@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/cards";
 import { SERVICE_TYPES, SESSION_STATUSES, durationMinutes } from "@/lib/sessionCalc";
 
 const inputCls = "w-full h-11 rounded-lg border border-input bg-background px-3 text-base";
-const labelCls = "block text-xs font-medium text-muted-foreground mb-1";
+const labelCls = "block text-xs font-medium text-muted-foreground mb-2";
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const nowRounded = (offsetMin = 0) => {
   const d = new Date();
@@ -114,7 +114,7 @@ export default function GroupSessionForm({ students, goals, recentActivities, on
     <div className="space-y-4">
       <Card className="p-4 sm:p-6">
         <h3 className="font-semibold flex items-center gap-2 mb-3"><Users className="h-4 w-4 text-primary" /> Shared session details</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-5">
           <div><label className={labelCls}>Date *</label><input type="date" className={inputCls} value={shared.date} onChange={(e) => set({ date: e.target.value })} /></div>
           <div><label className={labelCls}>Provider</label><input className={inputCls} value={shared.provider} onChange={(e) => set({ provider: e.target.value })} /></div>
           <div><label className={labelCls}>Start time</label><input type="time" className={inputCls} value={shared.start_time} onChange={(e) => set({ start_time: e.target.value })} /></div>
@@ -177,7 +177,7 @@ export default function GroupSessionForm({ students, goals, recentActivities, on
             {panel.saved && <span className="text-xs text-emerald-600 font-medium">Saved ✓</span>}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-5">
             <div>
               <label className={labelCls}>IEP goal addressed</label>
               <select className={inputCls} value={panel.goal_id || ""} onChange={(e) => setPanel({ goal_id: e.target.value })}>

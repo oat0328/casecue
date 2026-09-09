@@ -8,16 +8,17 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import StepCard from "@/components/meetingCheatSheet/StepCard";
 import MeetingMode from "@/components/meetingCheatSheet/MeetingMode";
-import { exportMeetingCheatSheetPdf } from "@/lib/pdfExport";
+import { exportMeetingNavigatorPdf } from "@/lib/pdfExport";
 
-// IEP Meeting Cheat Sheet: a 32-step guide filled with the student's verified
-// records so the teacher can present the entire IEP without reading the document.
-export default function MeetingCheatSheet() {
+// IEP Meeting Navigator: a 32-section guided workspace filled with the student's
+// verified records so the teacher can present the entire IEP meeting with confidence.
+export default function MeetingNavigator() {
   const { toast } = useToast();
   const [studentId, setStudentId] = useState("");
   const [record, setRecord] = useState(null);
   const [idx, setIdx] = useState(0);
   const [generating, setGenerating] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [inMeeting, setInMeeting] = useState(false);
 
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
@@ -45,9 +46,9 @@ export default function MeetingCheatSheet() {
       const res = await base44.functions.invoke("generateMeetingCheatSheet", { student_id: studentId });
       setRecord(res.data.cheat_sheet);
       setIdx(0);
-      toast({ title: "Cheat sheet ready", description: "Review each step — extracted facts and suggestions are separated." });
+      toast({ title: "Meeting guide ready", description: "Review each section — verified facts and suggestions are separated." });
     } catch (e) {
-      toast({ title: "Could not generate cheat sheet", description: e?.response?.data?.error || e.message, variant: "destructive" });
+      toast({ title: "Could not prepare the meeting guide", description: e?.response?.data?.error || e.message, variant: "destructive" });
     } finally { setGenerating(false); }
   };
 
@@ -67,13 +68,27 @@ export default function MeetingCheatSheet() {
     }
   };
 
+  const exportPacket = async () => {
+    setExporting(true);
+    try {
+      exportMeetingNavigatorPdf(student, record);
+      toast({ title: "Meeting Preparation Packet ready", description: "The PDF downloaded to your device." });
+    } catch (e) {
+      toast({ title: "Download failed", description: e.message, variant: "destructive" });
+    } finally { setExporting(false); }
+  };
+
   return (
     <div>
-      <PageHeader title="IEP Meeting Cheat Sheet" subtitle="A step-by-step meeting guide filled with your student's verified records — present the whole IEP without reading the document." icon={ClipboardList} />
+      <PageHeader
+        title="IEP Meeting Navigator"
+        subtitle="Move confidently through every part of the IEP meeting with verified student information, suggested talking points, source references, team decisions and follow-up tasks in one guided workspace."
+        icon={ClipboardList}
+      />
 
       <Card className="p-5 mb-5">
         <label className="text-sm font-medium">Student</label>
-        <select className="w-full sm:w-80 rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+        <select className="w-full sm:w-80 rounded-lg border border-input bg-background px-3 py-2.5 text-base mt-2" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
           <option value="">Select a student…</option>
           {(students || []).map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}
         </select>
@@ -82,13 +97,13 @@ export default function MeetingCheatSheet() {
       {studentId && !record && (
         <Card className="p-8 text-center">
           <ClipboardList className="h-8 w-8 text-primary mx-auto mb-3" />
-          <h3 className="font-semibold">Generate the 32-step cheat sheet</h3>
+          <h3 className="font-semibold">Prepare the 32-section meeting guide</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-lg mx-auto">
             CaseCue builds the guide from the student's records, goals, session data, and any New IEP Workspace draft — every item shows its source, and missing information is labeled so you can capture it in the meeting. CaseCue never decides anything — the team does.
           </p>
           <Button className="brand-gradient text-white mt-4 h-11 px-6" onClick={generate} disabled={generating}>
             {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-            {generating ? "Building cheat sheet…" : "Generate cheat sheet"}
+            {generating ? "Preparing meeting guide…" : "Prepare Meeting Guide"}
           </Button>
         </Card>
       )}
@@ -98,12 +113,14 @@ export default function MeetingCheatSheet() {
           <Card className="p-5 mb-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <h3 className="font-semibold">{student ? `${student.first_name} ${student.last_name}` : ""} — {steps.length} steps</h3>
+                <h3 className="font-semibold">{student ? `${student.first_name} ${student.last_name}` : ""} — {steps.length} sections</h3>
                 <p className="text-sm text-muted-foreground">{discussedCount} discussed · {steps.filter((s) => s.flagged).length} flagged for follow-up · status: {record.status}</p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Button className="brand-gradient text-white" onClick={() => setInMeeting(true)}><Play className="h-4 w-4 mr-2" /> Start Meeting Mode</Button>
-                <Button variant="outline" onClick={() => exportMeetingCheatSheetPdf(student, record)}><Download className="h-4 w-4 mr-2" /> PDF</Button>
+                <Button variant="outline" onClick={exportPacket} disabled={exporting}>
+                  {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Meeting Preparation Packet
+                </Button>
                 <Button variant="outline" onClick={generate} disabled={generating}>{generating ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Regenerate</Button>
               </div>
             </div>
@@ -114,7 +131,7 @@ export default function MeetingCheatSheet() {
 
           <div className="flex items-center justify-between gap-2 mb-3">
             <Button variant="outline" disabled={idx === 0} onClick={() => setIdx(idx - 1)}>← Previous section</Button>
-            <span className="text-sm text-muted-foreground">Step {idx + 1} of {steps.length}</span>
+            <span className="text-sm text-muted-foreground">Section {idx + 1} of {steps.length}</span>
             <Button variant="outline" disabled={idx >= steps.length - 1} onClick={() => setIdx(idx + 1)}>Next section →</Button>
           </div>
 

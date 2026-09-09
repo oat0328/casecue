@@ -37,7 +37,7 @@ import Admin from '@/pages/Admin';
 import OrgSetup from '@/pages/OrgSetup';
 import PlatformAdmin from '@/pages/PlatformAdmin';
 import IepWorkspace from '@/pages/IepWorkspace';
-import MeetingCheatSheet from '@/pages/MeetingCheatSheet';
+import MeetingNavigator from '@/pages/MeetingNavigator';
 import SessionTracker from '@/pages/SessionTracker';
 import ThankYou from '@/pages/ThankYou';
 import Terms from '@/pages/Terms';
@@ -68,7 +68,8 @@ function App() {
                 <Route path="/students/:id" element={<StudentDetail />} />
                 <Route path="/iep-studio" element={<IEPStudio />} />
                 <Route path="/iep-workspace" element={<IepWorkspace />} />
-                <Route path="/meeting-cheat-sheet" element={<MeetingCheatSheet />} />
+                <Route path="/meeting-navigator" element={<MeetingNavigator />} />
+                <Route path="/meeting-cheat-sheet" element={<Navigate to="/meeting-navigator" replace />} />
                 <Route path="/session-tracker" element={<SessionTracker />} />
                 <Route path="/iep-review" element={<IEPReview />} />
                 <Route path="/documents" element={<Documents />} />

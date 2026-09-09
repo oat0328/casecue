@@ -10,6 +10,10 @@
       "type": "string",
       "title": "Label"
     },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
     "grant_type": {
       "type": "string",
       "enum": [
@@ -18,25 +22,52 @@
         "demo"
       ],
       "default": "trial",
-      "title": "Grant Type"
+      "title": "Access Type"
+    },
+    "plan_name": {
+      "type": "string",
+      "title": "Assigned Plan"
+    },
+    "monthly_price": {
+      "type": "number",
+      "default": 0,
+      "title": "Plan Monthly Price (USD)"
+    },
+    "discount_pct": {
+      "type": "number",
+      "default": 0,
+      "title": "Discount (%)"
     },
     "trial_days": {
       "type": "number",
-      "title": "Trial Days"
+      "title": "Trial Length (days)"
     },
-    "max_redemptions": {
+    "access_days": {
       "type": "number",
-      "title": "Maximum Redemptions"
+      "title": "Complimentary Access Length (days)"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
     },
     "expiration_date": {
       "type": "string",
       "format": "date",
       "title": "Expiration Date"
     },
+    "max_redemptions": {
+      "type": "number",
+      "title": "Maximum Redemptions"
+    },
     "active": {
       "type": "boolean",
       "default": true,
       "title": "Active"
+    },
+    "created_by": {
+      "type": "string",
+      "title": "Created By"
     },
     "redemptions": {
       "type": "array",
