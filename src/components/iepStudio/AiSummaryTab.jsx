@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
+import ExportBar from "@/components/shared/ExportBar";
 
 // Tab 3 — AI Student Summary: full snapshot generated from the verified record.
 export default function AiSummaryTab({ student }) {
@@ -26,6 +27,20 @@ export default function AiSummaryTab({ student }) {
     } catch (e) {
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     } finally { setLoading(false); }
+  };
+
+  const saveSummary = async () => {
+    try {
+      await base44.entities.SavedReport.create({
+        student_id: student.id,
+        student_name: `${student.first_name} ${student.last_name}`,
+        report_type: "student_summary",
+        content: { summary },
+      });
+      toast({ title: "Saved to Reports history" });
+    } catch (e) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
   };
 
   return (
@@ -55,6 +70,14 @@ export default function AiSummaryTab({ student }) {
             <Button variant="outline" size="sm" onClick={() => { navigator.clipboard?.writeText(summary); toast({ title: "Copied" }); }}>
               <Copy className="h-3.5 w-3.5 mr-1" /> Copy
             </Button>
+            <ExportBar
+              title={`Student Summary — ${student.first_name} ${student.last_name}`}
+              subtitle="AI student record summary"
+              filename={`Student-Summary-${student.first_name}-${student.last_name}`}
+              sections={[{ heading: "Student Summary", body: summary }]}
+              gated
+              onSave={saveSummary}
+            />
             <AiDisclaimer className="flex-1 min-w-[240px]" />
           </div>
         </div>

@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Sparkles, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { computeGoalStatus } from "@/lib/goalStatus";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import GoalWorkPanel from "@/components/iepStudio/GoalWorkPanel";
 
 const STATUS_META = {
   met: { label: "Goal Met", color: "#10b981" },
@@ -29,6 +31,33 @@ const pctOf = (p) =>
 export default function GoalsProgressTab({ student }) {
   const [goals, setGoals] = useState(null);
   const [progress, setProgress] = useState([]);
+  const [work, setWork] = useState(null); // { goalId, data, loading }
+  const { toast } = useToast();
+
+  const generateWork = async (goal) => {
+    setWork({ goalId: goal.id, data: null, loading: true });
+    try {
+      const res = await base44.functions.invoke("generateAssignmentFromGoal", { goal_id: goal.id });
+      setWork({ goalId: goal.id, data: res.data, loading: false });
+    } catch (e) {
+      setWork(null);
+      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const saveWork = async (goal, data) => {
+    try {
+      await base44.entities.SavedReport.create({
+        student_id: student.id,
+        student_name: `${student.first_name} ${student.last_name}`,
+        report_type: "goal_assignment",
+        content: { goal_id: goal.id, goal_area: goal.goal_area, assignment: data.assignment },
+      });
+      toast({ title: "Saved to Reports history" });
+    } catch (e) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -147,6 +176,30 @@ export default function GoalsProgressTab({ student }) {
               ) : (
                 <p className="text-sm text-muted-foreground">No progress data logged for this goal yet.</p>
               )}
+
+              <div className="mt-4 pt-4 border-t border-border">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => (work?.goalId === g.id ? setWork(null) : generateWork(g))}
+                >
+                  {work?.goalId === g.id ? "Hide assignment" : <><Sparkles className="h-3.5 w-3.5 mr-1" /> Generate work from goal</>}
+                </Button>
+                {work?.goalId === g.id && (
+                  <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4">
+                    {work.loading ? (
+                      <p className="flex items-center gap-2 text-sm text-muted-foreground py-6"><Loader2 className="h-4 w-4 animate-spin" /> Creating goal-aligned materials…</p>
+                    ) : (
+                      <GoalWorkPanel
+                        assignment={work.data?.assignment}
+                        goal={g}
+                        student={student}
+                        onSave={() => saveWork(g, work.data)}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
             </Card>
           );
         })}

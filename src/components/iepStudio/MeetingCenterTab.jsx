@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
+import ExportBar from "@/components/shared/ExportBar";
 
 const PACKET_FIELDS = [
   ["student_snapshot", "Student Snapshot"],
@@ -71,6 +72,20 @@ export default function MeetingCenterTab({ student, autoGenerate, onGenerated })
       {data && (
         <>
           <AiDisclaimer extra="Meeting scripts are presentation support only — verify every statement against the IEP before reading it in the meeting." />
+
+          <ExportBar
+            title={`Meeting Materials — ${student.first_name} ${student.last_name}`}
+            subtitle="Meeting packet, script, and talking points"
+            filename={`Meeting-Materials-${student.first_name}-${student.last_name}`}
+            banner="DRAFT — IEP Team Review Required. Meeting scripts are presentation support only."
+            gated
+            sections={[
+              ...PACKET_FIELDS.map(([key, label]) => ({ heading: label, body: data.packet?.[key] || "" })),
+              { heading: "Full Meeting Script", body: data.script || "" },
+              { heading: "Talking Points", body: (data.talking_points || []).map((t) => `• ${t}`).join("\n") },
+              { heading: "Important Changes to Highlight", body: (data.important_changes || []).map((t) => `• ${t}`).join("\n") },
+            ]}
+          />
 
           <h3 className="font-semibold">Meeting packet</h3>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
