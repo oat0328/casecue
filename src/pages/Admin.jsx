@@ -8,6 +8,7 @@ import EmptyState from "@/components/EmptyState";
 import UsersTable from "@/components/admin/UsersTable";
 import PurchasesTable from "@/components/admin/PurchasesTable";
 import DemoRequestsTable from "@/components/admin/DemoRequestsTable";
+import DistrictAnalytics from "@/components/admin/DistrictAnalytics";
 
 const PLAN_PRICE = 24.99;
 
@@ -57,6 +58,8 @@ export default function Admin() {
         <StatCard label="Monthly recurring revenue" value={`$${(subscribers.length * PLAN_PRICE).toFixed(2)}`} icon={DollarSign} tone="blue" />
         <StatCard label="Payments collected" value={`$${collected.toFixed(2)}`} icon={DollarSign} tone="amber" sublabel={`${paidPurchases.length} paid order${paidPurchases.length === 1 ? "" : "s"}`} />
       </div>
+
+      <DistrictAnalytics />
 
       <Card className="p-6 mb-6">
         <h2 className="text-lg font-semibold mb-1">Registered users</h2>

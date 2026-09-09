@@ -14,6 +14,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import AddToCalendar from "@/components/meetings/AddToCalendar";
+import MeetingNotesGenerator from "@/components/meetings/MeetingNotesGenerator";
 import StudentSelector from "@/components/forms/StudentSelector";
 
 const MEETING_TYPES = ["IEP", "MET", "Evaluation", "Other"];
@@ -78,6 +79,7 @@ export default function MeetingCenter() {
                 <Button variant="outline" size="sm" onClick={() => prepare(m)} disabled={preparing === m.id} className="border-primary/30 text-primary">
                   {preparing === m.id ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />} Prepare Meeting With CaseCue
                 </Button>
+                <MeetingNotesGenerator meeting={m} onSaved={refetch} />
                 <Button variant="ghost" size="icon" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
               </div>
             </div>
