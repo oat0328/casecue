@@ -18,7 +18,7 @@ export const base44 = createClient({
 const ORG_ENTITIES = [
   'Student', 'Goal', 'ProgressData', 'SessionLog', 'GradebookAssignment',
   'Document', 'Meeting', 'Lesson', 'SubPlan', 'ScheduleEntry', 'SavedReport',
-  'IEPReview', 'AIConversation', 'Task', 'IepWorkspace',
+  'IEPReview', 'AIConversation', 'Task', 'IepWorkspace', 'SessionRecord', 'MeetingCheatSheet',
 ];
 
 let cachedOrgId;

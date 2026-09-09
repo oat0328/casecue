@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, FileEdit, Files, ShieldCheck, FolderOpen, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
-  FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown
+  FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown, Timer
 } from "lucide-react";
 
 export const navItems = [
@@ -9,6 +9,8 @@ export const navItems = [
   { label: "Students", path: "/students", icon: Users },
   { label: "IEP Studio", path: "/iep-studio", icon: FileEdit },
   { label: "New IEP Workspace", path: "/iep-workspace", icon: Files },
+  { label: "Meeting Cheat Sheet", path: "/meeting-cheat-sheet", icon: ClipboardList },
+  { label: "Session Tracker", path: "/session-tracker", icon: Timer },
   { label: "IEP Review", path: "/iep-review", icon: ShieldCheck },
   { label: "Documents", path: "/documents", icon: FolderOpen },
   { label: "Data Center", path: "/data-center", icon: BarChart3 },

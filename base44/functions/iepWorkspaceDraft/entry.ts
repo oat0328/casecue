@@ -21,7 +21,8 @@ export default async function(req) {
     const studentContext = buildStudentContext(student, goals, progress);
 
     const analysis = workspace.analysis || {};
-    const factLines = (analysis.facts || []).map((f) =>
+    const usableFacts = (analysis.facts || []).filter((f) => !f.rejected);
+    const factLines = usableFacts.map((f) =>
       `${f.verified ? '[VERIFIED by teacher]' : '[UNVERIFIED — teacher review]'} ${f.category || 'general'}: ${f.fact} (Source: ${f.source_document}, p.${f.page})`
     ).join('\n');
     const gapLines = (analysis.gaps || []).map((g) => `- ${g.issue}${g.detail ? `: ${g.detail}` : ''}`).join('\n');

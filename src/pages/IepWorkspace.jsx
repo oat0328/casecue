@@ -10,6 +10,7 @@ import DocumentStep from "@/components/iepWorkspace/DocumentStep";
 import ExtractionStep from "@/components/iepWorkspace/ExtractionStep";
 import DraftStep from "@/components/iepWorkspace/DraftStep";
 import ReviewStep from "@/components/iepWorkspace/ReviewStep";
+import PageSummaryView from "@/components/iepWorkspace/PageSummaryView";
 
 const STATUS_INDEX = { documents: 0, analysis: 1, draft: 2, review: 3, exported: 3 };
 const STEPS = ["Student & Documents", "Extraction Review", "IEP Draft", "Review & Export"];
@@ -92,6 +93,8 @@ export default function IepWorkspace() {
       {student && workspace && step === 1 && <ExtractionStep workspace={workspace} save={save} onDrafted={() => setStep(2)} />}
       {student && workspace && step === 2 && <DraftStep workspace={workspace} save={save} student={student} onReviewed={() => setStep(3)} />}
       {student && workspace && step === 3 && <ReviewStep workspace={workspace} save={save} student={student} />}
+
+      {student && workspace && <PageSummaryView workspace={workspace} student={student} save={save} />}
 
       {studentId && !loading && !workspace && <p className="text-muted-foreground text-sm">Workspace could not be opened.</p>}
       {!studentId && !loading && <p className="text-muted-foreground text-sm">Select a student to begin. Upload the current IEP and latest evaluation, and CaseCue will extract, cite, and draft — you verify and approve every step.</p>}

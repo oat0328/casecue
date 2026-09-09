@@ -9,19 +9,19 @@ const CONF_STYLES = {
   low: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-export default function FactCard({ fact, onToggleVerified, onEdit }) {
+export default function FactCard({ fact, onToggleVerified, onToggleRejected, onEdit }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(fact.fact);
   const verified = !!fact.verified;
 
   return (
-    <Card className="p-4">
+    <Card className={`p-4 ${fact.rejected ? "opacity-60 border-rose-200 bg-rose-50/30" : ""}`}>
       <div className="flex items-start justify-between gap-2">
         <span className={`text-xs px-2 py-0.5 rounded-full border ${CONF_STYLES[fact.confidence] || CONF_STYLES.medium}`}>
           {fact.confidence || "medium"} confidence
         </span>
-        <span className={`text-xs px-2 py-0.5 rounded-full border ${verified ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground border-border"}`}>
-          {verified ? "Verified" : "Needs verification"}
+        <span className={`text-xs px-2 py-0.5 rounded-full border ${fact.rejected ? "bg-rose-50 text-rose-700 border-rose-200" : verified ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground border-border"}`}>
+          {fact.rejected ? "Rejected" : verified ? "Verified" : "Needs verification"}
         </span>
       </div>
 
@@ -57,6 +57,14 @@ export default function FactCard({ fact, onToggleVerified, onEdit }) {
           onClick={onToggleVerified}
         >
           <Check className="h-3.5 w-3.5 mr-1" /> {verified ? "Unverify" : "Mark verified"}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-rose-600"
+          onClick={onToggleRejected}
+        >
+          <X className="h-3.5 w-3.5 mr-1" /> {fact.rejected ? "Restore" : "Reject"}
         </Button>
       </div>
     </Card>

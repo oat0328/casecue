@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { CASECUE_SYSTEM_PROMPT } from "../../shared/casecueContext.ts";
+import { formatDraftSections, formatDraftGoals, formatDraftAccommodations, formatDraftServices, unresolvedDecisions, formatPlacement } from "../../shared/workspaceFormat.ts";
 
 // New IEP Workspace — step 3: CaseCue Review of the working draft.
 // Reports potential issues only — never declares compliance or makes decisions.
@@ -20,23 +21,13 @@ export default async function(req) {
     const student = await base44.entities.Student.get(workspace.student_id);
     const draft = workspace.draft;
 
-    const draftLines = (draft.sections || []).map((s) =>
-      `## ${s.title} [${s.status || 'draft'}]\n${s.content}`
-    ).join('\n\n');
-    const goalLines = (draft.goals || []).map((g, i) =>
-      `Goal ${i + 1} [${g.status || 'draft'}]: ${g.goal_area} — ${g.conditions || ''} ${g.action || ''} | Baseline: ${g.baseline || 'MISSING'} | Target: ${g.target || 'MISSING'} | Criterion: ${g.criterion || 'MISSING'} | Measurement: ${g.measurement_method || 'MISSING'} | Schedule: ${g.data_schedule || 'MISSING'}`
-    ).join('\n');
-    const accomLines = (draft.accommodations || []).map((a) =>
-      `- ${a.accommodation} [${a.change_type}] need: ${a.need_addressed || '—'} source: ${a.source || '—'}`
-    ).join('\n');
-    const serviceLines = (draft.services || []).map((s) =>
-      `- ${s.service}: ${s.minutes_per_session ?? '?'} min x ${s.sessions_per_week ?? '?'}/wk, ${s.delivery || '?'} ${s.service_type || 'direct'}, provider: ${s.provider || '—'}, need: ${s.need_or_goal || '—'}`
-    ).join('\n');
     const placement = workspace.placement || {};
-    const placementLine = placement.instructional_minutes_per_day
-      ? `Placement worksheet (teacher inputs, for team verification): instructional ${placement.instructional_minutes_per_day}/day x ${placement.instructional_days_per_week} days; inside GE ${placement.minutes_inside_ge} min; outside GE ${placement.minutes_outside_ge} min.`
-      : 'Placement worksheet: not completed yet.';
-    const unresolved = (draft.unresolved_decisions || []).join('; ');
+    const draftLines = formatDraftSections(draft);
+    const goalLines = formatDraftGoals(draft);
+    const accomLines = formatDraftAccommodations(draft);
+    const serviceLines = formatDraftServices(draft);
+    const placementLine = formatPlacement(placement);
+    const unresolved = unresolvedDecisions(draft);
 
     const schema = {
       type: 'object',

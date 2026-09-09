@@ -1,42 +1,40 @@
 {
-  "name": "IepWorkspace",
+  "name": "MeetingCheatSheet",
   "type": "object",
   "properties": {
     "student_id": {
       "type": "string",
       "title": "Student ID"
     },
+    "workspace_id": {
+      "type": "string",
+      "title": "IEP Workspace ID"
+    },
     "status": {
       "type": "string",
       "enum": [
-        "documents",
-        "analysis",
         "draft",
-        "review",
-        "exported"
+        "in_meeting",
+        "completed"
       ],
-      "default": "documents",
+      "default": "draft",
       "title": "Status"
     },
-    "analysis": {
-      "type": "object",
-      "title": "Document Analysis"
+    "current_step": {
+      "type": "number",
+      "default": 0,
+      "title": "Current Step Index"
     },
-    "draft": {
-      "type": "object",
-      "title": "IEP Draft"
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "title": "Meeting Steps"
     },
-    "placement": {
+    "meeting_data": {
       "type": "object",
-      "title": "Placement Worksheet"
-    },
-    "review": {
-      "type": "object",
-      "title": "CaseCue Review"
-    },
-    "page_summaries": {
-      "type": "object",
-      "title": "Page-by-Page IEP Summary"
+      "title": "Meeting Data (attendance, notes, decisions, summary)"
     },
     "organization_id": {
       "type": "string",

@@ -413,3 +413,67 @@ export function exportWorkspaceReviewPdf(student, review) {
   addFooter(doc, "Potential issues for educator review only — CaseCue never claims compliance or makes decisions.");
   doc.save(`CaseCue-Review-${student?.first_name || "Student"}-${student?.last_name || ""}.pdf`);
 }
+
+// Printable meeting cheat sheet: all 32 steps with checkboxes, key info, talking points, and decisions.
+export function exportMeetingCheatSheetPdf(student, record) {
+  const doc = newDoc("IEP Meeting Cheat Sheet");
+  let y = MARGIN + 28;
+  y = studentHeader(doc, y, student || {}, `${(record?.steps || []).length}-step meeting guide`);
+
+  (record?.steps || []).forEach((s) => {
+    y = writeBlock(doc, y, `${s.discussed ? "[X]" : "[ ]"} ${s.index || ""}. ${s.title}`, { size: 11, bold: true, gap: 2 });
+    y = writeBlock(doc, y, `Extracted: ${s.key_info || "—"}`, { size: 10, gap: 1 });
+    if (s.source) y = writeBlock(doc, y, `Source: ${s.source}`, { size: 9, color: [110, 110, 110], gap: 1 });
+    (s.talking_points || []).forEach((t) => { y = writeBlock(doc, y, `• ${t}`, { size: 10, gap: 1 }); });
+    (s.questions || []).forEach((q) => { y = writeBlock(doc, y, `? ${q}`, { size: 9, color: [110, 110, 110], gap: 1 }); });
+    if (s.required_decisions && s.required_decisions !== "none")
+      y = writeBlock(doc, y, `Decisions still required: ${s.required_decisions}`, { size: 9, color: [180, 120, 0], gap: 1 });
+    (s.parent_notes || []).forEach((c) => { y = writeBlock(doc, y, `Parent: "${c}"`, { size: 9, color: [120, 80, 160], gap: 1 }); });
+    (s.decisions || []).forEach((d) => { y = writeBlock(doc, y, `Team decision: ${d}`, { size: 9, color: [20, 120, 90], gap: 1 }); });
+    if (s.presenter_notes) y = writeBlock(doc, y, `Presenter notes (private): ${s.presenter_notes}`, { size: 9, color: [110, 110, 110], gap: 1 });
+    y += 4;
+  });
+
+  addFooter(doc, "Extracted facts and suggestions only — the IEP team makes every decision. CaseCue never finalizes an IEP.");
+  doc.save(`Meeting-Cheat-Sheet-${student?.first_name || "Student"}-${student?.last_name || ""}.pdf`);
+}
+
+// Session log: one line per session with status, minutes, and performance.
+export function exportSessionLogPdf(student, sessions) {
+  const doc = newDoc("Session Log");
+  let y = MARGIN + 28;
+  y = studentHeader(doc, y, student || {}, `${(sessions || []).length} sessions`);
+  (sessions || []).forEach((s) => {
+    const q = s.quantitative || {};
+    const pct = q.percentage != null ? ` (${q.percentage}%)` : (q.correct != null && q.total ? ` (${q.correct}/${q.total})` : "");
+    y = writeBlock(doc, y, `${s.date}${s.start_time ? ` ${s.start_time}` : ""} — ${String(s.status || "").replace(/_/g, " ")} — ${s.delivered_minutes ?? s.duration_minutes ?? 0} min${pct}`, { size: 11, bold: true, gap: 1 });
+    if (s.activity || s.service_type) y = writeBlock(doc, y, `${String(s.service_type || "").replace(/_/g, " ")}${s.activity ? ` · ${s.activity}` : ""}`, { size: 9, color: [110, 110, 110], gap: 1 });
+    if (s.qualitative) y = writeBlock(doc, y, s.qualitative, { size: 9, gap: 4 });
+  });
+  addFooter(doc, "Session records as entered by the provider. Educator review required.");
+  doc.save(`Session-Log-${student?.first_name || "Student"}-${student?.last_name || ""}.pdf`);
+}
+
+// Service-minute report: required vs delivered for the week, missed/makeup sessions, and data-quality flags.
+export function exportServiceMinutesPdf(student, summary, flags, thisWeekSessions) {
+  const doc = newDoc("Service Minutes Report");
+  let y = MARGIN + 28;
+  y = studentHeader(doc, y, student || {}, `Week of ${new Date().toLocaleDateString()}`);
+
+  y = writeBlock(doc, y, `Required weekly minutes: ${summary?.required || "not recorded"}`, { size: 11, bold: true, gap: 2 });
+  y = writeBlock(doc, y, `Scheduled: ${summary?.scheduled || 0} min · Delivered: ${summary?.delivered || 0} min · Remaining: ${summary?.remaining || 0} min`, { size: 10, gap: 2 });
+  y = writeBlock(doc, y, `Missed: ${summary?.missedCount || 0} sessions (${summary?.missedMinutes || 0} min) · Makeup: ${summary?.makeupCount || 0} (${summary?.makeupMinutes || 0} min) · Completion: ${summary?.completion != null ? `${summary.completion}%` : "—"}`, { size: 10, gap: 6 });
+
+  y = writeBlock(doc, y, "Missed sessions and reasons", { size: 12, bold: true, color: [109, 40, 217], gap: 3 });
+  const missed = (thisWeekSessions || []).filter((s) => ["student_absent", "provider_absent", "refused", "school_activity", "canceled"].includes(s.status));
+  if (!missed.length) y = writeBlock(doc, y, "None this week.", { size: 10, color: [110, 110, 110], gap: 6 });
+  missed.forEach((s) => { y = writeBlock(doc, y, `${s.date} — ${String(s.status).replace(/_/g, " ")} (${s.scheduled_minutes || 0} scheduled min)`, { size: 10, gap: 1 }); });
+  y += 5;
+
+  y = writeBlock(doc, y, "Data-quality flags", { size: 12, bold: true, color: [109, 40, 217], gap: 3 });
+  if (!(flags || []).length) y = writeBlock(doc, y, "None.", { size: 10, color: [110, 110, 110], gap: 6 });
+  (flags || []).forEach((f) => { y = writeBlock(doc, y, `• ${f.message}`, { size: 10, gap: 1 }); });
+
+  addFooter(doc, "Required minutes come from the student record. Educator review required before any service decision.");
+  doc.save(`Service-Minutes-${student?.first_name || "Student"}-${student?.last_name || ""}.pdf`);
+}

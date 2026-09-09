@@ -16,6 +16,7 @@ export default function ExtractionStep({ workspace, save, onDrafted }) {
   const errMsg = (e) => e?.response?.data?.error || e.message;
 
   const analyze = async () => {
+    if (analysis && !window.confirm("Documents haven't changed since the last extraction — re-analyzing spends AI credits. Continue?")) return;
     setBusy("analyze"); setError("");
     try {
       const res = await base44.functions.invoke("iepWorkspaceAnalyze", { workspace_id: workspace.id });
@@ -79,6 +80,7 @@ export default function ExtractionStep({ workspace, save, onDrafted }) {
               key={i}
               fact={f}
               onToggleVerified={() => setFacts((prev) => prev.map((x, idx) => idx === i ? { ...x, verified: !x.verified } : x))}
+              onToggleRejected={() => setFacts((prev) => prev.map((x, idx) => idx === i ? { ...x, rejected: !x.rejected, verified: x.rejected ? false : x.verified } : x))}
               onEdit={(text) => setFacts((prev) => prev.map((x, idx) => idx === i ? { ...x, fact: text, verified: true } : x))}
             />
           ))}
