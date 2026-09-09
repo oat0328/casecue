@@ -61,6 +61,8 @@ Disclaimers appear on **every AI-generated output**. No AI output is ever presen
 | Meeting Cheat Sheet / Navigator | This summary is a meeting support tool. Review against the current IEP and supporting documentation before presentation. | ✅ |
 | Parent Summary | Parent-friendly summaries are generated from available records for communication support. Staff should review language for accuracy and appropriateness before distribution. | ✅ |
 | Compliance Review | Compliance checks are informational only. CaseCue cannot guarantee federal, state, district, or local compliance. Users remain responsible for ensuring compliance with applicable requirements. | ✅ |
+| Sub Plans | Draft — Educator Review Required. Verify all student details and directions before handing to a substitute. | ✅ |
+| Lesson Plans | Draft — Teacher Review Required. AI-generated content must be reviewed by the educator before use. CaseCue never guarantees IEP compliance. | ✅ |
 
 All section disclaimers are delivered by one standardized, shared component (`AiDisclaimer`) so wording is identical everywhere.
 
@@ -85,6 +87,7 @@ Before any IEP, amendment, BIP, report, meeting summary, or parent summary can b
 - ☐ I understand this document may require further review prior to official use.
 
 **User must acknowledge before export.** ✅ (built — a required acknowledgement dialog, `ExportGate`, gates every AI-assisted export: IEP drafts, source-citation reports, review reports, progress reports, caseload record binders, meeting packets, and the student IEP export.)
+**⚠ Open rule (from 2026-09-09 audit):** the gate must apply to **every** export format of AI-assisted content, including the bulk CSV records export — a format must never ship around the gate.
 
 ---
 
@@ -274,8 +277,8 @@ District service agreements, school subscription agreements, data privacy agreem
 ## 15. GAP LIST (prioritized build order)
 
 **Priority 1 — must have before schools**
-1. ~~Export acknowledgement gate (§2.4)~~ ✅ **built** — required acknowledgement dialog gates every AI-assisted export (IEP draft, progress report, caseload binder, meeting packet, student IEP, citation/review reports).
-2. ~~Standardized AI disclaimer component (§2.2)~~ ✅ **built** — one shared component on every AI output: IEP builder sections, goals, accommodations, SDI, amendments, BIP, FBA, meeting scripts, meeting prep/notes, AI summary, progress reports.
+1. ~~Export acknowledgement gate (§2.4)~~ ✅ **built** — required acknowledgement dialog gates every AI-assisted export (IEP draft, progress report, caseload binder, meeting packet, student IEP, citation/review reports). ⚠ Follow-up from 2026-09-09 audit: extend the gate to the bulk CSV export.
+2. ~~Standardized AI disclaimer component (§2.2)~~ ✅ **built** — one shared component on every AI output: IEP builder sections, goals, accommodations, SDI, amendments, BIP, FBA, meeting scripts, meeting prep/notes, AI summary, progress reports, sub plans, lesson plans.
 3. ~~AI confidence indicators (§2.3)~~ ✅ **built** — confidence levels, flags, and source references on every extracted field.
 
 **Priority 2 — district sales features**
@@ -288,6 +291,12 @@ District service agreements, school subscription agreements, data privacy agreem
 8. **Transition Planning Studio** ⛔ — transition assessments, post-secondary / education / employment / independent-living goals, transition activities, agency participation.
 9. **Standalone Modifications section** ⛔ — kept separate from accommodations.
 10. **Placement amendment workflow** ⛔ — current placement, proposed placement, reason, impact, meeting summary.
+
+**Priority 4 — export & print completion (2026-09-09 audit)**
+11. **Print / DOCX / Email / Share on all AI-assisted documents** ⛔ — see §19 for the current state and target. Lesson plans already have print + DOCX + PDF; replicate that export pattern for IEP drafts, meeting packets, sub plans, and progress reports. No UI or marketing copy may claim a format that isn't wired.
+12. **Substitute Teacher Center completion** ⛔ — see §18; the sub plan generator must actually load the schedule/group data it claims to use and must render required sections (schedule, contacts, emergency procedures, end-of-day checklist) or state that the information is missing.
+13. **Clickable evidence viewer** 🟡 — sources are shown per extracted field and in the source-citation report; the field-level "click to see where this came from" viewer (§17) is not yet wired.
+14. **Printable progress graphs** ⛔ — goal/trend charts are screen-only; add print/graph-as-image export for meetings and parent conferences.
 
 **Launch blocker fixes (2026-09-09 audit) ✅**
 - Marketing copy audit complete: retention-control claims removed (landing FAQ + Settings privacy copy); the district pricing card now lists only demonstrable offerings; "Unlimited students" softened to "no per-student fees."
@@ -337,3 +346,113 @@ Homepage copy, sales copy, landing page copy, email campaigns, Facebook / Instag
 
 ### 16.8 Immediate next assets (after launch)
 1. 60-second hero promo (homepage) · 2. 30-second Facebook/Instagram ad · 3. 2-minute product demo walkthrough. These three assets do more to win paying users than another feature.
+
+---
+
+## 17. SOURCE TRANSPARENCY
+
+**Rule: the platform should never present extracted information without identifying its source.** This is a huge trust builder for SPED teachers.
+
+For all AI-generated content show:
+
+- **Source Documents Used**
+- **Page References (when available)**
+- **Confidence Level**
+- **Missing Information**
+- **Conflicting Information**
+
+**Allow users to click and see where information came from.**
+
+**Current state (2026-09-09 audit):**
+- Upload Center shows, per extracted field, the confidence level, missing/conflicting/incomplete/unverified flags, and the source documents used ✅.
+- The New IEP Workspace shows per-fact cards with source document, page reference, excerpt, confidence, and verification state, and exports a full Source-Citation Report PDF (facts, excerpts, page refs, gaps, conflicts) ✅.
+- Section-level sources print inside the exported IEP draft PDF and Meeting Navigator packet ✅.
+- **Click-to-source evidence viewer** 🟡 — sources are listed as text; the field-level click-through that opens the cited source document/excerpt is not yet wired (gap item 13 in §15).
+
+---
+
+## 18. SUBSTITUTE TEACHER CENTER
+
+**Mission:** a substitute who has never met these students can run the day safely from one document. The sub plan must be self-sufficient, honest about what it doesn't know, and printable.
+
+**Required plan sections:**
+- Where the data comes from (an explicit "built from your verified schedule, student supports, and lesson records" statement)
+- Missing data (an explicit "CaseCue doesn't have X" section — never invented)
+- Daily Schedule (from stored schedule/group data)
+- Student Supports
+- Accommodations
+- Behavior Supports
+- Lesson Plans / lesson directions
+- Contacts
+- Emergency Procedures
+- End-of-Day Checklist
+
+**Required output options:** Print · PDF · DOCX · Email · Share (all gated per §2.4 where AI-assisted).
+
+**Current state (2026-09-09 audit) 🟡:**
+- Daily / planned-absence / emergency plan generation ✅, saved-plan library ✅, draft disclaimer ✅.
+- ⛔ The generator does not actually load the stored ScheduleEntry/group schedule data even though the UI says it uses "your stored student schedule, groups, supports, and lesson directions" — it must load that data or the claim must change (marketing-claims rule).
+- ⛔ Contacts, Emergency Procedures, and End-of-Day Checklist sections are not required or rendered.
+- ⛔ No missing-data section.
+- ⛔ No Print / PDF / DOCX / Email / Share on sub plans.
+
+---
+
+## 19. EXPORT & PRINT MATRIX (2026-09-09 audit)
+
+One row per AI-assisted document. The rule: **every document a teacher hands to another adult gets Print + PDF + DOCX; Email/Share where a recipient exists; every AI-assisted export passes the §2.4 gate.**
+
+| Surface | Print | PDF | DOCX | CSV | Email | Share | Gate | Status |
+|---|---|---|---|---|---|---|---|---|
+| Lesson Plan | ✅ | ✅ | ✅ (.doc) | — | ⛔ | ⛔ | via Lesson Studio export | ✅ |
+| IEP Draft (workspace) | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Student IEP export | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Source-Citation Report | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| CaseCue Review Report | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Meeting Packet | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Meeting Navigator packet | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Meeting script | copy ✅ | ⛔ | ⛔ | — | ⛔ | ⛔ | n/a | 🟡 |
+| Progress Report | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Caseload records binder | ⛔ | ✅ | — | ✅ ⚠ un-gated | ⛔ | ⛔ | PDF ✅ / CSV ⛔ | 🟡 |
+| Session Log / Service Minutes | ⛔ | ✅ | ⛔ | — | ⛔ | ⛔ | ✅ | 🟡 |
+| Sub Plan | ⛔ | ⛔ | ⛔ | — | ⛔ | ⛔ | n/a | ⛔ |
+| Progress graphs | ⛔ | ⛔ | ⛔ | — | ⛔ | ⛔ | n/a | ⛔ |
+| Billing receipt | — | ✅ | — | — | — | — | n/a | ✅ |
+
+**Build order:** replicate the Lesson Studio HTML-export pattern (one HTML builder → print + DOCX) across IEP drafts, meeting packets, sub plans, and progress reports; gate the CSV export; add graph printing; add email/share where a recipient exists.
+
+---
+
+## 20. LAUNCH QA PROTOCOL (standing requirement)
+
+Before any launch or major release, test the entire application as a real user — not from the code, from the screens. Actually exercise:
+
+- Every page
+- Every workflow
+- Every button
+- Every export option
+- Every print option
+- Every upload flow
+- Every student workflow
+- Every generated document
+
+Deliverable: Critical / High / Medium / Low issue lists and an explicit "Would you launch today? YES or NO" verdict with reasoning. The 2026-09-09 full audit lives in the conversation record; re-run this protocol after each Priority-3/4 build and before the district-readiness push.
+
+---
+
+## 21. FINAL CHECKLIST CROSS-REFERENCE (2026-09-09)
+
+| Requirement | Status |
+|---|---|
+| Upload Center inside IEP Studio · Documents page removed | ✅ |
+| Student Snapshot · IEP Readiness Score · AI Analysis | ✅ |
+| AI Confidence Indicators · Source citations | ✅ (§17; click-through 🟡) |
+| IEP: PDF Export · Student Binder export | ✅ · Print/DOCX/Email/Share ⛔ (§19) |
+| Meeting Script · Navigator · Meeting Mode · Parent Summary · Packet PDF | ✅ · Print/DOCX/Email/Share ⛔ |
+| Goal Tracking · Trend Charts · Progress Graphs · Parent Reports · Report exports | ✅ · Print graphs ⛔ |
+| Substitute Teacher Center | 🟡 (§18) |
+| FERPA notice above uploads · Audit logs · AI disclaimer · Export gate · Human review | ✅ |
+| Data retention controls | ⛔ — all references removed from claims |
+| Self-service billing · receipts · cancel | ✅ |
+| Homepage · Pricing · Testimonials · Privacy · Terms · Contact | ✅ · FERPA & Security page ⛔ |
+| Marketing content engine, promo videos, ad scripts | spec ✅ (§16) · build ⛔ post-launch |
