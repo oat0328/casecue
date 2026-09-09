@@ -29,6 +29,7 @@ import Reports from '@/pages/Reports';
 import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
 import Settings from '@/pages/Settings';
+import Admin from '@/pages/Admin';
 import ThankYou from '@/pages/ThankYou';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
@@ -66,6 +67,7 @@ function App() {
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/admin" element={<Admin />} />
               </Route>
             </Route>
             <Route path="*" element={<PageNotFound />} />

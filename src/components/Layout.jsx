@@ -16,6 +16,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const visibleNavItems = navItems.filter((item) => !item.adminOnly || user?.role === "admin");
   const initials = user?.full_name
     ? user.full_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
     : (user?.email?.[0] || "U").toUpperCase();
@@ -36,7 +37,7 @@ export default function Layout() {
         </Link>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
