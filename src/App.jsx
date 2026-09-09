@@ -25,6 +25,7 @@ import LessonStudio from '@/pages/LessonStudio';
 import SubPlans from '@/pages/SubPlans';
 import Gradebook from '@/pages/Gradebook';
 import MeetingCenter from '@/pages/MeetingCenter';
+import GoalGroups from '@/pages/GoalGroups';
 import Reports from '@/pages/Reports';
 import ProgressReports from '@/pages/ProgressReports';
 import PracticeLab from '@/pages/PracticeLab';
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/sub-plans" element={<SubPlans />} />
                 <Route path="/gradebook" element={<Gradebook />} />
                 <Route path="/meetings" element={<MeetingCenter />} />
+                <Route path="/goal-groups" element={<GoalGroups />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/progress-reports" element={<ProgressReports />} />
                 <Route path="/practice-lab" element={<PracticeLab />} />

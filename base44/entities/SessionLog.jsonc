@@ -1,0 +1,59 @@
+{
+  "name": "SessionLog",
+  "type": "object",
+  "properties": {
+    "goal_area": {
+      "type": "string",
+      "title": "Goal Area"
+    },
+    "student_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Student IDs"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "minutes": {
+      "type": "number",
+      "title": "Minutes"
+    },
+    "delivery": {
+      "type": "string",
+      "enum": [
+        "pull-out",
+        "push-in",
+        "consultation"
+      ],
+      "default": "pull-out",
+      "title": "Delivery"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "goal_area",
+    "student_ids",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
