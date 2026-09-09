@@ -46,7 +46,7 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
-      window.location.href = safeReturnTo("/app");
+      window.location.href = safeReturnTo("/onboarding");
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {
@@ -68,7 +68,7 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", safeReturnTo("/app"));
+    base44.auth.loginWithProvider("google", safeReturnTo("/onboarding"));
   };
 
   if (showOtp) {
@@ -134,7 +134,7 @@ export default function Register() {
         <>
           Already have an account?{" "}
           <Link
-            to={"/login" + (safeReturnTo("/app") !== "/app" ? "?returnTo=" + encodeURIComponent(safeReturnTo("/app")) : "")}
+            to={"/login" + (safeReturnTo("/onboarding") !== "/onboarding" ? "?returnTo=" + encodeURIComponent(safeReturnTo("/onboarding")) : "")}
             className="text-primary font-medium hover:underline"
           >
             Log in

@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import DeadlineAlerts from "@/components/deadlineAlerts/DeadlineAlerts";
+import { useAuth } from "@/lib/AuthContext";
 import OnboardingTour from "@/components/onboarding/OnboardingTour";
 import GettingStartedCard from "@/components/onboarding/GettingStartedCard";
 
@@ -35,6 +36,7 @@ const QUICK_ACTIONS = [
 export default function Today() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: tasks } = useAsync(() => base44.entities.Task.filter({ status: 'open' }, '-due_date', 50), []);
@@ -90,6 +92,14 @@ export default function Today() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Today</h1>
         <p className="text-muted-foreground mt-1">What needs your attention right now.</p>
       </div>
+
+      {/* Finish-setup banner for accounts that skipped onboarding */}
+      {user && !user?.data?.onboarding_completed && (
+        <Link to="/onboarding" className="mb-6 flex items-center justify-between rounded-2xl border border-primary/25 bg-card p-4 card-shadow hover:border-primary/50 transition-colors">
+          <span className="text-sm font-medium">Finish setting up your CaseCue profile</span>
+          <span className="text-sm font-semibold text-primary">Continue →</span>
+        </Link>
+      )}
 
       {/* Deadline alerts */}
       <DeadlineAlerts students={students} />

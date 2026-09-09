@@ -122,8 +122,13 @@ export default function AskCaseCue() {
             )}
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap leading-relaxed ${m.role === "user" ? "brand-gradient text-white" : "bg-muted"}`}>
-                  {m.content}
+                <div className="max-w-[80%]">
+                  <div className={`rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap leading-relaxed ${m.role === "user" ? "brand-gradient text-white" : "bg-muted"}`}>
+                    {m.content}
+                  </div>
+                  {m.role === "assistant" && (
+                    <p className="text-[11px] text-muted-foreground mt-1 px-1">AI-generated draft. Educator and IEP-team review required.</p>
+                  )}
                 </div>
               </div>
             ))}

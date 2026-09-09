@@ -87,11 +87,11 @@ export default function Landing() {
               <Sparkles className="h-3.5 w-3.5" /> Case management software for special education
             </div>
             <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
-              Stay Compliant. Stay Organized.<br />
-              <span className="text-gradient">Serve Students Better.</span>
+              Never miss a deadline.<br />
+              <span className="text-gradient">One organized caseload workspace.</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              CaseCue helps special education teachers and case managers track IEP deadlines, manage student records, organize meetings, and stay compliant from one simple dashboard.
+              CaseCue helps special education teachers and case managers track IEP deadlines, manage student records, monitor progress, and prepare for meetings — all from one simple dashboard.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link to="/register"><Button size="lg" className="brand-gradient text-white h-12 px-7 text-base">Start Free Trial</Button></Link>
@@ -256,55 +256,47 @@ export default function Landing() {
       <Section id="pricing" className="bg-card">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Simple, honest pricing.</h2>
-          <p className="mt-3 text-muted-foreground">Start free. Upgrade when it earns its place in your day.</p>
+          <p className="mt-3 text-muted-foreground">One plan with everything. Start free for 14 days.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-5 items-start max-w-5xl mx-auto">
-          {[
-            {
-              name: "Starter", price: "$19", period: "/month", tagline: "Perfect for individual educators",
-              items: ["Up to 50 students", "Deadline tracking", "Dashboard", "Notes and documentation", "Email support"],
-              cta: "Start Free Trial", href: "/register", highlight: false,
-            },
-            {
-              name: "Professional", price: "$49", period: "/month", tagline: "For larger caseloads and power users",
-              items: ["Unlimited students", "Advanced reporting", "Priority support", "Compliance tools", "Future feature access"],
-              cta: "Start Free Trial", href: "/register", highlight: true,
-            },
-            {
-              name: "District", price: "Custom", period: "", tagline: "For schools and districts",
-              items: ["Multi-user access", "Admin dashboard", "District-wide reporting", "Training", "Custom onboarding"],
-              cta: "Book a Demo", href: "#demo", highlight: false,
-            },
-          ].map((tier) => (
-            <div
-              key={tier.name}
-              className={`rounded-2xl border p-7 card-shadow relative ${tier.highlight ? "border-primary/40 bg-background md:-mt-3 md:pb-10 card-shadow-lg" : "border-border bg-background"}`}
-            >
-              {tier.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full brand-gradient px-3 py-1 text-xs font-semibold text-white">Most popular</div>
-              )}
-              <div className="text-sm font-semibold text-primary">{tier.name}</div>
-              <div className="mt-2 flex items-end gap-1">
-                <span className="text-4xl font-bold">{tier.price}</span>
-                {tier.period && <span className="text-muted-foreground mb-1.5">{tier.period}</span>}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{tier.tagline}</p>
-              <ul className="mt-5 space-y-2.5 text-sm">
-                {tier.items.map((item) => (
-                  <li key={item} className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500 shrink-0" /> {item}</li>
-                ))}
-              </ul>
-              {tier.href.startsWith("#") ? (
-                <a href={tier.href}><Button variant="outline" className="w-full mt-7 h-11">{tier.cta}</Button></a>
-              ) : (
-                <Link to={tier.href}><Button className="w-full mt-7 brand-gradient text-white h-11">{tier.cta}</Button></Link>
-              )}
+        <div className="grid md:grid-cols-2 gap-6 items-stretch max-w-4xl mx-auto">
+          <div className="rounded-2xl border-2 border-primary/40 bg-background p-8 card-shadow-lg relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full brand-gradient px-3 py-1 text-xs font-semibold text-white">Launch offer</div>
+            <div className="text-sm font-semibold text-primary">Founding Teacher</div>
+            <div className="mt-2 flex items-end gap-1">
+              <span className="text-5xl font-bold">$24.99</span>
+              <span className="text-muted-foreground mb-2">/ month</span>
             </div>
-          ))}
+            <p className="mt-1 text-sm text-muted-foreground">Everything CaseCue offers, in one simple plan.</p>
+            <ul className="mt-6 space-y-2.5 text-sm">
+              {[
+                "14-day free trial — no credit card required",
+                "Unlimited students",
+                "Every teacher feature included",
+                "Founding price locked while your subscription stays active",
+                "Cancel anytime",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2"><Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" /> {item}</li>
+              ))}
+            </ul>
+            <Link to="/register"><Button className="w-full mt-8 brand-gradient text-white h-12 text-base">Start Free Trial</Button></Link>
+          </div>
+          <div className="rounded-2xl border border-border bg-background p-8 card-shadow flex flex-col">
+            <div className="text-sm font-semibold text-primary">Schools & Districts</div>
+            <div className="mt-2 text-2xl font-bold">Contact us for pricing</div>
+            <p className="mt-2 text-sm text-muted-foreground">Bring CaseCue to your whole team.</p>
+            <ul className="mt-6 space-y-2.5 text-sm">
+              {[
+                "Multi-teacher access",
+                "District-level reporting",
+                "Team training and onboarding",
+                "Priority support",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2"><Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" /> {item}</li>
+              ))}
+            </ul>
+            <a href="#demo" className="mt-auto"><Button variant="outline" className="w-full mt-8 h-12 text-base">Book a Demo</Button></a>
+          </div>
         </div>
-        <p className="mt-8 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
-          <span className="font-semibold text-foreground">Launching now — Founding Teacher beta:</span> $24.99/month gets you everything in Professional, locked in for early adopters. 14-day free trial, no credit card.
-        </p>
       </Section>
 
       {/* Demo */}
@@ -361,7 +353,7 @@ export default function Landing() {
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           </div>
-          <p>© {new Date().getFullYear()} CaseCue. Stay compliant. Stay organized.</p>
+          <p>© {new Date().getFullYear()} CaseCue. Fewer missed deadlines. More time for students.</p>
         </div>
       </footer>
     </div>

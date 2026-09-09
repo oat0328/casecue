@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check } from "lucide-react";
+import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -10,13 +10,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { DEMO_LABEL, loadDemoCaseload, deleteDemoCaseload } from "@/lib/demoData";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function Settings() {
   const { toast } = useToast();
   const { user, checkUserAuth } = useAuth();
-  const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
+  const { data: students, refetch: refetchStudents } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
   const [profileName, setProfileName] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [aiSettings, setAiSettings] = useState({ ai_provider: "OpenAI", minimum_necessary: true, full_document_ai: false });
@@ -36,6 +41,40 @@ export default function Settings() {
     } catch (e) {
       toast({ title: "Could not start checkout", description: e.message, variant: "destructive" });
       setStartingCheckout(false);
+    }
+  };
+
+  const demoStudents = (students || []).filter((s) => s.notes === DEMO_LABEL);
+  const [demoBusy, setDemoBusy] = useState(false);
+  const [confirmDeleteDemo, setConfirmDeleteDemo] = useState(false);
+
+  const loadDemo = async () => {
+    setDemoBusy(true);
+    try {
+      const res = await loadDemoCaseload();
+      toast({
+        title: res.created ? "Demo caseload loaded" : "Demo data already present",
+        description: res.created ? "Five fictional students were added, clearly labeled as demo data." : "Demo records already exist in your account.",
+      });
+      refetchStudents();
+    } catch (e) {
+      toast({ title: "Could not load demo data", description: e.message, variant: "destructive" });
+    } finally {
+      setDemoBusy(false);
+    }
+  };
+
+  const deleteDemo = async () => {
+    setDemoBusy(true);
+    try {
+      const removed = await deleteDemoCaseload();
+      toast({ title: "Demo data deleted", description: `${removed} fictional records were removed. Your real data was not touched.` });
+      setConfirmDeleteDemo(false);
+      refetchStudents();
+    } catch (e) {
+      toast({ title: "Could not delete demo data", description: e.message, variant: "destructive" });
+    } finally {
+      setDemoBusy(false);
     }
   };
 
@@ -103,6 +142,7 @@ export default function Settings() {
           <TabsTrigger value="deletion"><Trash2 className="h-4 w-4 mr-1.5" /> Data Deletion</TabsTrigger>
           <TabsTrigger value="subscription"><CreditCard className="h-4 w-4 mr-1.5" /> Subscription</TabsTrigger>
           <TabsTrigger value="notifications"><Bell className="h-4 w-4 mr-1.5" /> Notifications</TabsTrigger>
+          <TabsTrigger value="demo"><FlaskConical className="h-4 w-4 mr-1.5" /> Demo Data</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile"><Card className="p-6 max-w-lg">
@@ -201,6 +241,46 @@ export default function Settings() {
             </div>
           ))}
           <Button onClick={saveNotifications} className="brand-gradient text-white mt-2"><Save className="h-4 w-4 mr-1" /> Save preferences</Button>
+        </Card></TabsContent>
+
+        <TabsContent value="demo"><Card className="p-6 max-w-lg">
+          <h3 className="font-semibold mb-2">Fictional demo data</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Load five completely fictional students — with goals, progress data, meetings, and documents — to safely explore every part of CaseCue.
+            Every demo record is clearly labeled "{DEMO_LABEL}" and never mixes with your real students.
+          </p>
+          <div className="rounded-xl border border-border bg-muted/50 p-4 text-sm mb-4">
+            {demoStudents.length > 0
+              ? `Demo caseload loaded — ${demoStudents.length} fictional student${demoStudents.length === 1 ? "" : "s"} in your account.`
+              : "No demo data loaded yet."}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={loadDemo} disabled={demoBusy || demoStudents.length > 0} className="brand-gradient text-white">
+              {demoBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FlaskConical className="h-4 w-4 mr-1" />}
+              {demoBusy ? "Loading…" : "Load Fictional Demo Caseload"}
+            </Button>
+            {demoStudents.length > 0 && (
+              <AlertDialog open={confirmDeleteDemo} onOpenChange={setConfirmDeleteDemo}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" disabled={demoBusy} className="text-rose-600 border-rose-300 hover:bg-rose-50">
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete All Demo Data
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete all demo data?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This permanently removes all fictional demo records from your account. Your real students and records are not affected.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={deleteDemo} disabled={demoBusy} className="bg-rose-600 hover:bg-rose-700">Delete demo data</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </Card></TabsContent>
       </Tabs>
     </div>

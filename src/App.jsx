@@ -28,6 +28,7 @@ import MeetingCenter from '@/pages/MeetingCenter';
 import GoalGroups from '@/pages/GoalGroups';
 import Reports from '@/pages/Reports';
 import ProgressReports from '@/pages/ProgressReports';
+import Onboarding from '@/pages/Onboarding';
 import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
 import Settings from '@/pages/Settings';
@@ -52,6 +53,7 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route element={<Layout />}>
                 <Route path="/app" element={<Today />} />
                 <Route path="/students" element={<Students />} />
