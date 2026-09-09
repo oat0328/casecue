@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, TicketPercent, Check } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -19,12 +19,44 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState(null);
+  const [promoChecking, setPromoChecking] = useState(false);
+
+  const checkPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoApplied(null);
+      return true;
+    }
+    setPromoChecking(true);
+    try {
+      const res = await base44.functions.invoke("validatePromoCode", { code: promoCode.trim() });
+      if (res.data?.valid) {
+        setPromoApplied(res.data);
+        setError("");
+        return true;
+      }
+      setPromoApplied(null);
+      setError(res.data?.reason || "Promo code not valid");
+      return false;
+    } catch (err) {
+      setPromoApplied(null);
+      setError(err.message || "Could not validate promo code");
+      return false;
+    } finally {
+      setPromoChecking(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+    if (promoCode.trim() && !(await checkPromo())) {
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -45,6 +77,13 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+      }
+      // Carry the validated promo code through to checkout — stored on the
+      // account so the buyer never has to type it again.
+      if (promoApplied?.promo?.code) {
+        try {
+          await base44.auth.updateMe({ promo_code: promoApplied.promo.code });
+        } catch (_) { /* non-fatal: checkout re-validates anyway */ }
       }
       window.location.href = safeReturnTo("/onboarding");
     } catch (err) {
@@ -215,6 +254,26 @@ export default function Register() {
               required
             />
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="promo">Promo Code (Optional)</Label>
+          <div className="relative">
+            <TicketPercent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              id="promo"
+              placeholder="e.g. FOUNDING25"
+              value={promoCode}
+              onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoApplied(null); setError(""); }}
+              onBlur={checkPromo}
+              className="pl-10 h-12"
+            />
+          </div>
+          {promoChecking && <p className="text-sm text-muted-foreground">Checking promo code…</p>}
+          {promoApplied && (
+            <p className="text-sm text-emerald-600 font-medium flex items-center gap-1.5">
+              <Check className="h-4 w-4" /> Promo Code Applied — {promoApplied.breakdown?.discount_label}
+            </p>
+          )}
         </div>
         <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
           {loading ? (

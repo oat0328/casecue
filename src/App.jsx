@@ -34,6 +34,7 @@ import AskCaseCue from '@/pages/AskCaseCue';
 import Help from '@/pages/Help';
 import Settings from '@/pages/Settings';
 import Admin from '@/pages/Admin';
+import PromoCodes from '@/pages/PromoCodes';
 import OrgSetup from '@/pages/OrgSetup';
 import PlatformAdmin from '@/pages/PlatformAdmin';
 import PlatformOwnerSetup from '@/pages/PlatformOwnerSetup';
@@ -92,6 +93,7 @@ function App() {
                 <Route path="/help" element={<Help />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/promo-codes" element={<PromoCodes />} />
                 <Route path="/platform-admin" element={<PlatformAdmin />} />
               </Route>
               </Route>

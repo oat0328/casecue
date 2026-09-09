@@ -29,6 +29,21 @@ export default function BillingCard() {
   const [promoInput, setPromoInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
   const [promo, setPromo] = useState(null); // validated promo preview
+
+  // Auto-carry: a promo code entered at registration is stored on the account
+  // and applied here automatically — the buyer never types it twice.
+  useEffect(() => {
+    const stored = user?.data?.promo_code;
+    if (stored && !promo) {
+      setPromoInput(stored);
+      base44.functions.invoke("validatePromoCode", { code: stored })
+        .then((res) => {
+          if (res.data?.valid) setPromo(res.data);
+          else base44.auth.updateMe({ promo_code: "" }).catch(() => {});
+        })
+        .catch(() => {});
+    }
+  }, [user?.data?.promo_code]);
   const [wixStatus, setWixStatus] = useState(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -72,6 +87,10 @@ export default function BillingCard() {
         productId: "founding-teacher",
         ...(promo?.promo?.code ? { promo_code: promo.promo.code } : {}),
       });
+      // Checkout started — the code is now redeemed, so clear the stored copy.
+      if (promo?.promo?.code) {
+        base44.auth.updateMe({ promo_code: "" }).catch(() => {});
+      }
       window.location.href = res.data.redirectUrl;
     } catch (e) {
       toast({ title: "Could not start checkout", description: e.message, variant: "destructive" });
