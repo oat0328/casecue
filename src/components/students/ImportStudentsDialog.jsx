@@ -63,6 +63,9 @@ export default function ImportStudentsDialog({ onImported }) {
         <p className="text-sm text-muted-foreground">
           Required columns: <b>First Name, Last Name</b>. Optional: {STUDENT_IMPORT_FIELDS.slice(2).map((f) => f.label).join(", ")}. Dates accept YYYY-MM-DD or M/D/YYYY.
         </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Caseload in Google Sheets? Open your sheet and choose <b>File → Download → Comma-separated values (.csv)</b>, then upload that file here.
+        </p>
         <Button variant="link" className="justify-start px-0" onClick={downloadStudentTemplate}>
           <Download className="h-3.5 w-3.5 mr-1" /> Download a template CSV
         </Button>

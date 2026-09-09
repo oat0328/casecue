@@ -29,6 +29,7 @@ import MeetingCenter from '@/pages/MeetingCenter';
 import GoalGroups from '@/pages/GoalGroups';
 import Reports from '@/pages/Reports';
 import ProgressReports from '@/pages/ProgressReports';
+import BehaviorStudio from '@/pages/BehaviorStudio';
 import Onboarding from '@/pages/Onboarding';
 import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
@@ -84,6 +85,7 @@ function App() {
                 <Route path="/goal-groups" element={<GoalGroups />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/progress-reports" element={<ProgressReports />} />
+                <Route path="/behavior-studio" element={<BehaviorStudio />} />
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/settings" element={<Settings />} />
