@@ -19,7 +19,6 @@ import Students from '@/pages/Students';
 import StudentDetail from '@/pages/StudentDetail';
 import IEPStudio from '@/pages/IEPStudio';
 import IEPReview from '@/pages/IEPReview';
-import Documents from '@/pages/Documents';
 import DataCenter from '@/pages/DataCenter';
 import Schedule from '@/pages/Schedule';
 import LessonStudio from '@/pages/LessonStudio';
@@ -76,7 +75,7 @@ function App() {
                 <Route path="/meeting-cheat-sheet" element={<Navigate to="/meeting-navigator" replace />} />
                 <Route path="/session-tracker" element={<SessionTracker />} />
                 <Route path="/iep-review" element={<IEPReview />} />
-                <Route path="/documents" element={<Documents />} />
+                <Route path="/documents" element={<Navigate to="/iep-studio" replace />} />
                 <Route path="/data-center" element={<DataCenter />} />
                 <Route path="/schedule" element={<Schedule />} />
                 <Route path="/lesson-studio" element={<LessonStudio />} />

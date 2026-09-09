@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, FileEdit, ShieldCheck, FolderOpen, BarChart3,
+  LayoutDashboard, Users, FileEdit, ShieldCheck, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
   FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown, Timer,
   LifeBuoy
@@ -12,7 +12,6 @@ export const navItems = [
   { label: "Meeting Navigator", path: "/meeting-navigator", icon: ClipboardList },
   { label: "Session Tracker", path: "/session-tracker", icon: Timer },
   { label: "IEP Review", path: "/iep-review", icon: ShieldCheck },
-  { label: "Documents", path: "/documents", icon: FolderOpen },
   { label: "Data Center", path: "/data-center", icon: BarChart3 },
   { label: "Instruction & Schedule", path: "/schedule", icon: CalendarClock },
   { label: "Lesson Studio", path: "/lesson-studio", icon: BookOpen },

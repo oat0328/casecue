@@ -31,7 +31,6 @@ const GETTING_STARTED = ["Select Student", "Upload Documents", "Review AI Analys
 
 const TAB_TIPS = [
   ["overview", "Overview", "The verified student record at a glance, with the readiness score, Meeting Mode, and Copilot."],
-  ["documents", "Upload Center", "The only upload point — drag files in and CaseCue reads, analyzes, and pre-fills the profile automatically."],
   ["summary", "AI Summary", "AI-generated summary of every uploaded document."],
   ["builder", "IEP Builder", "The 4-step pipeline: documents → extraction review → IEP draft → review & export."],
   ["goals", "Goals & Progress", "Goals with live progress graphs — green on track, yellow monitor, red at risk."],
@@ -65,11 +64,7 @@ export default function IEPStudio() {
         <StudentSelector
           students={students || []}
           value={studentId}
-          onChange={(id) => {
-            setStudentId(id);
-            // Uploading is step 1 of the workflow — land on the Upload Center immediately.
-            setTab("documents");
-          }}
+          onChange={setStudentId}
           noBottomSpace
         />
       </Card>
@@ -101,6 +96,14 @@ export default function IEPStudio() {
           </div>
         </Card>
       ) : (
+        <>
+        {/* The Upload Center lives directly under the student selector — the only
+            upload point in the app. Upload → automatic reading → AI analysis →
+            profile pre-fill → snapshot & one-click actions, all on screen. */}
+        <div className="mb-8">
+          <UploadCenterTab key={student.id} student={student} onProfileBuilt={() => setTab("overview")} onNavigate={setTab} />
+        </div>
+
         <Tabs value={tab} onValueChange={setTab}>
           <div className="overflow-x-auto -mx-1 px-1 pb-1">
             <TooltipProvider delayDuration={250}>
@@ -122,9 +125,6 @@ export default function IEPStudio() {
               student={student}
               onRunMeetingMode={() => { setMeetingAuto(true); setTab("meeting"); }}
             />
-          </TabsContent>
-          <TabsContent value="documents" className="mt-6">
-            <UploadCenterTab student={student} onProfileBuilt={() => setTab("overview")} onNavigate={setTab} />
           </TabsContent>
           <TabsContent value="summary" className="mt-6">
             <AiSummaryTab student={student} />
@@ -151,6 +151,7 @@ export default function IEPStudio() {
             <ComplianceReviewTab student={student} />
           </TabsContent>
         </Tabs>
+        </>
       )}
     </div>
   );

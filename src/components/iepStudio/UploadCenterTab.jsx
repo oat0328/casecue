@@ -170,7 +170,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
   return (
     <div className="space-y-6">
       <Card className="p-5 sm:p-6">
-        <h3 className="font-semibold mb-1">Upload records for {student.first_name} {student.last_name}</h3>
+        <h3 className="font-semibold mb-1">Upload Center — records for {student.first_name} {student.last_name}</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Drag a document in and CaseCue does the rest automatically — no extra clicks. Start with the current IEP and latest evaluation, then add MDT, reevaluation, BIP, FBA, progress reports, and parent/teacher input as you have them.
         </p>
