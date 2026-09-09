@@ -7,6 +7,7 @@ import { captureElement } from "@/lib/chartExport";
 import { printDoc, exportDocPdf } from "@/lib/docExport";
 import { exportXlsx } from "@/lib/xlsxExport";
 import { downloadCsv } from "@/lib/reportExport";
+import logExportAction from "@/lib/exportAudit";
 
 // Chart wrapper with per-chart export: Print, PDF, Excel, CSV, and PNG image.
 // `data` is the chart's source rows (array of objects) used for Excel/CSV;
@@ -64,15 +65,18 @@ export default function ChartCard({ title, subtitle, data = [], filename, height
           )}
           {btn("PDF", FileDown, () => withImage((img) => exportDocPdf(opts(img))))}
           {btn("Excel", FileSpreadsheet, () => {
+            logExportAction("excel", title);
             exportXlsx(file, [{ name: "Chart Data", headers, rows }]);
             toast({ title: "Excel downloaded" });
           }, !data.length)}
           {btn("CSV", Table, () => {
+            logExportAction("csv", title);
             downloadCsv(file, headers, rows);
             toast({ title: "CSV downloaded" });
           }, !data.length)}
           {btn("Image", ImageIcon, () =>
             withImage((img) => {
+              logExportAction("image", title);
               const a = document.createElement("a");
               a.href = img.dataUrl;
               a.download = `${file.replace(/[^a-z0-9-]+/gi, "-")}.png`;

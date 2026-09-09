@@ -354,6 +354,7 @@ export default function Landing() {
             <Link to="/testimonials" className="hover:text-foreground">Testimonials</Link>
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
+            <Link to="/trust" className="hover:text-foreground">Trust &amp; Security</Link>
           </div>
           <p>© {new Date().getFullYear()} CaseCue. Fewer missed deadlines. More time for students.</p>
         </div>

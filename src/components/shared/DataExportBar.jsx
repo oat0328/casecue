@@ -6,6 +6,7 @@ import ExportGate from "@/components/shared/ExportGate";
 import { printDoc, exportDocPdf, exportDocDocx, emailDoc, shareDoc } from "@/lib/docExport";
 import { exportXlsx } from "@/lib/xlsxExport";
 import { downloadCsv, downloadJson } from "@/lib/reportExport";
+import logExportAction from "@/lib/exportAudit";
 
 // The full 8-action export bar for data-derived reports: Save, Print, PDF,
 // DOCX, Excel, CSV, (optional JSON), Email, Share. Same pattern as the
@@ -45,15 +46,18 @@ export default function DataExportBar({
     );
 
   const doExcel = () => {
+    logExportAction("excel", title);
     exportXlsx(filename, sheets);
     toast({ title: "Excel workbook downloaded" });
   };
   const doCsv = () => {
     const primary = sheets[0];
+    logExportAction("csv", title);
     downloadCsv(filename, primary.headers, primary.rows);
     toast({ title: "CSV downloaded" });
   };
   const doJson = () => {
+    logExportAction("json", title);
     downloadJson(filename, json);
     toast({ title: "JSON downloaded" });
   };

@@ -117,7 +117,7 @@ export function applyFilters(data = {}, f = {}, forcedStudentId = null) {
   );
   const progress = (data.progress || []).filter((p) => ids.has(p.student_id) && inRange(p.date));
   const sessions = (data.sessions || []).filter(
-    (s) => (s.student_ids || []).some((id) => ids.has(id)) && inRange(s.date)
+    (s) => (s.student_ids || []).some((id) => ids.has(id)) && inRange(s.date) && (!f.provider || s.provider === f.provider)
   );
   const assignments = (data.assignments || []).filter((a) => ids.has(a.student_id) && inRange(a.date));
   const meetings = (data.meetings || []).filter((m) => !forcedStudentId || m.student_id === forcedStudentId);

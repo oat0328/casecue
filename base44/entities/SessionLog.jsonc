@@ -6,6 +6,10 @@
       "type": "string",
       "title": "Goal Area"
     },
+    "provider": {
+      "type": "string",
+      "title": "Provider"
+    },
     "student_ids": {
       "type": "array",
       "items": {

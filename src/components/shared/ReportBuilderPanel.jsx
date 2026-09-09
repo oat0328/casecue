@@ -27,7 +27,7 @@ export default function ReportBuilderPanel({
   const { toast } = useToast();
   const [reportKey, setReportKey] = useState(definitions[0]?.key);
   const [studentId, setStudentId] = useState("");
-  const [filters, setFilters] = useState({ grade: "", service: "", goal_area: "", from: "", to: "" });
+  const [filters, setFilters] = useState({ grade: "", service: "", goal_area: "", provider: "", from: "", to: "" });
   const [report, setReport] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -49,6 +49,16 @@ export default function ReportBuilderPanel({
   const goalAreas = useMemo(
     () => [...new Set((data.goals || []).map((g) => g.goal_area).filter(Boolean))].sort(),
     [data.goals]
+  );
+  const providers = useMemo(
+    () =>
+      [
+        ...new Set([
+          ...(data.sessions || []).map((s) => s.provider).filter(Boolean),
+          ...(data.schedule || []).map((e) => e.teacher_classroom).filter(Boolean),
+        ]),
+      ].sort(),
+    [data.sessions, data.schedule]
   );
 
   const generate = (override) => {
@@ -107,7 +117,7 @@ export default function ReportBuilderPanel({
     }
     setReportKey(p.report_key);
     setStudentId(p.student_id || "");
-    if (p.filters) setFilters({ grade: "", service: "", goal_area: "", from: "", to: "", ...p.filters });
+    if (p.filters) setFilters({ grade: "", service: "", goal_area: "", provider: "", from: "", to: "", ...p.filters });
     generate(p);
   };
 
@@ -150,6 +160,10 @@ export default function ReportBuilderPanel({
           <select className={selectClass} value={filters.service} onChange={setF("service")}>
             <option value="">All services</option>
             {services.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select className={selectClass} value={filters.provider} onChange={setF("provider")}>
+            <option value="">All providers</option>
+            {providers.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
           <select className={selectClass} value={filters.goal_area} onChange={setF("goal_area")}>
             <option value="">All goal areas</option>

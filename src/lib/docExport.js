@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import logExportAction from "@/lib/exportAudit";
 
 // Shared export pipeline for every generated CaseCue document.
 // One HTML builder feeds Print and Word (DOCX); one jsPDF writer feeds PDF;
@@ -53,6 +54,7 @@ function downloadBlob(blob, filename) {
 export function printDoc(opts) {
   const w = window.open("", "_blank");
   if (!w) return false;
+  logExportAction("print", opts.title);
   w.document.write(buildDocHtml(opts));
   w.document.close();
   w.focus();
@@ -62,6 +64,7 @@ export function printDoc(opts) {
 
 // Word-compatible DOCX (HTML-based, same approach as Lesson Studio exports).
 export function exportDocDocx(opts) {
+  logExportAction("docx", opts.title);
   downloadBlob(new Blob(["\ufeff", buildDocHtml(opts)], { type: "application/msword" }), `${safeName(opts.filename)}.doc`);
 }
 
@@ -88,6 +91,7 @@ const pdfSafe = (t) => String(t == null ? "" : t)
   .replace(/[^\n\x20-\x7E\xA1-\xFF]/g, "");
 
 export function exportDocPdf({ title, subtitle, sections, banner, filename }) {
+  logExportAction("pdf", title);
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const PAGE_H = 842;
   const M = 48;
@@ -157,6 +161,7 @@ function plainText({ title, subtitle, sections }) {
 // Opens the user's email client with the document in the body. Long documents
 // are trimmed (mailto limits vary by client); the note points to the full export.
 export function emailDoc(opts) {
+  logExportAction("email", opts.title);
   const text = plainText(opts);
   const clipped = text.length > 3800;
   const body = encodeURIComponent(
@@ -172,6 +177,7 @@ export async function shareDoc(opts) {
   if (navigator.share) {
     try {
       await navigator.share({ title: opts.title, text });
+      logExportAction("share", opts.title);
       return "shared";
     } catch {
       return "cancelled";
@@ -179,6 +185,7 @@ export async function shareDoc(opts) {
   }
   try {
     await navigator.clipboard.writeText(text);
+    logExportAction("share", opts.title);
     return "copied";
   } catch {
     return "failed";
