@@ -312,6 +312,9 @@ export default function Landing() {
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Book a Demo</h2>
           <p className="mt-3 text-muted-foreground">See CaseCue with your own caseload in mind — we'll walk you through it personally.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Prefer email? <a href="mailto:contact@getcasecue.com" className="text-primary font-medium hover:underline">contact@getcasecue.com</a>
+          </p>
         </div>
         <DemoRequestForm />
       </Section>
@@ -353,6 +356,7 @@ export default function Landing() {
             <span className="font-semibold text-foreground">CaseCue</span>
           </div>
           <div className="flex items-center gap-4">
+            <a href="mailto:contact@getcasecue.com" className="hover:text-foreground">contact@getcasecue.com</a>
             <a href="#demo" className="hover:text-foreground">Book a Demo</a>
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>

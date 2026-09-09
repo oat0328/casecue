@@ -82,7 +82,7 @@ export default function Terms() {
       </Section>
 
       <Section heading="10. Changes and contact">
-        <p>We may update these Terms from time to time and will post the updated version here with a new "Last updated" date. Continued use after changes means you accept them. Questions? Contact us through the support channel in the app.</p>
+        <p>We may update these Terms from time to time and will post the updated version here with a new "Last updated" date. Continued use after changes means you accept them. Questions? Contact us at <a href="mailto:contact@getcasecue.com" className="text-primary hover:underline">contact@getcasecue.com</a>.</p>
       </Section>
     </LegalShell>
   );

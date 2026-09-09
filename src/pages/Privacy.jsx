@@ -80,7 +80,7 @@ export default function Privacy() {
       </Section>
 
       <Section heading="9. Your rights and contact">
-        <p>Depending on your location, you may have rights to access, correct, export, or delete your personal information. You can exercise these from Settings (Data Export and Data Deletion) or by contacting us through the support channel in the app.</p>
+        <p>Depending on your location, you may have rights to access, correct, export, or delete your personal information. You can exercise these from Settings (Data Export and Data Deletion) or by contacting us at <a href="mailto:contact@getcasecue.com" className="text-primary hover:underline">contact@getcasecue.com</a>.</p>
       </Section>
     </LegalShell>
   );
