@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { exportProgressReportPdf } from "@/lib/pdfExport";
 import EmptyState from "@/components/EmptyState";
 import ReportHistory from "@/components/progressReports/ReportHistory";
+import BulkExportCard from "@/components/progressReports/BulkExportCard";
 
 function TrendIcon({ trend }) {
   if (trend === null || trend === undefined) return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -21,7 +22,7 @@ function TrendIcon({ trend }) {
 export default function ProgressReports() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
-  const { data: savedReports, refetch: refetchReports } = useAsync(() => base44.entities.SavedReport.list('-created_date', 50), []);
+  const { data: savedReports, refetch: refetchReports } = useAsync(() => base44.entities.SavedReport.list('-created_date', 200), []);
   const [studentId, setStudentId] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
@@ -140,6 +141,11 @@ export default function ProgressReports() {
           description="Select a student and generate a report — CaseCue turns your progress data into parent-ready statements."
         />
       )}
+
+      <h2 className="text-lg font-semibold mb-4 mt-8">Bulk export</h2>
+      <div className="mb-6">
+        <BulkExportCard students={students} savedReports={savedReports} />
+      </div>
 
       <h2 className="text-lg font-semibold mb-4 mt-8">Report history</h2>
       <ReportHistory
