@@ -20,4 +20,5 @@ export const navItems = [
   { label: "Practice Lab", path: "/practice-lab", icon: FlaskConical },
   { label: "Ask CaseCue", path: "/ask-casecue", icon: MessageCircle },
   { label: "Settings", path: "/settings", icon: Settings },
+  { label: "Admin", path: "/admin", icon: ShieldCheck, adminOnly: true },
 ];

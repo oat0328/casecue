@@ -29,6 +29,10 @@ import Reports from '@/pages/Reports';
 import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
 import Settings from '@/pages/Settings';
+import Admin from '@/pages/Admin';
+import ThankYou from '@/pages/ThankYou';
+import Terms from '@/pages/Terms';
+import Privacy from '@/pages/Privacy';
 
 function App() {
   return (
@@ -42,6 +46,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/ThankYou" element={<ThankYou />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
               <Route element={<Layout />}>
                 <Route path="/app" element={<Today />} />
@@ -60,6 +67,7 @@ function App() {
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/admin" element={<Admin />} />
               </Route>
             </Route>
             <Route path="*" element={<PageNotFound />} />
