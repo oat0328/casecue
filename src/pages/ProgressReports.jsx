@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { exportProgressReportPdf } from "@/lib/pdfExport";
 import EmptyState from "@/components/EmptyState";
+import ReportHistory from "@/components/progressReports/ReportHistory";
 
 function TrendIcon({ trend }) {
   if (trend === null || trend === undefined) return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -20,6 +21,7 @@ function TrendIcon({ trend }) {
 export default function ProgressReports() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
+  const { data: savedReports, refetch: refetchReports } = useAsync(() => base44.entities.SavedReport.list('-created_date', 50), []);
   const [studentId, setStudentId] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
@@ -33,7 +35,18 @@ export default function ProgressReports() {
     try {
       const res = await base44.functions.invoke("generateProgressReport", { student_id: studentId });
       setReport(res.data);
-      toast({ title: "Progress report drafted", description: "Review required before sharing." });
+      try {
+        await base44.entities.SavedReport.create({
+          student_id: studentId,
+          student_name: `${res.data.student.first_name} ${res.data.student.last_name}`,
+          report_type: "progress_report",
+          content: res.data,
+        });
+        refetchReports();
+      } catch (saveErr) {
+        console.error("Failed to save report history:", saveErr);
+      }
+      toast({ title: "Progress report drafted", description: "Saved to history. Review required before sharing." });
     } catch (e) {
       const msg = e?.response?.data?.error || e.message;
       toast({ title: "Generation failed", description: msg, variant: "destructive" });
@@ -127,6 +140,13 @@ export default function ProgressReports() {
           description="Select a student and generate a report — CaseCue turns your progress data into parent-ready statements."
         />
       )}
+
+      <h2 className="text-lg font-semibold mb-4 mt-8">Report history</h2>
+      <ReportHistory
+        reports={savedReports}
+        onLoad={(r) => { setStudentId(r.student_id); setReport(r.content); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+        onDelete={async (rid) => { await base44.entities.SavedReport.delete(rid); refetchReports(); }}
+      />
     </div>
   );
 }

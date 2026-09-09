@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import GoalBankPicker from "@/components/goalBank/GoalBankPicker";
+import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
 } from "recharts";
@@ -43,6 +45,7 @@ export default function StudentDetail() {
 
   const [newNote, setNewNote] = useState("");
   const [genLoading, setGenLoading] = useState(false);
+  const [bankOpen, setBankOpen] = useState(false);
 
   if (!student) return <div className="text-center py-20 text-muted-foreground">Loading student…</div>;
 
@@ -183,7 +186,21 @@ export default function StudentDetail() {
         {/* Goals */}
         <TabsContent value="goals">
           <Card className="p-6 mb-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /> Add goal</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold flex items-center gap-2"><Plus className="h-4 w-4 text-primary" /> Add goal</h3>
+              <Button variant="outline" size="sm" onClick={() => setBankOpen(true)}>
+                <Library className="h-3.5 w-3.5 mr-1" /> Goal bank
+              </Button>
+            </div>
+            <GoalBankPicker
+              open={bankOpen}
+              onOpenChange={setBankOpen}
+              onSelect={(g) => {
+                setNewGoal({ ...newGoal, goal_area: g.area, goal_text: g.goal_text, criterion: g.criterion, measurement_method: g.measurement_method });
+                setBankOpen(false);
+                toast({ title: "Template added — edit for this student", description: "Replace placeholders like [Student] and [grade] before saving." });
+              }}
+            />
             <div className="grid sm:grid-cols-2 gap-4">
               <div><Label>Goal area</Label><Input value={newGoal.goal_area} onChange={(e) => setNewGoal({ ...newGoal, goal_area: e.target.value })} placeholder="Reading, Math…" /></div>
               <div><Label>Criterion</Label><Input value={newGoal.criterion} onChange={(e) => setNewGoal({ ...newGoal, criterion: e.target.value })} placeholder="4/5 trials" /></div>

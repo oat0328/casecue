@@ -1,0 +1,41 @@
+{
+  "name": "SavedReport",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "student_name": {
+      "type": "string",
+      "title": "Student Name"
+    },
+    "report_type": {
+      "type": "string",
+      "default": "progress_report",
+      "title": "Report Type"
+    },
+    "content": {
+      "type": "object",
+      "title": "Content"
+    }
+  },
+  "required": [
+    "student_id",
+    "content"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
