@@ -13,6 +13,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import ImportStudentsDialog from "@/components/students/ImportStudentsDialog";
 
 const AVATAR_COLORS = ["violet", "blue", "emerald", "amber", "rose", "cyan"];
 const colorMap = {
@@ -69,24 +70,27 @@ export default function Students() {
         subtitle="Your caseload. Each student has a connected 360° profile."
         icon={Users}
         actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button className="brand-gradient text-white"><Plus className="h-4 w-4 mr-1" /> Add Student</Button></DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Add a student</DialogTitle></DialogHeader>
-              <div className="grid grid-cols-2 gap-4 py-2">
-                <div><Label>First name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
-                <div><Label>Last name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
-                <div><Label>Grade</Label><Input value={form.grade} onChange={(e) => setForm({ ...form, grade: e.target.value })} placeholder="e.g. 3" /></div>
-                <div><Label>Eligibility category</Label><Input value={form.eligibility_category} onChange={(e) => setForm({ ...form, eligibility_category: e.target.value })} placeholder="e.g. SLD" /></div>
-                <div><Label>Annual review due</Label><Input type="date" value={form.annual_review_due} onChange={(e) => setForm({ ...form, annual_review_due: e.target.value })} /></div>
-                <div><Label>Reevaluation due</Label><Input type="date" value={form.reevaluation_due} onChange={(e) => setForm({ ...form, reevaluation_due: e.target.value })} /></div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button onClick={createStudent} disabled={saving} className="brand-gradient text-white">{saving ? "Saving…" : "Add student"}</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <ImportStudentsDialog onImported={refetch} />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild><Button className="brand-gradient text-white"><Plus className="h-4 w-4 mr-1" /> Add Student</Button></DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Add a student</DialogTitle></DialogHeader>
+                <div className="grid grid-cols-2 gap-4 py-2">
+                  <div><Label>First name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
+                  <div><Label>Last name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
+                  <div><Label>Grade</Label><Input value={form.grade} onChange={(e) => setForm({ ...form, grade: e.target.value })} placeholder="e.g. 3" /></div>
+                  <div><Label>Eligibility category</Label><Input value={form.eligibility_category} onChange={(e) => setForm({ ...form, eligibility_category: e.target.value })} placeholder="e.g. SLD" /></div>
+                  <div><Label>Annual review due</Label><Input type="date" value={form.annual_review_due} onChange={(e) => setForm({ ...form, annual_review_due: e.target.value })} /></div>
+                  <div><Label>Reevaluation due</Label><Input type="date" value={form.reevaluation_due} onChange={(e) => setForm({ ...form, reevaluation_due: e.target.value })} /></div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                  <Button onClick={createStudent} disabled={saving} className="brand-gradient text-white">{saving ? "Saving…" : "Add student"}</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         }
       />
 
