@@ -8,6 +8,16 @@ import { CASECUE_SYSTEM_PROMPT } from "../../shared/casecueContext.ts";
 // creates draft goals when none exist, and saves the full extraction to the
 // IEP workspace. Teacher review is always required — nothing is finalized.
 
+// Confidence metadata shape reused for every extracted field.
+const CONF_META = {
+  type: 'object',
+  properties: {
+    level: { type: 'string', enum: ['high', 'medium', 'low', 'missing'] },
+    flags: { type: 'array', items: { type: 'string', enum: ['missing', 'conflicting', 'incomplete', 'unverified'] } },
+    sources: { type: 'array', items: { type: 'string' } }
+  }
+};
+
 const SCHEMA = {
   type: 'object',
   properties: {
@@ -37,7 +47,23 @@ const SCHEMA = {
     progress_information: { type: 'string' },
     behavior_information: { type: 'string' },
     parent_concerns: { type: 'string' },
-    data_gaps: { type: 'array', items: { type: 'string' } }
+    data_gaps: { type: 'array', items: { type: 'string' } },
+    confidence: {
+      type: 'object',
+      properties: {
+        eligibility_category: CONF_META,
+        strengths: CONF_META,
+        areas_of_need: CONF_META,
+        present_levels: CONF_META,
+        accommodations: CONF_META,
+        sdi: CONF_META,
+        services: CONF_META,
+        goals: CONF_META,
+        progress_information: CONF_META,
+        behavior_information: CONF_META,
+        parent_concerns: CONF_META
+      }
+    }
   },
   required: ['strengths', 'areas_of_need', 'present_levels', 'accommodations', 'services', 'goals', 'progress_information', 'behavior_information', 'data_gaps']
 };
@@ -78,6 +104,12 @@ STRICT EXTRACTION RULES:
 - progress_information: any progress data, scores, or growth statements found.
 - behavior_information: any behavior, FBA, or BIP content found.
 - parent_concerns: any parent concerns or parent input documented.
+
+CONFIDENCE RULES (confidence object — one entry per field in the confidence schema):
+- level: "high" ONLY when the information is explicitly and clearly stated in a source document; "medium" when stated once with ambiguous wording or scattered across documents; "low" when pieced together from indirect references; "missing" when not found.
+- flags: "conflicting" if documents give different values; "incomplete" if only partial information exists; "unverified" if the wording cannot be quoted from the source.
+- sources: list each supporting document as "document_type - filename" exactly as labeled in the content below.
+- Never mark a field "high" unless it is literally stated in the documents.
 
 PROCESSED DOCUMENT CONTENT:
 ${docContext}
@@ -156,6 +188,7 @@ Return JSON matching the schema.`;
     await base44.entities.IepWorkspace.update(workspace.id, {
       analysis: {
         auto_extracted: extracted,
+        confidence: extracted.confidence || {},
         extracted_at: new Date().toISOString(),
         source_documents: processed.map((d) => d.id),
       },
@@ -180,6 +213,7 @@ Return JSON matching the schema.`;
 
     return Response.json({
       filled,
+      confidence: extracted.confidence || {},
       kept,
       goals_created: goalsCreated,
       data_gaps: extracted.data_gaps || [],

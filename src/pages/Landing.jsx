@@ -34,6 +34,7 @@ function Nav() {
           <a href="#product" className="hover:text-foreground">Product</a>
           <a href="#pricing" className="hover:text-foreground">Pricing</a>
           <a href="#demo" className="hover:text-foreground">Demo</a>
+          <Link to="/testimonials" className="hover:text-foreground">Testimonials</Link>
           <a href="#faq" className="hover:text-foreground">FAQ</a>
         </nav>
         <div className="hidden md:flex items-center gap-3">
@@ -270,7 +271,7 @@ export default function Landing() {
             <ul className="mt-6 space-y-2.5 text-sm">
               {[
                 "14-day free trial — no credit card required",
-                "Unlimited students",
+                "Your full caseload — no per-student fees",
                 "Every teacher feature included",
                 "Founding price locked while your subscription stays active",
                 "Cancel anytime",
@@ -287,9 +288,9 @@ export default function Landing() {
             <ul className="mt-6 space-y-2.5 text-sm">
               {[
                 "Multi-teacher access",
-                "District-level reporting",
-                "Team training and onboarding",
-                "Priority support",
+                "Pilot program pricing",
+                "Guided onboarding session",
+                "Direct line to the CaseCue team",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2"><Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" /> {item}</li>
               ))}
@@ -320,7 +321,7 @@ export default function Landing() {
               { q: "Does CaseCue write legal IEPs?", a: "No. CaseCue drafts IEP sections to support your work, but every AI output is labeled 'Draft — Educator/IEP Team Review Required.' CaseCue never makes legal or IEP-team decisions." },
               { q: "Is CaseCue FERPA certified?", a: "CaseCue is designed with FERPA-focused privacy and security controls for authorized education use. We do not claim certification. You confirm authorization before uploading student data." },
               { q: "Will AI invent facts about my students?", a: "No. Ask CaseCue only uses your verified records. If information is missing, it tells you it doesn't have enough to answer." },
-              { q: "Can I export or delete my data?", a: "Yes. Settings includes data export and data deletion requests, plus retention controls." },
+              { q: "Can I export or delete my data?", a: "Yes. Settings includes one-click data export and a data deletion request — you stay in control of your information at all times." },
             ].map((f, i) => (
               <AccordionItem key={i} value={`item-${i}`}>
                 <AccordionTrigger>{f.q}</AccordionTrigger>
@@ -350,6 +351,7 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             <a href="mailto:contact@getcasecue.com" className="hover:text-foreground">contact@getcasecue.com</a>
             <a href="#demo" className="hover:text-foreground">Book a Demo</a>
+            <Link to="/testimonials" className="hover:text-foreground">Testimonials</Link>
             <Link to="/terms" className="hover:text-foreground">Terms of Service</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link>
           </div>

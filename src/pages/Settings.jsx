@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical } from "lucide-react";
+import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, Bell, Save, Loader2, Check, FlaskConical } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -17,7 +17,7 @@ import {
 import { DEMO_LABEL, loadDemoCaseload, deleteDemoCaseload } from "@/lib/demoData";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
-import RedeemAccessCode from "@/components/settings/RedeemAccessCode";
+import BillingCard from "@/components/settings/BillingCard";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -31,20 +31,6 @@ export default function Settings() {
   const [deletionReason, setDeletionReason] = useState("");
   const [requestingDeletion, setRequestingDeletion] = useState(false);
   const [notifications, setNotifications] = useState({ deadlines: true, meetings: true, data_reminders: true, weekly_summary: false });
-  const plan = user?.plan || user?.data?.plan || "trial";
-  const [startingCheckout, setStartingCheckout] = useState(false);
-
-  const startCheckout = async () => {
-    setStartingCheckout(true);
-    try {
-      const res = await base44.functions.invoke("create-checkout", { productId: "founding-teacher" });
-      window.location.href = res.data.redirectUrl;
-    } catch (e) {
-      toast({ title: "Could not start checkout", description: e.message, variant: "destructive" });
-      setStartingCheckout(false);
-    }
-  };
-
   const demoStudents = (students || []).filter((s) => s.notes === DEMO_LABEL);
   const [demoBusy, setDemoBusy] = useState(false);
   const [confirmDeleteDemo, setConfirmDeleteDemo] = useState(false);
@@ -186,7 +172,7 @@ export default function Settings() {
 
         <TabsContent value="privacy"><Card className="p-6 max-w-lg">
           <h3 className="font-semibold mb-2">Privacy & security</h3>
-          <p className="text-sm text-muted-foreground mb-4">CaseCue is designed with FERPA-focused privacy and security controls for authorized education use. We do not claim FERPA or HIPAA certification. Features include private document storage, row-level access control, audit logging, minimum-necessary AI, data export, data deletion, and retention controls.</p>
+          <p className="text-sm text-muted-foreground mb-4">CaseCue is designed with FERPA-focused privacy and security controls for authorized education use. We do not claim FERPA or HIPAA certification. Features include private document storage, row-level access control, audit logging, minimum-necessary AI, one-click data export, and data deletion requests.</p>
           <div className="rounded-xl border border-border p-4">
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" checked={acknowledged} onChange={acknowledge} className="mt-0.5" />
@@ -210,25 +196,7 @@ export default function Settings() {
           </Button>
         </Card></TabsContent>
 
-        <TabsContent value="subscription"><Card className="p-6 max-w-lg">
-          <div className="text-sm font-semibold text-primary">Founding Teacher</div>
-          <div className="flex items-end gap-1 mt-1"><span className="text-3xl font-bold">$24.99</span><span className="text-muted-foreground mb-1">/ month</span></div>
-          <p className="text-sm text-muted-foreground mt-1">14-day free trial · Cancel anytime</p>
-          <div className="mt-4 rounded-xl bg-muted p-4 text-sm">
-            {plan === "founding_teacher" && "Your Founding Teacher subscription is active. Thank you for supporting CaseCue!"}
-            {plan === "free" && "Your subscription has ended. Resubscribe anytime to restore full Founding Teacher access."}
-            {plan === "trial" && "You're on the 14-day free trial. Start your subscription now to keep full access when the trial ends — your first 14 days as a subscriber are free."}
-          </div>
-          {plan === "founding_teacher" ? (
-            <p className="text-xs text-muted-foreground mt-3">Your subscription renews monthly and can be canceled anytime through CaseCue support.</p>
-          ) : (
-            <Button onClick={startCheckout} disabled={startingCheckout} className="brand-gradient text-white mt-4">
-              {startingCheckout ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CreditCard className="h-4 w-4 mr-1" />}
-              {startingCheckout ? "Opening checkout…" : "Start subscription — $24.99/mo"}
-            </Button>
-          )}
-          <RedeemAccessCode />
-        </Card></TabsContent>
+        <TabsContent value="subscription"><BillingCard /></TabsContent>
 
         <TabsContent value="notifications"><Card className="p-6 max-w-lg space-y-3">
           {[

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import ProfileReadiness from "@/components/iepStudio/ProfileReadiness";
+import { ConfidenceBadge, ConfidenceFlag } from "@/components/shared/ConfidenceBadge";
 
 const DOC_TYPES = [
   ["IEP", "IEP (previous or current)"],
@@ -31,6 +32,21 @@ const DOC_TYPES = [
 ];
 
 const BUSY = ["pending", "queued", "processing", "ocr_processing"];
+
+// Extracted fields that carry AI confidence + source information.
+const CONFIDENCE_FIELDS = [
+  ["eligibility_category", "Eligibility"],
+  ["strengths", "Strengths"],
+  ["areas_of_need", "Areas of need"],
+  ["present_levels", "Present levels"],
+  ["accommodations", "Accommodations"],
+  ["sdi", "SDI / support language"],
+  ["services", "Services"],
+  ["goals", "Goals"],
+  ["progress_information", "Progress information"],
+  ["behavior_information", "Behavior information"],
+  ["parent_concerns", "Parent concerns"],
+];
 
 const STATUS_CHIP = {
   pending: "bg-muted text-foreground border-border", queued: "bg-muted text-foreground border-border",
@@ -271,6 +287,36 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
             </div>
           </Card>
 
+          {profileResult.confidence && (
+            <Card className="p-5 sm:p-6">
+              <h3 className="font-semibold mb-1">AI confidence &amp; sources</h3>
+              <p className="text-sm text-muted-foreground mb-4">How strongly each extracted section is supported by your uploaded documents.</p>
+              <div className="space-y-2">
+                {CONFIDENCE_FIELDS.map(([field, label]) => {
+                  const meta = profileResult.confidence[field];
+                  if (!meta) return null;
+                  return (
+                    <div key={field} className="flex items-start justify-between gap-3 border-b border-border/60 pb-2">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">{label}</div>
+                        {meta.sources?.length > 0 && (
+                          <div className="text-xs text-muted-foreground mt-0.5">Source: {meta.sources.join(" · ")}</div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 justify-end shrink-0">
+                        {(meta.flags || []).map((f) => <ConfidenceFlag key={f} flag={f} />)}
+                        <ConfidenceBadge level={meta.level} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Confidence reflects how clearly the information appears in your documents — educator review is always required before use in an IEP.
+              </p>
+            </Card>
+          )}
+
           <ProfileReadiness student={student} />
 
           <Card className="p-5 sm:p-6">
@@ -280,7 +326,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
               <Button size="sm" onClick={() => onNavigate?.("builder")}><ArrowRight className="h-3.5 w-3.5 mr-1" />Generate New IEP</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("amendments")}>Generate Amendment</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Script</Button>
-              <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Cheat Sheet</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate IEP Meeting Navigator</Button>
               <Button size="sm" variant="outline" asChild><Link to="/ask-casecue">Generate Parent Summary</Link></Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("goals")}>Generate Progress Summary</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("compliance")}>Review Compliance</Button>

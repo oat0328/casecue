@@ -93,7 +93,7 @@ export default function Today() {
     { label: "Meetings coming up", count: stats.meetingsUpcoming.length, icon: Users, tone: "blue", link: "/meetings" },
     { label: "Students needing data", count: stats.needingData.length, icon: ClipboardCheck, tone: "red", link: "/data-center" },
     { label: "Missing baselines", count: stats.missingBaselines.length, icon: Target, tone: "amber", link: "/iep-studio" },
-    { label: "Missing documentation", count: stats.missingDocs.length, icon: FileX, tone: "red", link: "/documents" },
+    { label: "Missing documentation", count: stats.missingDocs.length, icon: FileX, tone: "red", link: "/iep-studio" },
     { label: "Tasks needing attention", count: (tasks || []).filter((t) => t.status === 'open').length, icon: ListTodo, tone: "default", link: "/app" },
   ];
 
@@ -184,7 +184,6 @@ export default function Today() {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold flex items-center gap-2"><ListTodo className="h-4 w-4 text-primary" /> Open tasks</h2>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/app")}>View all</Button>
           </div>
           {(tasks || []).filter((t) => t.status === 'open').length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">No open tasks. You're all caught up.</p>

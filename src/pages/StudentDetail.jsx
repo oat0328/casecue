@@ -281,7 +281,7 @@ export default function StudentDetail() {
 
         {/* Documents */}
         <TabsContent value="documents">
-          <div className="flex justify-end mb-4"><Button className="brand-gradient text-white" onClick={() => navigate("/documents")}><Plus className="h-4 w-4 mr-1" /> Upload document</Button></div>
+          <div className="flex justify-end mb-4"><Button className="brand-gradient text-white" onClick={() => navigate(`/iep-studio?student=${id}`)}><Plus className="h-4 w-4 mr-1" /> Open Upload Center</Button></div>
           <div className="space-y-2">
             {(documents || []).map((d) => (
               <Card key={d.id} className="p-4 flex items-center justify-between">
@@ -295,7 +295,7 @@ export default function StudentDetail() {
 
         {/* Meetings */}
         <TabsContent value="meetings">
-          <div className="flex justify-end mb-4"><Button className="brand-gradient text-white" onClick={() => navigate("/meetings")}><Plus className="h-4 w-4 mr-1" /> Schedule meeting</Button></div>
+          <div className="flex justify-end mb-4"><Button className="brand-gradient text-white" onClick={() => navigate(`/meetings?student=${id}`)}><Plus className="h-4 w-4 mr-1" /> Schedule meeting</Button></div>
           <div className="space-y-2">
             {(meetings || []).map((m) => (
               <Card key={m.id} className="p-4"><div className="flex justify-between"><div className="text-sm font-medium">{m.title}</div><span className="text-xs text-muted-foreground">{m.date}</span></div><div className="text-xs text-muted-foreground mt-0.5">{m.meeting_type} · {m.status}</div></Card>

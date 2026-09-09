@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UsersRound, Plus, Sparkles, Loader2, Trash2, Calendar } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -30,6 +30,16 @@ export default function MeetingCenter() {
   const [saving, setSaving] = useState(false);
   const [prep, setPrep] = useState(null);
   const [preparing, setPreparing] = useState(null);
+
+  // Preserve student context: /meetings?student=<id> opens the schedule
+  // dialog with that student already preselected.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("student");
+    if (p) {
+      setForm((f) => ({ ...f, student_id: p }));
+      setOpen(true);
+    }
+  }, []);
 
   const studentName = (id) => { const s = (students || []).find((x) => x.id === id); return s ? `${s.first_name} ${s.last_name}` : "—"; };
 

@@ -10,6 +10,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import StudentSelector from "@/components/forms/StudentSelector";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import UploadCenterTab from "@/components/iepStudio/UploadCenterTab";
+import FerpaUploadNotice from "@/components/shared/FerpaUploadNotice";
 import WorkspacePipeline from "@/components/iepStudio/WorkspacePipeline";
 import SectionDrafter from "@/components/iepStudio/SectionDrafter";
 import StudentOverviewTab from "@/components/iepStudio/StudentOverviewTab";
@@ -43,7 +44,9 @@ const TAB_TIPS = [
 
 export default function IEPStudio() {
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
-  const [studentId, setStudentId] = useState("");
+  // /iep-studio?student=<id> deep-links with the student preselected so
+  // workflows that link here never make the teacher reselect.
+  const [studentId, setStudentId] = useState(() => new URLSearchParams(window.location.search).get("student") || "");
   const [tab, setTab] = useState("overview");
   const [meetingAuto, setMeetingAuto] = useState(false);
   const student = (students || []).find((s) => s.id === studentId);
@@ -106,6 +109,9 @@ export default function IEPStudio() {
         {/* The Upload Center lives directly under the student selector — the only
             upload point in the app. Upload → automatic reading → AI analysis →
             profile pre-fill → snapshot & one-click actions, all on screen. */}
+        <div className="mb-4">
+          <FerpaUploadNotice />
+        </div>
         <div className="mb-8">
           <UploadCenterTab key={student.id} student={student} onProfileBuilt={() => setTab("overview")} onNavigate={setTab} />
         </div>
