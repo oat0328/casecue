@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, FileEdit, ShieldCheck, FolderOpen, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound,
-  FileBarChart, FlaskConical, MessageCircle, Settings
+  FileBarChart, FlaskConical, MessageCircle, Settings, FileText
 } from "lucide-react";
 
 export const navItems = [
@@ -17,6 +17,7 @@ export const navItems = [
   { label: "Gradebook", path: "/gradebook", icon: GraduationCap },
   { label: "Meeting Center", path: "/meetings", icon: UsersRound },
   { label: "Reports", path: "/reports", icon: FileBarChart },
+  { label: "Progress Reports", path: "/progress-reports", icon: FileText },
   { label: "Practice Lab", path: "/practice-lab", icon: FlaskConical },
   { label: "Ask CaseCue", path: "/ask-casecue", icon: MessageCircle },
   { label: "Settings", path: "/settings", icon: Settings },

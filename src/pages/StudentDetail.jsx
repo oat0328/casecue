@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download } from "lucide-react";
+import { exportIepPdf } from "@/lib/pdfExport";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -130,7 +131,10 @@ export default function StudentDetail() {
             <Button onClick={saveProfile} disabled={savingProfile} className="brand-gradient text-white"><Save className="h-4 w-4 mr-1" /> {savingProfile ? "Saving…" : "Save"}</Button>
           </div>
         ) : (
-          <Button variant="outline" onClick={startEdit}>Edit profile</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => exportIepPdf(student, goals || [])}><Download className="h-4 w-4 mr-1" /> Export IEP (PDF)</Button>
+            <Button variant="outline" onClick={startEdit}>Edit profile</Button>
+          </div>
         )}
       </div>
 

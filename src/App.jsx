@@ -26,6 +26,7 @@ import SubPlans from '@/pages/SubPlans';
 import Gradebook from '@/pages/Gradebook';
 import MeetingCenter from '@/pages/MeetingCenter';
 import Reports from '@/pages/Reports';
+import ProgressReports from '@/pages/ProgressReports';
 import PracticeLab from '@/pages/PracticeLab';
 import AskCaseCue from '@/pages/AskCaseCue';
 import Settings from '@/pages/Settings';
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/gradebook" element={<Gradebook />} />
                 <Route path="/meetings" element={<MeetingCenter />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/progress-reports" element={<ProgressReports />} />
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/settings" element={<Settings />} />
