@@ -106,6 +106,11 @@ export function exportProgressReportPdf(student, report) {
   }
   if (!report.goal_reports?.length) y = writeBlock(doc, y, "No goal reports in this draft.", { size: 10, color: [110, 110, 110] });
 
+  if (report.teacher_notes) {
+    y = writeBlock(doc, y, "Teacher Notes", { size: 12, bold: true, color: [109, 40, 217], gap: 3 });
+    y = writeBlock(doc, y, report.teacher_notes, { size: 10, color: [90, 90, 90] });
+  }
+
   y = writeBlock(doc, y, "Overall Summary", { size: 12, bold: true, color: [109, 40, 217], gap: 3 });
   y = writeBlock(doc, y, report.overall_summary || "—");
 

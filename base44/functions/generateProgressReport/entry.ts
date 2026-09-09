@@ -55,6 +55,8 @@ export default async function(req) {
     const stats = goals.map((g) => computeStats(g, progress.filter((p) => p.goal_id === g.id)));
     const unassigned = progress.filter((p) => !p.goal_id).slice(-10);
 
+    const teacherNotes = (student.notes || '').toString().slice(-1500).trim();
+
     const contextLines = [
       `STUDENT: ${student.first_name} ${student.last_name}, Grade ${student.grade || '?'}, ${student.eligibility_category || 'eligibility not on file'}`,
       `REPORTING PERIOD DATA (use only this — never invent):`,
@@ -72,6 +74,10 @@ export default async function(req) {
     if (unassigned.length) {
       contextLines.push(`ADDITIONAL PROGRESS ENTRIES NOT LINKED TO A GOAL:`);
       unassigned.forEach((p) => contextLines.push(`  ${p.date}: ${p.correct ?? '?'}/${p.total ?? '?'} (${p.percentage ?? '?'}%) — ${p.observation_notes || ''}`));
+    }
+    if (teacherNotes) {
+      contextLines.push(`TEACHER CASE NOTES (verified — weave relevant observations into the statements where appropriate):`);
+      contextLines.push(teacherNotes);
     }
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}
@@ -115,6 +121,7 @@ TASK: Draft a quarterly progress report for this student's IEP goals.
       stats,
       goal_reports,
       overall_summary,
+      teacher_notes: teacherNotes,
     });
   } catch (error) {
     console.error('generateProgressReport: failed', error);
