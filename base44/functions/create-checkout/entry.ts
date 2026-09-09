@@ -15,6 +15,7 @@
 // (order.checkoutId === checkoutSession.id). Skipping this write makes fulfillment impossible.
 
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
+import { validatePromo, applyPromoPricing } from "../../shared/promoValidation.ts";
 
 const CONSTRUCT_URL = "https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct";
 
@@ -91,16 +92,40 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     }
     const productName = plan.name;
-    const price = plan.price;
     const currency = "USD";
-    // Monthly auto-renewing subscription with a 14-day free trial.
+    const basePrice = parseFloat(plan.price);
+
+    // ---- Promo code (optional). ALWAYS re-validated + priced SERVER-SIDE here — ----
+    // the client's "applied" preview is never trusted; this is the enforcement point.
+    const promoCodeInput = String(body.promo_code ?? "").trim().toUpperCase();
+    let promo: any = null;
+    let finalPrice = basePrice;
+    let trialPeriod: { frequency: string; interval: number } = { frequency: "DAY", interval: 14 };
+    let billingNote = "";
+    if (promoCodeInput) {
+      const check = await validatePromo(base44, promoCodeInput, appUser);
+      if (!check.ok) {
+        return new Response(JSON.stringify({ error: check.reason }), { status: 400 });
+      }
+      promo = check.promo;
+      const pricing = applyPromoPricing(promo, basePrice);
+      finalPrice = pricing.finalPrice;
+      trialPeriod = pricing.trialPeriod;
+      billingNote = pricing.billingNote;
+    }
+
+    const price = finalPrice.toFixed(2);
+    const description = promo
+      ? `Full CaseCue access. ${billingNote} Billed $${price}/month. Cancel anytime.`
+      : `Full CaseCue access. 14-day free trial, then $${price}/month. Cancel anytime.`;
+    // Monthly auto-renewing subscription; the free-trial period depends on the applied promo.
     const subscriptionInfo = {
       subscriptionSettings: {
         frequency: "MONTH",
-        freeTrialPeriod: { frequency: "DAY", interval: 14 },
+        freeTrialPeriod: trialPeriod,
       },
       title: plan.title,
-      description: plan.description,
+      description,
     };
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes in this app: the
     // returning buyer is often anonymous, so a missing or login-gated route strands a paid customer.
@@ -172,6 +197,31 @@ Deno.serve(async (req: Request) => {
       amount: total.toFixed(2),
       currency,
     });
+
+    // Record the promo redemption + audit entry now that the checkout session exists.
+    if (promo) {
+      try {
+        await base44.asServiceRole.entities.PromoCode.update(promo.id, {
+          redemptions: [
+            ...(promo.redemptions || []),
+            {
+              user_id: appUser?.id ?? null,
+              user_email: appUser?.email ?? null,
+              redeemed_at: new Date().toISOString(),
+              checkout_id: checkoutSessionId,
+            },
+          ],
+        });
+        await base44.asServiceRole.entities.AuditLog.create({
+          action: "promo_code_redeemed",
+          entity_type: "PromoCode",
+          entity_id: promo.id,
+          details: `${promo.code} redeemed by ${appUser?.email || "anonymous buyer"} — checkout ${checkoutSessionId}, price $${price}`,
+        });
+      } catch (e) {
+        console.error("create-checkout: failed to record promo redemption", e);
+      }
+    }
 
     return new Response(JSON.stringify({ redirectUrl }), {
       status: 200,

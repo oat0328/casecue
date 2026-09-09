@@ -9,6 +9,7 @@ import OverviewStats from "@/components/platform/OverviewStats";
 import CustomersTable from "@/components/platform/CustomersTable";
 import RecentLists from "@/components/platform/RecentLists";
 import AccessCodeManager from "@/components/platform/AccessCodeManager";
+import PromoCodeManager from "@/components/platform/PromoCodeManager";
 
 export default function PlatformAdmin() {
   const { user } = useAuth();
@@ -51,6 +52,7 @@ export default function PlatformAdmin() {
             <TabsTrigger value="customers">Customers</TabsTrigger>
             <TabsTrigger value="activity">Activity &amp; alerts</TabsTrigger>
             <TabsTrigger value="codes">Access codes</TabsTrigger>
+            <TabsTrigger value="promo">Promo codes</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="mt-6">
             <OverviewStats stats={stats} />
@@ -63,6 +65,9 @@ export default function PlatformAdmin() {
           </TabsContent>
           <TabsContent value="codes" className="mt-6">
             <AccessCodeManager />
+          </TabsContent>
+          <TabsContent value="promo" className="mt-6">
+            <PromoCodeManager />
           </TabsContent>
         </Tabs>
       )}

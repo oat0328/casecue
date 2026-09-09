@@ -1,0 +1,132 @@
+{
+  "name": "PromoCode",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "title": "Code"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "discount_type": {
+      "type": "string",
+      "enum": [
+        "percent_off",
+        "fixed_off",
+        "trial_extension",
+        "first_month_free",
+        "months_free"
+      ],
+      "default": "percent_off",
+      "title": "Discount Type"
+    },
+    "value": {
+      "type": "number",
+      "default": 0,
+      "title": "Discount Value (% / dollars / days / months)"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Expiration Date"
+    },
+    "max_uses": {
+      "type": "number",
+      "default": 0,
+      "title": "Maximum Uses (0 = unlimited)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "title": "Active"
+    },
+    "single_use_per_user": {
+      "type": "boolean",
+      "default": false,
+      "title": "Single Use Per User"
+    },
+    "allowed_email_domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Email Domains (empty = any)"
+    },
+    "invite_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Invite-Only Emails (empty = open)"
+    },
+    "founding_member": {
+      "type": "boolean",
+      "default": false,
+      "title": "Founding Member Badge"
+    },
+    "beta_tester": {
+      "type": "boolean",
+      "default": false,
+      "title": "Beta Tester Badge"
+    },
+    "redemptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "user_email": {
+            "type": "string"
+          },
+          "redeemed_at": {
+            "type": "string"
+          },
+          "checkout_id": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Redemptions"
+    },
+    "validation_count": {
+      "type": "number",
+      "default": 0,
+      "title": "Times Validated (interest tracking)"
+    }
+  },
+  "required": [
+    "code",
+    "discount_type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
