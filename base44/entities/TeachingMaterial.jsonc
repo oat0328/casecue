@@ -1,0 +1,103 @@
+{
+  "name": "TeachingMaterial",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "material_type": {
+      "type": "string",
+      "enum": [
+        "assignment",
+        "worksheet",
+        "reading_passage",
+        "lesson_material",
+        "presentation",
+        "other"
+      ],
+      "default": "assignment",
+      "title": "Material Type"
+    },
+    "subject": {
+      "type": "string",
+      "title": "Subject"
+    },
+    "grade": {
+      "type": "string",
+      "title": "Grade"
+    },
+    "skill": {
+      "type": "string",
+      "title": "Skill"
+    },
+    "filename": {
+      "type": "string",
+      "title": "Filename"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "File URL"
+    },
+    "student_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Student IDs"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Directions / Teacher Notes"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

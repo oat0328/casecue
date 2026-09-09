@@ -21,6 +21,8 @@ export default async function(req) {
     const lessons = await base44.entities.Lesson.list('-updated_date', 20);
     const schedule = await base44.entities.ScheduleEntry.list('day', 50);
     const goals = await base44.entities.Goal.list('-updated_date', 200);
+    const materials = await base44.entities.TeachingMaterial.list('-updated_date', 20);
+    const goalAssignments = await base44.entities.SavedReport.filter({ report_type: 'goal_assignment' }, '-created_date', 10);
 
     const sources = [];
     const missing = [];
@@ -60,6 +62,30 @@ export default async function(req) {
       missing.push('Lesson plans with student materials');
     }
 
+    if (materials.length) {
+      lines.push('\nTEACHER-UPLOADED ASSIGNMENTS (real student work):');
+      materials.forEach((m) => {
+        lines.push(`- "${m.title}" (${m.material_type || 'material'}${m.subject ? `, ${m.subject}` : ''}${m.grade ? `, grade ${m.grade}` : ''}) — file: ${m.filename || 'uploaded file'}${m.notes ? ` | Teacher notes: ${m.notes}` : ''}`);
+      });
+      sources.push(`Teacher uploads (${materials.length})`);
+    }
+
+    if (goalAssignments.length) {
+      lines.push('\nGOAL-ALIGNED ASSIGNMENTS (AI Generated, saved by the teacher — include these in full):');
+      goalAssignments.forEach((r) => {
+        const a = r.content?.assignment || {};
+        lines.push(`- "${a.activity_title || 'Goal assignment'}" for ${r.student_name || 'student'} (${r.content?.goal_area || 'goal'}):`);
+        lines.push(`  Activity: ${String(a.activity || '').slice(0, 1500)}`);
+        (a.items || []).slice(0, 8).forEach((it, i) => {
+          lines.push(`  ${i + 1}. ${it.question}`);
+          lines.push(`     ANSWER KEY: ${it.answer}`);
+        });
+        if (a.probe) lines.push(`  Progress probe: ${String(a.probe).slice(0, 800)}`);
+        if (a.accommodations_reminder) lines.push(`  Accommodations: ${a.accommodations_reminder}`);
+      });
+      sources.push(`Goal assignments (${goalAssignments.length})`);
+    }
+
     const goalAreas = [...new Set(goals.map((g) => g.goal_area).filter(Boolean))];
     if (goalAreas.length) {
       lines.push(`\nGOAL AREAS ON FILE (verified): ${goalAreas.join(', ')}`);
@@ -71,9 +97,10 @@ export default async function(req) {
 
     lines.push(`\nPlan type: ${planType}${date ? ` | Date: ${date}` : ''}`);
 
-    const assignmentRule = lessonsWithMaterials.length
-      ? 'Use the lesson materials and practice materials provided, and label each assignment with its source (Lesson Studio, Teacher Upload, or Connected Resource). Do not invent assignments.'
-      : "No lesson materials exist. Instead, generate practical, printable emergency activities based on the students' grade levels and the goal areas on file, and label each one 'AI Generated.' Make them usable by a substitute with no preparation.";
+    const hasRealWork = lessonsWithMaterials.length || materials.length || goalAssignments.length;
+    const assignmentRule = hasRealWork
+      ? "Use ONLY the assignments listed in the data below (Lesson Studio materials, teacher uploads, and saved goal assignments). Include each assignment's full directions and answer key where provided, label each with its source exactly as given, and do not invent new assignments."
+      : "No assignments exist anywhere in the account. Instead, generate practical, printable emergency activities based on the students' grade levels and the goal areas on file, and label each one 'AI Generated.' Make them usable by a substitute with no preparation.";
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}
 
@@ -84,10 +111,12 @@ Required sections, in this order:
 2. DAILY SCHEDULE — from the weekly schedule data; if none exists write exactly: "Schedule not recorded in CaseCue — check with the front office."
 3. STUDENT GROUPS & SUPPORTS — per student/group: services, minutes, accommodations, and any behavior supports from the records.
 4. ASSIGNMENTS FOR THE DAY — ${assignmentRule}
-5. PROGRESS MONITORING — what the substitute should mark (participation, completion, behavior notes) without collecting formal IEP data.
-6. EMERGENCY PROCEDURES — write "Follow the school's own emergency procedures" and list what to ask the front office for. Do not invent school-specific procedures.
-7. END-OF-DAY CHECKLIST — 5-8 items (materials returned, notes left for the teacher, etc.).
-8. MISSING INFORMATION — list exactly: ${missing.join('; ')}.
+5. ANSWER KEYS (TEACHER COPY ONLY) — for each assignment above that has one, restate the answers clearly under a heading labeled "Teacher Copy Only — do not hand to students." For uploaded files with no key in CaseCue, write "Answer key is inside the uploaded file."
+6. TEACHER NOTES — any teacher notes or directions attached to the lessons or uploaded materials; if there are none, write exactly "No teacher notes provided."
+7. PROGRESS MONITORING — what the substitute should mark (participation, completion, behavior notes) without collecting formal IEP data.
+8. EMERGENCY PROCEDURES — write "Follow the school's own emergency procedures" and list what to ask the front office for. Do not invent school-specific procedures.
+9. END-OF-DAY CHECKLIST — 5-8 items (materials returned, notes left for the teacher, etc.).
+10. MISSING INFORMATION — list exactly: ${missing.join('; ')}.
 
 ${lines.join('\n')}
 
@@ -100,7 +129,7 @@ Return the plan as structured markdown text. End with "Draft — Educator Review
       content,
       sources,
       missing,
-      has_materials: lessonsWithMaterials.length > 0,
+      has_materials: Boolean(hasRealWork),
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
