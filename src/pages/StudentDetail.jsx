@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import GoalBankPicker from "@/components/goalBank/GoalBankPicker";
+import GoalBoard from "@/components/students/GoalBoard";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
@@ -181,6 +182,7 @@ export default function StudentDetail() {
               <div><Label>Services</Label>{editing ? <Textarea rows={2} value={draft.services?.join(", ")} onChange={(e) => setDraft({ ...draft, services: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} /> : <p className="text-sm whitespace-pre-wrap mt-1">{student.services?.join(", ") || "—"}</p>}</div>
             </div>
           </Card>
+          <GoalBoard student={student} goals={goals || []} progress={progress || []} />
         </TabsContent>
 
         {/* Goals */}

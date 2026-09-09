@@ -11,7 +11,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import StudentSelector from "@/components/forms/StudentSelector";
 
-const DOC_TYPES = ["IEP", "Evaluation", "BIP", "504", "Progress Report", "Assessment Report", "Other"];
+const DOC_TYPES = [
+  "IEP", "Evaluation", "Eligibility Report", "MDT Report", "Psychological Report",
+  "BIP", "FBA", "504", "Progress Report", "Assessment Report", "Report Card",
+  "Teacher Input", "Parent Input", "Service Provider Report", "Transition Assessment", "Other",
+];
 
 export default function Documents() {
   const { toast } = useToast();
