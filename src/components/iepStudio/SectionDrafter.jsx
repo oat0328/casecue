@@ -27,7 +27,7 @@ const SAVE_TARGET = {
 
 // Single-section AI drafter: pick a section, add instructions, draft, edit, and
 // save to the student profile. Lives inside IEP Studio.
-export default function SectionDrafter({ student }) {
+export default function SectionDrafter({ student, sections = SECTIONS }) {
   const { toast } = useToast();
   const [section, setSection] = useState("present_levels");
   const [extra, setExtra] = useState("");
@@ -62,7 +62,7 @@ export default function SectionDrafter({ student }) {
       <Card className="p-6 lg:col-span-1 h-fit">
         <Label className="text-sm font-semibold block">Section to draft</Label>
         <div className="mt-2 space-y-1.5">
-          {SECTIONS.map((s) => (
+          {sections.map((s) => (
             <button key={s.key} onClick={() => { setSection(s.key); setDraft(""); }} className={`w-full text-left rounded-lg px-3 py-2 text-sm transition-colors ${section === s.key ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-muted-foreground"}`}>
               {s.label}
             </button>
@@ -78,7 +78,7 @@ export default function SectionDrafter({ student }) {
 
       <Card className="p-6 lg:col-span-2">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">{SECTIONS.find((s) => s.key === section)?.label}</h3>
+          <h3 className="font-semibold">{sections.find((s) => s.key === section)?.label}</h3>
           {draft && <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => { navigator.clipboard?.writeText(draft); toast({ title: "Copied" }); }}><Copy className="h-3.5 w-3.5 mr-1" /> Copy</Button>
             <Button size="sm" onClick={saveToProfile} disabled={saving} className="brand-gradient text-white"><Save className="h-3.5 w-3.5 mr-1" /> {saving ? "Saving…" : "Save to profile"}</Button>

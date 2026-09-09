@@ -29,7 +29,8 @@ export default async function(req) {
       "sdi": "Draft Specially Designed Instruction (SDI) / support language connected to the student's needs.",
       "progress_summary": "Draft a progress summary based ONLY on the recent progress data provided.",
       "meeting_notes": "Draft meeting notes based on the verified context.",
-      "parent_communication": "Draft a parent communication message based on verified context."
+      "parent_communication": "Draft a parent communication message based on verified context.",
+      "student_summary": "Write a complete AI Student Summary: a concise snapshot covering eligibility, strengths, areas of need, present levels, accommodations, services, and current progress — based ONLY on verified data."
     };
     const guide = sectionGuide[sectionType] || `Draft the following IEP section: ${sectionType}.`;
 

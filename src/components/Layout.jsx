@@ -9,6 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import AskCaseCueButton from "@/components/AskCaseCueButton";
+import FloatingFeedbackButton from "@/components/feedback/FloatingFeedbackButton";
 import NotificationsBell from "@/components/NotificationsBell";
 import { cn } from "@/lib/utils";
 
@@ -135,6 +136,7 @@ export default function Layout() {
       </div>
 
       <AskCaseCueButton />
+      <FloatingFeedbackButton />
     </div>
   );
 }

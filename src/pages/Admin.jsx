@@ -9,6 +9,7 @@ import UsersTable from "@/components/admin/UsersTable";
 import PurchasesTable from "@/components/admin/PurchasesTable";
 import DemoRequestsTable from "@/components/admin/DemoRequestsTable";
 import DistrictAnalytics from "@/components/admin/DistrictAnalytics";
+import FeedbackReviewCenter from "@/components/admin/FeedbackReviewCenter";
 
 const PLAN_PRICE = 24.99;
 
@@ -60,6 +61,8 @@ export default function Admin() {
       </div>
 
       <DistrictAnalytics />
+
+      <FeedbackReviewCenter />
 
       <Card className="p-6 mb-6">
         <h2 className="text-lg font-semibold mb-1">Registered users</h2>

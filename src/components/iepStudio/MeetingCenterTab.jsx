@@ -1,0 +1,109 @@
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Sparkles, Loader2, Copy, AlertTriangle, ClipboardList, CalendarPlus } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { Card } from "@/components/ui/cards";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+
+const PACKET_FIELDS = [
+  ["student_snapshot", "Student Snapshot"],
+  ["eligibility", "Eligibility"],
+  ["strengths", "Strengths"],
+  ["areas_of_need", "Areas of Need"],
+  ["present_levels", "Present Levels"],
+  ["goals", "Goals"],
+  ["services", "Services"],
+  ["accommodations", "Accommodations"],
+  ["behavior_supports", "Behavior Supports"],
+  ["parent_concerns", "Parent Concerns"],
+  ["progress_summary", "Progress Summary"],
+  ["team_recommendations", "Team Recommendations"],
+  ["questions_for_discussion", "Questions for Discussion"],
+];
+
+// Tab 9 — Meeting Command Center: one click generates the full Meeting Packet
+// and a read-aloud script that walks through EVERY page of the uploaded IEP.
+export default function MeetingCenterTab({ student }) {
+  const { toast } = useToast();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const generate = async () => {
+    setLoading(true);
+    setData(null);
+    try {
+      const res = await base44.functions.invoke("generateMeetingScript", { student_id: student.id });
+      setData(res.data);
+    } catch (e) {
+      toast({ title: "Generation failed", description: e.message, variant: "destructive" });
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="p-5">
+        <h3 className="font-semibold mb-1">IEP Meeting Command Center</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Generates a complete meeting packet and a full spoken script that walks through <strong>every page</strong> of {student.first_name}'s uploaded IEP, in order, in natural read-aloud language.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={generate} disabled={loading} className="brand-gradient text-white">
+            {loading ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Reading every page…</> : <><Sparkles className="h-4 w-4 mr-1" /> Generate Meeting Packet & Script</>}
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/meeting-navigator"><ClipboardList className="h-4 w-4 mr-1.5" /> Meeting Navigator (in-meeting mode)</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/meetings"><CalendarPlus className="h-4 w-4 mr-1.5" /> Schedule a meeting</Link>
+          </Button>
+        </div>
+        {loading && <p className="text-xs text-muted-foreground mt-3">This reads the full page-by-page IEP summary — it can take a minute.</p>}
+      </Card>
+
+      {data && (
+        <>
+          <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+            <span><strong>Draft — Educator/IEP Team Review Required.</strong> Verify every statement against the IEP before reading it in the meeting.</span>
+          </div>
+
+          <h3 className="font-semibold">Meeting packet</h3>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {PACKET_FIELDS.map(([key, label]) => (
+              <Card key={key} className="p-4">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{label}</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{data.packet?.[key] || "—"}</p>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold">Full meeting script</h3>
+              <Button variant="outline" size="sm" onClick={() => { navigator.clipboard?.writeText(data.script || ""); toast({ title: "Copied" }); }}>
+                <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{data.script}</p>
+          </Card>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="p-5">
+              <h3 className="font-semibold mb-2">Talking points</h3>
+              <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted-foreground">
+                {(data.talking_points || []).map((t, i) => <li key={i}>{t}</li>)}
+              </ul>
+            </Card>
+            <Card className="p-5">
+              <h3 className="font-semibold mb-2">Important changes to highlight</h3>
+              <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted-foreground">
+                {(data.important_changes || []).map((t, i) => <li key={i}>{t}</li>)}
+              </ul>
+            </Card>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

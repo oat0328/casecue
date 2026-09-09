@@ -42,6 +42,7 @@ import SessionTracker from '@/pages/SessionTracker';
 import ThankYou from '@/pages/ThankYou';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
+import Testimonials from '@/pages/Testimonials';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
             <Route path="/platform-owner-setup" element={<PlatformOwnerSetup />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/testimonials" element={<Testimonials />} />
             <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/org-setup" element={<OrgSetup />} />
