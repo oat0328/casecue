@@ -36,6 +36,7 @@ import Settings from '@/pages/Settings';
 import Admin from '@/pages/Admin';
 import OrgSetup from '@/pages/OrgSetup';
 import PlatformAdmin from '@/pages/PlatformAdmin';
+import IepWorkspace from '@/pages/IepWorkspace';
 import ThankYou from '@/pages/ThankYou';
 import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/students" element={<Students />} />
                 <Route path="/students/:id" element={<StudentDetail />} />
                 <Route path="/iep-studio" element={<IEPStudio />} />
+                <Route path="/iep-workspace" element={<IepWorkspace />} />
                 <Route path="/iep-review" element={<IEPReview />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/data-center" element={<DataCenter />} />

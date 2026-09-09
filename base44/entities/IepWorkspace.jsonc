@@ -1,0 +1,87 @@
+{
+  "name": "IepWorkspace",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "documents",
+        "analysis",
+        "draft",
+        "review",
+        "exported"
+      ],
+      "default": "documents",
+      "title": "Status"
+    },
+    "analysis": {
+      "type": "object",
+      "title": "Document Analysis"
+    },
+    "draft": {
+      "type": "object",
+      "title": "IEP Draft"
+    },
+    "placement": {
+      "type": "object",
+      "title": "Placement Worksheet"
+    },
+    "review": {
+      "type": "object",
+      "title": "CaseCue Review"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
+  },
+  "required": [
+    "student_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

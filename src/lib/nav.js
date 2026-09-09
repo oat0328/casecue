@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, FileEdit, ShieldCheck, FolderOpen, BarChart3,
+  LayoutDashboard, Users, FileEdit, Files, ShieldCheck, FolderOpen, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
   FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown
 } from "lucide-react";
@@ -8,6 +8,7 @@ export const navItems = [
   { label: "Today", path: "/app", icon: LayoutDashboard },
   { label: "Students", path: "/students", icon: Users },
   { label: "IEP Studio", path: "/iep-studio", icon: FileEdit },
+  { label: "New IEP Workspace", path: "/iep-workspace", icon: Files },
   { label: "IEP Review", path: "/iep-review", icon: ShieldCheck },
   { label: "Documents", path: "/documents", icon: FolderOpen },
   { label: "Data Center", path: "/data-center", icon: BarChart3 },
