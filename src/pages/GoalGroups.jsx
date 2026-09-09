@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Network, Plus } from "lucide-react";
+import { Network, Plus, FileDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -9,14 +9,17 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import EmptyState from "@/components/EmptyState";
 import SessionLogDialog from "@/components/goalGroups/SessionLogDialog";
+import GroupReports from "@/components/goalGroups/GroupReports";
 
 export default function GoalGroups() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.filter({ status: "active" }, '-updated_date', 200), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: sessions, refetch: refetchSessions } = useAsync(() => base44.entities.SessionLog.list('-date', 200), []);
+  const { data: progress } = useAsync(() => base44.entities.ProgressData.list('-date', 500), []);
 
   const [dialogGroup, setDialogGroup] = useState(null);
+  const [exportGroup, setExportGroup] = useState(null);
 
   const studentMap = new Map((students || []).map((s) => [s.id, s]));
 
@@ -86,9 +89,14 @@ export default function GoalGroups() {
                       {g.students.length} student{g.students.length === 1 ? "" : "s"} · {groupSessions.length} session{groupSessions.length === 1 ? "" : "s"} logged · {totalMinutes} total minutes
                     </p>
                   </div>
-                  <Button size="sm" className="brand-gradient text-white shrink-0" onClick={() => setDialogGroup(g)}>
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Log session
-                  </Button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Button size="sm" variant="outline" onClick={() => setExportGroup(g)} title="Export this group's report">
+                      <FileDown className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" className="brand-gradient text-white" onClick={() => setDialogGroup(g)}>
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Log session
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {g.students.map((s) => (
@@ -119,6 +127,17 @@ export default function GoalGroups() {
           })}
         </div>
       )}
+
+      <GroupReports
+        groups={groups}
+        students={students || []}
+        goals={goals || []}
+        progress={progress || []}
+        sessions={sessions || []}
+        selectedGroup={exportGroup}
+        onClear={() => setExportGroup(null)}
+        onSelectGroup={setExportGroup}
+      />
 
       <SessionLogDialog
         open={!!dialogGroup}
