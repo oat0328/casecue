@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import DeadlineAlerts from "@/components/deadlineAlerts/DeadlineAlerts";
+import DemoTour from "@/components/onboarding/DemoTour";
 import { useAuth } from "@/lib/AuthContext";
 import OnboardingTour from "@/components/onboarding/OnboardingTour";
 import GettingStartedCard from "@/components/onboarding/GettingStartedCard";
@@ -105,6 +106,7 @@ export default function Today() {
       <DeadlineAlerts students={students} />
 
       <OnboardingTour />
+      <DemoTour />
       <GettingStartedCard students={students} goals={goals} progress={progress} />
 
       {/* Time saved */}

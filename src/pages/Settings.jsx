@@ -246,7 +246,7 @@ export default function Settings() {
         <TabsContent value="demo"><Card className="p-6 max-w-lg">
           <h3 className="font-semibold mb-2">Fictional demo data</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Load five completely fictional students — with goals, progress data, meetings, and documents — to safely explore every part of CaseCue.
+            Load ten completely fictional students — with goals, progress data, meetings, and documents — to safely explore every part of CaseCue.
             Every demo record is clearly labeled "{DEMO_LABEL}" and never mixes with your real students.
           </p>
           <div className="rounded-xl border border-border bg-muted/50 p-4 text-sm mb-4">

@@ -73,13 +73,14 @@ export default function Onboarding() {
       await persist({ choice });
       await base44.auth.updateMe({ onboarding_completed: true });
       if (choice === "demo") {
+        sessionStorage.setItem("casecue_demo_tour", "1");
         const res = await loadDemoCaseload();
         toast({
           title: res.created ? "Demo caseload loaded" : "Demo caseload ready",
-          description: "Five fictional students — clearly labeled — are ready to explore.",
+          description: `${res.students} fictional students — clearly labeled — are ready to explore.`,
         });
       }
-      navigate("/students");
+      navigate(choice === "demo" ? "/app" : "/students");
     } catch (e) {
       toast({ title: "Something went wrong", description: e.message, variant: "destructive" });
     } finally {
@@ -197,7 +198,7 @@ export default function Onboarding() {
                 className="rounded-2xl border-2 border-border p-5 text-left hover:border-primary/50 transition-colors disabled:opacity-50">
                 {saving ? <Loader2 className="h-6 w-6 text-primary mb-3 animate-spin" /> : <FlaskConical className="h-6 w-6 text-primary mb-3" />}
                 <div className="font-semibold">Explore With Fictional Demo Data</div>
-                <p className="text-sm text-muted-foreground mt-1">Five clearly-labeled fictional students to safely try every feature.</p>
+                <p className="text-sm text-muted-foreground mt-1">Ten clearly-labeled fictional students to safely try every feature.</p>
               </button>
             </div>
           </div>

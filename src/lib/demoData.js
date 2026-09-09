@@ -61,6 +61,56 @@ const STUDENTS = [
     services: ["DEMO — Written expression intervention, 45 min, 3x/week"], service_minutes: 135,
     status: "active", notes: DEMO_LABEL, avatar_color: "rose",
   },
+  {
+    first_name: "Noah", last_name: "Kim (Demo)", grade: "K", eligibility_category: "Developmental Delay",
+    iep_date: "2025-08-01", annual_review_due: d(-12), reevaluation_due: "2027-08-01",
+    strengths: "DEMO — Curious and eager to try new centers; responds well to songs and routines.",
+    areas_of_need: "DEMO — Letter-sound identification; following multi-step classroom routines without prompting.",
+    present_levels: "DEMO — Names 16 of 26 letter sounds. Follows the arrival routine with one adult prompt.",
+    accommodations: "DEMO — Visual schedule; first-then boards; extra transition time.",
+    services: ["DEMO — Early literacy intervention, 20 min/day"], service_minutes: 100,
+    status: "active", notes: DEMO_LABEL, avatar_color: "violet",
+  },
+  {
+    first_name: "Isabella", last_name: "Foster (Demo)", grade: "7", eligibility_category: "SLD",
+    iep_date: "2025-05-14", annual_review_due: "2026-05-14", reevaluation_due: d(-6),
+    strengths: "DEMO — Persistent worker; strong participation in hands-on science labs.",
+    areas_of_need: "DEMO — Reading comprehension of grade-level text; math calculation fluency.",
+    present_levels: "DEMO — Answers literal questions at 65% accuracy; struggles with inference. Computes fractions at a grade-5 level.",
+    accommodations: "DEMO — Text-to-speech for content texts; worked examples provided; calculator for computation-heavy tasks.",
+    services: ["DEMO — Reading comprehension support, 30 min, 3x/week"], service_minutes: 90,
+    status: "active", notes: DEMO_LABEL, avatar_color: "blue",
+  },
+  {
+    first_name: "Jayden", last_name: "Moore (Demo)", grade: "1", eligibility_category: "SLD",
+    iep_date: "2025-09-15", annual_review_due: d(6), reevaluation_due: "2027-09-15",
+    strengths: "DEMO — Loves read-alouds; strong oral storytelling.",
+    areas_of_need: "DEMO — Blending and segmenting sounds; sight-word automaticity.",
+    present_levels: "DEMO — Blends CVC words with 50% accuracy; knows 12 of 25 target sight words.",
+    accommodations: "DEMO — Small-group phonics instruction; decodable readers sent home.",
+    services: ["DEMO — Phonological awareness intervention, 25 min/day"], service_minutes: 125,
+    status: "active", notes: DEMO_LABEL, avatar_color: "emerald",
+  },
+  {
+    first_name: "Harper", last_name: "Nguyen (Demo)", grade: "8", eligibility_category: "Emotional Disability",
+    iep_date: "2026-01-20", annual_review_due: d(88), reevaluation_due: d(140),
+    strengths: "DEMO — Talented artist; builds trust with preferred adults; self-advocates when calm.",
+    areas_of_need: "DEMO — Self-regulation during unstructured times; peer conflict resolution.",
+    present_levels: "DEMO — Uses the calm corner independently in 3 of 5 incidents (up from 1 of 5 last spring). Counselor check-ins twice weekly.",
+    accommodations: "DEMO — Preferential seating; check-in/check-out system; access to break card.",
+    services: ["DEMO — Counseling, 30 min, 2x/week", "DEMO — Social-emotional support, 45 min/week"], service_minutes: 105,
+    status: "active", notes: DEMO_LABEL, avatar_color: "amber",
+  },
+  {
+    first_name: "Owen", last_name: "Wright (Demo)", grade: "5", eligibility_category: "OHI",
+    iep_date: "2026-03-05", annual_review_due: d(150), reevaluation_due: "2028-03-05",
+    strengths: "DEMO — Encyclopedic knowledge of ocean animals; kind classmate.",
+    areas_of_need: "DEMO — Work completion during low-interest tasks; sustained attention after medication wear-off.",
+    present_levels: "DEMO — Completes 70% of classwork with a timer and checklist. Afternoon work completion dips to 50%.",
+    accommodations: "DEMO — Chunked assignments; movement breaks; timer visible.",
+    services: ["DEMO — Consultation with case manager, 30 min/month"], service_minutes: 30,
+    status: "transition", notes: DEMO_LABEL, avatar_color: "rose",
+  },
 ];
 
 function buildGoals(id) {
@@ -79,6 +129,16 @@ function buildGoals(id) {
     g(3, "Flexible Thinking", "Given an unexpected schedule change with advance notice, Elijah will use a coping strategy instead of escalation in 4 of 5 changes.", "1 of 5 (Aug 2026)", "4 of 5 changes", "Given a previewed schedule change", "4 of 5 changes", "Antecedent-behavior-consequence log", "Daily teacher log"),
     g(4, "Written Expression", "Using a rubric, Lily will write a 3-paragraph essay scoring 3/4 on organization in 4 of 6 probes.", "2/4 organization (Aug 2026)", "3/4 on organization", "Given a prompt and graphic organizer", "4 of 6 monthly probes", "4-point rubric", "Monthly writing sample"),
     g(4, "Organization", "Lily will arrive to class with required materials independently in 80% of checks.", "40% of checks (Aug 2026)", "80% of checks", "Given a daily materials checklist", "80% of checks over 4 weeks", "Materials checklist", "Daily checklist by case manager"),
+    g(5, "Early Literacy", "Given a letter-sound probe, Noah will name 26 of 26 letter sounds.", "16 of 26 (Aug 2026)", "26 of 26", "Given a letter-sound card probe", "4 of 5 weekly probes", "Letter-sound probe", "Weekly probe"),
+    g(5, "Classroom Routines", "Noah will follow the arrival and dismissal routines with no adult prompting in 4 of 5 days.", "1 prompt per routine (Aug 2026)", "0 prompts, 4 of 5 days", "Given a visual schedule", "4 of 5 school days", "Teacher observation checklist", "Daily teacher log"),
+    g(6, "Reading Comprehension", "After reading a grade-7 passage with text-to-speech, Isabella will answer literal and inferential questions at 80% accuracy.", "65% literal accuracy (Aug 2026)", "80% on literal and inferential", "Given a grade-7 passage with text-to-speech", "4 of 6 probes", "Comprehension question sets", "Biweekly probe"),
+    g(6, "Math Calculation", "Isabella will solve fraction operations problems with 85% accuracy using a worked-examples reference.", "62% accuracy (Aug 2026)", "85% accuracy", "Given a 15-item fraction probe with worked examples", "85% on 3 consecutive probes", "Curriculum-based math probe", "Weekly probe"),
+    g(7, "Phonological Awareness", "Given CVC word cards, Jayden will blend sounds into words with 85% accuracy.", "50% accuracy (Aug 2026)", "85% accuracy", "Given a 20-item blending task", "4 of 5 sessions", "Blending accuracy count", "Weekly probe"),
+    g(7, "Sight Words", "Jayden will read 25 target sight words with 100% accuracy in 2 minutes.", "12 of 25 words (Aug 2026)", "25 of 25 in 2 minutes", "Given a timed sight-word list", "2 of 3 consecutive probes", "Timed sight-word list", "Weekly probe"),
+    g(8, "Self-Regulation", "Harper will use a coping strategy instead of escalating during unstructured times in 4 of 5 incidents.", "3 of 5 incidents (Aug 2026)", "4 of 5 incidents", "Given access to the calm corner and break card", "4 of 5 incidents over 4 weeks", "Antecedent-behavior-consequence log", "Daily teacher log"),
+    g(8, "Peer Conflict Resolution", "During structured peer activities, Harper will use an agreed problem-solving script with one adult prompt in 3 of 4 conflicts.", "1 of 4 conflicts (Aug 2026)", "3 of 4 conflicts", "Given a structured peer activity", "3 of 4 conflicts", "Counselor observation", "Weekly counselor log"),
+    g(9, "Work Completion", "Using a timer and checklist, Owen will complete 90% of assigned classwork.", "70% completion (Aug 2026)", "90% completion", "Given chunked assignments with a visible timer", "90% over 4 weeks", "Assignment completion checklist", "Weekly checklist by case manager"),
+    g(9, "Sustained Attention", "Owen will remain on task during independent work in 85% of observed intervals.", "60% of intervals (Aug 2026)", "85% of intervals", "During 20-minute work blocks", "85% across 3 observations", "10-second momentary time sampling", "2x monthly observation"),
   ];
 }
 
@@ -121,6 +181,27 @@ function buildMeetings(id) {
     m(2, "Sofia's MET / Reevaluation Planning", "MET", d(24), "9:00 AM", "Plan reevaluation timeline with speech-language pathologist."),
     m(3, "Elijah's Parent-Teacher Check-In", "Other", d(16), "3:15 PM", "Share social-group data and preview the field-trip support plan."),
     m(4, "Lily's Annual IEP Review", "IEP", d(18), "11:00 AM", "Review essay rubric data; discuss middle-school transition supports."),
+    m(5, "Noah's Overdue Annual Review — RESCHEDULE", "IEP", d(3), "8:30 AM", "This review is past its due date. Review letter-sound data, update routines goal, and reset the compliance calendar."),
+    m(7, "Jayden's Annual IEP Review — THIS WEEK", "IEP", d(5), "1:00 PM", "Review blending and sight-word data; draft next-year phonics goals."),
+    // Completed meetings with full notes — demonstrates the "after the meeting" state
+    {
+      student_id: id(9), title: "DEMO — Owen's Transition Planning Meeting", meeting_type: "Other",
+      date: d(-45), time: "10:00 AM", agenda: "DEMO — Review progress toward consult-only services.",
+      parent_concerns: "DEMO — Family asked how supports will look in middle school.",
+      teacher_concerns: "DEMO — Afternoon work completion dips after medication wear-off.",
+      notes: "DEMO — Team agreed to reduce direct services to monthly consultation and keep the timer/checklist accommodations. Progress data showed 70% work completion, trending up.",
+      follow_up_tasks: "DEMO — Send updated IEP to the family; schedule a spring check-in.",
+      status: "completed",
+    },
+    {
+      student_id: id(8), title: "DEMO — Harper's Manifestation Determination Review", meeting_type: "MET",
+      date: d(-20), time: "2:00 PM", agenda: "DEMO — Review incident data and coping-strategy usage.",
+      parent_concerns: "DEMO — Family requested clearer communication during incidents.",
+      teacher_concerns: "DEMO — Unstructured times remain the hardest part of the day.",
+      notes: "DEMO — Team confirmed behavior was a manifestation; added a check-in/check-out card and agreed on a shared incident-response script.",
+      follow_up_tasks: "DEMO — Train all 6th-period staff on the response script.",
+      status: "completed",
+    },
   ];
 }
 
@@ -148,6 +229,8 @@ function buildSessions(id) {
     { goal_area: "Reading Fluency", student_ids: [id(0), id(2)], date: d(-3), minutes: 30, delivery: "pull-out", notes: "DEMO — Paired repeated reading; both students beat their wpm best." },
     { goal_area: "Written Expression", student_ids: [id(1), id(4)], date: d(-2), minutes: 45, delivery: "pull-out", notes: "DEMO — Paragraph-building warm-up; Marcus used organizer independently." },
     { goal_area: "Social Skills", student_ids: [id(3)], date: d(-1), minutes: 30, delivery: "push-in", notes: "DEMO — Train-themed conversation game; Elijah initiated twice with peers." },
+    { goal_area: "Phonological Awareness", student_ids: [id(5), id(7)], date: d(-1), minutes: 25, delivery: "pull-out", notes: "DEMO — Blending bingo; Jayden blended 14 of 20 words, Noah joined with letter-sound practice." },
+    { goal_area: "Reading Comprehension", student_ids: [id(6)], date: d(-4), minutes: 30, delivery: "pull-out", notes: "DEMO — Main-idea scavenger hunt with text-to-speech; Isabella answered 7 of 10 questions correctly." },
   ];
 }
 
@@ -166,14 +249,29 @@ function buildAssignments(id) {
     a(3, "Schedule-change coping", 3, 5, "2026-09-08"),
     a(4, "Essay organization rubric", 2, 4, "2026-09-05"),
     a(4, "Materials checklist", 4, 5, "2026-09-08"),
+    a(5, "Letter-sound probe", 19, 26, "2026-09-07"),
+    a(6, "Comprehension questions", 7, 10, "2026-09-04"),
+    a(6, "Fraction probe", 12, 15, "2026-09-08"),
+    a(7, "Blending task", 14, 20, "2026-09-07"),
+    a(8, "Calm-corner usage log", 4, 5, "2026-09-08"),
+    a(9, "Work completion checklist", 3, 4, "2026-09-08"),
   ];
 }
 
 function buildTasks(id) {
   return [
+    // Overdue compliance item — shows how risk surfaces in Today's deadline alerts
+    { title: "DEMO — OVERDUE: Noah's annual review is past due — schedule now", due_date: d(-12), priority: "high", status: "open", student_id: id(5), category: "DEMO" },
+    { title: "DEMO — Overdue: Isabella's reevaluation consent paperwork", due_date: d(-6), priority: "high", status: "open", student_id: id(6), category: "DEMO" },
     { title: "DEMO — Send draft goals home before Marcus's review", due_date: d(5), priority: "high", status: "open", student_id: id(1), category: "DEMO" },
     { title: "DEMO — Collect baseline probe for Sofia's reevaluation", due_date: d(9), priority: "medium", status: "open", student_id: id(2), category: "DEMO" },
     { title: "DEMO — Schedule Lily's review invitation letters", due_date: d(2), priority: "high", status: "open", student_id: id(4), category: "DEMO" },
+    { title: "DEMO — Print Jayden's decodable readers for home practice", due_date: d(3), priority: "low", status: "in_progress", student_id: id(7), category: "DEMO" },
+    // Completed — shows the satisfaction of crossing things off
+    { title: "DEMO — Completed: Ava's fall progress report sent home", due_date: d(-8), priority: "medium", status: "done", student_id: id(0), category: "DEMO" },
+    { title: "DEMO — Completed: Elijah's field-trip support plan shared with team", due_date: d(-4), priority: "medium", status: "done", student_id: id(3), category: "DEMO" },
+    { title: "DEMO — Completed: Owen's consultation notes logged", due_date: d(-15), priority: "low", status: "done", student_id: id(9), category: "DEMO" },
+    { title: "DEMO — Completed: Harper's counselor check-in schedule confirmed", due_date: d(-2), priority: "low", status: "done", student_id: id(8), category: "DEMO" },
   ];
 }
 
@@ -195,9 +293,12 @@ function buildLessons(id) {
 
 export async function loadDemoCaseload() {
   const existing = await base44.entities.Student.list("-created_date", 500);
-  if (existing.some((s) => s.notes === DEMO_LABEL)) {
-    return { created: false, students: existing.filter((s) => s.notes === DEMO_LABEL).length };
+  const demo = existing.filter((s) => s.notes === DEMO_LABEL);
+  if (demo.length >= STUDENTS.length) {
+    return { created: false, students: demo.length };
   }
+  // Older/partial demo sets are replaced with the full current one (demo records are disposable).
+  if (demo.length > 0) await deleteDemoCaseload();
   const created = await base44.entities.Student.bulkCreate(STUDENTS);
   const id = (i) => created[i].id;
 
