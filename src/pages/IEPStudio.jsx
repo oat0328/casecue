@@ -65,7 +65,11 @@ export default function IEPStudio() {
         <StudentSelector
           students={students || []}
           value={studentId}
-          onChange={setStudentId}
+          onChange={(id) => {
+            setStudentId(id);
+            // Uploading is step 1 of the workflow — land on the Upload Center immediately.
+            setTab("documents");
+          }}
           noBottomSpace
         />
       </Card>

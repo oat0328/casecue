@@ -1,47 +1,22 @@
 import React, { useState } from "react";
-import { FolderOpen, Upload, FileText, Trash2, RefreshCw, ShieldCheck, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FolderOpen, FileText, Trash2, RefreshCw, ShieldCheck, Loader2, Upload } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import StudentSelector from "@/components/forms/StudentSelector";
 
-const DOC_TYPES = [
-  "IEP", "Evaluation", "Eligibility Report", "MDT Report", "Psychological Report",
-  "BIP", "FBA", "504", "Progress Report", "Assessment Report", "Report Card",
-  "Teacher Input", "Parent Input", "Service Provider Report", "Transition Assessment", "Other",
-];
-
+// Documents — a read-only archive of every record uploaded through IEP Studio.
+// All uploading happens in IEP Studio → Upload Center.
 export default function Documents() {
   const { toast } = useToast();
   const { data: documents, refetch } = useAsync(() => base44.entities.Document.list('-date_uploaded', 200), []);
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
-  const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ student_id: "", document_type: "IEP" });
 
   const studentName = (id) => { const s = (students || []).find((x) => x.id === id); return s ? `${s.first_name} ${s.last_name}` : "—"; };
-
-  const onUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
-      await base44.entities.Document.create({
-        filename: file.name, file_url: file_uri, student_id: form.student_id || "",
-        document_type: form.document_type, date_uploaded: new Date().toISOString().slice(0, 10),
-        extraction_status: "pending", review_status: "none", is_private: true,
-      });
-      toast({ title: "Document uploaded" });
-      refetch();
-    } catch (err) { toast({ title: "Upload failed", description: err.message, variant: "destructive" }); }
-    finally { setUploading(false); e.target.value = ""; }
-  };
 
   const remove = async (id) => { await base44.entities.Document.delete(id); refetch(); };
 
@@ -67,45 +42,21 @@ export default function Documents() {
 
   return (
     <div>
-      <PageHeader title="Documents" subtitle="Upload IEPs, evaluations, BIPs, 504s, progress reports, and assessments. Stored privately — only you can access your records." icon={FolderOpen} />
+      <PageHeader title="Documents" subtitle="Your document archive — every record uploaded through IEP Studio. Stored privately — only you can access your records." icon={FolderOpen} />
 
-      <div className="rounded-xl bg-primary/5 border border-primary/20 px-4 py-3 text-sm text-primary mb-6">
-        <strong>Doing IEP work?</strong> Upload inside <strong>IEP Studio → Upload Center</strong> instead — it reads every document automatically, builds the student profile, and pre-fills IEP sections for your review. This page is your full document library for storage and retrieval.
-      </div>
-
-      <Card className="p-6 mb-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2"><Upload className="h-4 w-4 text-primary" /> Upload document</h3>
-        <div className="grid sm:grid-cols-3 gap-5 mb-5">
-          <div>
-            <StudentSelector
-              students={students || []}
-              value={form.student_id}
-              onChange={(id) => setForm({ ...form, student_id: id })}
-              placeholder="—"
-              noBottomSpace
-            />
-          </div>
-          <div><Label>Document type</Label>
-            <select className="w-full min-h-[44px] rounded-lg border border-input bg-background px-3 py-2 text-sm mt-2" value={form.document_type} onChange={(e) => setForm({ ...form, document_type: e.target.value })}>
-              {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div className="flex items-end">
-            <label className="w-full">
-              <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={onUpload} disabled={uploading} className="hidden" id="doc-upload" />
-              <Button asChild disabled={uploading} className="brand-gradient text-white w-full cursor-pointer">
-                <span>{uploading ? "Uploading…" : "Choose file"}</span>
-              </Button>
-            </label>
-          </div>
+      <div className="rounded-xl bg-primary/5 border border-primary/20 px-4 py-3 text-sm text-primary mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1">
+          <strong>This is a read-only archive.</strong> All uploads happen in <strong>IEP Studio → Upload Center</strong> — CaseCue reads every file automatically and pre-fills the student profile for your review.
         </div>
-        <p className="text-xs text-muted-foreground">Supports PDF, DOCX, JPG, PNG. Files are stored in your private document storage.</p>
-      </Card>
+        <Button asChild className="brand-gradient text-white shrink-0">
+          <Link to="/iep-studio"><Upload className="h-4 w-4 mr-1.5" /> Go to Upload Center</Link>
+        </Button>
+      </div>
 
       <div className="flex justify-end mb-3"><Button variant="outline" size="sm" onClick={refetch}><RefreshCw className="h-4 w-4 mr-1" /> Refresh</Button></div>
 
       {documents && documents.length === 0 ? (
-        <EmptyState title="No documents yet" description="Upload your first IEP, evaluation, or report to get started." icon={FolderOpen} />
+        <EmptyState title="No documents yet" description="Documents you upload in IEP Studio → Upload Center will appear here automatically." icon={FolderOpen} />
       ) : (
         <div className="space-y-2">
           {(documents || []).map((d) => (
