@@ -16,7 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   // Post-login destination (e.g. the MCP OAuth consent page sends users here
   // with returnTo so the grant flow can resume). Same-origin paths only.
-  const returnTo = safeReturnTo();
+  const returnTo = safeReturnTo("/app");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useAuth } from "@/lib/AuthContext";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -17,6 +18,7 @@ const fadeUp = {
 
 function Nav() {
   const [open, setOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -33,15 +35,27 @@ function Nav() {
           <a href="#faq" className="hover:text-foreground">FAQ</a>
         </nav>
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/login"><Button variant="ghost" size="sm">Sign in</Button></Link>
-          <Link to="/register"><Button size="sm" className="brand-gradient text-white">Start free trial</Button></Link>
+          {isAuthenticated ? (
+            <Link to="/app"><Button size="sm" className="brand-gradient text-white">Open app</Button></Link>
+          ) : (
+            <>
+              <Link to="/login"><Button variant="ghost" size="sm">Sign in</Button></Link>
+              <Link to="/register"><Button size="sm" className="brand-gradient text-white">Start free trial</Button></Link>
+            </>
+          )}
         </div>
         <button className="md:hidden p-2" onClick={() => setOpen(!open)}><Menu className="h-5 w-5" /></button>
       </div>
       {open && (
         <div className="md:hidden border-t border-border bg-background px-4 py-4 flex flex-col gap-3">
-          <Link to="/login" onClick={() => setOpen(false)}><Button variant="ghost" className="w-full">Sign in</Button></Link>
-          <Link to="/register" onClick={() => setOpen(false)}><Button className="w-full brand-gradient text-white">Start free trial</Button></Link>
+          {isAuthenticated ? (
+            <Link to="/app" onClick={() => setOpen(false)}><Button className="w-full brand-gradient text-white">Open app</Button></Link>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setOpen(false)}><Button variant="ghost" className="w-full">Sign in</Button></Link>
+              <Link to="/register" onClick={() => setOpen(false)}><Button className="w-full brand-gradient text-white">Start free trial</Button></Link>
+            </>
+          )}
         </div>
       )}
     </header>
