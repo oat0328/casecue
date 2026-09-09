@@ -1,0 +1,74 @@
+{
+  "name": "Document",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "filename": {
+      "type": "string",
+      "title": "Filename"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "File URL"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "IEP",
+        "Evaluation",
+        "BIP",
+        "504",
+        "Progress Report",
+        "Assessment Report",
+        "Other"
+      ],
+      "default": "Other",
+      "title": "Document Type"
+    },
+    "date_uploaded": {
+      "type": "string",
+      "format": "date",
+      "title": "Date Uploaded"
+    },
+    "extraction_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processed",
+        "failed"
+      ],
+      "default": "pending",
+      "title": "Extraction Status"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "passed",
+        "flagged"
+      ],
+      "default": "none",
+      "title": "Review Status"
+    }
+  },
+  "required": [
+    "filename"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

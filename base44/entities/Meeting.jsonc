@@ -1,0 +1,82 @@
+{
+  "name": "Meeting",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "meeting_type": {
+      "type": "string",
+      "enum": [
+        "IEP",
+        "MET",
+        "Evaluation",
+        "Other"
+      ],
+      "default": "IEP",
+      "title": "Meeting Type"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "time": {
+      "type": "string",
+      "title": "Time"
+    },
+    "agenda": {
+      "type": "string",
+      "title": "Agenda"
+    },
+    "parent_concerns": {
+      "type": "string",
+      "title": "Parent Concerns"
+    },
+    "teacher_concerns": {
+      "type": "string",
+      "title": "Teacher Concerns"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "follow_up_tasks": {
+      "type": "string",
+      "title": "Follow-Up Tasks"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "completed",
+        "cancelled"
+      ],
+      "default": "scheduled",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "title",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

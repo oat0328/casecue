@@ -1,0 +1,50 @@
+{
+  "name": "SubPlan",
+  "type": "object",
+  "properties": {
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "planned_absence",
+        "emergency"
+      ],
+      "default": "daily",
+      "title": "Plan Type"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "content": {
+      "type": "string",
+      "title": "Content"
+    },
+    "student_schedule_info": {
+      "type": "string",
+      "title": "Student Schedule Info"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

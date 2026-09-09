@@ -1,0 +1,53 @@
+{
+  "name": "GradebookAssignment",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "goal_id": {
+      "type": "string",
+      "title": "Goal ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "score_earned": {
+      "type": "number",
+      "title": "Score Earned"
+    },
+    "score_possible": {
+      "type": "number",
+      "title": "Score Possible"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    }
+  },
+  "required": [
+    "student_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

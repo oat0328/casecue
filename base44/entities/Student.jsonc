@@ -1,0 +1,101 @@
+{
+  "name": "Student",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "title": "First Name"
+    },
+    "last_name": {
+      "type": "string",
+      "title": "Last Name"
+    },
+    "grade": {
+      "type": "string",
+      "title": "Grade"
+    },
+    "eligibility_category": {
+      "type": "string",
+      "title": "Eligibility Category"
+    },
+    "iep_date": {
+      "type": "string",
+      "format": "date",
+      "title": "IEP Date"
+    },
+    "annual_review_due": {
+      "type": "string",
+      "format": "date",
+      "title": "Annual Review Due"
+    },
+    "reevaluation_due": {
+      "type": "string",
+      "format": "date",
+      "title": "Reevaluation Due"
+    },
+    "strengths": {
+      "type": "string",
+      "title": "Strengths"
+    },
+    "areas_of_need": {
+      "type": "string",
+      "title": "Areas of Need"
+    },
+    "present_levels": {
+      "type": "string",
+      "title": "Present Levels"
+    },
+    "accommodations": {
+      "type": "string",
+      "title": "Accommodations"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Services"
+    },
+    "service_minutes": {
+      "type": "number",
+      "title": "Service Minutes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "transition",
+        "exited"
+      ],
+      "default": "active",
+      "title": "Status"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "avatar_color": {
+      "type": "string",
+      "default": "violet",
+      "title": "Avatar Color"
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

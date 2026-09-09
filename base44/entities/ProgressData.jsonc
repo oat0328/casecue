@@ -1,0 +1,77 @@
+{
+  "name": "ProgressData",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "goal_id": {
+      "type": "string",
+      "title": "Goal ID"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "correct": {
+      "type": "number",
+      "title": "Correct"
+    },
+    "total": {
+      "type": "number",
+      "title": "Total"
+    },
+    "percentage": {
+      "type": "number",
+      "title": "Percentage"
+    },
+    "decimal": {
+      "type": "number",
+      "title": "Decimal"
+    },
+    "qualitative_notes": {
+      "type": "string",
+      "title": "Qualitative Notes"
+    },
+    "prompting_level": {
+      "type": "string",
+      "enum": [
+        "independent",
+        "verbal",
+        "visual",
+        "physical",
+        "full"
+      ],
+      "default": "independent",
+      "title": "Prompting Level"
+    },
+    "support_level": {
+      "type": "string",
+      "title": "Support Level"
+    },
+    "observation_notes": {
+      "type": "string",
+      "title": "Observation Notes"
+    }
+  },
+  "required": [
+    "student_id",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

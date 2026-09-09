@@ -1,0 +1,70 @@
+{
+  "name": "Goal",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "goal_area": {
+      "type": "string",
+      "title": "Goal Area"
+    },
+    "goal_text": {
+      "type": "string",
+      "title": "Goal Text"
+    },
+    "baseline": {
+      "type": "string",
+      "title": "Baseline"
+    },
+    "target": {
+      "type": "string",
+      "title": "Target"
+    },
+    "condition": {
+      "type": "string",
+      "title": "Condition"
+    },
+    "criterion": {
+      "type": "string",
+      "title": "Criterion"
+    },
+    "measurement_method": {
+      "type": "string",
+      "title": "Measurement Method"
+    },
+    "progress_monitoring_method": {
+      "type": "string",
+      "title": "Progress Monitoring Method"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "met",
+        "revision"
+      ],
+      "default": "active",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "student_id",
+    "goal_text"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

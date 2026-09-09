@@ -1,0 +1,87 @@
+{
+  "name": "Lesson",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "objective": {
+      "type": "string",
+      "title": "Objective"
+    },
+    "essential_question": {
+      "type": "string",
+      "title": "Essential Question"
+    },
+    "real_world_connection": {
+      "type": "string",
+      "title": "Real-World Connection"
+    },
+    "mini_lecture": {
+      "type": "string",
+      "title": "Mini-Lecture"
+    },
+    "warm_up": {
+      "type": "string",
+      "title": "Warm-Up"
+    },
+    "i_do": {
+      "type": "string",
+      "title": "I Do"
+    },
+    "we_do": {
+      "type": "string",
+      "title": "We Do"
+    },
+    "you_do": {
+      "type": "string",
+      "title": "You Do"
+    },
+    "accommodations": {
+      "type": "string",
+      "title": "Accommodations"
+    },
+    "data_collection": {
+      "type": "string",
+      "title": "Data Collection"
+    },
+    "student_performance": {
+      "type": "string",
+      "title": "Student Performance"
+    },
+    "reflection": {
+      "type": "string",
+      "title": "Reflection"
+    },
+    "student_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Student IDs"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "AIConversation",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Messages"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "single",
+        "caseload"
+      ],
+      "default": "caseload",
+      "title": "Mode"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

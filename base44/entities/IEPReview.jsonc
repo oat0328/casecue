@@ -1,0 +1,91 @@
+{
+  "name": "IEPReview",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "document_id": {
+      "type": "string",
+      "title": "Document ID"
+    },
+    "score": {
+      "type": "number",
+      "title": "Score"
+    },
+    "category_scores": {
+      "type": "object",
+      "properties": {
+        "present_levels": {
+          "type": "number"
+        },
+        "goals": {
+          "type": "number"
+        },
+        "data_alignment": {
+          "type": "number"
+        },
+        "services_accommodations": {
+          "type": "number"
+        },
+        "progress_monitoring": {
+          "type": "number"
+        },
+        "document_consistency": {
+          "type": "number"
+        }
+      },
+      "title": "Category Scores"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "what_found": {
+            "type": "string"
+          },
+          "why_flagged": {
+            "type": "string"
+          },
+          "where_found": {
+            "type": "string"
+          },
+          "suggested_action": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "Findings"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary"
+    }
+  },
+  "required": [],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

@@ -1,56 +1,71 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { AuthProvider } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 // Add page imports here
-
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
-  }
-
-  // Render the main app
-  return (
-    <Routes>
-      {/* Add your page Route elements here */}
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
-  );
-};
-
+import Landing from '@/pages/Landing';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+import Today from '@/pages/Today';
+import Students from '@/pages/Students';
+import StudentDetail from '@/pages/StudentDetail';
+import IEPStudio from '@/pages/IEPStudio';
+import IEPReview from '@/pages/IEPReview';
+import Documents from '@/pages/Documents';
+import DataCenter from '@/pages/DataCenter';
+import Schedule from '@/pages/Schedule';
+import LessonStudio from '@/pages/LessonStudio';
+import SubPlans from '@/pages/SubPlans';
+import Gradebook from '@/pages/Gradebook';
+import MeetingCenter from '@/pages/MeetingCenter';
+import Reports from '@/pages/Reports';
+import PracticeLab from '@/pages/PracticeLab';
+import AskCaseCue from '@/pages/AskCaseCue';
+import Settings from '@/pages/Settings';
 
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+              <Route element={<Layout />}>
+                <Route path="/app" element={<Today />} />
+                <Route path="/students" element={<Students />} />
+                <Route path="/students/:id" element={<StudentDetail />} />
+                <Route path="/iep-studio" element={<IEPStudio />} />
+                <Route path="/iep-review" element={<IEPReview />} />
+                <Route path="/documents" element={<Documents />} />
+                <Route path="/data-center" element={<DataCenter />} />
+                <Route path="/schedule" element={<Schedule />} />
+                <Route path="/lesson-studio" element={<LessonStudio />} />
+                <Route path="/sub-plans" element={<SubPlans />} />
+                <Route path="/gradebook" element={<Gradebook />} />
+                <Route path="/meetings" element={<MeetingCenter />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/practice-lab" element={<PracticeLab />} />
+                <Route path="/ask-casecue" element={<AskCaseCue />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
+            </Route>
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+          <Toaster />
         </Router>
-        <Toaster />
       </QueryClientProvider>
     </AuthProvider>
   )
