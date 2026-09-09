@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import ExportBar from "@/components/shared/ExportBar";
 import AssignmentCenter from "@/components/subPlans/AssignmentCenter";
+import TodaysAssignmentPacket from "@/components/subPlans/TodaysAssignmentPacket";
 
 const PLAN_TYPES = [
   { value: "daily", label: "Daily Sub Plan" },
@@ -74,6 +75,8 @@ export default function SubPlans() {
   return (
     <div>
       <PageHeader title="Substitute Plans" subtitle="Never panic over an absence again. Sub plans are built from your real schedule, Lesson Studio assignments, student supports, and connected resources — with honest sourcing." icon={ClipboardList} />
+
+      <TodaysAssignmentPacket />
 
       <AssignmentCenter />
 
