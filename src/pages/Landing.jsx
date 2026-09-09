@@ -100,6 +100,26 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Promo video */}
+      <Section id="video" className="pt-0 sm:pt-0">
+        <div className="max-w-4xl mx-auto text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">See CaseCue in action.</h2>
+          <p className="mt-3 text-muted-foreground">One calm workspace for your entire caseload.</p>
+        </div>
+        <div className="rounded-2xl border border-border card-shadow-lg overflow-hidden max-w-4xl mx-auto">
+          <video
+            src="https://media.base44.com/videos/public/6aa0ab4a6f88297dfb76d459/dbba7b5b0_CaseCue_Promo_Video.mp4"
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full aspect-video bg-black"
+            aria-label="CaseCue product overview video"
+          />
+        </div>
+      </Section>
+
       {/* Outcomes */}
       <Section id="outcomes" className="bg-card">
         <div className="grid sm:grid-cols-3 gap-6">
