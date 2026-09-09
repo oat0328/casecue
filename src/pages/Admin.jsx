@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Users, UserCheck, DollarSign, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Users, UserCheck, DollarSign, ShieldCheck, ShieldAlert, CalendarClock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
@@ -7,6 +7,7 @@ import { StatCard, Card } from "@/components/ui/cards";
 import EmptyState from "@/components/EmptyState";
 import UsersTable from "@/components/admin/UsersTable";
 import PurchasesTable from "@/components/admin/PurchasesTable";
+import DemoRequestsTable from "@/components/admin/DemoRequestsTable";
 
 const PLAN_PRICE = 24.99;
 
@@ -14,12 +15,14 @@ export default function Admin() {
   const { user } = useAuth();
   const [users, setUsers] = useState(null);
   const [purchases, setPurchases] = useState(null);
+  const [demoRequests, setDemoRequests] = useState(null);
   const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     if (!isAdmin) return;
     base44.entities.User.list().then(setUsers);
     base44.entities.Base44Purchase.list().then(setPurchases);
+    base44.entities.DemoRequest.list().then(setDemoRequests);
   }, [isAdmin]);
 
   if (!isAdmin) {
@@ -32,7 +35,7 @@ export default function Admin() {
     );
   }
 
-  if (!users || !purchases) {
+  if (!users || !purchases || !demoRequests) {
     return <div className="py-24 text-center text-muted-foreground">Loading your dashboard…</div>;
   }
 
@@ -74,6 +77,16 @@ export default function Admin() {
           <EmptyState icon={DollarSign} title="No payments yet" description="When teachers subscribe, their payments will appear here." />
         ) : (
           <PurchasesTable purchases={purchases} />
+        )}
+      </Card>
+
+      <Card className="p-6 mt-6">
+        <h2 className="text-lg font-semibold mb-1">Demo requests</h2>
+        <p className="text-sm text-muted-foreground mb-4">People who asked for a demo from your website.</p>
+        {demoRequests.length === 0 ? (
+          <EmptyState icon={CalendarClock} title="No demo requests yet" description="When someone books a demo on your site, they'll show up here." />
+        ) : (
+          <DemoRequestsTable requests={demoRequests} />
         )}
       </Card>
     </div>
