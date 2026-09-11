@@ -126,7 +126,7 @@ async function analyze(base44, body) {
 
   const prompt = `You are analyzing a special education teacher's schedule document (it may be a PDF, spreadsheet export, word-processing document, photo, or screenshot).
 
-TASK: Extract every recurring instructional service block, and match the students named in it to the teacher's roster.
+TASK: Extract EVERY recurring instructional service block from the ENTIRE uploaded schedule, and match the students named in it to the teacher's roster. Read every page, table, row, column, merged cell, legend, note, and continuation page before returning. Do not stop after the first visible day or first few rows.
 
 TEACHER'S ROSTER (name | id | grade | required weekly service minutes | services):
 ${roster || '(roster is empty)'}
@@ -136,7 +136,7 @@ RULES:
 2. For every service block, output one entry in "groups":
    - group_name: the group name as written in the document. If none is given, derive a short descriptive name (e.g. "Reading Group A").
    - delivery: "pull-out" (students leave the classroom), "push-in" (support delivered in the classroom), or "consultation".
-   - day: exactly one of Monday, Tuesday, Wednesday, Thursday, Friday. If the document shows a range (e.g. "Mon-Fri" or "daily"), create one entry per weekday it covers.
+   - day: exactly one of Monday, Tuesday, Wednesday, Thursday, Friday. If the document says "daily", "every day", "Mon-Fri", "M-F", or otherwise clearly applies the block/student across multiple weekdays, EXPAND it into one separate entry for EACH supported weekday. If a note says M/W/F or Tue/Thu, create entries for each named day. If different students attend the same block on different days, create separate day entries with the correct student list for each day.
    - start_time / end_time: 24-hour HH:MM format. If only a start time is given, leave end_time "".
    - service_minutes: minutes per session (stated in the document, or the start-to-end duration). 0 if unknown.
    - teacher_classroom: provider/teacher name and location if shown.
@@ -144,6 +144,8 @@ RULES:
 3. Any name you could not match also goes in "unmatched_names".
 4. "conflicts": scheduling problems visible in the document (same student in two blocks at once, overlapping blocks, blocks with no time). One item per problem, severity "warning" or "info".
 5. "extraction_notes": anything missing or ambiguous (e.g. "no end times given for Tuesday blocks"). Flag it — never guess.
+6. COMPLETENESS CHECK BEFORE RETURNING: compare all five weekdays against the source. If the source contains service information for a weekday, that weekday must appear in groups. Re-scan the document for recurring notes such as daily, M/W/F, Tue/Thu, every day, Period 1-6, or continuation tables. Do not omit later weekdays just because the layout repeats.
+7. Preserve recurrence details in notes when useful, but do not use a note as a substitute for creating the actual weekday entries.
 
 Return JSON matching the schema exactly.`;
 
