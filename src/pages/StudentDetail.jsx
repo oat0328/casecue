@@ -146,33 +146,41 @@ export default function StudentDetail() {
 
   return (
     <div>
-      <button onClick={() => navigate("/students")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+      <button onClick={() => navigate("/students")} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 mb-4">
         <ArrowLeft className="h-4 w-4" /> Back to students
       </button>
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
-        <div className={`h-14 w-14 rounded-2xl flex items-center justify-center font-bold text-lg shrink-0 ${colorMap[student.avatar_color] || colorMap.violet}`}>
-          {student.first_name?.[0]}{student.last_name?.[0]}
-        </div>
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{student.first_name} {student.last_name}</h1>
-          <p className="text-muted-foreground">Grade {student.grade || "—"} · {student.eligibility_category || "No eligibility on file"}</p>
-        </div>
-        {editing ? (
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
-            <Button onClick={saveProfile} disabled={savingProfile} className="brand-gradient text-white"><Save className="h-4 w-4 mr-1" /> {savingProfile ? "Saving…" : "Save"}</Button>
+      <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#07111f] via-[#0b1730] to-[#12345d] px-6 py-7 text-white shadow-xl mb-7">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sky-400/15 blur-3xl" />
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`h-16 w-16 rounded-2xl flex items-center justify-center font-black text-xl shrink-0 ${colorMap[student.avatar_color] || colorMap.violet}`}>
+              {student.first_name?.[0]}{student.last_name?.[0]}
+            </div>
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-[.18em] text-sky-300">Student 360</div>
+              <h1 className="mt-1 text-3xl sm:text-4xl font-black tracking-tight">{student.first_name} {student.last_name}</h1>
+              <p className="mt-1 text-slate-300">Grade {student.grade || "—"} · {student.eligibility_category || "Eligibility not entered"}</p>
+            </div>
           </div>
-        ) : (
-          <div className="flex gap-2">
-            <ExportGate documentName="IEP draft" onExport={() => exportIepPdf(student, goals || [])}>
-              <Button variant="outline"><Download className="h-4 w-4 mr-1" /> Export IEP (PDF)</Button>
-            </ExportGate>
-            <Button variant="outline" onClick={startEdit}>Edit profile</Button>
-            <Button variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => setDeleteOpen(true)}><Trash2 className="h-4 w-4 mr-1" /> Delete student</Button>
-          </div>
-        )}
-      </div>
+          {editing ? (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => setEditing(false)}>Cancel</Button>
+              <Button onClick={saveProfile} disabled={savingProfile} className="bg-white text-slate-950 hover:bg-slate-100"><Save className="h-4 w-4 mr-1" /> {savingProfile ? "Saving…" : "Save changes"}</Button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Button className="bg-white text-slate-950 hover:bg-slate-100" onClick={() => navigate(`/iep-studio?student=${id}`)}>Open IEP Studio</Button>
+              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => navigate(`/session-tracker?student_id=${id}`)}>Log session</Button>
+              <ExportGate documentName="IEP draft" onExport={() => exportIepPdf(student, goals || [])}>
+                <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-1" /> Export</Button>
+              </ExportGate>
+              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={startEdit}>Edit profile</Button>
+              <Button variant="outline" className="border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20" onClick={() => setDeleteOpen(true)}><Trash2 className="h-4 w-4 mr-1" /> Delete</Button>
+            </div>
+          )}
+        </div>
+      </section>
 
       <Tabs defaultValue="overview">
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
