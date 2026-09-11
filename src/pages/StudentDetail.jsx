@@ -133,7 +133,14 @@ export default function StudentDetail() {
   const Field = ({ label, value, name }) => (
     <div>
       <Label className="text-xs text-muted-foreground">{label}</Label>
-      {editing ? <Input value={draft[name]} onChange={(e) => setDraft({ ...draft, [name]: e.target.value })} /> : <div className="mt-0.5 text-sm font-medium">{value || "—"}</div>}
+      {editing ? (
+        name === "eligibility_category" ? (
+          <Select value={draft[name] || ""} onValueChange={(v) => setDraft({ ...draft, [name]: v })}>
+            <SelectTrigger><SelectValue placeholder="Select eligibility" /></SelectTrigger>
+            <SelectContent>{ELIGIBILITY_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+          </Select>
+        ) : <Input value={draft[name] ?? ""} onChange={(e) => setDraft({ ...draft, [name]: e.target.value })} />
+      ) : <div className="mt-0.5 text-sm font-medium">{value || "—"}</div>}
     </div>
   );
 
@@ -162,6 +169,7 @@ export default function StudentDetail() {
               <Button variant="outline"><Download className="h-4 w-4 mr-1" /> Export IEP (PDF)</Button>
             </ExportGate>
             <Button variant="outline" onClick={startEdit}>Edit profile</Button>
+            <Button variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => setDeleteOpen(true)}><Trash2 className="h-4 w-4 mr-1" /> Delete student</Button>
           </div>
         )}
       </div>
@@ -339,6 +347,17 @@ export default function StudentDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Delete {student.first_name} {student.last_name}?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">This removes the student record from your caseload. Review connected documentation first if you need to preserve historical records.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button>
+            <Button variant="destructive" disabled={deletingStudent} onClick={deleteStudent}>{deletingStudent ? "Deleting…" : "Delete student"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
