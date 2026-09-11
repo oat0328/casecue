@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Sparkles, ShieldCheck, FileEdit, MessageCircle, BarChart3, BookOpen,
   ClipboardList, FlaskConical, Check, Lock, Menu, Users, CalendarClock,
-  UsersRound, LayoutDashboard, PlayCircle, ArrowRight, CheckCircle2
+  UsersRound, LayoutDashboard, PlayCircle, ArrowRight, CheckCircle2, Workflow, ScanLine, HeartHandshake
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -141,21 +141,14 @@ export default function Landing() {
       </section>
 
       {/* Product tour proof band */}
-      <Section id="video" className="bg-slate-50 py-14 sm:py-16">
-        <div className="grid lg:grid-cols-[.75fr_1.25fr] gap-8 items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 text-sm font-bold text-primary"><PlayCircle className="h-4 w-4" /> Product Tour</div>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight">Show the product before asking teachers to buy it.</h2>
-            <p className="mt-4 text-muted-foreground leading-7">A premium product experience should make CaseCue feel tangible immediately. The product tour now sits above the fold, while this section explains the value behind what viewers are seeing.</p>
-            <div className="mt-5 space-y-3 text-sm font-medium">
-              {["Real product video, not a stock animation","Dashboard-first presentation","Evidence-connected positioning","Family View and CaseCue Proof™ called out clearly"].map((item) => <div key={item} className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> {item}</div>)}
-            </div>
-          </div>
-          <div className="rounded-3xl border border-border bg-white p-3 card-shadow-lg">
-            <div className="grid sm:grid-cols-3 gap-3">
-              {[{icon:LayoutDashboard,title:"Daily Command Center",desc:"Deadlines, sessions, actions and meetings."},{icon:BarChart3,title:"Progress Intelligence",desc:"Goals, trends and evidence in one record."},{icon:UsersRound,title:"Family View",desc:"Share only the approved view-only information."}].map((f) => <div key={f.title} className="rounded-2xl bg-slate-50 p-5"><div className="h-10 w-10 rounded-xl bg-white border flex items-center justify-center"><f.icon className="h-5 w-5 text-primary" /></div><div className="mt-4 font-bold">{f.title}</div><div className="mt-2 text-sm text-muted-foreground leading-6">{f.desc}</div></div>)}
-            </div>
-          </div>
+      <Section id="video" className="bg-slate-50 py-16 sm:py-20">
+        <div className="text-center max-w-3xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 text-sm font-bold text-primary"><PlayCircle className="h-4 w-4" /> See CaseCue in action</div>
+          <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">One connected workflow from IEP to evidence.</h2>
+          <p className="mt-4 text-muted-foreground leading-7">See how teachers move from student records to progress monitoring, meeting prep, and family communication without rebuilding the same information in separate places.</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          {[{icon:Workflow,title:"Connected workflow",desc:"IEP goals, sessions, lessons, student work, and reports stay tied together."},{icon:ScanLine,title:"Evidence in one place",desc:"Use approved data and work samples to support progress updates and future IEP writing."},{icon:HeartHandshake,title:"Family communication",desc:"Share a separate view-only experience with only the information you choose."}].map((f) => <div key={f.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="h-11 w-11 rounded-2xl bg-indigo-50 flex items-center justify-center"><f.icon className="h-5 w-5 text-indigo-600" /></div><div className="mt-4 font-black text-lg">{f.title}</div><div className="mt-2 text-sm text-muted-foreground leading-6">{f.desc}</div></div>)}
         </div>
       </Section>
 
