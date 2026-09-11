@@ -26,11 +26,13 @@ export default function MeetingCenter() {
   const { toast } = useToast();
   const { data: meetings, refetch } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
+  const { data: scheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list('-day', 500), []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ student_id: "", title: "", meeting_type: "IEP", date: "", time: "", location: "", agenda: "", parent_concerns: "", teacher_concerns: "" });
   const [saving, setSaving] = useState(false);
   const [prep, setPrep] = useState(null);
   const [preparing, setPreparing] = useState(null);
+  const [timeSuggestions, setTimeSuggestions] = useState([]);
 
   // Preserve student context: /meetings?student=<id> opens the schedule
   // dialog with that student already preselected.
@@ -72,6 +74,20 @@ export default function MeetingCenter() {
   };
 
   const remove = async (id) => { await base44.entities.Meeting.delete(id); refetch(); };
+
+  const suggestTimes = () => {
+    if (!form.date) { toast({ title: 'Choose a meeting date first', variant: 'destructive' }); return; }
+    const day = new Date(`${form.date}T12:00:00`).toLocaleDateString('en-US',{weekday:'long'});
+    const toMin = (t) => { const m=String(t||'').match(/^(\d{1,2}):(\d{2})/); return m?Number(m[1])*60+Number(m[2]):null; };
+    const blocked = (scheduleEntries||[]).filter(e=>!e.archived&&e.day===day).map(e=>[toMin(e.start_time),toMin(e.end_time)]).filter(x=>x[0]!=null&&x[1]!=null);
+    (meetings||[]).filter(m=>m.date===form.date&&m.status==='scheduled'&&m.time).forEach(m=>{const s=toMin(m.time); if(s!=null)blocked.push([s,s+60]);});
+    const candidates=[];
+    for(let start=7*60+30; start<=16*60+30; start+=15){const end=start+45; if(!blocked.some(([a,b])=>start<b&&end>a))candidates.push(start);}
+    const preferred=candidates.sort((a,b)=>Math.abs(a-(15*60+15))-Math.abs(b-(15*60+15))).slice(0,3).sort((a,b)=>a-b);
+    const fmt=(m)=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+    setTimeSuggestions(preferred.map(fmt));
+    if(!preferred.length)toast({title:'No open 45-minute slots found',description:'Try another date or adjust your schedule.'});
+  };
 
   return (
     <div>
