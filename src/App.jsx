@@ -49,6 +49,7 @@ import ParentPortal from '@/pages/ParentPortal';
 import ResourceHub from '@/pages/ResourceHub';
 import EvidenceVault from '@/pages/EvidenceVault';
 import ProgressMonitoringDay from '@/pages/ProgressMonitoringDay';
+import ConfigurationCenter from '@/pages/ConfigurationCenter';
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function App() {
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/help" element={<Help />} />
+                <Route path="/configuration" element={<ConfigurationCenter />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/promo-codes" element={<PromoCodes />} />
