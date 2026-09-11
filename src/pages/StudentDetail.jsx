@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import GoalBankPicker from "@/components/goalBank/GoalBankPicker";
 import GoalBoard from "@/components/students/GoalBoard";
+import ParentSharePanel from "@/components/students/ParentSharePanel";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
@@ -153,7 +154,12 @@ export default function StudentDetail() {
           <TabsTrigger value="documents"><FolderOpen className="h-4 w-4 mr-1.5" /> Documents</TabsTrigger>
           <TabsTrigger value="meetings"><UsersRound className="h-4 w-4 mr-1.5" /> Meetings</TabsTrigger>
           <TabsTrigger value="notes"><StickyNote className="h-4 w-4 mr-1.5" /> Notes</TabsTrigger>
+          <TabsTrigger value="family"><UsersRound className="h-4 w-4 mr-1.5" /> Family View</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="family">
+          <ParentSharePanel student={student} />
+        </TabsContent>
 
         {/* Overview */}
         <TabsContent value="overview">
