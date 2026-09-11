@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical } from "lucide-react";
+import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical, Archive } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -23,6 +23,7 @@ export default function Settings() {
   const { toast } = useToast();
   const { user, checkUserAuth } = useAuth();
   const { data: students, refetch: refetchStudents } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
+  const { data: retentionRows, refetch: refetchRetention } = useAsync(() => base44.entities.RetentionPolicy.list('-updated_date', 5), []);
   const [profileName, setProfileName] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [aiSettings, setAiSettings] = useState({ ai_provider: "OpenAI", minimum_necessary: true, full_document_ai: false });
@@ -31,6 +32,8 @@ export default function Settings() {
   const [deletionReason, setDeletionReason] = useState("");
   const [requestingDeletion, setRequestingDeletion] = useState(false);
   const [notifications, setNotifications] = useState({ deadlines: true, meetings: true, data_reminders: true, weekly_summary: false });
+  const [retention, setRetention] = useState({ student_record_years: 7, session_record_years: 7, document_years: 7, archive_exited_students: true, delete_after_retention: false, notes: "", last_reviewed: new Date().toISOString().slice(0,10) });
+  const [savingRetention, setSavingRetention] = useState(false);
   const demoStudents = (students || []).filter((s) => s.notes === DEMO_LABEL);
   const [demoBusy, setDemoBusy] = useState(false);
   const [confirmDeleteDemo, setConfirmDeleteDemo] = useState(false);
@@ -75,6 +78,11 @@ export default function Settings() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const current = (retentionRows || [])[0];
+    if (current) setRetention((r) => ({ ...r, ...current }));
+  }, [retentionRows]);
+
   const saveProfile = async () => {
     setSavingProfile(true);
     try { await base44.auth.updateMe({ full_name: profileName }); await checkUserAuth(); toast({ title: "Profile saved" }); }
@@ -113,6 +121,19 @@ export default function Settings() {
   const saveNotifications = async () => {
     try { await base44.auth.updateMe({ notifications }); toast({ title: "Notification preferences saved" }); }
     catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
+  };
+
+  const saveRetention = async () => {
+    setSavingRetention(true);
+    try {
+      const current = (retentionRows || [])[0];
+      const payload = { ...retention, student_record_years: Number(retention.student_record_years || 0), session_record_years: Number(retention.session_record_years || 0), document_years: Number(retention.document_years || 0), last_reviewed: new Date().toISOString().slice(0,10) };
+      if (current) await base44.entities.RetentionPolicy.update(current.id, payload);
+      else await base44.entities.RetentionPolicy.create(payload);
+      refetchRetention();
+      toast({ title: "Retention policy saved", description: "This records your organization’s policy settings. Automatic deletion remains off unless explicitly enabled." });
+    } catch (e) { toast({ title: "Could not save retention policy", description: e.message, variant: "destructive" }); }
+    finally { setSavingRetention(false); }
   };
 
   return (
