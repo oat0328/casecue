@@ -12,7 +12,7 @@ import NotificationsBell from "@/components/NotificationsBell";
 import { cn } from "@/lib/utils";
 
 const PRIMARY = ["/app","/students","/iep-studio","/session-tracker","/data-center","/meetings","/lesson-studio","/reports"];
-const SECONDARY = ["/meeting-navigator","/iep-review","/schedule","/sub-plans","/gradebook","/goal-groups","/progress-reports","/practice-lab","/ask-casecue","/help","/settings"];
+const SECONDARY = ["/meeting-navigator","/iep-review","/schedule","/sub-plans","/gradebook","/goal-groups","/progress-reports","/resource-hub","/practice-lab","/ask-casecue","/help","/settings"];
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
