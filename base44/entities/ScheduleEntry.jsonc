@@ -1,10 +1,8 @@
 {
-  "name": "ScheduleEntry",
   "type": "object",
   "properties": {
     "group_name": {
-      "type": "string",
-      "title": "Group Name"
+      "type": "string"
     },
     "delivery": {
       "type": "string",
@@ -12,57 +10,37 @@
         "pull-out",
         "push-in",
         "consultation"
-      ],
-      "default": "pull-out",
-      "title": "Delivery"
+      ]
     },
     "day": {
-      "type": "string",
-      "enum": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday"
-      ],
-      "default": "Monday",
-      "title": "Day"
+      "type": "string"
     },
     "start_time": {
-      "type": "string",
-      "title": "Start Time"
+      "type": "string"
     },
     "end_time": {
-      "type": "string",
-      "title": "End Time"
-    },
-    "teacher_classroom": {
-      "type": "string",
-      "title": "Teacher / Classroom"
+      "type": "string"
     },
     "service_minutes": {
-      "type": "number",
-      "title": "Service Minutes"
+      "type": "number"
+    },
+    "teacher_classroom": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
     },
     "student_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "title": "Student IDs"
+      }
     },
-    "notes": {
-      "type": "string",
-      "title": "Notes"
+    "school_year": {
+      "type": "string"
     },
     "archived": {
-      "type": "boolean",
-      "default": false,
-      "title": "Archived"
-    },
-    "organization_id": {
-      "type": "string",
-      "title": "Organization ID"
+      "type": "boolean"
     },
     "week_pattern": {
       "type": "string",
@@ -71,30 +49,28 @@
         "A_week",
         "B_week",
         "alternating"
-      ],
-      "default": "every_week",
-      "title": "Week Pattern"
+      ]
     },
     "cycle_day": {
-      "type": "string",
-      "title": "Cycle Day / Rotation"
+      "type": "string"
     },
     "period": {
-      "type": "string",
-      "title": "Period / Block"
+      "type": "string"
     },
     "recurrence_note": {
-      "type": "string",
-      "title": "Recurrence Note"
+      "type": "string"
     },
-    "school_year": {
+    "source_kind": {
       "type": "string",
-      "title": "School Year"
+      "enum": [
+        "generated_plan",
+        "resource_schedule",
+        "school_bell_schedule",
+        "student_schedule",
+        "manual"
+      ]
     }
   },
-  "required": [
-    "group_name"
-  ],
   "rls": {
     "read": {
       "$or": [
@@ -136,5 +112,7 @@
         }
       ]
     }
-  }
+  },
+  "required": [],
+  "name": "ScheduleEntry"
 }
