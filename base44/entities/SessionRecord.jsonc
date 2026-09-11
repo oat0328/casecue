@@ -132,6 +132,58 @@
     "organization_id": {
       "type": "string",
       "title": "Organization ID"
+    },
+    "medicaid_billable": {
+      "type": "boolean",
+      "default": false,
+      "title": "Medicaid Billable"
+    },
+    "billing_code": {
+      "type": "string",
+      "title": "Billing / Procedure Code"
+    },
+    "billing_units": {
+      "type": "number",
+      "title": "Billing Units"
+    },
+    "place_of_service": {
+      "type": "string",
+      "title": "Place of Service"
+    },
+    "provider_npi": {
+      "type": "string",
+      "title": "Provider NPI / Identifier"
+    },
+    "diagnosis_reference": {
+      "type": "string",
+      "title": "Diagnosis / Eligibility Reference"
+    },
+    "medical_necessity_note": {
+      "type": "string",
+      "title": "Medical Necessity / Service Note"
+    },
+    "signature_status": {
+      "type": "string",
+      "enum": [
+        "not_required",
+        "unsigned",
+        "signed"
+      ],
+      "default": "not_required",
+      "title": "Signature Status"
+    },
+    "billing_status": {
+      "type": "string",
+      "enum": [
+        "not_applicable",
+        "ready",
+        "hold",
+        "submitted",
+        "paid",
+        "denied"
+      ],
+      "default": "not_applicable",
+      "title": "Billing Status"
     }
   },
   "required": [
