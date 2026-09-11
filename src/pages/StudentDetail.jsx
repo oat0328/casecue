@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3 } from "lucide-react";
+import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3, Wrench, Accessibility, Compass, FileSearch } from "lucide-react";
 import { exportIepPdf } from "@/lib/pdfExport";
 import ExportGate from "@/components/shared/ExportGate";
 import { base44 } from "@/api/base44Client";
@@ -17,6 +17,10 @@ import { useToast } from "@/components/ui/use-toast";
 import GoalBankPicker from "@/components/goalBank/GoalBankPicker";
 import GoalBoard from "@/components/students/GoalBoard";
 import ParentSharePanel from "@/components/students/ParentSharePanel";
+import ModificationsPanel from "@/components/students/ModificationsPanel";
+import AccommodationLogPanel from "@/components/students/AccommodationLogPanel";
+import TransitionPanel from "@/components/students/TransitionPanel";
+import EvaluationPanel from "@/components/students/EvaluationPanel";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
@@ -190,6 +194,10 @@ export default function StudentDetail() {
           <TabsTrigger value="progress"><BarChart3 className="h-4 w-4 mr-1.5" /> Progress</TabsTrigger>
           <TabsTrigger value="documents"><FolderOpen className="h-4 w-4 mr-1.5" /> Documents</TabsTrigger>
           <TabsTrigger value="meetings"><UsersRound className="h-4 w-4 mr-1.5" /> Meetings</TabsTrigger>
+          <TabsTrigger value="modifications"><Wrench className="h-4 w-4 mr-1.5" /> Modifications</TabsTrigger>
+          <TabsTrigger value="accommodations-log"><Accessibility className="h-4 w-4 mr-1.5" /> Accommodation Log</TabsTrigger>
+          <TabsTrigger value="transition"><Compass className="h-4 w-4 mr-1.5" /> Transition</TabsTrigger>
+          <TabsTrigger value="evaluations"><FileSearch className="h-4 w-4 mr-1.5" /> Evaluations</TabsTrigger>
           <TabsTrigger value="proof"><ShieldCheck className="h-4 w-4 mr-1.5" /> CaseCue Proof</TabsTrigger>
           <TabsTrigger value="notes"><StickyNote className="h-4 w-4 mr-1.5" /> Notes</TabsTrigger>
           <TabsTrigger value="family"><UsersRound className="h-4 w-4 mr-1.5" /> Family View</TabsTrigger>
@@ -347,6 +355,11 @@ export default function StudentDetail() {
             {(meetings || []).length === 0 && <p className="text-center text-muted-foreground py-8">No meetings scheduled.</p>}
           </div>
         </TabsContent>
+
+        <TabsContent value="modifications"><ModificationsPanel student={student} /></TabsContent>
+        <TabsContent value="accommodations-log"><AccommodationLogPanel student={student} /></TabsContent>
+        <TabsContent value="transition"><TransitionPanel student={student} /></TabsContent>
+        <TabsContent value="evaluations"><EvaluationPanel student={student} /></TabsContent>
 
         {/* CaseCue Proof */}
         <TabsContent value="proof">
