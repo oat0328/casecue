@@ -23,7 +23,7 @@ const emptyForm = (provider) => ({
   student_id: "", date: todayStr(), start_time: nowRounded(0), end_time: nowRounded(30),
   provider: provider || "", service_type: "special_education", delivery: "individual", setting: "pull_out",
   location: "", goal_id: "", activity: "", scheduled_minutes: "", delivered_minutes: "",
-  status: "completed", quantitative: {}, qualitative: "", tags: [], follow_up_needed: false, follow_up_note: "",
+  status: "completed", quantitative: {}, qualitative: "", tags: [], follow_up_needed: false, follow_up_note: "", attachment_url: "",
   medicaid_billable: false, billing_code: "", billing_units: "", place_of_service: "", provider_npi: "", diagnosis_reference: "", medical_necessity_note: "", signature_status: "not_required", billing_status: "not_applicable",
 });
 
