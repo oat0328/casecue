@@ -47,6 +47,7 @@ import Trust from '@/pages/Trust';
 import Testimonials from '@/pages/Testimonials';
 import ParentPortal from '@/pages/ParentPortal';
 import ResourceHub from '@/pages/ResourceHub';
+import EvidenceVault from '@/pages/EvidenceVault';
 
 function App() {
   return (
@@ -92,6 +93,7 @@ function App() {
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/progress-reports" element={<ProgressReports />} />
                 <Route path="/resource-hub" element={<ResourceHub />} />
+                <Route path="/evidence-vault" element={<EvidenceVault />} />
                 <Route path="/practice-lab" element={<PracticeLab />} />
                 <Route path="/ask-casecue" element={<AskCaseCue />} />
                 <Route path="/help" element={<Help />} />
