@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Users, CalendarClock, RefreshCw, Trash2, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Search, Plus, Users, RefreshCw, Trash2, AlertTriangle, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
