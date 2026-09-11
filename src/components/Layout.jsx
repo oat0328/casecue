@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 
-const PRIMARY = ["/app","/students","/iep-studio","/session-tracker","/data-center","/meetings","/lesson-studio","/reports"];
+const PRIMARY = ["/app","/students","/iep-studio","/session-tracker","/data-center","/progress-monitoring-day","/meetings","/lesson-studio","/reports"];
 const SECONDARY = ["/meeting-navigator","/iep-review","/schedule","/sub-plans","/gradebook","/goal-groups","/progress-reports","/evidence-vault","/resource-hub","/practice-lab","/ask-casecue","/help","/settings"];
 
 export default function Layout() {
