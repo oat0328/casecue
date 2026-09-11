@@ -4,9 +4,9 @@ import { AlertTriangle, CalendarClock, FileWarning, ChevronRight } from "lucide-
 import { Card } from "@/components/ui/cards";
 
 function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr || "")) return null;
+  const d = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(d.getTime()) || d.getFullYear() < 2020 || d.getFullYear() > 2100) return null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   return Math.round((d - today) / 86400000);
 }
