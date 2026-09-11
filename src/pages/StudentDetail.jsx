@@ -22,6 +22,7 @@ import AccommodationLogPanel from "@/components/students/AccommodationLogPanel";
 import TransitionPanel from "@/components/students/TransitionPanel";
 import EvaluationPanel from "@/components/students/EvaluationPanel";
 import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
+import InputRecordsPanel from "@/components/students/InputRecordsPanel";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
@@ -217,6 +218,7 @@ export default function StudentDetail() {
           <TabsTrigger value="evaluations"><FileSearch className="h-4 w-4 mr-1.5" /> Evaluations</TabsTrigger>
           <TabsTrigger value="evidence"><Archive className="h-4 w-4 mr-1.5" /> Evidence Vault</TabsTrigger>
           <TabsTrigger value="timeline"><History className="h-4 w-4 mr-1.5" /> Timeline</TabsTrigger>
+          <TabsTrigger value="input"><UsersRound className="h-4 w-4 mr-1.5" /> Team Input</TabsTrigger>
           <TabsTrigger value="proof"><ShieldCheck className="h-4 w-4 mr-1.5" /> CaseCue Proof</TabsTrigger>
           <TabsTrigger value="notes"><StickyNote className="h-4 w-4 mr-1.5" /> Notes</TabsTrigger>
           <TabsTrigger value="family"><UsersRound className="h-4 w-4 mr-1.5" /> Family View</TabsTrigger>
@@ -392,6 +394,7 @@ export default function StudentDetail() {
             ].filter(x=>x.date).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,100).map((x,i)=><div key={`${x.type}-${x.date}-${i}`} className="flex gap-3 rounded-2xl border bg-white p-4"><div className="w-24 shrink-0 text-xs font-bold text-slate-500">{x.date}</div><div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xs font-black">{x.type[0]}</div><div className="min-w-0"><div className="text-xs font-black uppercase tracking-wider text-blue-700">{x.type}</div><div className="font-semibold">{x.title}</div><div className="text-sm text-slate-500 mt-0.5">{x.detail}</div></div></div>)}{![...(sessions||[]),...(progress||[]),...(workEvidence||[]),...(meetings||[]),...(documents||[])].length&&<div className="text-sm text-slate-500 py-8 text-center">No timeline records yet.</div>}</div>
           </Card>
         </TabsContent>
+        <TabsContent value="input"><InputRecordsPanel student={student}/></TabsContent>
 
         {/* CaseCue Proof */}
         <TabsContent value="proof">
