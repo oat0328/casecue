@@ -19,19 +19,20 @@ const aliases = {
   end_time: ["end time","end","end_time"],
   duration_minutes: ["duration","duration minutes","minutes","session minutes","duration_minutes"],
   provider: ["provider","teacher","staff","service provider"],
-  service_type: ["service type","service","subject","service area","service_type"],
+  service_type: ["service type","service","subject","service area","area of service","service_type"],
   delivery: ["delivery","individual/group","individual or group","session type","group"],
   setting: ["setting","push in/pull out","push-in/pull-out","push or pull","location type"],
   location: ["location","room"],
   goal: ["goal","goal area","iep goal","goal name","goal_area"],
   activity: ["activity","skill","assignment","lesson","activity or skill","focus"],
   scheduled_minutes: ["scheduled minutes","required minutes","scheduled","scheduled_minutes"],
-  delivered_minutes: ["delivered minutes","minutes delivered","service minutes","delivered","delivered_minutes"],
+  delivered_minutes: ["delivered minutes","minutes delivered","service minutes","clean minutes","delivered","delivered_minutes"],
   status: ["status","attendance","session status"],
   correct: ["correct","points earned","earned"],
   total: ["total","possible","points possible","attempted"],
   percentage: ["percentage","percent","accuracy","score"],
-  qualitative: ["qualitative","qualitative notes","notes","observation","observation notes","narrative","session notes"],
+  quantitative_note: ["quantitative","quantitative numbers student performance notes","student performance data"],
+  qualitative: ["qualitative","qualitative notes","qualitative narrative student performance notes","notes","observation","observation notes","narrative","session notes"],
   follow_up_note: ["follow up","follow-up","follow up note","next step"],
 };
 
@@ -53,11 +54,26 @@ function csvRows(text) {
 
 function indexMap(headers){
   const h=headers.map(normalize); const out={};
-  Object.entries(aliases).forEach(([key,list])=>{ const idx=h.findIndex(x=>list.some(a=>x===normalize(a))); if(idx>=0) out[key]=idx; });
+  Object.entries(aliases).forEach(([key,list])=>{
+    const normalized=list.map(normalize);
+    const idx=h.findIndex(x=>normalized.some(a=>x===a || (a.length>=5 && x.includes(a)) || (x.length>=5 && a.includes(x))));
+    if(idx>=0) out[key]=idx;
+  });
+  // Legacy/Google Form session trackers sometimes have a student's name in the
+  // second column header and the form date itself in the third header cell.
+  // Detect that layout from the surrounding stable columns rather than rejecting it.
+  if(out.student==null && h[0]?.includes('timestamp') && h[3]?.includes('service minutes')) out.student=1;
+  if(out.date==null && h[0]?.includes('timestamp') && h[3]?.includes('service minutes')) out.date=2;
+  if(out.delivered_minutes==null && h[4]?.includes('clean minutes')) out.delivered_minutes=4;
+  if(out.service_type==null && h[5]?.includes('area of service')) out.service_type=5;
+  if(out.location==null && h[6]?.includes('location of services')) out.location=6;
+  if(out.quantitative_note==null && h[7]?.includes('quantitative')) out.quantitative_note=7;
+  if(out.qualitative==null && h[8]?.includes('qualitative')) out.qualitative=8;
   return out;
 }
 function get(row,map,key){ return map[key] == null ? "" : cellText(row[map[key]]); }
-function num(v){ const n=Number(String(v||"").replace(/%/g,"").trim()); return Number.isFinite(n)?n:null; }
+function num(v){ const s=String(v||'').replace(/,/g,'').trim(); const m=s.match(/-?\d+(?:\.\d+)?/); if(!m)return null; const n=Number(m[0]); return Number.isFinite(n)?n:null; }
+function fraction(v){ const m=String(v||'').match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/); return m?{correct:Number(m[1]),total:Number(m[2])}:null; }
 function dateValue(v){
   if(v instanceof Date) return v.toISOString().slice(0,10);
   const s=String(v||"").trim(); if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
@@ -103,11 +119,11 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
         const sid=studentByName.get(normalizeName(full))||'';
         const date=dateValue(map.date==null?'':r[map.date]); const start=timeValue(get(r,map,'start_time')); const end=timeValue(get(r,map,'end_time'));
         const statedDuration=num(get(r,map,'duration_minutes')); const delivered=num(get(r,map,'delivered_minutes')); const scheduled=num(get(r,map,'scheduled_minutes')); const duration=delivered??statedDuration??minutesBetween(start,end);
-        const correct=num(get(r,map,'correct')), total=num(get(r,map,'total')); let pct=num(get(r,map,'percentage')); if(pct!=null && pct<=1 && String(get(r,map,'percentage')).includes('.') && !String(get(r,map,'percentage')).includes('%')) pct*=100; if(pct==null&&correct!=null&&total>0)pct=Math.round((correct/total)*1000)/10;
+        const rawQuant=get(r,map,'quantitative_note'); const frac=fraction(rawQuant); const correct=num(get(r,map,'correct'))??frac?.correct??null, total=num(get(r,map,'total'))??frac?.total??null; let pct=num(get(r,map,'percentage')); if(pct==null && /%/.test(rawQuant)) pct=num(rawQuant); if(pct!=null && pct<=1 && String(get(r,map,'percentage')).includes('.') && !String(get(r,map,'percentage')).includes('%')) pct*=100; if(pct==null&&correct!=null&&total>0)pct=Math.round((correct/total)*1000)/10;
         const goalText=get(r,map,'goal'); const gid=goalFor(sid,goalText);
         const activity=get(r,map,'activity')||goalText||get(r,map,'service_type')||'Imported session';
         const key=`${sid}|${date}|${start||''}|${normalize(activity)}`;
-        return {row:i+2,student_name:full,student_id:sid,date,start_time:start,end_time:end,duration_minutes:duration??null,provider:get(r,map,'provider'),service_type:enumValue(get(r,map,'service_type'),'service'),delivery:enumValue(get(r,map,'delivery'),'delivery'),setting:enumValue(get(r,map,'setting'),'setting'),location:get(r,map,'location'),goal_text:goalText,goal_id:gid,activity,scheduled_minutes:scheduled??duration??null,delivered_minutes:delivered??duration??null,status:enumValue(get(r,map,'status'),'status'),correct,total,percentage:pct,qualitative:get(r,map,'qualitative'),follow_up_note:get(r,map,'follow_up_note'),duplicate:sid&&date?duplicateKeys.has(key):false};
+        return {row:i+2,student_name:full,student_id:sid,date,start_time:start,end_time:end,duration_minutes:duration??null,provider:get(r,map,'provider'),service_type:enumValue(get(r,map,'service_type'),'service'),delivery:enumValue(get(r,map,'delivery'),'delivery'),setting:enumValue(get(r,map,'setting'),'setting'),location:get(r,map,'location'),goal_text:goalText,goal_id:gid,activity,scheduled_minutes:scheduled??duration??null,delivered_minutes:delivered??duration??null,status:enumValue(get(r,map,'status'),'status'),correct,total,percentage:pct,quantitative_note:rawQuant,qualitative:get(r,map,'qualitative'),follow_up_note:get(r,map,'follow_up_note'),duplicate:sid&&date?duplicateKeys.has(key):false};
       }).filter(r=>r.student_name||r.date||r.activity);
       setRows(parsed); setFileName(file.name);
     }catch(e){toast({title:'Could not read session file',description:e.message,variant:'destructive'});}
@@ -121,7 +137,7 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
   const doImport=async()=>{
     if(!ready.length)return; setBusy(true);
     try{
-      const sessionRecords=ready.map(r=>({student_id:r.student_id,date:r.date,start_time:r.start_time||undefined,end_time:r.end_time||undefined,duration_minutes:r.duration_minutes??undefined,provider:r.provider||undefined,service_type:r.service_type,delivery:r.delivery,setting:r.setting,location:r.location||undefined,goal_id:r.goal_id||undefined,activity:r.activity,scheduled_minutes:r.scheduled_minutes??undefined,delivered_minutes:r.delivered_minutes??undefined,status:r.status,quantitative:(r.correct!=null||r.total!=null||r.percentage!=null)?{correct:r.correct,total:r.total,percentage:r.percentage}:undefined,qualitative:r.qualitative||undefined,follow_up_needed:!!r.follow_up_note,follow_up_note:r.follow_up_note||undefined,tags:['Imported spreadsheet']}));
+      const sessionRecords=ready.map(r=>({student_id:r.student_id,date:r.date,start_time:r.start_time||undefined,end_time:r.end_time||undefined,duration_minutes:r.duration_minutes??undefined,provider:r.provider||undefined,service_type:r.service_type,delivery:r.delivery,setting:r.setting,location:r.location||undefined,goal_id:r.goal_id||undefined,activity:r.activity,scheduled_minutes:r.scheduled_minutes??undefined,delivered_minutes:r.delivered_minutes??undefined,status:r.status,quantitative:(r.correct!=null||r.total!=null||r.percentage!=null||r.quantitative_note)?{correct:r.correct,total:r.total,percentage:r.percentage,raw:r.quantitative_note||undefined}:undefined,qualitative:r.qualitative||undefined,follow_up_needed:!!r.follow_up_note,follow_up_note:r.follow_up_note||undefined,tags:['Imported spreadsheet']}));
       await base44.entities.SessionRecord.bulkCreate(sessionRecords);
       const progressRecords=ready.filter(r=>r.goal_id&&(r.correct!=null||r.total!=null||r.percentage!=null||r.qualitative)).map(r=>({student_id:r.student_id,goal_id:r.goal_id,date:r.date,correct:r.correct??undefined,total:r.total??undefined,percentage:r.percentage??undefined,decimal:r.percentage!=null?Math.round((r.percentage/100)*100)/100:undefined,qualitative_notes:r.qualitative||undefined,observation_notes:r.qualitative||undefined,prompting_level:'independent'}));
       if(progressRecords.length) await base44.entities.ProgressData.bulkCreate(progressRecords);
@@ -132,10 +148,8 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
 
   return <div className="space-y-4">
     <Card className="p-6 border-sky-100 bg-gradient-to-br from-white to-sky-50/50">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-        <div className="flex gap-4"><div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0"><FileSpreadsheet className="h-6 w-6"/></div><div><h3 className="font-black text-lg">Import session tracking spreadsheet</h3><p className="text-sm text-slate-600 mt-1 max-w-2xl">Upload Excel or CSV. CaseCue matches students, reads dates/minutes/service details, previews every row, skips duplicates, and can turn goal-linked scores into progress data for graphs and reports.</p><div className="flex items-center gap-2 mt-2 text-xs text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600"/>Nothing is saved until you review and approve the import.</div></div></div>
-        <div><input ref={inputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={e=>parseFile(e.target.files?.[0])}/><Button className="bg-slate-950 hover:bg-slate-800 text-white" disabled={busy} onClick={()=>inputRef.current?.click()}>{busy?<Loader2 className="h-4 w-4 mr-2 animate-spin"/>:<Upload className="h-4 w-4 mr-2"/>}Upload Excel / CSV</Button></div>
-      </div>
+      <div className="flex gap-4"><div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0"><FileSpreadsheet className="h-6 w-6"/></div><div><h3 className="font-black text-lg">Import session tracking spreadsheet</h3><p className="text-sm text-slate-600 mt-1 max-w-2xl">Upload or drag in Excel/CSV. CaseCue matches students, reads dates, service minutes, service area, quantitative data and narrative notes, previews every row, skips duplicates, then creates session records after you approve.</p><div className="flex items-center gap-2 mt-2 text-xs text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600"/>Nothing is saved until you review and approve the import.</div></div></div>
+      <div className="mt-5"><input ref={inputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={e=>parseFile(e.target.files?.[0])}/><div onDragOver={e=>{e.preventDefault();e.currentTarget.classList.add('border-blue-500')}} onDragLeave={e=>e.currentTarget.classList.remove('border-blue-500')} onDrop={e=>{e.preventDefault();e.currentTarget.classList.remove('border-blue-500');parseFile(e.dataTransfer.files?.[0])}} onClick={()=>inputRef.current?.click()} className="cursor-pointer rounded-2xl border-2 border-dashed border-blue-200 bg-white p-7 text-center transition-colors hover:border-blue-500"><Upload className="h-7 w-7 mx-auto text-blue-700"/><div className="font-black mt-2">Drag & drop your session tracking file here</div><div className="text-sm text-slate-500 mt-1">or click to browse · Excel (.xlsx) or CSV · up to 5 MB</div><Button type="button" className="mt-3 bg-slate-950 hover:bg-slate-800 text-white" disabled={busy}>{busy?<Loader2 className="h-4 w-4 mr-2 animate-spin"/>:<Upload className="h-4 w-4 mr-2"/>}{busy?'Reading file…':'Choose Excel / CSV'}</Button></div></div>
       {summary&&<div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><div className="font-black flex items-center gap-2"><CheckCircle2 className="h-4 w-4"/>Import complete</div><div className="mt-1">{summary.sessions} sessions · {summary.progress} goal progress points · {summary.skipped} rows skipped/reviewed</div></div>}
     </Card>
 
