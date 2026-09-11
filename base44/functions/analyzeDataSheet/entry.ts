@@ -13,9 +13,9 @@ const SCHEMA = {
         properties: {
           date: { type: 'string' },
           goal_area: { type: 'string' },
-          correct: { type: ['number','null'] },
-          total: { type: ['number','null'] },
-          percentage: { type: ['number','null'] },
+          correct: { type: 'number' },
+          total: { type: 'number' },
+          percentage: { type: 'number' },
           prompting_level: { type: 'string' },
           qualitative_notes: { type: 'string' },
           source: { type: 'string' }
