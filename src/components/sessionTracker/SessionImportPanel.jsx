@@ -63,7 +63,14 @@ function indexMap(headers){
   // second column header and the form date itself in the third header cell.
   // Detect that layout from the surrounding stable columns rather than rejecting it.
   if(out.student==null && h[0]?.includes('timestamp') && h[3]?.includes('service minutes')) out.student=1;
-  if(out.date==null && h[0]?.includes('timestamp') && h[3]?.includes('service minutes')) out.date=2;
+  if(out.date==null && h[0]?.includes('timestamp')) out.date=0;
+  // Some Google Forms exports use the actual date/question text as a header.
+  // Prefer a date-like column when present; otherwise the submission timestamp
+  // is a safe fallback for the session date and can be corrected in review.
+  if(out.date==null){
+    const dateLike=h.findIndex(x=>/\b(date|day)\b/.test(x)||/^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(x));
+    if(dateLike>=0) out.date=dateLike;
+  }
   if(out.delivered_minutes==null && h[4]?.includes('clean minutes')) out.delivered_minutes=4;
   if(out.service_type==null && h[5]?.includes('area of service')) out.service_type=5;
   if(out.location==null && h[6]?.includes('location of services')) out.location=6;
@@ -111,10 +118,35 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
       else raw=await readXlsxFile(file);
       if(raw.length<2) throw new Error('No data rows were found.');
       if(raw.length-1>MAX_ROWS) throw new Error(`This file has more than ${MAX_ROWS} rows. Split it into smaller imports.`);
-      const map=indexMap(raw[0].map(cellText));
-      if(map.date==null) throw new Error('I could not find a session date column.');
-      if(map.student==null && (map.first_name==null || map.last_name==null)) throw new Error('I could not find a student name column.');
-      const parsed=raw.slice(1).map((r,i)=>{
+      // Find the real header row instead of assuming row 1. Google Forms and
+      // exported school trackers may include title/instruction rows first.
+      let headerIndex=0, map=indexMap((raw[0]||[]).map(cellText));
+      let bestScore=Object.keys(map).length;
+      for(let hi=1;hi<Math.min(raw.length,12);hi++){
+        const candidate=indexMap((raw[hi]||[]).map(cellText));
+        const score=Object.keys(candidate).length;
+        if(score>bestScore){headerIndex=hi;map=candidate;bestScore=score;}
+      }
+      // Last-resort data-driven detection: find columns whose first values look
+      // like dates and student names. This keeps custom Excel trackers usable.
+      const sample=raw.slice(headerIndex+1,Math.min(raw.length,headerIndex+21));
+      if(map.date==null){
+        const width=Math.max(...sample.map(r=>r.length),0);
+        for(let c=0;c<width;c++){
+          const vals=sample.map(r=>r[c]).filter(v=>v!==''&&v!=null);
+          if(vals.length && vals.filter(v=>v instanceof Date || dateValue(v)).length/vals.length>=0.7){map.date=c;break;}
+        }
+      }
+      if(map.student==null && (map.first_name==null || map.last_name==null)){
+        const width=Math.max(...sample.map(r=>r.length),0);
+        for(let c=0;c<width;c++){
+          const hits=sample.map(r=>normalizeName(r[c])).filter(v=>studentByName.has(v)).length;
+          if(hits>=Math.max(1,Math.ceil(sample.length*.3))){map.student=c;break;}
+        }
+      }
+      if(map.date==null) throw new Error('CaseCue could not identify the session date. Add a Date/Session Date column or keep the Google Forms Timestamp column.');
+      if(map.student==null && (map.first_name==null || map.last_name==null)) throw new Error('CaseCue could not identify the student column. Use Student Name, First/Last Name, or names matching your CaseCue roster.');
+      const parsed=raw.slice(headerIndex+1).map((r,i)=>{
         const full=get(r,map,'student')||`${get(r,map,'first_name')} ${get(r,map,'last_name')}`.trim();
         const sid=studentByName.get(normalizeName(full))||'';
         const date=dateValue(map.date==null?'':r[map.date]); const start=timeValue(get(r,map,'start_time')); const end=timeValue(get(r,map,'end_time'));
@@ -123,7 +155,7 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
         const goalText=get(r,map,'goal'); const gid=goalFor(sid,goalText);
         const activity=get(r,map,'activity')||goalText||get(r,map,'service_type')||'Imported session';
         const key=`${sid}|${date}|${start||''}|${normalize(activity)}`;
-        return {row:i+2,student_name:full,student_id:sid,date,start_time:start,end_time:end,duration_minutes:duration??null,provider:get(r,map,'provider'),service_type:enumValue(get(r,map,'service_type'),'service'),delivery:enumValue(get(r,map,'delivery'),'delivery'),setting:enumValue(get(r,map,'setting'),'setting'),location:get(r,map,'location'),goal_text:goalText,goal_id:gid,activity,scheduled_minutes:scheduled??duration??null,delivered_minutes:delivered??duration??null,status:enumValue(get(r,map,'status'),'status'),correct,total,percentage:pct,quantitative_note:rawQuant,qualitative:get(r,map,'qualitative'),follow_up_note:get(r,map,'follow_up_note'),duplicate:sid&&date?duplicateKeys.has(key):false};
+        return {row:i+headerIndex+2,student_name:full,student_id:sid,date,start_time:start,end_time:end,duration_minutes:duration??null,provider:get(r,map,'provider'),service_type:enumValue(get(r,map,'service_type'),'service'),delivery:enumValue(get(r,map,'delivery'),'delivery'),setting:enumValue(get(r,map,'setting'),'setting'),location:get(r,map,'location'),goal_text:goalText,goal_id:gid,activity,scheduled_minutes:scheduled??duration??null,delivered_minutes:delivered??duration??null,status:enumValue(get(r,map,'status'),'status'),correct,total,percentage:pct,quantitative_note:rawQuant,qualitative:get(r,map,'qualitative'),follow_up_note:get(r,map,'follow_up_note'),duplicate:sid&&date?duplicateKeys.has(key):false};
       }).filter(r=>r.student_name||r.date||r.activity);
       setRows(parsed); setFileName(file.name);
     }catch(e){toast({title:'Could not read session file',description:e.message,variant:'destructive'});}
