@@ -98,7 +98,7 @@ export default function Schedule() {
               <Card key={day} className="p-4">
                 <h3 className="font-semibold text-sm mb-3 text-primary">{day}</h3>
                 <div className="space-y-2">
-                  {active.filter((e) => e.day === day).map((e) => (
+                  {active.filter((e) => e.day === day).sort((a,b) => String(a.start_time||'').localeCompare(String(b.start_time||''))).map((e) => (
                     <div key={e.id} className="rounded-lg border border-border p-3 group relative">
                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => setEditing(e)} title="Edit" className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
