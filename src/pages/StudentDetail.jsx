@@ -342,12 +342,24 @@ export default function StudentDetail() {
             </div>
             <Button onClick={addProgress} disabled={savingProg} className="brand-gradient text-white mt-4"><Plus className="h-4 w-4 mr-1" /> {savingProg ? "Saving…" : "Log data"}</Button>
           </Card>
+          <Card className="p-6 mb-6">
+            <h3 className="font-semibold mb-1">Intervention phase markers</h3>
+            <p className="text-sm text-muted-foreground mb-4">Mark when instruction, intervention, grouping, or support changed so progress graphs have context.</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div><Label>Start date</Label><Input type="date" value={newPhase.start_date} onChange={(e)=>setNewPhase({...newPhase,start_date:e.target.value})}/></div>
+              <div><Label>Goal</Label><select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" value={newPhase.goal_id} onChange={(e)=>setNewPhase({...newPhase,goal_id:e.target.value})}><option value="">All / general</option>{(goals||[]).map(g=><option key={g.id} value={g.id}>{g.goal_area||'Goal'}</option>)}</select></div>
+              <div><Label>Phase label</Label><Input value={newPhase.label} onChange={(e)=>setNewPhase({...newPhase,label:e.target.value})} placeholder="Phase 2"/></div>
+              <div><Label>Intervention / change</Label><Input value={newPhase.intervention} onChange={(e)=>setNewPhase({...newPhase,intervention:e.target.value})} placeholder="New decoding routine"/></div>
+              <div className="flex items-end"><Button onClick={addPhase} className="w-full">Add marker</Button></div>
+            </div>
+            {(phases||[]).length>0&&<div className="mt-4 flex flex-wrap gap-2">{(phases||[]).map(p=><span key={p.id} className="rounded-full border bg-slate-50 px-3 py-1.5 text-xs font-semibold">{p.start_date} · {p.label}{p.intervention?` — ${p.intervention}`:''}</span>)}</div>}
+          </Card>
           {chartData.length > 0 && (
             <Card className="p-6 mb-6">
               <h3 className="font-semibold mb-4">Progress trend</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /><XAxis dataKey="date" fontSize={12} /><YAxis domain={[0,100]} fontSize={12} /><Tooltip /><Line type="monotone" dataKey="percentage" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} /></LineChart>
+                  <LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /><XAxis dataKey="date" fontSize={12} /><YAxis domain={[0,100]} fontSize={12} /><Tooltip />{(phases||[]).map(p=><ReferenceLine key={p.id} x={p.start_date} strokeDasharray="4 4" label={{value:p.label,position:'top',fontSize:10}}/>)}<Line type="monotone" dataKey="percentage" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} /></LineChart>
                 </ResponsiveContainer>
               </div>
             </Card>
