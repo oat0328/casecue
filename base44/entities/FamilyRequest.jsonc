@@ -1,0 +1,73 @@
+{
+  "name": "FamilyRequest",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "parent_share_id": {
+      "type": "string",
+      "title": "Parent Share ID"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "acknowledgment",
+        "question",
+        "meeting_request",
+        "resource_request",
+        "update_request"
+      ],
+      "default": "question",
+      "title": "Request Type"
+    },
+    "message": {
+      "type": "string",
+      "title": "Message"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "reviewed",
+        "resolved"
+      ],
+      "default": "new",
+      "title": "Status"
+    },
+    "submitted_at": {
+      "type": "string",
+      "title": "Submitted At"
+    },
+    "resolved_at": {
+      "type": "string",
+      "title": "Resolved At"
+    }
+  },
+  "required": [
+    "student_id",
+    "organization_id",
+    "parent_share_id",
+    "request_type",
+    "submitted_at"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
