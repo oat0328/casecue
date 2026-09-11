@@ -7,8 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import ExportGate from "@/components/shared/ExportGate";
 import { printDoc, exportDocPdf, exportDocDocx } from "@/lib/docExport";
 
-// Complete Student Binder: compiles the verified record, goals, saved AI
-// outputs (AI summary, BIP analysis, amendments, progress reports), meeting
+// Complete Student Binder: compiles the verified record, goals, saved CaseCue
+// outputs (student summary, BIP analysis, amendments, progress reports), meeting
 // info, and the latest compliance review into one document — Print, PDF, and
 // DOCX. Sections with nothing on file are stated honestly, never invented.
 export default function StudentBinder({ student }) {
@@ -18,12 +18,17 @@ export default function StudentBinder({ student }) {
   const gather = async () => {
     setBusy(true);
     try {
-      const [goals, docs, reports, reviews, meetings] = await Promise.all([
+      const [goals, docs, reports, reviews, meetings, modifications, transitionPlans, accommodationLogs, evaluations, sessions] = await Promise.all([
         base44.entities.Goal.filter({ student_id: student.id }, "-updated_date", 100),
         base44.entities.Document.filter({ student_id: student.id }, "-date_uploaded", 50),
         base44.entities.SavedReport.filter({ student_id: student.id }, "-created_date", 100),
         base44.entities.IEPReview.filter({ student_id: student.id }, "-created_date", 5),
         base44.entities.Meeting.filter({ student_id: student.id }, "-date", 10),
+        base44.entities.Modification.filter({ student_id: student.id }, "-updated_date", 100),
+        base44.entities.TransitionPlan.filter({ student_id: student.id }, "-updated_date", 5),
+        base44.entities.AccommodationLog.filter({ student_id: student.id }, "-date", 100),
+        base44.entities.EvaluationRecord.filter({ student_id: student.id }, "-updated_date", 100),
+        base44.entities.SessionRecord.filter({ student_id: student.id }, "-date", 200),
       ]);
 
       const processed = (docs || []).filter((d) => d.extraction_status === "processed");
@@ -94,10 +99,10 @@ export default function StudentBinder({ student }) {
           ].join("\n"),
         },
         {
-          heading: "AI Summary",
+          heading: "CaseCue Summary",
           body:
             aiSummary?.content?.summary ||
-            na + " Generate one in the AI Summary tab of IEP Studio.",
+            na + " Generate one in the CaseCue Summary tab of IEP Studio.",
         },
         { heading: "Present Levels", body: student.present_levels || na },
         { heading: "Strengths", body: student.strengths || na },
@@ -106,13 +111,47 @@ export default function StudentBinder({ student }) {
         { heading: "Accommodations", body: student.accommodations || na },
         {
           heading: "Modifications",
-          body: "Not tracked separately in CaseCue yet — record modifications in the Accommodations field if your district uses them.",
+          body: (modifications || []).length
+            ? modifications.map((m, i) => `${i + 1}. ${m.area || "General"}: ${m.modification}${m.setting ? ` · ${m.setting}` : ""}${m.frequency ? ` · ${m.frequency}` : ""}`).join("\n")
+            : na,
         },
         {
           heading: "SDI / Specially Designed Instruction",
           body: na + " Draft SDI language in IEP Studio (Accommodations & SDI tab).",
         },
         { heading: "Services", body: (student.services || []).join(", ") || na },
+        {
+          heading: "Accommodation Implementation",
+          body: (accommodationLogs || []).length
+            ? accommodationLogs.slice(0, 25).map((x) => `${x.date}: ${x.accommodation} — ${String(x.status || "").replace(/_/g, " ")}${x.effectiveness ? ` · ${x.effectiveness}` : ""}`).join("\n")
+            : na,
+        },
+        {
+          heading: "Transition Planning",
+          body: (transitionPlans || [])[0]
+            ? [
+                `Status: ${(transitionPlans || [])[0].status || "draft"}`,
+                `Interests & preferences: ${(transitionPlans || [])[0].interests || "—"}`,
+                `Student voice: ${(transitionPlans || [])[0].student_voice || "—"}`,
+                `Education/training goal: ${(transitionPlans || [])[0].education_goal || "—"}`,
+                `Employment goal: ${(transitionPlans || [])[0].employment_goal || "—"}`,
+                `Independent living goal: ${(transitionPlans || [])[0].independent_living_goal || "—"}`,
+                `Activities: ${(transitionPlans || [])[0].activities || "—"}`,
+              ].join("\n")
+            : na,
+        },
+        {
+          heading: "Evaluations / MET / Reevaluation",
+          body: (evaluations || []).length
+            ? evaluations.map((e, i) => `${i + 1}. ${e.evaluation_type || "Evaluation"} · ${String(e.status || "").replace(/_/g, " ")}${e.due_date ? ` · due ${e.due_date}` : ""}${e.meeting_date ? ` · meeting ${e.meeting_date}` : ""}`).join("\n")
+            : na,
+        },
+        {
+          heading: "Recent Service Sessions",
+          body: (sessions || []).length
+            ? sessions.slice(0, 30).map((s) => `${s.date}: ${s.activity || s.service_type || "Session"} · ${s.delivered_minutes ?? s.duration_minutes ?? "—"} min · ${s.status || "—"}`).join("\n")
+            : na,
+        },
         { heading: "BIP", body: bipBody },
         {
           heading: "FBA",
@@ -196,8 +235,8 @@ export default function StudentBinder({ student }) {
             <BookOpen className="h-4 w-4 text-primary" /> Student Binder
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-            Export {student.first_name}'s complete binder in one document — snapshot, AI summary, present levels,
-            strengths, needs, goals, accommodations, SDI, services, BIP, FBA, amendments, meeting packet, progress
+            Export {student.first_name}'s complete binder in one document — snapshot, CaseCue summary, present levels,
+            strengths, needs, goals, accommodations, modifications, transition, evaluations, services, BIP, FBA, amendments, meeting packet, progress
             reports, and the latest compliance review. Anything not on file is stated honestly.
           </p>
         </div>
