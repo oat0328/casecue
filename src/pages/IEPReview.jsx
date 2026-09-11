@@ -63,7 +63,7 @@ export default function IEPReview() {
 
   return (
     <div>
-      <PageHeader title="IEP Review" subtitle="Run a CaseCue quality review across six categories. This is a quality review — not a legal compliance score. Educator and team verification is always required." icon={ShieldCheck} />
+      <PageHeader title="CaseCue Check" subtitle="Review IEP readiness, missing information, data alignment, services/accommodations, progress monitoring, and document consistency. This is a quality-support check — not a legal compliance determination." icon={ShieldCheck} />
 
       <Card className="p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
@@ -76,7 +76,7 @@ export default function IEPReview() {
             />
           </div>
           <Button onClick={runReview} disabled={running || !studentId} className="brand-gradient text-white">
-            {running ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Reviewing…</> : <><Sparkles className="h-4 w-4 mr-1" /> Run CaseCue IEP Review</>}
+            {running ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Reviewing…</> : <><Sparkles className="h-4 w-4 mr-1" /> Run CaseCue Check</>}
           </Button>
         </div>
       </Card>
@@ -94,7 +94,7 @@ export default function IEPReview() {
           <Card className="p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="text-center sm:text-left">
-                <div className="text-sm text-muted-foreground">CaseCue IEP Review</div>
+                <div className="text-sm text-muted-foreground">CaseCue Check</div>
                 <div className="flex items-end gap-1"><span className="text-5xl font-bold text-gradient">{review.score}</span><span className="text-muted-foreground mb-1.5">/ 100</span></div>
               </div>
               <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
@@ -153,7 +153,7 @@ export default function IEPReview() {
 
           <div className="mt-4 space-y-3">
             <ExportBar
-              title={`IEP Review — ${selectedStudent ? `${selectedStudent.first_name} ${selectedStudent.last_name}` : "Student"}`}
+              title={`CaseCue Check — ${selectedStudent ? `${selectedStudent.first_name} ${selectedStudent.last_name}` : "Student"}`}
               subtitle="CaseCue quality review"
               filename={`IEP-Review-${selectedStudent ? selectedStudent.first_name : "Student"}`}
               banner="Potential issues for educator review only — CaseCue never claims compliance or makes decisions."
@@ -178,7 +178,7 @@ export default function IEPReview() {
 
           <div className="mt-6 flex items-start gap-2 rounded-xl bg-muted p-4 text-sm text-muted-foreground">
             <Info className="h-4 w-4 mt-0.5 shrink-0" />
-            <span>CaseCue IEP Review is a quality-support tool. It does not determine legal compliance. All findings are potential issues requiring educator and IEP team verification.</span>
+            <span>CaseCue Check is a quality-support tool. It does not determine legal compliance. All findings are potential issues requiring educator and IEP team verification.</span>
           </div>
         </>
       )}
