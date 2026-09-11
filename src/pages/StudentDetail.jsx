@@ -215,6 +215,8 @@ export default function StudentDetail() {
           <TabsTrigger value="accommodations-log"><Accessibility className="h-4 w-4 mr-1.5" /> Accommodation Log</TabsTrigger>
           <TabsTrigger value="transition"><Compass className="h-4 w-4 mr-1.5" /> Transition</TabsTrigger>
           <TabsTrigger value="evaluations"><FileSearch className="h-4 w-4 mr-1.5" /> Evaluations</TabsTrigger>
+          <TabsTrigger value="evidence"><Archive className="h-4 w-4 mr-1.5" /> Evidence Vault</TabsTrigger>
+          <TabsTrigger value="timeline"><History className="h-4 w-4 mr-1.5" /> Timeline</TabsTrigger>
           <TabsTrigger value="proof"><ShieldCheck className="h-4 w-4 mr-1.5" /> CaseCue Proof</TabsTrigger>
           <TabsTrigger value="notes"><StickyNote className="h-4 w-4 mr-1.5" /> Notes</TabsTrigger>
           <TabsTrigger value="family"><UsersRound className="h-4 w-4 mr-1.5" /> Family View</TabsTrigger>
@@ -377,6 +379,19 @@ export default function StudentDetail() {
         <TabsContent value="accommodations-log"><AccommodationLogPanel student={student} /></TabsContent>
         <TabsContent value="transition"><TransitionPanel student={student} /></TabsContent>
         <TabsContent value="evaluations"><EvaluationPanel student={student} /></TabsContent>
+        <TabsContent value="evidence"><WorkEvidencePanel fixedStudentId={student.id} students={[student]} goals={goals||[]} /></TabsContent>
+        <TabsContent value="timeline">
+          <Card className="p-6">
+            <div className="flex items-start justify-between gap-3"><div><h3 className="font-black text-lg">Student Timeline</h3><p className="text-sm text-slate-500 mt-1">A chronological view of documented sessions, progress data, work evidence, meetings, and uploaded records.</p></div></div>
+            <div className="mt-5 space-y-3">{[
+              ...(sessions||[]).map(x=>({date:x.date||'',type:'Session',title:x.activity||x.service_type||'Service session',detail:`${x.delivered_minutes??x.duration_minutes??'—'} min · ${x.status||'recorded'}`})),
+              ...(progress||[]).map(x=>({date:x.date||'',type:'Progress',title:'Progress data',detail:x.percentage!=null?`${x.percentage}%${x.qualitative_notes?` · ${x.qualitative_notes}`:''}`:(x.qualitative_notes||'Data point recorded')})),
+              ...(workEvidence||[]).map(x=>({date:x.date||'',type:'Evidence',title:x.title||'Work evidence',detail:x.score_possible>0?`${x.score_earned}/${x.score_possible} (${x.percentage}%)`:(x.qualitative_notes||'Evidence saved')})),
+              ...(meetings||[]).map(x=>({date:x.date||'',type:'Meeting',title:x.title||x.meeting_type||'Meeting',detail:x.status||'scheduled'})),
+              ...(documents||[]).map(x=>({date:x.date_uploaded||'',type:'Document',title:x.filename||x.document_type||'Document',detail:x.document_type||'Uploaded record'})),
+            ].filter(x=>x.date).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,100).map((x,i)=><div key={`${x.type}-${x.date}-${i}`} className="flex gap-3 rounded-2xl border bg-white p-4"><div className="w-24 shrink-0 text-xs font-bold text-slate-500">{x.date}</div><div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xs font-black">{x.type[0]}</div><div className="min-w-0"><div className="text-xs font-black uppercase tracking-wider text-blue-700">{x.type}</div><div className="font-semibold">{x.title}</div><div className="text-sm text-slate-500 mt-0.5">{x.detail}</div></div></div>)}{![...(sessions||[]),...(progress||[]),...(workEvidence||[]),...(meetings||[]),...(documents||[])].length&&<div className="text-sm text-slate-500 py-8 text-center">No timeline records yet.</div>}</div>
+          </Card>
+        </TabsContent>
 
         {/* CaseCue Proof */}
         <TabsContent value="proof">
