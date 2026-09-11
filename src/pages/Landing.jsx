@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Sparkles, ShieldCheck, FileEdit, MessageCircle, BarChart3, BookOpen,
   ClipboardList, FlaskConical, Check, Lock, Menu, Users, CalendarClock,
-  UsersRound, LayoutDashboard
+  UsersRound, LayoutDashboard, PlayCircle, ArrowRight, CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,48 +78,84 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <Nav />
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
-        <div className="absolute inset-0 brand-gradient-soft" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <motion.div initial="hidden" animate="show" variants={fadeUp}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-medium text-primary mb-6">
-              <Sparkles className="h-3.5 w-3.5" /> Case management software for special education
-            </div>
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
-              Never miss a deadline.<br />
-              <span className="text-gradient">One organized caseload workspace.</span>
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              CaseCue helps special education teachers and case managers track IEP deadlines, manage student records, monitor progress, and prepare for meetings — all from one simple dashboard.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link to="/register"><Button size="lg" className="brand-gradient text-white h-12 px-7 text-base">Start Free Trial</Button></Link>
-              <a href="#demo"><Button size="lg" variant="outline" className="h-12 px-7 text-base">Book a Demo</Button></a>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">14-day free trial · No credit card to start</p>
-          </motion.div>
+      {/* Premium hero + product video */}
+      <section className="relative overflow-hidden bg-[#07111f] pt-28 pb-20 sm:pt-36 sm:pb-28 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(99,102,241,.28),transparent_32%),radial-gradient(circle_at_85%_18%,rgba(14,165,233,.20),transparent_30%),linear-gradient(180deg,#07111f_0%,#0b1324_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-white/5 to-transparent" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-[.9fr_1.1fr] gap-12 lg:gap-16 items-center">
+            <motion.div initial="hidden" animate="show" variants={fadeUp} className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold text-sky-100 backdrop-blur">
+                <Sparkles className="h-3.5 w-3.5" /> Built for special education teams
+              </div>
+              <h1 className="mt-6 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.045em] leading-[0.98]">
+                The operating system for your <span className="text-sky-300">SPED caseload.</span>
+              </h1>
+              <p className="mt-6 text-lg sm:text-xl leading-8 text-slate-300">
+                Connect IEPs, progress data, session notes, student work, meeting prep, lessons, and family communication in one premium workspace built around the evidence you already collect.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Link to="/register"><Button size="lg" className="h-12 px-7 bg-white text-slate-950 hover:bg-slate-100 text-base font-bold">Start free trial <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+                <a href="#video"><Button size="lg" variant="outline" className="h-12 px-7 border-white/20 bg-white/5 text-white hover:bg-white/10 text-base"><PlayCircle className="mr-2 h-4 w-4" /> Watch product tour</Button></a>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-300">
+                <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-300" /> 14-day free trial</span>
+                <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-300" /> No credit card to start</span>
+                <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-sky-300" /> Educator review stays in control</span>
+              </div>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 24, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .65, delay: .08 }} className="relative">
+              <div className="absolute -inset-4 rounded-[36px] bg-gradient-to-r from-indigo-500/20 via-sky-400/10 to-cyan-300/20 blur-2xl" />
+              <div className="relative rounded-[30px] border border-white/10 bg-white/10 p-2.5 shadow-2xl backdrop-blur-xl">
+                <div className="overflow-hidden rounded-[23px] border border-white/10 bg-black">
+                  <div className="flex h-10 items-center gap-2 border-b border-white/10 bg-slate-950 px-4">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+                    <div className="ml-3 text-[11px] font-semibold text-slate-400">getcasecue.com • Product Tour</div>
+                  </div>
+                  <video
+                    src="https://media.base44.com/videos/public/6aa0ab4a6f88297dfb76d459/dbba7b5b0_CaseCue_Promo_Video.mp4"
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full aspect-video object-cover bg-black"
+                    aria-label="CaseCue product tour"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2 p-2 pt-3">
+                  {[['IEP → Evidence','Connected workflow'],['Family View','View-only sharing'],['CaseCue Proof™','Trace the evidence']].map(([title,sub]) => (
+                    <div key={title} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <div className="text-xs font-bold text-white">{title}</div>
+                      <div className="mt-1 text-[10px] text-slate-400">{sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Promo video */}
-      <Section id="video" className="pt-0 sm:pt-0">
-        <div className="max-w-4xl mx-auto text-center mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">See CaseCue in action.</h2>
-          <p className="mt-3 text-muted-foreground">One calm workspace for your entire caseload.</p>
-        </div>
-        <div className="rounded-2xl border border-border card-shadow-lg overflow-hidden max-w-4xl mx-auto">
-          <video
-            src="https://media.base44.com/videos/public/6aa0ab4a6f88297dfb76d459/dbba7b5b0_CaseCue_Promo_Video.mp4"
-            controls
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full aspect-video bg-black"
-            aria-label="CaseCue product overview video"
-          />
+      {/* Product tour proof band */}
+      <Section id="video" className="bg-slate-50 py-14 sm:py-16">
+        <div className="grid lg:grid-cols-[.75fr_1.25fr] gap-8 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 text-sm font-bold text-primary"><PlayCircle className="h-4 w-4" /> Product Tour</div>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight">Show the product before asking teachers to buy it.</h2>
+            <p className="mt-4 text-muted-foreground leading-7">A premium SaaS landing page should make CaseCue feel tangible immediately. The product tour now sits above the fold, while this section explains the value behind what viewers are seeing.</p>
+            <div className="mt-5 space-y-3 text-sm font-medium">
+              {["Real product video, not a stock animation","Dashboard-first presentation","Evidence-connected positioning","Family View and CaseCue Proof™ called out clearly"].map((item) => <div key={item} className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> {item}</div>)}
+            </div>
+          </div>
+          <div className="rounded-3xl border border-border bg-white p-3 card-shadow-lg">
+            <div className="grid sm:grid-cols-3 gap-3">
+              {[{icon:LayoutDashboard,title:"Daily Command Center",desc:"Deadlines, sessions, actions and meetings."},{icon:BarChart3,title:"Progress Intelligence",desc:"Goals, trends and evidence in one record."},{icon:UsersRound,title:"Family View",desc:"Share only the approved view-only information."}].map((f) => <div key={f.title} className="rounded-2xl bg-slate-50 p-5"><div className="h-10 w-10 rounded-xl bg-white border flex items-center justify-center"><f.icon className="h-5 w-5 text-primary" /></div><div className="mt-4 font-bold">{f.title}</div><div className="mt-2 text-sm text-muted-foreground leading-6">{f.desc}</div></div>)}
+            </div>
+          </div>
         </div>
       </Section>
 
