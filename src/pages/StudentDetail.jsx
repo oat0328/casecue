@@ -121,6 +121,15 @@ export default function StudentDetail() {
     finally { setSavingProg(false); }
   };
 
+  const addPhase = async () => {
+    if (!newPhase.label.trim() || !newPhase.start_date) { toast({ title: "Phase label and date required", variant: "destructive" }); return; }
+    try {
+      await base44.entities.InterventionPhase.create({ student_id:id, ...newPhase });
+      setNewPhase({ goal_id:'', start_date:new Date().toISOString().slice(0,10), label:'', intervention:'', notes:'' });
+      refetchPhases(); toast({ title: "Intervention phase added" });
+    } catch (e) { toast({ title: "Could not add phase", description:e.message, variant:"destructive" }); }
+  };
+
   const generatePresentLevels = async () => {
     setGenLoading(true);
     try {
