@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3, Wrench, Accessibility, Compass, FileSearch } from "lucide-react";
+import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3, Wrench, Accessibility, Compass, FileSearch, Archive, History } from "lucide-react";
 import { exportIepPdf } from "@/lib/pdfExport";
 import ExportGate from "@/components/shared/ExportGate";
 import { base44 } from "@/api/base44Client";
@@ -21,6 +21,7 @@ import ModificationsPanel from "@/components/students/ModificationsPanel";
 import AccommodationLogPanel from "@/components/students/AccommodationLogPanel";
 import TransitionPanel from "@/components/students/TransitionPanel";
 import EvaluationPanel from "@/components/students/EvaluationPanel";
+import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
@@ -48,6 +49,7 @@ export default function StudentDetail() {
   const { data: documents, refetch: refetchDocs } = useAsync(() => base44.entities.Document.filter({ student_id: id }, '-date_uploaded', 100), [id]);
   const { data: meetings, refetch: refetchMeetings } = useAsync(() => base44.entities.Meeting.filter({ student_id: id }, 'date', 100), [id]);
   const { data: sessions } = useAsync(() => base44.entities.SessionRecord.filter({ student_id: id }, '-date', 300), [id]);
+  const { data: workEvidence } = useAsync(() => base44.entities.WorkEvidence.filter({ student_id: id }, '-date', 200), [id]);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
