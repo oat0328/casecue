@@ -10,6 +10,8 @@ import AskCaseCueButton from "@/components/AskCaseCueButton";
 import FloatingFeedbackButton from "@/components/feedback/FloatingFeedbackButton";
 import NotificationsBell from "@/components/NotificationsBell";
 import { cn } from "@/lib/utils";
+import { base44 } from "@/api/base44Client";
+import { useAsync } from "@/lib/useAsync";
 
 const PRIMARY = ["/app","/students","/iep-studio","/session-tracker","/data-center","/meetings","/lesson-studio","/reports"];
 const SECONDARY = ["/meeting-navigator","/iep-review","/schedule","/sub-plans","/gradebook","/goal-groups","/progress-reports","/resource-hub","/practice-lab","/ask-casecue","/help","/settings"];
@@ -18,6 +20,8 @@ export default function Layout() {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { data: caseloadStudents } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
+  const caseloadCount = (caseloadStudents || []).length;
   const visible = navItems.filter((item) => !item.adminOnly || user?.role === "admin");
   const primary = PRIMARY.map(p => visible.find(i => i.path === p)).filter(Boolean);
   const secondary = SECONDARY.map(p => visible.find(i => i.path === p)).filter(Boolean);
@@ -33,6 +37,7 @@ export default function Layout() {
     )}>
       <item.icon className="h-[17px] w-[17px] shrink-0" />
       <span className="truncate">{item.label}</span>
+      {item.path === "/students" && <span className="ml-auto min-w-6 rounded-full bg-sky-500/15 px-2 py-0.5 text-center text-[11px] font-black text-sky-300 group-[.active]:text-sky-700">{caseloadCount}</span>}
     </NavLink>
   );
 
