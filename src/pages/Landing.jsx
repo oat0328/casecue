@@ -146,7 +146,7 @@ export default function Landing() {
           <div>
             <div className="inline-flex items-center gap-2 text-sm font-bold text-primary"><PlayCircle className="h-4 w-4" /> Product Tour</div>
             <h2 className="mt-3 text-3xl sm:text-4xl font-black tracking-tight">Show the product before asking teachers to buy it.</h2>
-            <p className="mt-4 text-muted-foreground leading-7">A premium SaaS landing page should make CaseCue feel tangible immediately. The product tour now sits above the fold, while this section explains the value behind what viewers are seeing.</p>
+            <p className="mt-4 text-muted-foreground leading-7">A premium product experience should make CaseCue feel tangible immediately. The product tour now sits above the fold, while this section explains the value behind what viewers are seeing.</p>
             <div className="mt-5 space-y-3 text-sm font-medium">
               {["Real product video, not a stock animation","Dashboard-first presentation","Evidence-connected positioning","Family View and CaseCue Proof™ called out clearly"].map((item) => <div key={item} className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> {item}</div>)}
             </div>
