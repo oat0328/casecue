@@ -134,6 +134,21 @@ export default function StudentDetail() {
   };
 
   const chartData = (progress || []).map((p) => ({ date: p.date, percentage: p.percentage || 0 }));
+  const forecastFor = (goalId) => {
+    const pts = (progress || []).filter((p) => p.goal_id === goalId && Number.isFinite(Number(p.percentage))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    if (pts.length < 2) return { label: "Need more data", detail: "At least two percentage data points are required for a trend estimate.", tone: "slate" };
+    const recent = pts.slice(-5); const first = Number(recent[0].percentage); const last = Number(recent[recent.length-1].percentage); const delta = Math.round((last-first)*10)/10;
+    if (Math.abs(delta) < 3) return { label: "Stable trend", detail: `${last}% current · ${delta >= 0 ? '+' : ''}${delta} points across the recent window`, tone: "amber" };
+    return delta > 0
+      ? { label: "Trending upward", detail: `${last}% current · +${delta} points across the recent window`, tone: "emerald" }
+      : { label: "Trending downward", detail: `${last}% current · ${delta} points across the recent window`, tone: "rose" };
+  };
+  const dataQualityIssues = [
+    !/^\d{4}-\d{2}-\d{2}$/.test(student.annual_review_due || "") ? "Annual review date needs review or is missing." : null,
+    ...(goals || []).filter((g) => !g.baseline).map((g) => `${g.goal_area || "Goal"}: baseline is missing.`),
+    ...(goals || []).filter((g) => !g.measurement_method).map((g) => `${g.goal_area || "Goal"}: measurement method is missing.`),
+    ...(progress || []).filter((p) => !p.goal_id).slice(0,5).map((p) => `Progress data on ${p.date || "unknown date"} is not linked to a goal.`),
+  ].filter(Boolean);
 
   const Field = ({ label, value, name }) => (
     <div>
