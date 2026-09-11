@@ -23,6 +23,7 @@ import TransitionPanel from "@/components/students/TransitionPanel";
 import EvaluationPanel from "@/components/students/EvaluationPanel";
 import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
 import InputRecordsPanel from "@/components/students/InputRecordsPanel";
+import SupportPlansPanel from "@/components/students/SupportPlansPanel";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine
@@ -230,6 +231,7 @@ export default function StudentDetail() {
           <TabsTrigger value="evidence"><Archive className="h-4 w-4 mr-1.5" /> Evidence Vault</TabsTrigger>
           <TabsTrigger value="timeline"><History className="h-4 w-4 mr-1.5" /> Timeline</TabsTrigger>
           <TabsTrigger value="input"><UsersRound className="h-4 w-4 mr-1.5" /> Team Input</TabsTrigger>
+          <TabsTrigger value="support-plans"><FileText className="h-4 w-4 mr-1.5" /> 504 / MTSS</TabsTrigger>
           <TabsTrigger value="proof"><ShieldCheck className="h-4 w-4 mr-1.5" /> CaseCue Proof</TabsTrigger>
           <TabsTrigger value="notes"><StickyNote className="h-4 w-4 mr-1.5" /> Notes</TabsTrigger>
           <TabsTrigger value="family"><UsersRound className="h-4 w-4 mr-1.5" /> Family View</TabsTrigger>
@@ -418,6 +420,7 @@ export default function StudentDetail() {
           </Card>
         </TabsContent>
         <TabsContent value="input"><InputRecordsPanel student={student}/></TabsContent>
+        <TabsContent value="support-plans"><SupportPlansPanel student={student}/></TabsContent>
 
         {/* CaseCue Proof */}
         <TabsContent value="proof">
