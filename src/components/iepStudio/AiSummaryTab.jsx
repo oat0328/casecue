@@ -9,7 +9,7 @@ import AiDisclaimer from "@/components/shared/AiDisclaimer";
 import ExportBar from "@/components/shared/ExportBar";
 import SourceCitations from "@/components/shared/SourceCitations";
 
-// Tab 3 — AI Student Summary: full snapshot generated from the verified record.
+// Tab 3 — CaseCue Student Summary: full snapshot generated from the verified record.
 export default function AiSummaryTab({ student }) {
   const { toast } = useToast();
   const [summary, setSummary] = useState("");
@@ -48,7 +48,7 @@ export default function AiSummaryTab({ student }) {
     <Card className="p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-semibold">AI Student Summary</h3>
+          <h3 className="font-semibold">CaseCue Student Summary</h3>
           <p className="text-sm text-muted-foreground">A complete snapshot of {student.first_name}'s verified record — eligibility, strengths, needs, present levels, accommodations, services, and progress.</p>
         </div>
         <Button onClick={generate} disabled={loading} className="brand-gradient text-white">
@@ -73,7 +73,7 @@ export default function AiSummaryTab({ student }) {
             </Button>
             <ExportBar
               title={`Student Summary — ${student.first_name} ${student.last_name}`}
-              subtitle="AI student record summary"
+              subtitle="CaseCue student record summary"
               filename={`Student-Summary-${student.first_name}-${student.last_name}`}
               sections={[{ heading: "Student Summary", body: summary }]}
               gated
