@@ -21,14 +21,15 @@ export default function DistrictAnalytics() {
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 500), []);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.list('date', 1000), []);
-  const { data: sessions } = useAsync(() => base44.entities.SessionLog.list('-date', 500), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 1000), []);
 
   const stats = useMemo(() => {
     const s = students || [];
     const gs = goals || [];
     const now = new Date();
-    const inDays = (d, n) => d && new Date(d) >= now && new Date(d) <= new Date(now.getTime() + n * 86400000);
-    const isOverdue = (d) => d && new Date(d) < now;
+    const validDate = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || '') && !Number.isNaN(new Date(`${d}T00:00:00`).getTime());
+    const inDays = (d, n) => validDate(d) && new Date(`${d}T00:00:00`) >= now && new Date(`${d}T00:00:00`) <= new Date(now.getTime() + n * 86400000);
+    const isOverdue = (d) => validDate(d) && new Date(`${d}T23:59:59`) < now;
 
     // Compliance attention list — overdue and due-within-30-days items, deduped per student
     const compliance = [];
@@ -61,7 +62,7 @@ export default function DistrictAnalytics() {
     // Service delivery this calendar month
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
     const monthSessions = (sessions || []).filter((x) => x.date >= monthStart);
-    const monthMinutes = monthSessions.reduce((sum, x) => sum + (x.minutes || 0), 0);
+    const monthMinutes = monthSessions.reduce((sum, x) => sum + Number(x.delivered_minutes ?? x.duration_minutes ?? 0), 0);
 
     return {
       totalStudents: s.length,
@@ -84,9 +85,9 @@ export default function DistrictAnalytics() {
 
   return (
     <Card className="p-6 mb-6">
-      <h2 className="text-lg font-semibold mb-1">District analytics</h2>
+      <h2 className="text-lg font-semibold mb-1">School & District dashboard</h2>
       <p className="text-sm text-muted-foreground mb-4">
-        Caseload, compliance, goal achievement, and service delivery across your organization.
+        Organization-scoped caseload, deadline, goal-progress, and service-delivery visibility for authorized administrators.
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <StatCard label="Active caseload" value={`${stats.activeStudents}/${stats.totalStudents}`} icon={Users} />
