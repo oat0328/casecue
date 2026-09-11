@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Users, GitMerge, Scissors, Copy, Pencil, Archive, ArchiveRestore, Check } from "lucide-react";
+import { GitMerge, Scissors, Copy, Pencil, Archive, ArchiveRestore, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
