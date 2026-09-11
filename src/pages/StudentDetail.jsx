@@ -25,7 +25,7 @@ import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
 import InputRecordsPanel from "@/components/students/InputRecordsPanel";
 import { Library } from "lucide-react";
 import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine
 } from "recharts";
 
 const colorMap = {
@@ -51,9 +51,11 @@ export default function StudentDetail() {
   const { data: meetings, refetch: refetchMeetings } = useAsync(() => base44.entities.Meeting.filter({ student_id: id }, 'date', 100), [id]);
   const { data: sessions } = useAsync(() => base44.entities.SessionRecord.filter({ student_id: id }, '-date', 300), [id]);
   const { data: workEvidence } = useAsync(() => base44.entities.WorkEvidence.filter({ student_id: id }, '-date', 200), [id]);
+  const { data: phases, refetch: refetchPhases } = useAsync(() => base44.entities.InterventionPhase.filter({ student_id: id }, 'start_date', 100), [id]);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
+  const [newPhase, setNewPhase] = useState({ goal_id:'', start_date:new Date().toISOString().slice(0,10), label:'', intervention:'', notes:'' });
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [newGoal, setNewGoal] = useState({ goal_area: "", goal_text: "", baseline: "", target: "", criterion: "", measurement_method: "" });
