@@ -146,6 +146,7 @@ export default function Settings() {
           <TabsTrigger value="organization"><Building2 className="h-4 w-4 mr-1.5" /> Organization</TabsTrigger>
           <TabsTrigger value="ai"><Sparkles className="h-4 w-4 mr-1.5" /> AI Settings</TabsTrigger>
           <TabsTrigger value="privacy"><Lock className="h-4 w-4 mr-1.5" /> Privacy</TabsTrigger>
+          <TabsTrigger value="retention"><Archive className="h-4 w-4 mr-1.5" /> Data Retention</TabsTrigger>
           <TabsTrigger value="export"><Download className="h-4 w-4 mr-1.5" /> Data Export</TabsTrigger>
           <TabsTrigger value="deletion"><Trash2 className="h-4 w-4 mr-1.5" /> Data Deletion</TabsTrigger>
           <TabsTrigger value="subscription"><CreditCard className="h-4 w-4 mr-1.5" /> Subscription</TabsTrigger>
@@ -201,6 +202,22 @@ export default function Settings() {
             </label>
           </div>
           {acknowledged && <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1"><Check className="h-3.5 w-3.5" /> Acknowledgement recorded</p>}
+        </Card></TabsContent>
+
+        <TabsContent value="retention"><Card className="p-6 max-w-2xl">
+          <h3 className="font-semibold mb-2">Data retention policy</h3>
+          <p className="text-sm text-muted-foreground mb-5">Record your organization’s retention rules. CaseCue does not automatically delete records unless you explicitly enable deletion after the retention period. Confirm these values with your school or district policy.</p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div><Label>Student records (years)</Label><Input type="number" min="0" value={retention.student_record_years} onChange={(e)=>setRetention({...retention,student_record_years:e.target.value})}/></div>
+            <div><Label>Session records (years)</Label><Input type="number" min="0" value={retention.session_record_years} onChange={(e)=>setRetention({...retention,session_record_years:e.target.value})}/></div>
+            <div><Label>Documents (years)</Label><Input type="number" min="0" value={retention.document_years} onChange={(e)=>setRetention({...retention,document_years:e.target.value})}/></div>
+          </div>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between rounded-xl border p-4"><div><div className="text-sm font-medium">Archive exited students</div><div className="text-xs text-muted-foreground">Keep exited/transitioned students archived instead of showing them in the active caseload.</div></div><Switch checked={!!retention.archive_exited_students} onCheckedChange={(v)=>setRetention({...retention,archive_exited_students:v})}/></div>
+            <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50/40 p-4"><div><div className="text-sm font-medium">Delete after retention period</div><div className="text-xs text-muted-foreground">High-impact setting. This records the policy preference only; automated deletion jobs should be reviewed before activation.</div></div><Switch checked={!!retention.delete_after_retention} onCheckedChange={(v)=>setRetention({...retention,delete_after_retention:v})}/></div>
+          </div>
+          <Label className="mt-4 block">Policy notes</Label><Textarea rows={3} value={retention.notes||""} onChange={(e)=>setRetention({...retention,notes:e.target.value})} className="mt-1" placeholder="District policy reference, exceptions, legal hold instructions…"/>
+          <Button onClick={saveRetention} disabled={savingRetention} className="mt-5 bg-blue-700 hover:bg-blue-800 text-white"><Save className="h-4 w-4 mr-1"/>{savingRetention?"Saving…":"Save retention policy"}</Button>
         </Card></TabsContent>
 
         <TabsContent value="export"><Card className="p-6 max-w-lg">
