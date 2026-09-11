@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/cards';
-import { Copy, Link2, ShieldCheck, Trash2 } from 'lucide-react';
+import { Link2, ShieldCheck, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function ParentSharePanel({student}){
