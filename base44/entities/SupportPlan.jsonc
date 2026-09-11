@@ -1,0 +1,88 @@
+{
+  "name": "SupportPlan",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "504",
+        "MTSS",
+        "intervention",
+        "other"
+      ],
+      "title": "Plan Type"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "review",
+        "closed"
+      ],
+      "default": "draft",
+      "title": "Status"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Review Date"
+    },
+    "needs": {
+      "type": "string",
+      "title": "Needs"
+    },
+    "supports": {
+      "type": "string",
+      "title": "Supports / Interventions"
+    },
+    "accommodations": {
+      "type": "string",
+      "title": "Accommodations"
+    },
+    "progress_measures": {
+      "type": "string",
+      "title": "Progress Measures"
+    },
+    "team_members": {
+      "type": "string",
+      "title": "Team Members"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "student_id",
+    "organization_id",
+    "plan_type"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
