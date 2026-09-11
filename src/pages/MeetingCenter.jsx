@@ -154,8 +154,9 @@ export default function MeetingCenter() {
                 {MEETING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
-            <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+            <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => {setForm({ ...form, date: e.target.value });setTimeSuggestions([]);}} /></div>
             <div><Label>Time</Label><Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
+            <div className="col-span-2 rounded-xl border bg-slate-50 p-3"><div className="flex items-center justify-between gap-3"><div><div className="text-sm font-semibold">Automatic meeting time proposals</div><div className="text-xs text-muted-foreground">Checks your CaseCue instruction schedule and already-scheduled CaseCue meetings for open 45-minute slots.</div></div><Button type="button" variant="outline" size="sm" onClick={suggestTimes}>Suggest times</Button></div>{timeSuggestions.length>0&&<div className="flex flex-wrap gap-2 mt-3">{timeSuggestions.map(t=><button key={t} type="button" onClick={()=>setForm({...form,time:t})} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${form.time===t?'border-blue-600 bg-blue-50 text-blue-700':'bg-white'}`}>{t}</button>)}</div>}</div>
             <div className="col-span-2"><Label>Location / virtual meeting link</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Room 12 or https://meet.google.com/…" className="mt-1" /></div>
             <div className="col-span-2"><Label>Agenda</Label><Textarea rows={2} value={form.agenda} onChange={(e) => setForm({ ...form, agenda: e.target.value })} /></div>
             <div><Label>Parent concerns</Label><Textarea rows={2} value={form.parent_concerns} onChange={(e) => setForm({ ...form, parent_concerns: e.target.value })} /></div>
