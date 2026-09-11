@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 
-function toDate(value){ if(!value) return null; const d=new Date(value); return Number.isNaN(d.getTime())?null:d; }
+function toDate(value){ if(!/^\d{4}-\d{2}-\d{2}$/.test(value||'')) return null; const d=new Date(`${value}T00:00:00`); if(Number.isNaN(d.getTime())||d.getFullYear()<2020||d.getFullYear()>2100) return null; return d; }
 function isToday(value){ const d=toDate(value); if(!d) return false; const n=new Date(); return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate(); }
 function daysUntil(value){ const d=toDate(value); if(!d) return null; const n=new Date(); n.setHours(0,0,0,0); d.setHours(0,0,0,0); return Math.round((d-n)/86400000); }
 
