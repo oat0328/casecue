@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Users, FileEdit, ShieldCheck, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
   FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown, Timer,
-  LifeBuoy, TicketPercent
+  LifeBuoy, TicketPercent, Library
 } from "lucide-react";
 
 export const navItems = [
@@ -21,6 +21,7 @@ export const navItems = [
   { label: "Goal Groups", path: "/goal-groups", icon: Network },
   { label: "Reports", path: "/reports", icon: FileBarChart },
   { label: "Progress Reports", path: "/progress-reports", icon: FileText },
+  { label: "Resource Hub", path: "/resource-hub", icon: Library },
   { label: "Practice Lab", path: "/practice-lab", icon: FlaskConical },
   { label: "Ask CaseCue", path: "/ask-casecue", icon: MessageCircle },
   { label: "Help Center", path: "/help", icon: LifeBuoy },
