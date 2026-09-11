@@ -23,6 +23,10 @@ const ANALYSIS_SCHEMA = {
           service_minutes: { type: 'number' },
           teacher_classroom: { type: 'string' },
           notes: { type: 'string' },
+          week_pattern: { type: 'string', enum: ['every_week','A_week','B_week','alternating'] },
+          cycle_day: { type: 'string' },
+          period: { type: 'string' },
+          recurrence_note: { type: 'string' },
           students: {
             type: 'array',
             items: {
@@ -140,6 +144,10 @@ RULES:
    - start_time / end_time: 24-hour HH:MM format. If only a start time is given, leave end_time "".
    - service_minutes: minutes per session (stated in the document, or the start-to-end duration). 0 if unknown.
    - teacher_classroom: provider/teacher name and location if shown.
+   - week_pattern: "every_week" unless the document explicitly identifies A week, B week, or an alternating schedule.
+   - cycle_day: any explicit rotation day (e.g. A Day, B Day, Day 1, Day 2); otherwise "".
+   - period: any explicit class period/block (e.g. Period 5, Block 2); otherwise "".
+   - recurrence_note: preserve source wording such as "daily", "M/W/F", "Tue/Thu", or "A-week only" when shown.
    - students: every student named for that block. For each student: "name" exactly as written in the document; "student_id" = the roster id if you can match (identical name = "exact", nickname/spelling variant = "fuzzy"), otherwise "" with match_type "unmatched"; confidence high/medium/low/none.
 3. Any name you could not match also goes in "unmatched_names".
 4. "conflicts": scheduling problems visible in the document (same student in two blocks at once, overlapping blocks, blocks with no time). One item per problem, severity "warning" or "info".
