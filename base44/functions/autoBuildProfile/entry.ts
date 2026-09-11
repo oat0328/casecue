@@ -123,6 +123,49 @@ Return JSON matching the schema.`;
     });
     const extracted = typeof result === 'object' ? result : JSON.parse(result);
 
+    // Deterministic recovery from the saved page extraction. This protects against
+    // an LLM summary pass accidentally calling information "missing" when the page
+    // reader already found it. We only reuse literal facts already stored in the
+    // processed document; we never infer or calculate new IEP facts here.
+    const pageFacts = processed.flatMap((d) => (d.processing_results?.pages || []).flatMap((p) =>
+      (p.important_facts || []).map((fact) => ({
+        fact: String(fact || '').trim(),
+        page: p.page_number,
+        section: String(p.section_name || ''),
+        document_type: d.document_type,
+        filename: d.filename,
+      }))
+    )).filter((x) => x.fact);
+    const serviceFacts = pageFacts.filter((x) =>
+      /service/i.test(x.section) && /(?:service|minutes?\s*\/\s*(?:week|month)|minutes? per (?:week|month)|specialized instruction)/i.test(x.fact)
+    );
+    if ((!Array.isArray(extracted.services) || extracted.services.length === 0) && serviceFacts.length) {
+      extracted.services = [...new Set(serviceFacts
+        .filter((x) => !/^total specialized instruction/i.test(x.fact))
+        .map((x) => `${x.fact} (${x.document_type} p.${x.page})`))];
+      extracted.confidence = extracted.confidence || {};
+      extracted.confidence.services = {
+        level: 'high', flags: [],
+        sources: [...new Set(serviceFacts.map((x) => `${x.document_type} - ${x.filename}, p.${x.page}`))]
+      };
+    }
+    const accommodationFacts = pageFacts.filter((x) =>
+      /supplementary|accommodation/i.test(x.section) && /accommodation|small group|break|overlay|chunk|organizer|chart/i.test(x.fact)
+    );
+    if (!(extracted.accommodations || '').trim() && accommodationFacts.length) {
+      extracted.accommodations = accommodationFacts.map((x) => `${x.fact} (${x.document_type} p.${x.page})`).join('; ');
+    }
+    if (Array.isArray(extracted.data_gaps) && serviceFacts.length) {
+      extracted.data_gaps = extracted.data_gaps.map((gap) => {
+        const text = String(gap || '');
+        if (/service.*minutes|minutes.*service/i.test(text)) {
+          return 'Service minutes were found in the uploaded document; verify any frequency/location details not explicitly captured before finalizing.';
+        }
+        return text;
+      });
+      extracted.data_gaps = [...new Set(extracted.data_gaps.filter(Boolean))];
+    }
+
     // Pre-fill the student record — only where fields are empty, so teacher-
     // entered data is never overwritten.
     const filled = [];
