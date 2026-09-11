@@ -17,6 +17,16 @@ import ScheduleExportPanel from "@/components/schedule/ScheduleExportPanel";
 import OptimizeDialog from "@/components/schedule/OptimizeDialog";
 import { DAYS, DELIVERY_LABEL, studentName } from "@/lib/scheduleUtils";
 
+const displayTime = (value) => {
+  if (!value) return "?";
+  const m = String(value).match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return value;
+  const h = Number(m[1]);
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${m[2]} ${suffix}`;
+};
+
 export default function Schedule() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
@@ -95,7 +105,7 @@ export default function Schedule() {
                         <button onClick={() => remove(e.id)} title="Delete" className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-rose-500"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
                       <div className="font-medium text-sm pr-10">{e.group_name}</div>
-                      <div className="text-xs text-muted-foreground">{e.start_time}–{e.end_time} · {DELIVERY_LABEL[e.delivery] || e.delivery}{e.period?` · ${e.period}`:''}</div>
+                      <div className="text-xs text-muted-foreground">{displayTime(e.start_time)}–{displayTime(e.end_time)} · {DELIVERY_LABEL[e.delivery] || e.delivery}{e.period?` · ${e.period}`:''}</div>
                       <div className="text-xs text-muted-foreground">{e.service_minutes} min · {e.teacher_classroom || "—"}{e.cycle_day?` · ${e.cycle_day}`:''}{e.week_pattern&&e.week_pattern!=='every_week'?` · ${e.week_pattern.replace('_',' ')}`:''}</div>
                       {e.student_ids?.length > 0 && <div className="text-xs text-muted-foreground mt-1">{e.student_ids.map((id) => studentName(students, id)).join(", ")}</div>}
                     </div>
