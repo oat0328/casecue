@@ -45,6 +45,7 @@ import Terms from '@/pages/Terms';
 import Privacy from '@/pages/Privacy';
 import Trust from '@/pages/Trust';
 import Testimonials from '@/pages/Testimonials';
+import ParentPortal from '@/pages/ParentPortal';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/trust" element={<Trust />} />
             <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/family" element={<ParentPortal />} />
             <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/org-setup" element={<OrgSetup />} />
