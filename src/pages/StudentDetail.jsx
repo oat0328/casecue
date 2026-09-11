@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download } from "lucide-react";
+import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3 } from "lucide-react";
 import { exportIepPdf } from "@/lib/pdfExport";
 import ExportGate from "@/components/shared/ExportGate";
 import { base44 } from "@/api/base44Client";
@@ -43,6 +43,7 @@ export default function StudentDetail() {
   const { data: progress, refetch: refetchProgress } = useAsync(() => base44.entities.ProgressData.filter({ student_id: id }, 'date', 100), [id]);
   const { data: documents, refetch: refetchDocs } = useAsync(() => base44.entities.Document.filter({ student_id: id }, '-date_uploaded', 100), [id]);
   const { data: meetings, refetch: refetchMeetings } = useAsync(() => base44.entities.Meeting.filter({ student_id: id }, 'date', 100), [id]);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.filter({ student_id: id }, '-date', 300), [id]);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
@@ -189,6 +190,7 @@ export default function StudentDetail() {
           <TabsTrigger value="progress"><BarChart3 className="h-4 w-4 mr-1.5" /> Progress</TabsTrigger>
           <TabsTrigger value="documents"><FolderOpen className="h-4 w-4 mr-1.5" /> Documents</TabsTrigger>
           <TabsTrigger value="meetings"><UsersRound className="h-4 w-4 mr-1.5" /> Meetings</TabsTrigger>
+          <TabsTrigger value="proof"><ShieldCheck className="h-4 w-4 mr-1.5" /> CaseCue Proof</TabsTrigger>
           <TabsTrigger value="notes"><StickyNote className="h-4 w-4 mr-1.5" /> Notes</TabsTrigger>
           <TabsTrigger value="family"><UsersRound className="h-4 w-4 mr-1.5" /> Family View</TabsTrigger>
         </TabsList>
@@ -343,6 +345,28 @@ export default function StudentDetail() {
               <Card key={m.id} className="p-4"><div className="flex justify-between"><div className="text-sm font-medium">{m.title}</div><span className="text-xs text-muted-foreground">{m.date}</span></div><div className="text-xs text-muted-foreground mt-0.5">{m.meeting_type} · {m.status}</div></Card>
             ))}
             {(meetings || []).length === 0 && <p className="text-center text-muted-foreground py-8">No meetings scheduled.</p>}
+          </div>
+        </TabsContent>
+
+        {/* CaseCue Proof */}
+        <TabsContent value="proof">
+          <div className="space-y-4">
+            <Card className="p-6 border-sky-100 bg-gradient-to-br from-white to-sky-50/40">
+              <div className="flex items-start gap-3"><div className="h-11 w-11 rounded-2xl bg-slate-950 text-white flex items-center justify-center"><ShieldCheck className="h-5 w-5"/></div><div><h3 className="font-black text-lg">CaseCue Proof™</h3><p className="text-sm text-slate-600 mt-1">Trace this student’s goals and progress back to dated evidence already stored in CaseCue. Planned work is not counted as delivered evidence.</p></div></div>
+              <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="rounded-2xl border bg-white p-4"><div className="text-2xl font-black">{(goals||[]).length}</div><div className="text-xs text-slate-500 mt-1">IEP goals</div></div>
+                <div className="rounded-2xl border bg-white p-4"><div className="text-2xl font-black">{(progress||[]).length}</div><div className="text-xs text-slate-500 mt-1">Progress data points</div></div>
+                <div className="rounded-2xl border bg-white p-4"><div className="text-2xl font-black">{(sessions||[]).filter(s=>['completed','partially_completed','makeup_session'].includes(s.status)).length}</div><div className="text-xs text-slate-500 mt-1">Delivered sessions</div></div>
+                <div className="rounded-2xl border bg-white p-4"><div className="text-2xl font-black">{(documents||[]).length}</div><div className="text-xs text-slate-500 mt-1">Source documents</div></div>
+              </div>
+            </Card>
+            {(goals||[]).map(g=>{
+              const pts=(progress||[]).filter(p=>p.goal_id===g.id);
+              const ss=(sessions||[]).filter(s=>s.goal_id===g.id);
+              const last=pts.length?pts[pts.length-1]:null;
+              return <Card key={g.id} className="p-5"><div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3"><div><div className="text-xs font-black uppercase tracking-wider text-blue-700">{g.goal_area||'IEP Goal'}</div><div className="font-semibold mt-1">{g.goal_text}</div></div><div className="flex gap-2 text-xs"><span className="rounded-full bg-blue-50 text-blue-800 px-3 py-1.5 font-semibold">{pts.length} data points</span><span className="rounded-full bg-emerald-50 text-emerald-800 px-3 py-1.5 font-semibold">{ss.length} sessions</span></div></div><div className="mt-4 grid md:grid-cols-2 gap-3"><div className="rounded-xl bg-slate-50 p-4"><div className="text-xs font-bold text-slate-500">Latest measured evidence</div>{last?<div className="mt-1"><div className="text-xl font-black">{last.percentage!=null?`${last.percentage}%`:`${last.correct||0}/${last.total||0}`}</div><div className="text-xs text-slate-500 mt-1">{last.date} · {last.observation_notes||last.qualitative_notes||'No narrative note recorded'}</div></div>:<div className="text-sm text-slate-500 mt-2">No progress measurement linked yet.</div>}</div><div className="rounded-xl bg-slate-50 p-4"><div className="text-xs font-bold text-slate-500">Recent service evidence</div>{ss.length?<div className="mt-2 space-y-1">{ss.slice(0,3).map(s=><div key={s.id} className="text-sm flex items-center gap-2"><Clock3 className="h-3.5 w-3.5 text-blue-600"/><span>{s.date} · {s.delivered_minutes??s.duration_minutes??'—'} min · {s.activity||s.service_type}</span></div>)}</div>:<div className="text-sm text-slate-500 mt-2">No session records linked to this goal.</div>}</div></div></Card>
+            })}
+            {(goals||[]).length===0&&<Card className="p-8 text-center text-sm text-slate-500">Add or extract goals before CaseCue Proof can build a goal-level evidence trail.</Card>}
           </div>
         </TabsContent>
 
