@@ -90,7 +90,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
   const uploadFile = async (file) => {
     if (!file) return;
     if ((docs || []).some((d) => d.filename === file.name)) {
-      toast({ title: "Already uploaded", description: `"${file.name}" is already on file — duplicates are skipped so AI credits aren't re-spent.`, variant: "destructive" });
+      toast({ title: "Already uploaded", description: `"${file.name}" is already on file — duplicates are skipped so processing credits aren't re-spent.`, variant: "destructive" });
       return;
     }
     setUploading(true);
@@ -232,7 +232,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
               ? `${(docs || []).filter((d) => d.extraction_status === "processed").length} document(s) read and summarized.`
               : "No readable documents yet."}
           </Check>
-          <Check done={!!profileResult && !profileResult.error} active={building} label="AI analysis complete">
+          <Check done={!!profileResult && !profileResult.error} active={building} label="CaseCue analysis complete">
             {building ? "Extracting eligibility, strengths, needs, present levels, accommodations, SDI, services, goals, progress, and behavior information…" : profileResult?.error ? profileResult.error : hasProcessed ? "Analysis is ready." : "Waits for documents to be read."}
           </Check>
           <Check done={!!profileResult && !profileResult.error} active={false} label="Student profile updated">
@@ -289,7 +289,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
 
           {profileResult.confidence && (
             <Card className="p-5 sm:p-6">
-              <h3 className="font-semibold mb-1">AI confidence &amp; sources</h3>
+              <h3 className="font-semibold mb-1">CaseCue confidence &amp; sources</h3>
               <p className="text-sm text-muted-foreground mb-4">How strongly each extracted section is supported by your uploaded documents.</p>
               <div className="space-y-2">
                 {CONFIDENCE_FIELDS.map(([field, label]) => {
