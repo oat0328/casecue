@@ -110,9 +110,14 @@ const OPTIMIZE_SCHEMA = {
 };
 
 async function analyze(base44, body) {
-  const fileUrl = String(body.file_url || '');
+  const fileUri = String(body.file_uri || '');
+  let fileUrl = String(body.file_url || '');
+  if (fileUri) {
+    const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: fileUri, expires_in: 600 });
+    fileUrl = signed.signed_url;
+  }
   if (!/^https?:\/\//.test(fileUrl)) {
-    return Response.json({ error: 'file_url is required' }, { status: 400 });
+    return Response.json({ error: 'A schedule file is required.' }, { status: 400 });
   }
 
   const students = await base44.entities.Student.list('-updated_date', 300);
