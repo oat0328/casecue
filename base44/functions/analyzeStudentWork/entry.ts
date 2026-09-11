@@ -30,8 +30,13 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json().catch(() => ({}));
     const studentId = String(body.student_id || '');
-    const fileUrl = String(body.file_url || '');
-    if (!studentId || !/^https?:\/\//i.test(fileUrl)) return Response.json({ error: 'Student and uploaded work are required.' }, { status: 400 });
+    const fileUri = String(body.file_uri || '');
+    let fileUrl = String(body.file_url || '');
+    if (!studentId || (!fileUri && !/^https?:\/\//i.test(fileUrl))) return Response.json({ error: 'Student and uploaded work are required.' }, { status: 400 });
+    if (fileUri) {
+      const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: fileUri, expires_in: 600 });
+      fileUrl = signed.signed_url;
+    }
 
     const student = await base44.entities.Student.get(studentId);
     if (!student) return Response.json({ error: 'Student not found.' }, { status: 404 });
