@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarClock, CheckCircle2, FileText, Users, Clock3, ClipboardList, Sparkles, Upload, Camera, ArrowRight, Target, ListTodo } from "lucide-react";
+import { CalendarClock, CheckCircle2, FileText, Clock3, Sparkles, Upload, Camera, ArrowRight, Target, ListTodo } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
