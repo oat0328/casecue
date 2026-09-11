@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CalendarClock, Upload, Sparkles, Plus, UserPlus, Pencil, Trash2 } from "lucide-react";
+import { CalendarClock, Upload, Sparkles, Plus, UserPlus, Pencil, Trash2, Coffee } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -37,6 +37,7 @@ export default function Schedule() {
   const [editing, setEditing] = useState(null);
 
   const active = (entries || []).filter((e) => !e.archived);
+  const isBlocked = (e) => String(e.notes || '').includes('NON-INSTRUCTIONAL / UNAVAILABLE');
 
   const remove = async (id) => {
     try {
@@ -99,12 +100,12 @@ export default function Schedule() {
                 <h3 className="font-semibold text-sm mb-3 text-primary">{day}</h3>
                 <div className="space-y-2">
                   {active.filter((e) => e.day === day).sort((a,b) => String(a.start_time||'').localeCompare(String(b.start_time||''))).map((e) => (
-                    <div key={e.id} className="rounded-lg border border-border p-3 group relative">
+                    <div key={e.id} className={`rounded-lg border p-3 group relative ${isBlocked(e) ? 'border-sky-200 bg-sky-50/70' : 'border-border'}`}>
                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => setEditing(e)} title="Edit" className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
                         <button onClick={() => remove(e.id)} title="Delete" className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-rose-500"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
-                      <div className="font-medium text-sm pr-10">{e.group_name}</div>
+                      <div className="font-medium text-sm pr-10 flex items-center gap-1.5">{isBlocked(e) && <Coffee className="h-3.5 w-3.5 text-sky-700" />}{e.group_name}</div>
                       <div className="text-xs text-muted-foreground">{displayTime(e.start_time)}–{displayTime(e.end_time)} · {DELIVERY_LABEL[e.delivery] || e.delivery}{e.period?` · ${e.period}`:''}</div>
                       <div className="text-xs text-muted-foreground">{e.service_minutes} min · {e.teacher_classroom || "—"}{e.cycle_day?` · ${e.cycle_day}`:''}{e.week_pattern&&e.week_pattern!=='every_week'?` · ${e.week_pattern.replace('_',' ')}`:''}</div>
                       {e.student_ids?.length > 0 && <div className="text-xs text-muted-foreground mt-1">{e.student_ids.map((id) => studentName(students, id)).join(", ")}</div>}
