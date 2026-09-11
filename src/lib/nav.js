@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Users, FileEdit, ShieldCheck, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
   FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown, Timer,
-  LifeBuoy, TicketPercent, Library, Archive
+  LifeBuoy, TicketPercent, Library, Archive, ClipboardCheck
 } from "lucide-react";
 
 export const navItems = [
@@ -11,8 +11,9 @@ export const navItems = [
   { label: "IEP Studio", path: "/iep-studio", icon: FileEdit },
   { label: "Meeting Navigator", path: "/meeting-navigator", icon: ClipboardList },
   { label: "Session Tracker", path: "/session-tracker", icon: Timer },
-  { label: "IEP Review", path: "/iep-review", icon: ShieldCheck },
+  { label: "CaseCue Check", path: "/iep-review", icon: ShieldCheck },
   { label: "Data Center", path: "/data-center", icon: BarChart3 },
+  { label: "Progress Monitoring Day", path: "/progress-monitoring-day", icon: ClipboardCheck },
   { label: "Instruction & Schedule", path: "/schedule", icon: CalendarClock },
   { label: "Lesson Studio", path: "/lesson-studio", icon: BookOpen },
   { label: "Substitute Plans", path: "/sub-plans", icon: ClipboardList },
