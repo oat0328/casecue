@@ -16,12 +16,14 @@ import SessionCharts from "@/components/sessionTracker/SessionCharts";
 import PrintExportPanel from "@/components/sessionTracker/PrintExportPanel";
 import ComplianceReport from "@/components/sessionTracker/ComplianceReport";
 import SessionReportGenerator from "@/components/sessionTracker/SessionReportGenerator";
+import SessionImportPanel from "@/components/sessionTracker/SessionImportPanel";
 
 const TABS = [
   { key: "quick", label: "Quick Entry" },
   { key: "detailed", label: "Detailed Entry" },
   { key: "group", label: "Group Session" },
   { key: "log", label: "Log & Minutes" },
+  { key: "import", label: "Import Spreadsheet" },
   { key: "reports", label: "Reports & Exports" },
 ];
 
@@ -134,6 +136,14 @@ export default function SessionTracker() {
             <p className="text-sm text-muted-foreground">Select a student to see service minutes, goal progress, and the session log.</p>
           )}
         </div>
+      )}
+      {tab === "import" && (
+        <SessionImportPanel
+          students={students || []}
+          goals={goals || []}
+          sessions={sessions || []}
+          onImported={refetchSessions}
+        />
       )}
       {tab === "reports" && (
         <div className="space-y-4">
