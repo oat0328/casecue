@@ -5,35 +5,35 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import ExportBar from "@/components/shared/ExportBar";
 import { exportXlsx } from "@/lib/xlsxExport";
-import { scheduleSections, caseloadSections, rosterSections, scheduleRows, SCHEDULE_HEADERS, byGroup, studentName, DELIVERY_LABEL } from "@/lib/scheduleUtils";
+import { scheduleSections, caseloadSections, rosterSections, scheduleRows, SCHEDULE_HEADERS, byGroup, studentName, DELIVERY_LABEL, formatScheduleTime } from "@/lib/scheduleUtils";
 
 const BANNER = "Instruction & Schedule — generated from your saved CaseCue data.";
 
 // Print & Export: weekly schedule, caseload schedule, and group rosters in
 // Print / PDF / DOCX / Email / Share, plus a full Excel workbook.
-export default function ScheduleExportPanel({ entries, students }) {
+export default function ScheduleExportPanel({ entries, students, timeFormat = "12h" }) {
   const { toast } = useToast();
 
-  const weekly = scheduleSections(entries, students);
-  const caseload = caseloadSections(entries, students);
-  const roster = rosterSections(entries, students);
+  const weekly = scheduleSections(entries, students, timeFormat);
+  const caseload = caseloadSections(entries, students, timeFormat);
+  const roster = rosterSections(entries, students, timeFormat);
 
   const caseloadRows = (students || [])
     .filter((s) => s.status !== "exited")
     .flatMap((s) => {
       const list = (entries || []).filter((e) => !e.archived && (e.student_ids || []).includes(s.id));
       return list.length
-        ? list.map((e) => [`${s.first_name} ${s.last_name}`, e.day, `${e.start_time || "?"}-${e.end_time || "?"}`, e.group_name, DELIVERY_LABEL[e.delivery] || e.delivery, e.service_minutes || 0, e.teacher_classroom || ""])
+        ? list.map((e) => [`${s.first_name} ${s.last_name}`, e.day, `${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)}`, e.group_name, DELIVERY_LABEL[e.delivery] || e.delivery, e.service_minutes || 0, e.teacher_classroom || ""])
         : [[`${s.first_name} ${s.last_name}`, "", "", "Not scheduled", "", 0, ""]];
     });
 
   const rosterRows = byGroup(entries).flatMap((g) =>
-    g.entries.map((e) => [g.name, e.day, `${e.start_time || "?"}-${e.end_time || "?"}`, e.teacher_classroom || "", [...g.studentIds].map((id) => studentName(students, id)).join(", ")])
+    g.entries.map((e) => [g.name, e.day, `${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)}`, e.teacher_classroom || "", [...g.studentIds].map((id) => studentName(students, id)).join(", ")])
   );
 
   const exportExcel = () => {
     exportXlsx("casecue-schedule", [
-      { name: "Weekly Schedule", headers: SCHEDULE_HEADERS, rows: scheduleRows(entries, students) },
+      { name: "Weekly Schedule", headers: SCHEDULE_HEADERS, rows: scheduleRows(entries, students, timeFormat) },
       { name: "Caseload Schedule", headers: ["Student", "Day", "Time", "Group", "Delivery", "Minutes", "Teacher / Location"], rows: caseloadRows },
       { name: "Group Roster", headers: ["Group", "Day", "Time", "Teacher / Location", "Students"], rows: rosterRows },
     ]);
