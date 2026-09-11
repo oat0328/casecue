@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Check, AlertTriangle, Users, Clock } from "lucide-react";
+import { Check, AlertTriangle, Users, Clock, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/cards";
 import { findConflicts, normalizeDay, DELIVERY_LABEL } from "@/lib/scheduleUtils";
@@ -19,6 +19,7 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
   const [groups, setGroups] = useState(() =>
     (analysis.groups || []).map((g) => ({ ...g, included: true, assignments: {} }))
   );
+  const blocked = analysis.non_instructional_blocks || [];
 
   const roster = students || [];
   const resolveIds = (g) =>
@@ -83,7 +84,22 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
         recurrence_note: g.recurrence_note || '',
         student_ids: resolveIds(g),
       }));
-    onSave(entries);
+    const blockedEntries = blocked.map((b) => ({
+      group_name: b.label || "Unavailable",
+      delivery: "consultation",
+      day: normalizeDay(b.day),
+      start_time: b.start_time || "",
+      end_time: b.end_time || "",
+      service_minutes: 0,
+      teacher_classroom: "",
+      notes: ["NON-INSTRUCTIONAL / UNAVAILABLE", b.notes || ""].filter(Boolean).join(" — "),
+      week_pattern: "every_week",
+      cycle_day: "",
+      period: "",
+      recurrence_note: "",
+      student_ids: [],
+    }));
+    onSave([...entries, ...blockedEntries]);
   };
 
   const stats = [
@@ -91,6 +107,7 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
     { label: "Students Found", value: matchedIds.size },
     { label: "Unmatched Names", value: unmatched.length },
     { label: "Service Minutes", value: totalMinutes },
+    { label: "Blocked Times", value: blocked.length },
     { label: "Conflicts Found", value: conflicts.length },
   ];
 
@@ -98,7 +115,7 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
     <div className="space-y-4">
       <AiDisclaimer extra="Review every group and student match below. Unmatched names need your confirmation before they join a group." />
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
         {stats.map((s) => (
           <div key={s.label} className="rounded-xl border border-border bg-card px-3 py-2.5 text-center">
             <div className="text-xl font-bold">{s.value}</div>
@@ -124,6 +141,16 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
         <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">Missing / unclear information:</span>{" "}
           {analysis.extraction_notes.join(" · ")}
+        </div>
+      )}
+
+      {blocked.length > 0 && (
+        <div className="rounded-xl border border-sky-200 bg-sky-50 p-3">
+          <div className="font-semibold text-sky-900 text-sm flex items-center gap-1.5"><Coffee className="h-4 w-4" /> Lunch / planning / unavailable blocks found</div>
+          <div className="mt-2 grid sm:grid-cols-2 gap-2 text-sm text-sky-900">
+            {blocked.map((b,i)=><div key={i} className="rounded-lg bg-white/70 border border-sky-100 px-3 py-2"><b>{b.label}</b> · {normalizeDay(b.day)} · {b.start_time}–{b.end_time}</div>)}
+          </div>
+          <p className="mt-2 text-xs text-sky-800">These save as blocked time so CaseCue will not treat lunch, prep, meetings, or duty as available student-service windows.</p>
         </div>
       )}
 
