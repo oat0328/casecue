@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import StudentSelector from "@/components/forms/StudentSelector";
 import ChartCard from "@/components/shared/ChartCard";
 import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
+import DataSheetScanPanel from "@/components/dataCenter/DataSheetScanPanel";
 import { DATA_CENTER_DEFINITIONS } from "@/lib/caseReports";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
@@ -62,6 +63,7 @@ export default function DataCenter() {
       <Tabs defaultValue="log">
         <TabsList className="mb-4">
           <TabsTrigger value="log">Log & Trends</TabsTrigger>
+          <TabsTrigger value="scan">Scan Data Sheet</TabsTrigger>
           <TabsTrigger value="reports">Reports & Exports</TabsTrigger>
         </TabsList>
 
@@ -133,6 +135,10 @@ export default function DataCenter() {
             })}
             {studentsWithTrends.length === 0 && <p className="text-muted-foreground text-sm">Log at least two data points per student to see trends.</p>}
           </div>
+        </TabsContent>
+
+        <TabsContent value="scan">
+          <DataSheetScanPanel students={students || []} goals={goals || []} onImported={refetch} />
         </TabsContent>
 
         <TabsContent value="reports">
