@@ -1,0 +1,114 @@
+{
+  "name": "WorkEvidence",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "goal_id": {
+      "type": "string",
+      "title": "Goal ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "assignment",
+        "worksheet",
+        "writing_sample",
+        "quiz",
+        "assessment",
+        "classwork",
+        "homework",
+        "probe",
+        "observation",
+        "other"
+      ],
+      "default": "assignment",
+      "title": "Evidence Type"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "File URL"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "source": {
+      "type": "string",
+      "title": "Source"
+    },
+    "score_earned": {
+      "type": "number",
+      "title": "Score Earned"
+    },
+    "score_possible": {
+      "type": "number",
+      "title": "Score Possible"
+    },
+    "percentage": {
+      "type": "number",
+      "title": "Percentage"
+    },
+    "qualitative_notes": {
+      "type": "string",
+      "title": "Qualitative Notes"
+    },
+    "error_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Error Patterns"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Skills"
+    },
+    "analysis": {
+      "type": "object",
+      "title": "Analysis"
+    },
+    "teacher_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "title": "Teacher Confirmed"
+    },
+    "gradebook_assignment_id": {
+      "type": "string",
+      "title": "Gradebook Assignment ID"
+    }
+  },
+  "required": [
+    "student_id",
+    "organization_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
