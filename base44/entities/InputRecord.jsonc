@@ -1,0 +1,75 @@
+{
+  "name": "InputRecord",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "input_type": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "gen_ed",
+        "student",
+        "related_service",
+        "administrator",
+        "other"
+      ],
+      "title": "Input Type"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "name_or_role": {
+      "type": "string",
+      "title": "Name / Role"
+    },
+    "strengths": {
+      "type": "string",
+      "title": "Strengths / Positives"
+    },
+    "concerns": {
+      "type": "string",
+      "title": "Concerns"
+    },
+    "priorities": {
+      "type": "string",
+      "title": "Priorities / Requests"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Additional Notes"
+    },
+    "source": {
+      "type": "string",
+      "title": "Source"
+    }
+  },
+  "required": [
+    "student_id",
+    "organization_id",
+    "input_type",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
