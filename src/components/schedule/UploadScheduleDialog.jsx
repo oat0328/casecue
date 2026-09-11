@@ -36,8 +36,8 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
     setFileName(file.name);
     setStep("analyzing");
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const res = await base44.functions.invoke("scheduleAi", { mode: "analyze", file_url });
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+      const res = await base44.functions.invoke("scheduleAi", { mode: "analyze", file_uri });
       setAnalysis(res.data);
       setStep("review");
     } catch (err) {
