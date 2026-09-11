@@ -110,15 +110,15 @@ const OPTIMIZE_SCHEMA = {
 };
 
 async function analyze(base44, body) {
-  const fileUri = String(body.file_uri || '');
-  let fileUrl = String(body.file_url || '');
-  if (fileUri) {
-    const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: fileUri, expires_in: 600 });
-    fileUrl = signed.signed_url;
+  const fileUris = Array.isArray(body.file_uris) ? body.file_uris.filter(Boolean) : (body.file_uri ? [body.file_uri] : []);
+  const fileUrls = [];
+  for (const fileUri of fileUris.slice(0, 20)) {
+    const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: String(fileUri), expires_in: 600 });
+    if (signed?.signed_url) fileUrls.push(signed.signed_url);
   }
-  if (!/^https?:\/\//.test(fileUrl)) {
-    return Response.json({ error: 'A schedule file is required.' }, { status: 400 });
-  }
+  if (body.file_url && /^https?:\/\//.test(String(body.file_url))) fileUrls.push(String(body.file_url));
+  if (!fileUrls.length) return Response.json({ error: 'At least one schedule file is required.' }, { status: 400 });
+  const pullPreferences = String(body.pull_preferences || '').trim();
 
   const students = await base44.entities.Student.list('-updated_date', 300);
   const goals = await base44.entities.Goal.list('-created_date', 500);
@@ -135,13 +135,19 @@ async function analyze(base44, body) {
 
   const prompt = `You are analyzing a special education teacher's schedule document (it may be a PDF, spreadsheet export, word-processing document, photo, or screenshot).
 
-TASK: Extract EVERY recurring instructional service block from the ENTIRE uploaded schedule, and match the students named in it to the teacher's roster. Read every page, table, row, column, merged cell, legend, note, and continuation page before returning. Do not stop after the first visible day or first few rows.
+TASK: The uploaded files may include a SCHOOL BELL SCHEDULE, one or more STUDENT/CLASS SCHEDULES, and/or a CURRENT RESOURCE/CASE-MANAGER SCHEDULE. Read every page, table, row, column, merged cell, legend, note, and continuation page. Build a PROPOSED special-education service schedule — do not mistake a student's general-education class schedule for an already-delivered SPED service block.
+
+TEACHER'S PLANNING PREFERENCES:
+${pullPreferences || '(No preference entered — preserve explicit service blocks from the documents and flag places where teacher input is needed.)'}
 
 TEACHER'S ROSTER (name | id | grade | required weekly service minutes | services):
 ${roster || '(roster is empty)'}
 
 RULES:
-1. Use ONLY information present in the document. Never invent students, groups, times, or locations.
+1. Use ONLY information present in the files, the roster below, and the teacher's stated planning preferences. Never invent students, IEP minutes, classes, groups, times, or locations.
+1A. Distinguish source types: bell schedules define available periods; student schedules define where a student is assigned; resource schedules define existing/proposed service blocks. Do NOT convert every class on a student schedule into a SPED group.
+1B. When the teacher provides preferred pull-out/push-in windows, propose groups only where those windows do not visibly conflict with the uploaded student schedules. Flag any unresolved conflict for educator review.
+1C. Compare each matched student's proposed WEEKLY scheduled service minutes against the "required weekly minutes" in the CaseCue roster. If proposed minutes are below or above that recorded amount, add a conflict/info item stating the student's name, recorded weekly minutes, proposed weekly minutes, and difference. This is a planning check, not a legal/compliance determination.
 2. For every service block, output one entry in "groups":
    - group_name: the group name as written in the document. If none is given, derive a short descriptive name (e.g. "Reading Group A").
    - delivery: "pull-out" (students leave the classroom), "push-in" (support delivered in the classroom), or "consultation".
@@ -164,7 +170,7 @@ Return JSON matching the schema exactly.`;
 
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
     prompt,
-    file_urls: [fileUrl],
+    file_urls: fileUrls,
     response_json_schema: ANALYSIS_SCHEMA,
   });
 
