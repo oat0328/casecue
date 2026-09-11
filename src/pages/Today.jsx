@@ -1,225 +1,78 @@
 import React, { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import {
-  CalendarClock, FileWarning, Users, ClipboardCheck, FileX, AlertCircle,
-  ListTodo, Sparkles, FileEdit, Target, ClipboardList, BookOpen, Clock, TrendingUp
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { CalendarClock, CheckCircle2, FileText, Users, Clock3, ClipboardList, TrendingUp, Sparkles, Upload, Camera, ArrowRight, Target, ListTodo } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import DeadlineAlerts from "@/components/deadlineAlerts/DeadlineAlerts";
-import DemoTour from "@/components/onboarding/DemoTour";
 import { useAuth } from "@/lib/AuthContext";
-import OnboardingTour from "@/components/onboarding/OnboardingTour";
-import GettingStartedCard from "@/components/onboarding/GettingStartedCard";
-import AddToCalendar from "@/components/meetings/AddToCalendar";
 
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return null;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  return Math.round((d - today) / 86400000);
-}
+function toDate(value){ if(!value) return null; const d=new Date(value); return Number.isNaN(d.getTime())?null:d; }
+function isToday(value){ const d=toDate(value); if(!d) return false; const n=new Date(); return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate(); }
+function daysUntil(value){ const d=toDate(value); if(!d) return null; const n=new Date(); n.setHours(0,0,0,0); d.setHours(0,0,0,0); return Math.round((d-n)/86400000); }
 
-const QUICK_ACTIONS = [
-  { label: "Generate Present Levels", icon: FileEdit, path: "/iep-studio" },
-  { label: "Draft Annual Goal", icon: Target, path: "/iep-studio" },
-  { label: "Create Progress Report", icon: ClipboardCheck, path: "/data-center" },
-  { label: "Prepare Meeting", icon: Users, path: "/meetings" },
-  { label: "Create Lesson", icon: BookOpen, path: "/lesson-studio" },
-  { label: "Generate Sub Plan", icon: ClipboardList, path: "/sub-plans" },
-  { label: "Ask CaseCue", icon: Sparkles, path: "/ask-casecue" },
-];
+export default function Today(){
+  const navigate=useNavigate();
+  const { user }=useAuth();
+  const {data:students}=useAsync(()=>base44.entities.Student.list('-updated_date',200),[]);
+  const {data:goals}=useAsync(()=>base44.entities.Goal.list('-updated_date',300),[]);
+  const {data:progress}=useAsync(()=>base44.entities.ProgressData.list('-date',400),[]);
+  const {data:sessions}=useAsync(()=>base44.entities.SessionRecord.list('-date',300),[]);
+  const {data:meetings}=useAsync(()=>base44.entities.Meeting.filter({status:'scheduled'},'date',100),[]);
+  const {data:tasks}=useAsync(()=>base44.entities.Task.list('-updated_date',200),[]);
 
-export default function Today() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const studentMap=useMemo(()=>new Map((students||[]).map(s=>[s.id,s])),[students]);
+  const todaySessions=useMemo(()=>(sessions||[]).filter(s=>isToday(s.date)),[sessions]);
+  const completed=todaySessions.filter(s=>['completed','partially_completed','makeup_session'].includes(s.status));
+  const noteNeeded=todaySessions.filter(s=>['completed','partially_completed','makeup_session'].includes(s.status)&&!(s.notes||s.qualitative||s.session_notes));
+  const upcoming=useMemo(()=>(meetings||[]).filter(m=>{const d=daysUntil(m.date);return d!==null&&d>=0&&d<=45;}).slice(0,4),[meetings]);
 
-  const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
-  const { data: tasks } = useAsync(() => base44.entities.Task.filter({ status: 'open' }, '-due_date', 50), []);
-  const { data: meetings } = useAsync(() => base44.entities.Meeting.filter({ status: 'scheduled' }, 'date', 50), []);
-  const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 200), []);
-  const { data: progress } = useAsync(() => base44.entities.ProgressData.list('-date', 200), []);
-  const { data: sessionRecords } = useAsync(() => base44.entities.SessionRecord.list('-date', 200), []);
-  const { data: allTasks } = useAsync(() => base44.entities.Task.list('-updated_date', 200), []);
+  const actionItems=useMemo(()=>{
+    const out=[];
+    noteNeeded.slice(0,2).forEach(s=>{const st=studentMap.get(s.student_id);out.push({title:'Complete session notes',detail:`${st?`${st.first_name} ${st.last_name}`:'Student'}${s.date?` · ${s.date}`:''}`,path:'/session-tracker'});});
+    (students||[]).forEach(st=>{if(out.length>=5)return;const d=daysUntil(st.annual_review_due);if(d!==null&&d>=0&&d<=30)out.push({title:'Prepare for IEP meeting',detail:`${st.first_name} ${st.last_name} · due in ${d} day${d===1?'':'s'}`,path:'/meeting-navigator'});});
+    (goals||[]).forEach(g=>{if(out.length>=5)return;const pts=(progress||[]).filter(p=>p.goal_id===g.id);if(!pts.length){const st=studentMap.get(g.student_id);out.push({title:'Collect progress data',detail:`${st?`${st.first_name} ${st.last_name}`:'Student'} · ${g.goal_area||'Goal'}`,path:'/data-center'});}});
+    (tasks||[]).filter(t=>t.status==='open').slice(0,5-out.length).forEach(t=>out.push({title:t.title,detail:t.due_date?`Due ${t.due_date}`:'Open task',path:'/app'}));
+    return out.slice(0,5);
+  },[noteNeeded,students,goals,progress,tasks,studentMap]);
 
-  const stats = useMemo(() => {
-    const s = students || [];
-    const iepsDue = s.filter((st) => {
-      const d = daysUntil(st.annual_review_due);
-      return d !== null && d >= 0 && d <= 45;
-    });
-    const reevalsDue = s.filter((st) => {
-      const d = daysUntil(st.reevaluation_due);
-      return d !== null && d >= 0 && d <= 60;
-    });
-    const meetingsUpcoming = (meetings || []).filter((m) => {
-      const d = daysUntil(m.date);
-      return d !== null && d >= 0 && d <= 30;
-    });
-    const studentIds = new Set(s.map((st) => st.id));
-    const withRecentProgress = new Set((progress || []).map((p) => p.student_id));
-    const needingData = s.filter((st) => !withRecentProgress.has(st.id));
-    const missingBaselines = (goals || []).filter((g) => studentIds.has(g.student_id) && !g.baseline);
-    const missingDocs = s.filter((st) => !st.present_levels);
-    return { iepsDue, reevalsDue, meetingsUpcoming, needingData, missingBaselines, missingDocs, total: s.length };
-  }, [students, tasks, meetings, goals, progress]);
+  const studentGlance=useMemo(()=>(students||[]).slice(0,5).map(st=>{
+    const pts=(progress||[]).filter(p=>p.student_id===st.id&&typeof p.percentage==='number').slice(0,5);
+    const pct=pts.length?Math.round(pts.reduce((a,p)=>a+Number(p.percentage||0),0)/pts.length):null;
+    return {...st,pct};
+  }),[students,progress]);
 
-  // Real activity this week — no estimated or hard-coded numbers.
-  const weekActivity = useMemo(() => {
-    const now = new Date(); now.setHours(0, 0, 0, 0);
-    const dow = (now.getDay() + 6) % 7;
-    const start = new Date(now); start.setDate(now.getDate() - dow);
-    const end = new Date(start); end.setDate(start.getDate() + 7);
-    const inWeek = (d) => { const t = new Date(`${d}T00:00:00`); return !isNaN(t) && t >= start && t < end; };
-    const sessionsThisWeek = (sessionRecords || []).filter((s) => inWeek(s.date));
-    return {
-      sessions: sessionsThisWeek.length,
-      studentsWithSessions: new Set(sessionsThisWeek.map((s) => s.student_id)).size,
-      progressPoints: (progress || []).filter((p) => inWeek(p.date)).length,
-      tasksCompleted: (allTasks || []).filter((t) => t.status === "done" && inWeek(t.updated_date?.slice(0, 10))).length,
-      meetings: (meetings || []).filter((m) => inWeek(m.date)).length,
-    };
-  }, [sessionRecords, progress, allTasks, meetings]);
+  const primaryGoal=useMemo(()=>{const goal=(goals||[])[0];if(!goal)return null;const pts=(progress||[]).filter(p=>p.goal_id===goal.id&&typeof p.percentage==='number').slice(-8);const st=studentMap.get(goal.student_id);const current=pts.length?Math.round(Number(pts[pts.length-1].percentage)):null;return{goal,pts,st,current};},[goals,progress,studentMap]);
 
-  const attentionCards = [
-    { label: "IEPs due soon", count: stats.iepsDue.length, icon: CalendarClock, tone: "amber", link: "/students" },
-    { label: "Reevaluations due", count: stats.reevalsDue.length, icon: FileWarning, tone: "amber", link: "/students" },
-    { label: "Meetings coming up", count: stats.meetingsUpcoming.length, icon: Users, tone: "blue", link: "/meetings" },
-    { label: "Students needing data", count: stats.needingData.length, icon: ClipboardCheck, tone: "red", link: "/data-center" },
-    { label: "Missing baselines", count: stats.missingBaselines.length, icon: Target, tone: "amber", link: "/iep-studio" },
-    { label: "Missing documentation", count: stats.missingDocs.length, icon: FileX, tone: "red", link: "/iep-studio" },
-    { label: "Tasks needing attention", count: (tasks || []).filter((t) => t.status === 'open').length, icon: ListTodo, tone: "default", link: "/app" },
-  ];
+  const name=user?.full_name?.split(' ')[0]||'Teacher';
+  const iepsDue=(students||[]).filter(st=>{const d=daysUntil(st.annual_review_due);return d!==null&&d>=0&&d<=45;}).length;
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Today</h1>
-        <p className="text-muted-foreground mt-1">What needs your attention right now.</p>
+  return <div className="space-y-5">
+    <section className="rounded-[28px] bg-gradient-to-br from-[#0a1220] via-[#111b31] to-[#18264b] px-6 py-7 sm:px-8 sm:py-8 text-white shadow-xl shadow-slate-950/10 overflow-hidden relative">
+      <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl"/>
+      <div className="relative flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+        <div><div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">CaseCue Today</div><h1 className="mt-2 text-3xl sm:text-4xl font-black tracking-tight">Good morning, {name}.</h1><p className="mt-2 max-w-2xl text-slate-300">Your caseload, deadlines, sessions, progress data, and meeting prep in one place.</p></div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">{[[todaySessions.length,'Sessions today'],[completed.length,'Completed'],[noteNeeded.length,'Need notes'],[(students||[]).length,'Students']].map(([v,l])=><div key={l} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur"><div className="text-2xl font-black">{v}</div><div className="text-[11px] text-slate-400">{l}</div></div>)}</div>
       </div>
+    </section>
 
-      {/* Finish-setup banner for accounts that skipped onboarding */}
-      {user && !user?.data?.onboarding_completed && (
-        <Link to="/onboarding" className="mb-6 flex items-center justify-between rounded-2xl border border-primary/25 bg-card p-4 card-shadow hover:border-primary/50 transition-colors">
-          <span className="text-sm font-medium">Finish setting up your CaseCue profile</span>
-          <span className="text-sm font-semibold text-primary">Continue →</span>
-        </Link>
-      )}
+    <section className="grid xl:grid-cols-[1.15fr_.85fr_.8fr] gap-4">
+      <Card className="p-0 overflow-hidden border-slate-200 shadow-sm"><div className="flex items-center justify-between px-5 py-4 border-b"><div><h2 className="font-black text-lg">Today’s schedule</h2><p className="text-xs text-slate-500 mt-0.5">Sessions from your live CaseCue records</p></div><button className="text-sm font-semibold text-indigo-600" onClick={()=>navigate('/schedule')}>View calendar</button></div><div className="divide-y">{todaySessions.length?todaySessions.slice(0,6).map((s,i)=>{const st=studentMap.get(s.student_id);const done=['completed','partially_completed','makeup_session'].includes(s.status);return <div key={s.id||i} className="px-5 py-3 flex items-center gap-3"><div className="w-16 text-xs font-semibold text-slate-500">{s.start_time||'Today'}</div><div className={`h-8 w-8 rounded-full flex items-center justify-center ${done?'bg-emerald-100 text-emerald-700':'bg-indigo-50 text-indigo-600'}`}>{done?<CheckCircle2 className="h-4 w-4"/>:<Clock3 className="h-4 w-4"/>}</div><div className="min-w-0 flex-1"><div className="font-semibold text-sm truncate">{s.activity||s.service_type||'Student session'}</div><div className="text-xs text-slate-500 truncate">{st?`${st.first_name} ${st.last_name}`:'Student'}</div></div><Button size="sm" variant="outline" onClick={()=>navigate('/session-tracker')}>{done?'View':'Start'}</Button></div>}):<div className="p-8 text-center text-sm text-slate-500">No sessions logged for today yet.</div>}</div></Card>
 
-      {/* Deadline alerts */}
-      <DeadlineAlerts students={students} />
+      <Card className="p-0 overflow-hidden border-slate-200 shadow-sm"><div className="flex items-center justify-between px-5 py-4 border-b"><div><h2 className="font-black text-lg">Students at a glance</h2><p className="text-xs text-slate-500 mt-0.5">Recent progress by student</p></div><button className="text-sm font-semibold text-indigo-600" onClick={()=>navigate('/students')}>View all</button></div><div className="divide-y">{studentGlance.length?studentGlance.map(st=><button key={st.id} onClick={()=>navigate(`/students/${st.id}`)} className="w-full px-5 py-3 flex items-center gap-3 text-left hover:bg-slate-50"><div className="h-9 w-9 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-600">{(st.first_name?.[0]||'')+(st.last_name?.[0]||'')}</div><div className="min-w-0 flex-1"><div className="font-semibold text-sm truncate">{st.first_name} {st.last_name}</div><div className="text-xs text-slate-500">Grade {st.grade||'—'} · {st.eligibility_category||'Eligibility not entered'}</div></div><div className="w-20"><div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-emerald-500" style={{width:`${Math.max(0,Math.min(100,st.pct??0))}%`}}/></div><div className="text-[11px] text-slate-500 mt-1 text-right">{st.pct==null?'No data':`${st.pct}%`}</div></div></button>):<div className="p-8 text-center text-sm text-slate-500">Add a student to begin.</div>}</div></Card>
 
-      <OnboardingTour />
-      <DemoTour />
-      <GettingStartedCard students={students} goals={goals} progress={progress} />
+      <div className="space-y-4"><Card className="p-0 overflow-hidden border-slate-200 shadow-sm"><div className="px-5 py-4 border-b"><h2 className="font-black text-lg flex items-center gap-2">Action items <span className="inline-flex h-6 min-w-6 px-1.5 items-center justify-center rounded-full bg-rose-500 text-white text-xs">{actionItems.length}</span></h2></div><div className="divide-y">{actionItems.length?actionItems.map((a,i)=><button key={`${a.title}-${i}`} onClick={()=>navigate(a.path)} className="w-full px-5 py-3 flex gap-3 text-left hover:bg-slate-50"><div className="h-5 w-5 rounded border border-slate-300 mt-0.5"/><div><div className="font-semibold text-sm">{a.title}</div><div className="text-xs text-slate-500 mt-0.5">{a.detail}</div></div></button>):<div className="p-6 text-sm text-slate-500 text-center">No urgent action items.</div>}</div></Card>
+      <Card className="p-5 border-slate-200 shadow-sm"><div className="flex items-center justify-between"><h2 className="font-black text-lg">Upcoming meetings</h2><button className="text-sm font-semibold text-indigo-600" onClick={()=>navigate('/meetings')}>View all</button></div><div className="mt-4 space-y-3">{upcoming.length?upcoming.map(m=>{const st=studentMap.get(m.student_id);return <div key={m.id} className="flex gap-3 items-center"><div className="h-9 w-9 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center"><CalendarClock className="h-5 w-5"/></div><div className="min-w-0 flex-1"><div className="text-sm font-semibold truncate">{m.title||m.meeting_type||'IEP Meeting'}</div><div className="text-xs text-slate-500">{st?`${st.first_name} ${st.last_name} · `:''}{m.date}</div></div></div>}):<div className="text-sm text-slate-500">No meetings scheduled in the next 45 days.</div>}</div></Card></div>
+    </section>
 
-      {/* Real activity this week */}
-      <Card className="mb-8 overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          <div className="brand-gradient text-white p-6 md:w-64 flex flex-col justify-center">
-            <div className="flex items-center gap-2 text-white/80 text-sm font-medium"><Clock className="h-4 w-4" /> Your Activity This Week</div>
-            <div className="text-4xl font-bold mt-1">{weekActivity.sessions}</div>
-            <div className="text-white/80 text-sm mt-1">sessions logged</div>
-          </div>
-          <div className="p-6 flex-1">
-            <div className="text-sm font-medium text-muted-foreground mb-4">Counts update from your real records</div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "Sessions logged", value: weekActivity.sessions, icon: ClipboardCheck },
-                { label: "Students served", value: weekActivity.studentsWithSessions, icon: Users },
-                { label: "Progress data points", value: weekActivity.progressPoints, icon: TrendingUp },
-                { label: "Tasks completed", value: weekActivity.tasksCompleted, icon: ListTodo },
-              ].map((it) => (
-                <div key={it.label} className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-lg brand-gradient-soft flex items-center justify-center"><it.icon className="h-4 w-4 text-primary" /></div>
-                  <div>
-                    <div className="text-lg font-bold leading-tight">{it.value}</div>
-                    <span className="text-xs font-medium text-muted-foreground">{it.label}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {weekActivity.sessions === 0 && weekActivity.progressPoints === 0 && weekActivity.tasksCompleted === 0 && (
-              <p className="text-sm text-muted-foreground mt-4">No activity recorded yet this week — these counts update automatically as you log sessions, data, and completed work.</p>
-            )}
-          </div>
-        </div>
-      </Card>
+    <section className="grid xl:grid-cols-[1fr_1fr_.75fr] gap-4">
+      <Card className="p-5 border-slate-200 shadow-sm"><div className="flex items-center justify-between mb-4"><div><h2 className="font-black text-lg">Goal progress</h2><p className="text-xs text-slate-500">Connected to approved progress data</p></div><button className="text-sm font-semibold text-indigo-600" onClick={()=>navigate('/data-center')}>View all goals</button></div>{primaryGoal?<div className="grid grid-cols-[1fr_130px] gap-4 items-end"><div className="h-44 rounded-2xl bg-slate-50 border p-4 flex items-end gap-2">{primaryGoal.pts.length?primaryGoal.pts.map((p,i)=><div key={i} className="flex-1 flex flex-col justify-end"><div className="rounded-t bg-gradient-to-t from-indigo-600 to-sky-400 min-h-1" style={{height:`${Math.max(4,Math.min(100,Number(p.percentage||0)))}%`}}/><div className="text-[9px] text-slate-400 mt-1 truncate">{p.date?.slice(5)}</div></div>):<div className="m-auto text-sm text-slate-500">No progress data yet.</div>}</div><div className="space-y-2"><div className="rounded-xl bg-indigo-50 p-3"><div className="text-xs text-slate-500">Current</div><div className="text-2xl font-black text-indigo-700">{primaryGoal.current==null?'—':`${primaryGoal.current}%`}</div></div><div className="rounded-xl bg-emerald-50 p-3"><div className="text-xs font-bold text-emerald-800">Evidence connected</div><div className="mt-1 text-xl font-black text-emerald-700">{primaryGoal.pts.length}</div></div></div></div>:<div className="py-10 text-center text-sm text-slate-500">Add an IEP goal to begin tracking progress.</div>}</Card>
 
-      {/* Attention cards */}
-      <h2 className="text-lg font-semibold mb-4">Needs your attention</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-        {attentionCards.map((c) => (
-          <button key={c.label} onClick={() => navigate(c.link)} className="text-left">
-            <Card className="p-5 h-full hover:-translate-y-0.5 hover:card-shadow-lg transition-all">
-              <div className="flex items-center justify-between">
-                <c.icon className="h-5 w-5 text-muted-foreground" />
-                <span className={`text-2xl font-bold ${c.count > 0 ? "text-foreground" : "text-muted-foreground/50"}`}>{c.count}</span>
-              </div>
-              <div className="mt-3 text-sm font-medium text-muted-foreground">{c.label}</div>
-            </Card>
-          </button>
-        ))}
-      </div>
+      <Card className="p-5 border-slate-200 shadow-sm"><div className="flex items-center justify-between"><div><h2 className="font-black text-lg">Caseload readiness</h2><p className="text-xs text-slate-500">What needs attention next</p></div></div><div className="mt-5 grid grid-cols-2 gap-3">{[[iepsDue,'IEPs due soon',CalendarClock],[noteNeeded.length,'Notes needed',FileText],[(tasks||[]).filter(t=>t.status==='open').length,'Open tasks',ListTodo],[(goals||[]).filter(g=>!g.baseline).length,'Missing baselines',Target]].map(([v,l,Icon])=><div key={l} className="rounded-2xl bg-slate-50 border p-4"><Icon className="h-4 w-4 text-indigo-600"/><div className="mt-3 text-2xl font-black">{v}</div><div className="text-xs text-slate-500">{l}</div></div>)}</div></Card>
 
-      {/* Quick actions */}
-      <h2 className="text-lg font-semibold mb-4">Quick actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-8">
-        {QUICK_ACTIONS.map((a) => (
-          <button key={a.label} onClick={() => navigate(a.path)} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 card-shadow hover:border-primary/30 hover:-translate-y-0.5 transition-all text-left">
-            <div className="h-9 w-9 rounded-lg brand-gradient-soft flex items-center justify-center shrink-0"><a.icon className="h-4 w-4 text-primary" /></div>
-            <span className="text-sm font-medium leading-tight">{a.label}</span>
-          </button>
-        ))}
-      </div>
+      <Card className="p-5 border-indigo-100 bg-gradient-to-br from-indigo-50 to-sky-50 shadow-sm"><div className="flex items-center gap-2 text-indigo-800"><Sparkles className="h-5 w-5"/><h2 className="font-black text-lg">Quick start</h2></div><p className="text-sm text-slate-600 mt-1 mb-4">Jump into a common workflow.</p><div className="grid grid-cols-2 gap-2">{[['Upload an IEP',Upload,'/iep-studio'],['Scan a data sheet',Camera,'/data-center'],['Progress report',ClipboardList,'/progress-reports'],['Prepare meeting',Users,'/meeting-navigator']].map(([label,Icon,path])=><button key={label} onClick={()=>navigate(path)} className="rounded-xl bg-white border border-indigo-100 p-3 text-left text-xs font-bold text-slate-800 hover:border-indigo-300"><Icon className="h-4 w-4 mb-2 text-indigo-600"/>{label}</button>)}</div></Card>
+    </section>
 
-      {/* Open tasks + upcoming meetings */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold flex items-center gap-2"><ListTodo className="h-4 w-4 text-primary" /> Open tasks</h2>
-          </div>
-          {(tasks || []).filter((t) => t.status === 'open').length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">No open tasks. You're all caught up.</p>
-          ) : (
-            <div className="space-y-2">
-              {(tasks || []).filter((t) => t.status === 'open').slice(0, 6).map((t) => (
-                <div key={t.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
-                  <span className="text-sm font-medium truncate">{t.title}</span>
-                  {t.due_date && <span className="text-xs text-muted-foreground">{t.due_date}</span>}
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Upcoming meetings</h2>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/meetings")}>View all</Button>
-          </div>
-          {stats.meetingsUpcoming.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">No upcoming meetings scheduled.</p>
-          ) : (
-            <div className="space-y-2">
-              {stats.meetingsUpcoming.slice(0, 6).map((m) => (
-                <div key={m.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
-                  <div><div className="text-sm font-medium truncate">{m.title}</div><div className="text-xs text-muted-foreground">{m.meeting_type}</div></div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-muted-foreground">{m.date}{m.time ? ` · ${m.time}` : ""}</span>
-                    <AddToCalendar compact meeting={m} student={(students || []).find((s) => s.id === m.student_id)} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
-    </div>
-  );
+    <section className="rounded-2xl border border-sky-200 bg-gradient-to-r from-sky-50 via-white to-indigo-50 px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-4 lg:justify-between"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-xl bg-slate-950 text-white flex items-center justify-center"><Sparkles className="h-5 w-5"/></div><div><div className="font-black text-slate-950">CaseCue Proof™</div><div className="text-xs text-slate-600">Trace generated progress statements back to the evidence that supports them.</div></div></div><div className="flex flex-wrap gap-2 text-xs">{['Data','Work samples','Sessions','Observations','Parent input'].map(x=><span key={x} className="px-3 py-1.5 rounded-full bg-white border border-slate-200 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-600"/>{x}</span>)}</div><button onClick={()=>navigate('/reports')} className="text-sm font-semibold text-indigo-700 flex items-center gap-1">View evidence <ArrowRight className="h-4 w-4"/></button></section>
+  </div>;
 }
