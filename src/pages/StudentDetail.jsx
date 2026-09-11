@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import GoalBankPicker from "@/components/goalBank/GoalBankPicker";
 import GoalBoard from "@/components/students/GoalBoard";
@@ -25,6 +27,12 @@ const colorMap = {
   emerald: "bg-emerald-100 text-emerald-700", amber: "bg-amber-100 text-amber-700",
   rose: "bg-rose-100 text-rose-700", cyan: "bg-cyan-100 text-cyan-700",
 };
+const ELIGIBILITY_OPTIONS = [
+  "Autism Spectrum Disorder","Deaf/Blind","Developmental Delay","Emotional Disturbance",
+  "Health Impairment","Hearing Impairment/Deaf","Intellectual Disability","Multiple Impairments",
+  "Orthopedic Impairment","Specific Learning Disability","Speech/Language Impairment",
+  "Traumatic Brain Injury","Visual Impairment/Blind","Other/State-Specific"
+];
 
 export default function StudentDetail() {
   const { id } = useParams();
@@ -49,10 +57,22 @@ export default function StudentDetail() {
   const [newNote, setNewNote] = useState("");
   const [genLoading, setGenLoading] = useState(false);
   const [bankOpen, setBankOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingStudent, setDeletingStudent] = useState(false);
 
   if (!student) return <div className="text-center py-20 text-muted-foreground">Loading student…</div>;
 
   const startEdit = () => { setDraft({ ...student }); setEditing(true); };
+  const deleteStudent = async () => {
+    setDeletingStudent(true);
+    try {
+      await base44.entities.Student.delete(id);
+      toast({ title: "Student deleted" });
+      navigate("/students");
+    } catch (e) {
+      toast({ title: "Could not delete student", description: e.message, variant: "destructive" });
+    } finally { setDeletingStudent(false); }
+  };
   const saveProfile = async () => {
     setSavingProfile(true);
     try {
