@@ -56,6 +56,20 @@ const ANALYSIS_SCHEMA = {
         required: ['description'],
       },
     },
+    non_instructional_blocks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          label: { type: 'string' },
+          day: { type: 'string' },
+          start_time: { type: 'string' },
+          end_time: { type: 'string' },
+          notes: { type: 'string' },
+        },
+        required: ['label','day','start_time','end_time'],
+      },
+    },
     extraction_notes: { type: 'array', items: { type: 'string' } },
   },
   required: ['groups'],
@@ -162,9 +176,11 @@ RULES:
    - students: every student named for that block. For each student: "name" exactly as written in the document; "student_id" = the roster id if you can match (identical name = "exact", nickname/spelling variant = "fuzzy"), otherwise "" with match_type "unmatched"; confidence high/medium/low/none.
 3. Any name you could not match also goes in "unmatched_names".
 4. "conflicts": scheduling problems visible in the document (same student in two blocks at once, overlapping blocks, blocks with no time). One item per problem, severity "warning" or "info".
-5. "extraction_notes": anything missing or ambiguous (e.g. "no end times given for Tuesday blocks"). Flag it — never guess.
-6. COMPLETENESS CHECK BEFORE RETURNING: compare all five weekdays against the source. If the source contains service information for a weekday, that weekday must appear in groups. Re-scan the document for recurring notes such as daily, M/W/F, Tue/Thu, every day, Period 1-6, or continuation tables. Do not omit later weekdays just because the layout repeats.
-7. Preserve recurrence details in notes when useful, but do not use a note as a substitute for creating the actual weekday entries.
+5. "non_instructional_blocks": extract the teacher's OWN lunch, prep/planning, IEP/meeting, duty, and other unavailable blocks whenever explicitly shown. Expand recurring/daily blocks to each applicable weekday. These are schedule constraints and MUST NOT be omitted just because they are not student service groups. Do not treat a student's lunch or class period as the teacher's unavailable block unless the document explicitly says so.
+6. "extraction_notes": anything missing or ambiguous (e.g. "no end times given for Tuesday blocks"). Flag it — never guess.
+7. COMPLETENESS CHECK BEFORE RETURNING: compare all five weekdays against the source. If the source contains service information for a weekday, that weekday must appear in groups. Re-scan the document for recurring notes such as daily, M/W/F, Tue/Thu, every day, Period 1-6, or continuation tables. Do not omit later weekdays just because the layout repeats.
+8. Preserve recurrence details in notes when useful, but do not use a note as a substitute for creating the actual weekday entries.
+9. Before returning, explicitly verify that any teacher Lunch, Prep/Planning, IEP/Meeting, Duty, or other blocked time visible in the source is represented in non_instructional_blocks.
 
 Return JSON matching the schema exactly.`;
 
@@ -174,8 +190,9 @@ Return JSON matching the schema exactly.`;
     response_json_schema: ANALYSIS_SCHEMA,
   });
 
-  const groups = Array.isArray(result.groups) ? result.groups.slice(0, 60) : [];
-  return Response.json({ ...result, groups });
+  const groups = Array.isArray(result.groups) ? result.groups.slice(0, 120) : [];
+  const non_instructional_blocks = Array.isArray(result.non_instructional_blocks) ? result.non_instructional_blocks.slice(0, 80) : [];
+  return Response.json({ ...result, groups, non_instructional_blocks });
 }
 
 async function recommend(base44, body) {
