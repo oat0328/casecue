@@ -17,6 +17,7 @@ import { useToast } from "@/components/ui/use-toast";
 import GoalBankPicker from "@/components/goalBank/GoalBankPicker";
 import GoalBoard from "@/components/students/GoalBoard";
 import ParentSharePanel from "@/components/students/ParentSharePanel";
+import FamilyRequestsPanel from "@/components/students/FamilyRequestsPanel";
 import ModificationsPanel from "@/components/students/ModificationsPanel";
 import AccommodationLogPanel from "@/components/students/AccommodationLogPanel";
 import TransitionPanel from "@/components/students/TransitionPanel";
@@ -239,6 +240,7 @@ export default function StudentDetail() {
 
         <TabsContent value="family">
           <ParentSharePanel student={student} />
+          <FamilyRequestsPanel student={student} />
         </TabsContent>
 
         {/* Overview */}
