@@ -156,14 +156,12 @@ Return JSON matching the schema.`;
       extracted.accommodations = accommodationFacts.map((x) => `${x.fact} (${x.document_type} p.${x.page})`).join('; ');
     }
     if (Array.isArray(extracted.data_gaps) && serviceFacts.length) {
-      extracted.data_gaps = extracted.data_gaps.map((gap) => {
+      extracted.data_gaps = [...new Set(extracted.data_gaps.filter((gap) => {
         const text = String(gap || '');
-        if (/service.*minutes|minutes.*service/i.test(text)) {
-          return 'Service minutes were found in the uploaded document; verify any frequency/location details not explicitly captured before finalizing.';
-        }
-        return text;
-      });
-      extracted.data_gaps = [...new Set(extracted.data_gaps.filter(Boolean))];
+        // Do not label service frequency/duration/minutes as missing when the
+        // page-level extraction already found explicit service-minute facts.
+        return !/(service.*(?:minute|frequency|duration)|(?:minute|frequency|duration).*service)/i.test(text);
+      }).filter(Boolean))];
     }
 
     // Pre-fill the student record — only where fields are empty, so teacher-
@@ -246,7 +244,7 @@ Return JSON matching the schema.`;
       eligibility: extracted.eligibility_category || '',
       strengths_found: listCount(extracted.strengths),
       needs_found: listCount(extracted.areas_of_need),
-      goals_found: Array.isArray(extracted.goals) ? extracted.goals.length : 0,
+      goals_found: Math.max(Array.isArray(extracted.goals) ? extracted.goals.length : 0, (existingGoals || []).length + goalsCreated),
       accommodations_found: listCount(extracted.accommodations),
       services_found: Array.isArray(extracted.services) ? extracted.services.length : 0,
       behavior_supports_found: !!extracted.behavior_information,
