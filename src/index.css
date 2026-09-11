@@ -4,94 +4,95 @@
 
 @layer base {
   :root {
-    --background: 250 60% 99%;
-    --foreground: 240 10% 12%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 12%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 12%;
-    --primary: 255 82% 58%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 217 91% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 250 40% 96%;
-    --secondary-foreground: 255 60% 30%;
-    --muted: 250 30% 96%;
-    --muted-foreground: 240 6% 46%;
-    --accent: 217 91% 60%;
+    --secondary: 214 32% 95%;
+    --secondary-foreground: 222 47% 18%;
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 199 89% 48%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 250 24% 91%;
-    --input: 250 24% 91%;
-    --ring: 255 82% 58%;
-    --chart-1: 255 82% 58%;
-    --chart-2: 217 91% 60%;
-    --chart-3: 280 65% 60%;
-    --chart-4: 199 89% 55%;
-    --chart-5: 43 74% 66%;
-    --radius: 0.75rem;
+    --border: 214 32% 90%;
+    --input: 214 32% 90%;
+    --ring: 217 91% 52%;
+    --chart-1: 217 91% 52%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 190 90% 40%;
+    --chart-4: 160 84% 39%;
+    --chart-5: 38 92% 50%;
+    --radius: 0.9rem;
     --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 10% 20%;
-    --sidebar-primary: 255 82% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 250 40% 96%;
-    --sidebar-accent-foreground: 255 60% 30%;
-    --sidebar-border: 250 24% 92%;
-    --sidebar-ring: 255 82% 58%;
+    --sidebar-background: 221 46% 10%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 199 89% 56%;
+    --sidebar-primary-foreground: 221 46% 10%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 28% 20%;
+    --sidebar-ring: 199 89% 56%;
   }
 
   .dark {
-    --background: 240 10% 6%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 255 82% 68%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 8% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 8% 16%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 217 91% 65%;
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --card: 222 42% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 42% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 199 89% 56%;
+    --primary-foreground: 222 47% 8%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 70% 55%;
+    --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 8% 18%;
-    --input: 240 8% 18%;
-    --ring: 255 82% 68%;
+    --border: 217 28% 20%;
+    --input: 217 28% 20%;
+    --ring: 199 89% 56%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground font-body antialiased;
-  }
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground font-body antialiased; }
 }
 
 @layer utilities {
   .brand-gradient {
-    background-image: linear-gradient(135deg, hsl(217 91% 52%) 0%, hsl(217 91% 60%) 100%);
+    background-image: linear-gradient(135deg, hsl(217 91% 52%) 0%, hsl(199 89% 48%) 100%);
   }
   .brand-gradient-soft {
-    background-image: linear-gradient(135deg, hsl(214 100% 97%) 0%, hsl(217 91% 95%) 100%);
+    background-image: linear-gradient(135deg, hsl(214 100% 97%) 0%, hsl(199 100% 96%) 100%);
   }
   .text-gradient {
-    background-image: linear-gradient(135deg, hsl(217 91% 50%) 0%, hsl(217 91% 55%) 100%);
+    background-image: linear-gradient(135deg, hsl(217 91% 46%) 0%, hsl(199 89% 42%) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .card-shadow {
-    box-shadow: 0 1px 2px hsl(240 10% 10% / 0.04), 0 8px 24px hsl(255 60% 40% / 0.06);
+    box-shadow: 0 1px 2px hsl(222 47% 11% / 0.04), 0 8px 24px hsl(217 40% 20% / 0.06);
   }
   .card-shadow-lg {
-    box-shadow: 0 4px 12px hsl(240 10% 10% / 0.05), 0 24px 48px hsl(255 60% 40% / 0.10);
+    box-shadow: 0 4px 12px hsl(222 47% 11% / 0.06), 0 24px 48px hsl(217 40% 20% / 0.12);
+  }
+  .premium-panel {
+    background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 18px 50px rgba(15,23,42,.08);
   }
 }
