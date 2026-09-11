@@ -63,6 +63,33 @@
     "organization_id": {
       "type": "string",
       "title": "Organization ID"
+    },
+    "week_pattern": {
+      "type": "string",
+      "enum": [
+        "every_week",
+        "A_week",
+        "B_week",
+        "alternating"
+      ],
+      "default": "every_week",
+      "title": "Week Pattern"
+    },
+    "cycle_day": {
+      "type": "string",
+      "title": "Cycle Day / Rotation"
+    },
+    "period": {
+      "type": "string",
+      "title": "Period / Block"
+    },
+    "recurrence_note": {
+      "type": "string",
+      "title": "Recurrence Note"
+    },
+    "school_year": {
+      "type": "string",
+      "title": "School Year"
     }
   },
   "required": [
