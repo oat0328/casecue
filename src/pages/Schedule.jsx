@@ -17,11 +17,12 @@ import ScheduleExportPanel from "@/components/schedule/ScheduleExportPanel";
 import OptimizeDialog from "@/components/schedule/OptimizeDialog";
 import { DAYS, DELIVERY_LABEL, studentName } from "@/lib/scheduleUtils";
 
-const displayTime = (value) => {
+const displayTime = (value, format = "12h") => {
   if (!value) return "?";
   const m = String(value).match(/^(\d{1,2}):(\d{2})$/);
   if (!m) return value;
   const h = Number(m[1]);
+  if (format === "24h") return `${String(h).padStart(2, "0")}:${m[2]}`;
   const suffix = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
   return `${hour}:${m[2]} ${suffix}`;
@@ -35,9 +36,26 @@ export default function Schedule() {
   const [dialog, setDialog] = useState(null); // "upload" | "group" | "student"
   const [optimizeOpen, setOptimizeOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [timeFormat, setTimeFormat] = useState(() => localStorage.getItem('casecue-schedule-time-format') || '12h');
 
   const active = (entries || []).filter((e) => !e.archived);
   const isBlocked = (e) => String(e.notes || '').includes('NON-INSTRUCTIONAL / UNAVAILABLE');
+
+  const setFormat = (format) => {
+    setTimeFormat(format);
+    localStorage.setItem('casecue-schedule-time-format', format);
+  };
+
+  const clearSchedule = async () => {
+    if (!active.length || !window.confirm(`Clear the current schedule? This will archive ${active.length} blocks so you can replace it with a new schedule.`)) return;
+    try {
+      await Promise.all(active.map((e) => base44.entities.ScheduleEntry.update(e.id, { archived: true })));
+      await refetch();
+      toast({ title: "Schedule cleared", description: "The previous schedule was archived. Upload or build the new schedule now." });
+    } catch (e) {
+      toast({ title: "Could not clear schedule", description: e.message, variant: "destructive" });
+    }
+  };
 
   const remove = async (id) => {
     try {
@@ -60,6 +78,10 @@ export default function Schedule() {
             <Button onClick={() => setDialog("upload")} className="brand-gradient text-white">
               <Upload className="h-4 w-4" /> Upload Schedule
             </Button>
+            <div className="inline-flex rounded-lg border border-white/30 overflow-hidden">
+              <button onClick={() => setFormat('12h')} className={`px-3 py-2 text-xs font-bold ${timeFormat==='12h'?'bg-white text-slate-950':'text-white'}`}>12-hour</button>
+              <button onClick={() => setFormat('24h')} className={`px-3 py-2 text-xs font-bold ${timeFormat==='24h'?'bg-white text-slate-950':'text-white'}`}>24-hour</button>
+            </div>
             <Button variant="outline" onClick={() => setOptimizeOpen(true)}>
               <Sparkles className="h-4 w-4 text-primary" /> Optimize Groups
             </Button>
@@ -68,6 +90,9 @@ export default function Schedule() {
             </Button>
             <Button variant="outline" onClick={() => setDialog("student")}>
               <UserPlus className="h-4 w-4" /> Add Student
+            </Button>
+            <Button variant="outline" onClick={clearSchedule} className="border-rose-300 text-rose-700">
+              <Trash2 className="h-4 w-4" /> Clear / Replace Schedule
             </Button>
           </>
         }
@@ -106,7 +131,7 @@ export default function Schedule() {
                         <button onClick={() => remove(e.id)} title="Delete" className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-rose-500"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
                       <div className="font-medium text-sm pr-10 flex items-center gap-1.5">{isBlocked(e) && <Coffee className="h-3.5 w-3.5 text-sky-700" />}{e.group_name}</div>
-                      <div className="text-xs text-muted-foreground">{displayTime(e.start_time)}–{displayTime(e.end_time)} · {DELIVERY_LABEL[e.delivery] || e.delivery}{e.period?` · ${e.period}`:''}</div>
+                      <div className="text-xs text-muted-foreground">{displayTime(e.start_time, timeFormat)}–{displayTime(e.end_time, timeFormat)} · {DELIVERY_LABEL[e.delivery] || e.delivery}{e.period?` · ${e.period}`:''}</div>
                       <div className="text-xs text-muted-foreground">{e.service_minutes} min · {e.teacher_classroom || "—"}{e.cycle_day?` · ${e.cycle_day}`:''}{e.week_pattern&&e.week_pattern!=='every_week'?` · ${e.week_pattern.replace('_',' ')}`:''}</div>
                       {e.student_ids?.length > 0 && <div className="text-xs text-muted-foreground mt-1">{e.student_ids.map((id) => studentName(students, id)).join(", ")}</div>}
                     </div>
@@ -117,7 +142,7 @@ export default function Schedule() {
             ))}
           </div>
 
-          <ScheduleExportPanel entries={entries || []} students={students || []} />
+          <ScheduleExportPanel entries={entries || []} students={students || []} timeFormat={timeFormat} />
         </TabsContent>
 
         <TabsContent value="groups">
