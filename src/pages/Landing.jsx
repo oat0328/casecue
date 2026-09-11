@@ -96,7 +96,7 @@ export default function Landing() {
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Link to="/register"><Button size="lg" className="h-12 px-7 bg-white text-slate-950 hover:bg-slate-100 text-base font-bold">Start free trial <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
-                <a href="#video"><Button size="lg" variant="outline" className="h-12 px-7 border-white/20 bg-white/5 text-white hover:bg-white/10 text-base"><PlayCircle className="mr-2 h-4 w-4" /> Watch product tour</Button></a>
+                <a href="#video"><Button size="lg" variant="outline" className="h-12 px-7 border-white/20 bg-white/5 text-white hover:bg-white/10 text-base"><PlayCircle className="mr-2 h-4 w-4" /> See product preview</Button></a>
               </div>
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-300">
                 <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-300" /> 14-day free trial</span>
@@ -115,16 +115,22 @@ export default function Landing() {
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
                     <div className="ml-3 text-[11px] font-semibold text-slate-400">getcasecue.com • Product Tour</div>
                   </div>
-                  <video
-                    src="https://media.base44.com/videos/public/6aa0ab4a6f88297dfb76d459/dbba7b5b0_CaseCue_Promo_Video.mp4"
-                    controls
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full aspect-video object-cover bg-black"
-                    aria-label="CaseCue product tour"
-                  />
+                  <div className="aspect-video bg-slate-50 text-slate-900 p-4 sm:p-5">
+                    <div className="grid h-full grid-cols-[92px_1fr] sm:grid-cols-[120px_1fr] overflow-hidden rounded-xl border border-slate-200 bg-white">
+                      <aside className="bg-[#08111f] p-3 text-white">
+                        <div className="flex items-center gap-2 text-xs font-black"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-500">✦</span><span>CaseCue</span></div>
+                        <div className="mt-5 space-y-2 text-[8px] sm:text-[10px] text-slate-400">{['Today','Students','IEP Studio','Progress','Sessions','Meetings'].map((x,i)=><div key={x} className={`rounded-md px-2 py-1.5 ${i===0?'bg-white text-slate-950 font-bold':'bg-white/0'}`}>{x}</div>)}</div>
+                      </aside>
+                      <div className="p-3 sm:p-4 bg-slate-50">
+                        <div className="flex items-center justify-between"><div><div className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider text-sky-600">CaseCue Today</div><div className="text-xs sm:text-sm font-black mt-1">Your caseload, connected.</div></div><div className="h-6 w-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[8px] font-black">CC</div></div>
+                        <div className="mt-3 grid grid-cols-4 gap-1.5">{[['16','Students'],['4','Actions'],['3','Meetings'],['28','Evidence']].map(([v,l])=><div key={l} className="rounded-lg border bg-white p-2"><div className="text-[10px] sm:text-xs font-black">{v}</div><div className="text-[6px] sm:text-[8px] text-slate-400">{l}</div></div>)}</div>
+                        <div className="mt-2 grid grid-cols-[1.2fr_.8fr] gap-2">
+                          <div className="rounded-lg border bg-white p-2"><div className="text-[8px] sm:text-[10px] font-bold">Goal progress</div><div className="mt-2 h-16 flex items-end gap-1">{[35,48,57,66,73,82].map((h,i)=><div key={i} className="flex-1 rounded-t bg-gradient-to-t from-blue-600 to-sky-400" style={{height:`${h}%`}} />)}</div></div>
+                          <div className="space-y-2"><div className="rounded-lg border bg-white p-2"><div className="text-[8px] sm:text-[10px] font-bold">What needs attention</div><div className="mt-1.5 space-y-1 text-[6px] sm:text-[8px] text-slate-500"><div>• Progress data due</div><div>• Meeting brief ready</div><div>• Session note missing</div></div></div><div className="rounded-lg bg-[#0b1730] p-2 text-white"><div className="text-[7px] sm:text-[9px] font-black text-sky-300">CaseCue Proof™</div><div className="text-[6px] sm:text-[8px] text-slate-300 mt-1">Trace every statement to evidence.</div></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 p-2 pt-3">
                   {[['IEP → Evidence','Connected workflow'],['Family View','View-only sharing'],['CaseCue Proof™','Trace the evidence']].map(([title,sub]) => (
