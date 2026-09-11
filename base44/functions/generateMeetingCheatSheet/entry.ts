@@ -12,6 +12,7 @@ export default async function(req) {
 
     const body = await req.json();
     if (!body.student_id) return Response.json({ error: 'A student is required.' }, { status: 400 });
+    const role = ['case_manager','parent','gen_ed','administrator','related_service','student'].includes(body.role) ? body.role : 'case_manager';
 
     const student = await base44.entities.Student.get(body.student_id);
     if (!student) return Response.json({ error: 'Student not found.' }, { status: 404 });
@@ -104,7 +105,9 @@ Required weekly minutes per student record: ${student.service_minutes || 'not re
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}
 
-You are building the IEP MEETING NAVIGATOR — a 32-section guided workspace so a teacher can move confidently through the entire IEP meeting without reading the full document during the meeting. The teacher presents; the team decides. You never diagnose, never finalize an IEP, and never make a placement decision.
+You are building the IEP MEETING NAVIGATOR — a 32-section guided workspace so a participant can move confidently through the entire IEP meeting without reading the full document during the meeting. The team decides. You never diagnose, never finalize an IEP, and never make a placement decision.
+
+ROLE-SPECIFIC BRIEF: ${role}. Tailor talking_points and questions for this role while keeping the same verified facts. case_manager = facilitator/documentation focus; parent = plain-language questions and family participation; gen_ed = classroom performance/accommodations/implementation; administrator = resources, scheduling, service delivery and unresolved operational items; related_service = discipline-specific goals/services/collaboration; student = age-appropriate strengths, preferences, self-advocacy and transition voice.
 
 Return a "steps" array with EXACTLY ${titles.length} steps, in this exact order with these exact titles:
 ${titles.map((t, i) => `${i + 1}. ${t}`).join('\n')}
@@ -177,7 +180,7 @@ Return JSON matching the schema.`;
       status: 'draft',
       current_step: 0,
       steps,
-      meeting_data: {},
+      meeting_data: { brief_role: role },
       organization_id: student.organization_id || undefined,
     };
 
