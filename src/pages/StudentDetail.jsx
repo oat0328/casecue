@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3, Wrench, Accessibility, Compass, FileSearch, Archive, History } from "lucide-react";
+import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3, Wrench, Accessibility, Compass, FileSearch, Archive, History, FileText } from "lucide-react";
 import { exportIepPdf } from "@/lib/pdfExport";
 import ExportGate from "@/components/shared/ExportGate";
 import { base44 } from "@/api/base44Client";
