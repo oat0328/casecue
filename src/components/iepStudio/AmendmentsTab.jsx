@@ -23,6 +23,7 @@ export default function AmendmentsTab({ student }) {
   const { toast } = useToast();
   const [type, setType] = useState("goal");
   const [description, setDescription] = useState("");
+  const [placement, setPlacement] = useState({ current:"", proposed:"", reason:"", impact:"", meeting_summary:"" });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,10 +32,11 @@ export default function AmendmentsTab({ student }) {
     setLoading(true);
     setResult(null);
     try {
+      const structuredPlacement = type === "placement" ? `\nCurrent placement: ${placement.current || "not entered"}\nProposed placement: ${placement.proposed || "not entered"}\nReason for proposed change: ${placement.reason || "not entered"}\nExpected impact / supports: ${placement.impact || "not entered"}\nMeeting/team summary: ${placement.meeting_summary || "not entered"}` : "";
       const res = await base44.functions.invoke("draftAmendment", {
         student_id: student.id,
         amendment_type: type,
-        change_description: description,
+        change_description: `${description}${structuredPlacement}`,
       });
       setResult(res.data.amendment);
     } catch (e) {
@@ -48,7 +50,7 @@ export default function AmendmentsTab({ student }) {
         student_id: student.id,
         student_name: `${student.first_name} ${student.last_name}`,
         report_type: "amendment",
-        content: { amendment: result, amendment_type: type },
+        content: { amendment: result, amendment_type: type, placement_details: type === "placement" ? placement : undefined },
       });
       toast({ title: "Saved to Reports history" });
     } catch (e) {
@@ -73,6 +75,15 @@ export default function AmendmentsTab({ student }) {
             <Label className="text-sm">New information / requested change</Label>
             <Textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Based on new evaluation results, increase speech services from 30 to 60 minutes per week" className="mt-1.5" />
           </div>
+          {type === "placement" && (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 grid md:grid-cols-2 gap-4">
+              <div><Label>Current placement</Label><Textarea rows={2} value={placement.current} onChange={(e)=>setPlacement({...placement,current:e.target.value})}/></div>
+              <div><Label>Proposed placement</Label><Textarea rows={2} value={placement.proposed} onChange={(e)=>setPlacement({...placement,proposed:e.target.value})}/></div>
+              <div><Label>Reason for proposed change</Label><Textarea rows={2} value={placement.reason} onChange={(e)=>setPlacement({...placement,reason:e.target.value})}/></div>
+              <div><Label>Expected impact / supports</Label><Textarea rows={2} value={placement.impact} onChange={(e)=>setPlacement({...placement,impact:e.target.value})}/></div>
+              <div className="md:col-span-2"><Label>Meeting / team summary</Label><Textarea rows={2} value={placement.meeting_summary} onChange={(e)=>setPlacement({...placement,meeting_summary:e.target.value})} placeholder="Record what the team discussed; CaseCue does not make placement decisions."/></div>
+            </div>
+          )}
           <Button onClick={generate} disabled={loading} className="brand-gradient text-white">
             {loading ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Comparing IEP…</> : <><Sparkles className="h-4 w-4 mr-1" /> Generate amendment language</>}
           </Button>
