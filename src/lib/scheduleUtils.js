@@ -96,7 +96,17 @@ export function deliveredThisWeek(logs) {
 
 const BANNER = "Instruction & Schedule — CaseCue";
 
-export function scheduleSections(entries, students) {
+export function formatScheduleTime(value, format = "12h") {
+  if (!value) return "?";
+  const m = String(value).match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return String(value);
+  const h = Number(m[1]);
+  if (format === "24h") return `${String(h).padStart(2, "0")}:${m[2]}`;
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${m[2]} ${suffix}`;
+}
+
+export function scheduleSections(entries, students, timeFormat = "12h") {
   return DAYS.map((day) => {
     const list = (entries || []).filter((e) => !e.archived && e.day === day);
     if (!list.length) return { heading: day, body: "No sessions scheduled." };
@@ -105,14 +115,14 @@ export function scheduleSections(entries, students) {
       body: list
         .map(
           (e) =>
-            `${e.group_name} — ${e.start_time || "?"} to ${e.end_time || "?"} (${DELIVERY_LABEL[e.delivery] || e.delivery}, ${e.service_minutes || 0} min)${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}\nStudents: ${(e.student_ids || []).map((id) => studentName(students, id)).join(", ") || "None"}${e.notes ? `\nNotes: ${e.notes}` : ""}`
+            `${e.group_name} — ${formatScheduleTime(e.start_time, timeFormat)} to ${formatScheduleTime(e.end_time, timeFormat)} (${DELIVERY_LABEL[e.delivery] || e.delivery}, ${e.service_minutes || 0} min)${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}\nStudents: ${(e.student_ids || []).map((id) => studentName(students, id)).join(", ") || "None"}${e.notes ? `\nNotes: ${e.notes}` : ""}`
         )
         .join("\n\n"),
     };
   });
 }
 
-export function caseloadSections(entries, students) {
+export function caseloadSections(entries, students, timeFormat = "12h") {
   const scheduled = scheduledMinutes(entries);
   return (students || [])
     .filter((s) => s.status !== "exited")
@@ -124,33 +134,33 @@ export function caseloadSections(entries, students) {
         body:
           `Required weekly minutes: ${s.service_minutes != null ? s.service_minutes : "Not recorded"}\nScheduled weekly minutes: ${scheduled[s.id] || 0}\n` +
           (list.length
-            ? list.map((e) => `${e.day} ${e.start_time || "?"}-${e.end_time || "?"} — ${e.group_name} (${DELIVERY_LABEL[e.delivery] || e.delivery}, ${e.service_minutes || 0} min)`).join("\n")
+            ? list.map((e) => `${e.day} ${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)} — ${e.group_name} (${DELIVERY_LABEL[e.delivery] || e.delivery}, ${e.service_minutes || 0} min)`).join("\n")
             : "No scheduled sessions.") +
           (conflicts ? `\nScheduling conflicts: ${conflicts}` : ""),
       };
     });
 }
 
-export function rosterSections(entries, students) {
+export function rosterSections(entries, students, timeFormat = "12h") {
   return byGroup(entries).map((g) => ({
     heading: g.name,
     body:
       g.entries
-        .map((e) => `${e.day} ${e.start_time || "?"}-${e.end_time || "?"} — ${DELIVERY_LABEL[e.delivery] || e.delivery}${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}`)
+        .map((e) => `${e.day} ${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)} — ${DELIVERY_LABEL[e.delivery] || e.delivery}${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}`)
         .join("\n") +
       `\nStudents (${g.studentIds.size}): ${[...g.studentIds].map((id) => studentName(students, id)).join(", ") || "None"}`,
   }));
 }
 
-export function scheduleRows(entries, students) {
+export function scheduleRows(entries, students, timeFormat = "12h") {
   return (entries || [])
     .filter((e) => !e.archived)
     .map((e) => [
       e.day || "",
       e.group_name || "",
       DELIVERY_LABEL[e.delivery] || e.delivery || "",
-      e.start_time || "",
-      e.end_time || "",
+      formatScheduleTime(e.start_time, timeFormat),
+      formatScheduleTime(e.end_time, timeFormat),
       e.service_minutes || 0,
       e.teacher_classroom || "",
       (e.student_ids || []).map((id) => studentName(students, id)).join(", "),
