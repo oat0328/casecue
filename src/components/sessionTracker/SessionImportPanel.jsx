@@ -87,7 +87,7 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
 
   const parseFile=async(file)=>{
     setSummary(null); if(!file)return; if(file.size>MAX_BYTES){toast({title:'File too large',description:'Use a session file under 5 MB.',variant:'destructive'});return;}
-    const ext=file.name.split('.').pop()?.toLowerCase(); if(!['xlsx','xls','csv'].includes(ext)){toast({title:'Unsupported file',description:'Upload Excel (.xlsx/.xls) or CSV.',variant:'destructive'});return;}
+    const ext=file.name.split('.').pop()?.toLowerCase(); if(!['xlsx','csv'].includes(ext)){toast({title:'Unsupported file',description:'Upload Excel (.xlsx) or CSV.',variant:'destructive'});return;}
     setBusy(true);
     try{
       let raw;
@@ -134,7 +134,7 @@ export default function SessionImportPanel({students=[],goals=[],sessions=[],onI
     <Card className="p-6 border-sky-100 bg-gradient-to-br from-white to-sky-50/50">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
         <div className="flex gap-4"><div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0"><FileSpreadsheet className="h-6 w-6"/></div><div><h3 className="font-black text-lg">Import session tracking spreadsheet</h3><p className="text-sm text-slate-600 mt-1 max-w-2xl">Upload Excel or CSV. CaseCue matches students, reads dates/minutes/service details, previews every row, skips duplicates, and can turn goal-linked scores into progress data for graphs and reports.</p><div className="flex items-center gap-2 mt-2 text-xs text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600"/>Nothing is saved until you review and approve the import.</div></div></div>
-        <div><input ref={inputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={e=>parseFile(e.target.files?.[0])}/><Button className="bg-slate-950 hover:bg-slate-800 text-white" disabled={busy} onClick={()=>inputRef.current?.click()}>{busy?<Loader2 className="h-4 w-4 mr-2 animate-spin"/>:<Upload className="h-4 w-4 mr-2"/>}Upload Excel / CSV</Button></div>
+        <div><input ref={inputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={e=>parseFile(e.target.files?.[0])}/><Button className="bg-slate-950 hover:bg-slate-800 text-white" disabled={busy} onClick={()=>inputRef.current?.click()}>{busy?<Loader2 className="h-4 w-4 mr-2 animate-spin"/>:<Upload className="h-4 w-4 mr-2"/>}Upload Excel / CSV</Button></div>
       </div>
       {summary&&<div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><div className="font-black flex items-center gap-2"><CheckCircle2 className="h-4 w-4"/>Import complete</div><div className="mt-1">{summary.sessions} sessions · {summary.progress} goal progress points · {summary.skipped} rows skipped/reviewed</div></div>}
     </Card>
