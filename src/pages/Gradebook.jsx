@@ -13,13 +13,14 @@ import StudentSelector from "@/components/forms/StudentSelector";
 import GradebookCharts from "@/components/gradebook/GradebookCharts";
 import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
 import { GRADEBOOK_REPORT_DEFINITIONS } from "@/lib/gradebookReporting";
+import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
 
 export default function Gradebook() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: assignments, refetch } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 200), []);
-  const { data: sessions } = useAsync(() => base44.entities.SessionLog.list('-date', 200), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 300), []);
   const [form, setForm] = useState({ student_id: "", goal_id: "", title: "", score_earned: "", score_possible: "", notes: "", date: new Date().toISOString().slice(0,10) });
   const [saving, setSaving] = useState(false);
 
@@ -47,6 +48,7 @@ export default function Gradebook() {
       <Tabs defaultValue="assignments">
         <TabsList className="mb-4">
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
+          <TabsTrigger value="upload">Upload & Grade Work</TabsTrigger>
           <TabsTrigger value="charts">Charts</TabsTrigger>
           <TabsTrigger value="reports">Reports & Exports</TabsTrigger>
         </TabsList>
@@ -96,6 +98,10 @@ export default function Gradebook() {
             ))}
             {(assignments || []).length === 0 && <p className="text-muted-foreground text-sm text-center py-8">No assignments yet.</p>}
           </div>
+        </TabsContent>
+
+        <TabsContent value="upload">
+          <WorkEvidencePanel students={students||[]} goals={goals||[]} />
         </TabsContent>
 
         <TabsContent value="charts">
