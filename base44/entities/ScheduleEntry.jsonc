@@ -1,6 +1,9 @@
 {
   "type": "object",
   "properties": {
+    "organization_id": {
+      "type": "string"
+    },
     "group_name": {
       "type": "string"
     },
