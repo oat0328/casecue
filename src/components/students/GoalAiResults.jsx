@@ -1,8 +1,8 @@
 import React from "react";
-import { AlertTriangle, TrendingDown, TrendingUp, Lightbulb, CheckCircle2, Target } from "lucide-react";
+import { AlertTriangle, TrendingDown, TrendingUp, Lightbulb, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 
-// Renders the AI goal analysis returned by the analyzeGoalProgress function.
+// Renders the CaseCue goal analysis returned by the analyzeGoalProgress function.
 export default function GoalAiResults({ analysis }) {
   const list = (items, className = "") =>
     (items || []).length > 0 ? (
@@ -27,7 +27,7 @@ export default function GoalAiResults({ analysis }) {
       </div>
 
       <Card className="p-5">
-        <h3 className="font-semibold mb-2">AI progress summary</h3>
+        <h3 className="font-semibold mb-2">CaseCue progress summary</h3>
         <p className="text-sm text-muted-foreground whitespace-pre-wrap">{analysis.summary}</p>
       </Card>
 
