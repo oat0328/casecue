@@ -48,6 +48,7 @@ import Testimonials from '@/pages/Testimonials';
 import ParentPortal from '@/pages/ParentPortal';
 import ResourceHub from '@/pages/ResourceHub';
 import EvidenceVault from '@/pages/EvidenceVault';
+import ProgressMonitoringDay from '@/pages/ProgressMonitoringDay';
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
                 <Route path="/iep-review" element={<IEPReview />} />
                 <Route path="/documents" element={<Navigate to="/iep-studio" replace />} />
                 <Route path="/data-center" element={<DataCenter />} />
+                <Route path="/progress-monitoring-day" element={<ProgressMonitoringDay />} />
                 <Route path="/schedule" element={<Schedule />} />
                 <Route path="/lesson-studio" element={<LessonStudio />} />
                 <Route path="/sub-plans" element={<SubPlans />} />
