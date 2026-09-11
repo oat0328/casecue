@@ -23,6 +23,7 @@ export default function MeetingNavigator() {
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [inMeeting, setInMeeting] = useState(false);
+  const [briefRole, setBriefRole] = useState('case_manager');
 
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: sheets } = useAsync(
@@ -46,7 +47,7 @@ export default function MeetingNavigator() {
   const generate = async () => {
     setGenerating(true);
     try {
-      const res = await base44.functions.invoke("generateMeetingCheatSheet", { student_id: studentId });
+      const res = await base44.functions.invoke("generateMeetingCheatSheet", { student_id: studentId, role: briefRole });
       setRecord(res.data.cheat_sheet);
       setIdx(0);
       toast({ title: "Meeting guide ready", description: "Review each section — verified facts and suggestions are separated." });
@@ -90,12 +91,15 @@ export default function MeetingNavigator() {
       />
 
       <Card className="p-5 mb-5">
+        <div className="grid md:grid-cols-[1fr_280px] gap-4 items-end">
         <StudentSelector
           students={students || []}
           value={studentId}
           onChange={setStudentId}
           noBottomSpace
         />
+        <div><label className="text-sm font-medium">Role-specific brief</label><select className="mt-1 w-full h-10 rounded-lg border bg-white px-3 text-sm" value={briefRole} onChange={(e)=>setBriefRole(e.target.value)}><option value="case_manager">Case manager / SPED teacher</option><option value="parent">Parent / guardian</option><option value="gen_ed">General education teacher</option><option value="administrator">Administrator</option><option value="related_service">Related service provider</option><option value="student">Student</option></select></div>
+        </div>
       </Card>
 
       {studentId && !record && (
