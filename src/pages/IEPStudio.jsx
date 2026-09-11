@@ -29,11 +29,11 @@ const ACCOMMODATION_SDI_SECTIONS = [
   { key: "sdi", label: "SDI / Support Language" },
 ];
 
-const GETTING_STARTED = ["Select Student", "Upload Documents", "Review AI Analysis", "Generate IEP Draft", "Prepare For Meeting"];
+const GETTING_STARTED = ["Select Student", "Upload Documents", "Review CaseCue Analysis", "Generate IEP Draft", "Prepare For Meeting"];
 
 const TAB_TIPS = [
   ["overview", "Overview", "The verified student record at a glance, with the readiness score, Meeting Mode, and Copilot."],
-  ["summary", "AI Summary", "AI-generated summary of every uploaded document."],
+  ["summary", "CaseCue Summary", "CaseCue-generated summary of every uploaded document for educator review."],
   ["builder", "IEP Builder", "The 4-step pipeline: documents → extraction review → IEP draft → review & export."],
   ["goals", "Goals & Progress", "Goals with live progress graphs — green on track, yellow monitor, red at risk."],
   ["accommodations", "Accommodations & SDI", "Draft and manage accommodations and specially designed instruction language."],
@@ -109,7 +109,7 @@ export default function IEPStudio() {
       ) : (
         <>
         {/* The Upload Center lives directly under the student selector — the only
-            upload point in the app. Upload → automatic reading → AI analysis →
+            upload point in the app. Upload → automatic reading → CaseCue analysis →
             profile pre-fill → snapshot & one-click actions, all on screen. */}
         <div className="mb-4">
           <FerpaUploadNotice />
