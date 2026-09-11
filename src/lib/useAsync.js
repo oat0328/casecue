@@ -14,7 +14,6 @@ export function useAsync(fn, deps = []) {
       .catch((e) => { if (active) setError(e); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   useEffect(() => { const cancel = run(); return cancel; }, [run]);
