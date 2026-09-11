@@ -15,6 +15,7 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
   const inputRef = useRef(null);
   const [step, setStep] = useState("upload"); // upload | analyzing | review | saving
   const [fileName, setFileName] = useState("");
+  const [pullPreferences, setPullPreferences] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState("");
 
@@ -23,6 +24,7 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
     setFileName("");
     setAnalysis(null);
     setError("");
+    setPullPreferences("");
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -31,13 +33,16 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
     onOpenChange(next);
   };
 
-  const analyzeFile = async (file) => {
+  const analyzeFiles = async (files) => {
+    const list = Array.from(files || []).filter(Boolean);
+    if (!list.length) return;
     setError("");
-    setFileName(file.name);
+    setFileName(list.map(f => f.name).join(", "));
     setStep("analyzing");
     try {
-      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
-      const res = await base44.functions.invoke("scheduleAi", { mode: "analyze", file_uri });
+      const uploaded = await Promise.all(list.map(file => base44.integrations.Core.UploadPrivateFile({ file })));
+      const file_uris = uploaded.map(x => x.file_uri).filter(Boolean);
+      const res = await base44.functions.invoke("scheduleAi", { mode: "analyze", file_uris, pull_preferences: pullPreferences });
       setAnalysis(res.data);
       setStep("review");
     } catch (err) {
@@ -47,14 +52,12 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
   };
 
   const onPick = (e) => {
-    const file = e.target.files?.[0];
-    if (file) analyzeFile(file);
+    if (e.target.files?.length) analyzeFiles(e.target.files);
   };
 
   const onDrop = (e) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) analyzeFile(file);
+    if (e.dataTransfer.files?.length) analyzeFiles(e.dataTransfer.files);
   };
 
   const saveEntries = async (entries) => {
@@ -76,13 +79,23 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
         <DialogHeader>
           <DialogTitle>Upload Schedule</DialogTitle>
           <DialogDescription>
-            Upload your existing schedule and CaseCue will find the groups, students, service times, and minutes — you review everything before it saves.
+            Upload the school bell schedule, student/class schedules, and/or your current resource schedule together. Tell CaseCue when you prefer to pull students; it will propose groups and compare scheduled minutes with the service minutes already recorded in each student's CaseCue profile.
           </DialogDescription>
         </DialogHeader>
 
         {step === "upload" && (
           <div className="space-y-4">
             <FerpaUploadNotice />
+            <div>
+              <label className="text-sm font-semibold">When do you want to provide pull-out / push-in services?</label>
+              <textarea
+                value={pullPreferences}
+                onChange={(e) => setPullPreferences(e.target.value)}
+                placeholder="Example: Prefer pull-out 8:30–11:41 AM and 12:45–2:06 PM. Avoid PE, lunch, electives, and core tests. Reading M/W/F; math T/Th when possible."
+                className="mt-2 w-full min-h-24 rounded-xl border border-border bg-background px-3 py-2 text-sm"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">CaseCue treats this as a planning preference, not proof that a service was delivered.</p>
+            </div>
             <div
               onDragOver={(e) => e.preventDefault()}
               onDrop={onDrop}
@@ -92,9 +105,9 @@ export default function UploadScheduleDialog({ open, onOpenChange, students, onS
               <FileUp className="h-10 w-10 text-primary mx-auto" />
               <p className="mt-3 font-semibold">Drop your schedule here, or click to browse</p>
               <p className="text-sm text-muted-foreground mt-1">
-                PDF, Excel (.xlsx), CSV, DOCX, screenshots and images. Google Sheets: export as Excel or CSV first.
+                Add one or several files at once: school bell schedule + student schedules + resource schedule. PDF, Excel (.xlsx), CSV, DOCX, screenshots and images.
               </p>
-              <input ref={inputRef} type="file" accept={ACCEPT} className="hidden" onChange={onPick} />
+              <input ref={inputRef} type="file" accept={ACCEPT} multiple className="hidden" onChange={onPick} />
             </div>
             {error && (
               <div className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
