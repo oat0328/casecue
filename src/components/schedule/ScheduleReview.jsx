@@ -77,6 +77,10 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
         service_minutes: Number(g.service_minutes) || 0,
         teacher_classroom: g.teacher_classroom || "",
         notes: g.notes || "",
+        week_pattern: ['every_week','A_week','B_week','alternating'].includes(g.week_pattern) ? g.week_pattern : 'every_week',
+        cycle_day: g.cycle_day || '',
+        period: g.period || '',
+        recurrence_note: g.recurrence_note || '',
         student_ids: resolveIds(g),
       }));
     onSave(entries);
@@ -138,7 +142,7 @@ export default function ScheduleReview({ analysis, students, saving, onSave, onC
                   <div className="font-semibold">{g.group_name || "Unnamed group"}</div>
                   <div className="text-xs text-muted-foreground">
                     {normalizeDay(g.day)} · {g.start_time || "?"}–{g.end_time || "?"} · {DELIVERY_LABEL[g.delivery] || g.delivery} ·{" "}
-                    {Number(g.service_minutes) || 0} min {g.teacher_classroom ? `· ${g.teacher_classroom}` : ""}
+                    {Number(g.service_minutes) || 0} min {g.teacher_classroom ? `· ${g.teacher_classroom}` : ""}{g.period ? ` · ${g.period}` : ''}{g.cycle_day ? ` · ${g.cycle_day}` : ''}{g.week_pattern && g.week_pattern !== 'every_week' ? ` · ${g.week_pattern.replace('_',' ')}` : ''}
                   </div>
                 </div>
               </div>
