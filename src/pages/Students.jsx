@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import ImportStudentsDialog from "@/components/students/ImportStudentsDialog";
+import RolloverDialog from "@/components/students/RolloverDialog";
 
 const AVATAR_COLORS = ["violet", "blue", "emerald", "amber", "rose", "cyan"];
 const ELIGIBILITY_OPTIONS = [
@@ -46,6 +47,7 @@ export default function Students() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [rolloverOpen, setRolloverOpen] = useState(false);
   const emptyForm = { first_name: "", last_name: "", grade: "", eligibility_category: "", annual_review_due: "", reevaluation_due: "" };
   const [form, setForm] = useState(emptyForm);
 
@@ -93,6 +95,7 @@ export default function Students() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ImportStudentsDialog onImported={refetch} />
+            <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={()=>setRolloverOpen(true)}>School-Year Rollover</Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild><Button className="bg-white text-slate-950 hover:bg-slate-100"><Plus className="h-4 w-4 mr-2" /> Add Student</Button></DialogTrigger>
               <DialogContent className="sm:max-w-2xl">
@@ -147,6 +150,8 @@ export default function Students() {
           })}
         </div>
       )}
+
+      <RolloverDialog open={rolloverOpen} onOpenChange={setRolloverOpen} students={students||[]} onDone={refetch}/>
 
       <Dialog open={!!deleteTarget} onOpenChange={(v)=>!v&&setDeleteTarget(null)}>
         <DialogContent><DialogHeader><DialogTitle>Delete student?</DialogTitle></DialogHeader><div className="text-sm text-slate-600">This will remove <strong>{deleteTarget?.first_name} {deleteTarget?.last_name}</strong> from the Student entity. Review connected records before deleting if you need to preserve historical documentation.</div><DialogFooter><Button variant="outline" onClick={()=>setDeleteTarget(null)}>Cancel</Button><Button variant="destructive" disabled={deleting} onClick={deleteStudent}>{deleting?'Deleting…':'Delete student'}</Button></DialogFooter></DialogContent>
