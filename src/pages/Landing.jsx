@@ -106,7 +106,7 @@ export default function Landing() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 24, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .65, delay: .08 }} className="relative">
-              <div className="absolute -inset-4 rounded-[36px] bg-gradient-to-r from-indigo-500/20 via-sky-400/10 to-cyan-300/20 blur-2xl" />
+              <div className="absolute -inset-4 rounded-[36px] bg-gradient-to-r from-blue-500/20 via-sky-400/10 to-cyan-300/20 blur-2xl" />
               <div className="relative rounded-[30px] border border-white/10 bg-white/10 p-2.5 shadow-2xl backdrop-blur-xl">
                 <div className="overflow-hidden rounded-[23px] border border-white/10 bg-black">
                   <div className="flex h-10 items-center gap-2 border-b border-white/10 bg-slate-950 px-4">
@@ -148,7 +148,7 @@ export default function Landing() {
           <p className="mt-4 text-muted-foreground leading-7">See how teachers move from student records to progress monitoring, meeting prep, and family communication without rebuilding the same information in separate places.</p>
         </div>
         <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {[{icon:Workflow,title:"Connected workflow",desc:"IEP goals, sessions, lessons, student work, and reports stay tied together."},{icon:ScanLine,title:"Evidence in one place",desc:"Use approved data and work samples to support progress updates and future IEP writing."},{icon:HeartHandshake,title:"Family communication",desc:"Share a separate view-only experience with only the information you choose."}].map((f) => <div key={f.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="h-11 w-11 rounded-2xl bg-indigo-50 flex items-center justify-center"><f.icon className="h-5 w-5 text-indigo-600" /></div><div className="mt-4 font-black text-lg">{f.title}</div><div className="mt-2 text-sm text-muted-foreground leading-6">{f.desc}</div></div>)}
+          {[{icon:Workflow,title:"Connected workflow",desc:"IEP goals, sessions, lessons, student work, and reports stay tied together."},{icon:ScanLine,title:"Evidence in one place",desc:"Use approved data and work samples to support progress updates and future IEP writing."},{icon:HeartHandshake,title:"Family communication",desc:"Share a separate view-only experience with only the information you choose."}].map((f) => <div key={f.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="h-11 w-11 rounded-2xl bg-blue-50 flex items-center justify-center"><f.icon className="h-5 w-5 text-blue-600" /></div><div className="mt-4 font-black text-lg">{f.title}</div><div className="mt-2 text-sm text-muted-foreground leading-6">{f.desc}</div></div>)}
         </div>
       </Section>
 

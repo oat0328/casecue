@@ -183,7 +183,7 @@ export default function PromoCodeManager() {
                     <span className="font-mono font-semibold">{c.code}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full border ${c.active ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-border bg-muted text-muted-foreground"}`}>{c.active ? "Active" : "Paused"}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted text-muted-foreground">{TYPES[c.discount_type]?.label || c.discount_type}{c.value && c.discount_type !== "first_month_free" ? ` (${c.value}${c.discount_type === "percent_off" ? "%" : c.discount_type === "fixed_off" ? "$" : ""})` : ""}</span>
-                    {c.founding_member && <span className="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">Founding Member</span>}
+                    {c.founding_member && <span className="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Founding Member</span>}
                     {c.beta_tester && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Beta Tester</span>}
                   </div>
                   {c.description && <div className="text-sm text-muted-foreground mt-1">{c.description}</div>}

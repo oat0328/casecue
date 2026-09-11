@@ -23,7 +23,7 @@ function Sparkline({ points }) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points}>
           <YAxis domain={[0, 100]} hide />
-          <Line type="monotone" dataKey="percentage" stroke="hsl(255 82% 58%)" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="percentage" stroke="hsl(217 91% 52%)" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

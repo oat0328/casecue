@@ -210,7 +210,7 @@ export default function SessionCharts({ sessions, goals }) {
               <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-15} height={40} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
               <Tooltip />
-              <Bar dataKey="average" fill="hsl(255 82% 58%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="average" fill="hsl(217 91% 52%)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -232,7 +232,7 @@ export default function SessionCharts({ sessions, goals }) {
             <XAxis dataKey="name" tick={{ fontSize: 10 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Bar dataKey="sessions" fill="hsl(280 65% 60%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="sessions" fill="hsl(199 89% 48%)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>

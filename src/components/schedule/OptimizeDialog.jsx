@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
 
 const TYPE_META = {
-  combination: { label: "Group Combination", icon: GitMerge, style: "bg-violet-100 text-violet-700" },
+  combination: { label: "Group Combination", icon: GitMerge, style: "bg-sky-100 text-sky-700" },
   pairing: { label: "Student Pairing", icon: Users, style: "bg-blue-100 text-blue-700" },
   block: { label: "Service Block", icon: Clock, style: "bg-emerald-100 text-emerald-700" },
   improvement: { label: "Improvement", icon: Lightbulb, style: "bg-amber-100 text-amber-700" },

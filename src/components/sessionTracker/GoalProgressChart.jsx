@@ -54,7 +54,7 @@ export default function GoalProgressChart({ sessions, goals }) {
               <XAxis dataKey="date" tick={{ fontSize: 11 }} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
               <Tooltip formatter={(v) => [`${v}%`, "Performance"]} />
-              <Line type="monotone" dataKey="percentage" stroke="hsl(255 82% 58%)" strokeWidth={2.5} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="percentage" stroke="hsl(217 91% 52%)" strokeWidth={2.5} dot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

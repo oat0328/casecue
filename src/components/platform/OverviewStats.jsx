@@ -50,15 +50,15 @@ export default function OverviewStats({ stats }) {
             <AreaChart data={stats.growth}>
               <defs>
                 <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(255 82% 58%)" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="hsl(255 82% 58%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(217 91% 52%)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="hsl(217 91% 52%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(250 24% 91%)" />
               <XAxis dataKey="week" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="users" stroke="hsl(255 82% 58%)" strokeWidth={2} fill="url(#growthFill)" name="Users" />
+              <Area type="monotone" dataKey="users" stroke="hsl(217 91% 52%)" strokeWidth={2} fill="url(#growthFill)" name="Users" />
             </AreaChart>
           </ResponsiveContainer>
         </Card>

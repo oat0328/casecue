@@ -20,7 +20,7 @@ const ELIGIBILITY_OPTIONS = [
   "Traumatic Brain Injury","Visual Impairment/Blind","Other/State-Specific"
 ];
 const colorMap = {
-  violet: "bg-violet-100 text-violet-700", blue: "bg-blue-100 text-blue-700",
+  violet: "bg-sky-100 text-sky-700", blue: "bg-blue-100 text-blue-700",
   emerald: "bg-emerald-100 text-emerald-700", amber: "bg-amber-100 text-amber-700",
   rose: "bg-rose-100 text-rose-700", cyan: "bg-cyan-100 text-cyan-700",
 };
@@ -137,7 +137,7 @@ export default function Students() {
                   <div className="rounded-xl bg-slate-50 p-3"><div className="text-slate-400">Reevaluation</div><div className="mt-1 font-semibold text-slate-700">{parseIsoDate(s.reevaluation_due)?s.reevaluation_due:'Needs review'}</div></div>
                 </div>
                 {invalidDate && <div className="mt-3 flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"><AlertTriangle className="h-4 w-4"/>One or more saved dates are invalid and should be corrected.</div>}
-                <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-indigo-600"><ShieldCheck className="h-4 w-4"/>Open Student 360</div>
+                <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-blue-600"><ShieldCheck className="h-4 w-4"/>Open Student 360</div>
               </Link>
               <div className="flex items-center justify-between border-t bg-slate-50/70 px-4 py-3">
                 <span className="text-xs text-slate-400">Student ID: {String(s.id).slice(-6)}</span>

@@ -121,7 +121,7 @@ export default function BillingCard() {
     <Card className="p-6 max-w-lg">
       <div className="flex items-center gap-2 flex-wrap">
         <div className="text-sm font-semibold text-primary">Founding Teacher</div>
-        {user?.data?.founding_member && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">★ Founding Member</span>}
+        {user?.data?.founding_member && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">★ Founding Member</span>}
         {user?.data?.beta_tester && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Beta Tester</span>}
       </div>
       <div className="flex items-end gap-1 mt-1"><span className="text-3xl font-bold">$24.99</span><span className="text-muted-foreground mb-1">/ month</span></div>
@@ -169,7 +169,7 @@ export default function BillingCard() {
                 <div className="flex justify-between"><span className="text-muted-foreground">Amount saved</span><span>{promo.breakdown.amount_saved}</span></div>
                 <div className="flex justify-between font-semibold"><span>You pay</span><span>{promo.breakdown.final_price}</span></div>
                 <p className="text-xs text-muted-foreground pt-1">{promo.breakdown.billing_note}</p>
-                {promo.promo.founding_member && <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 mt-1">★ Founding Member</span>}
+                {promo.promo.founding_member && <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 mt-1">★ Founding Member</span>}
                 {promo.promo.beta_tester && <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 mt-1">Beta Tester</span>}
               </div>
             )}

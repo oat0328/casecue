@@ -3,7 +3,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 
 const statusBadge = {
-  new: { label: "New", className: "bg-violet-100 text-violet-700" },
+  new: { label: "New", className: "bg-sky-100 text-sky-700" },
   contacted: { label: "Contacted", className: "bg-amber-100 text-amber-700" },
   closed: { label: "Closed", className: "bg-gray-100 text-gray-600" },
 };
