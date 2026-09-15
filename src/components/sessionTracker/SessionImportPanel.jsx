@@ -148,7 +148,8 @@ function enumValue(v, type) {
   if (type === 'delivery') return s.includes('group') ? 'group' : 'individual';
   if (type === 'setting') return s.includes('push') ? 'push_in' : 'pull_out';
   if (type === 'status') {
-    if (s.includes('student absent') || s === 'absent') return 'student_absent'; if (s.includes('provider absent') || s.includes('teacher absent')) return 'provider_absent';
+    if (s.includes('student absent') || s === 'absent' || s.includes('no show')) return 'student_absent'; if (s.includes('provider absent') || s.includes('teacher absent') || s.includes('staff absent')) return 'provider_absent';
+    if (s.includes('school event') || s.includes('school activity')) return 'school_activity';
     if (s.includes('partial')) return 'partially_completed'; if (s.includes('refus')) return 'refused'; if (s.includes('resched')) return 'rescheduled';
     if (s.includes('makeup') || s.includes('make up')) return 'makeup_session'; if (s.includes('cancel')) return 'canceled'; return 'completed';
   }
@@ -248,8 +249,9 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         const statusEvidence = [get(r, map, 'status'), rawScheduled, qualitative, rawQuant].filter(Boolean).join(' ');
         let status = enumValue(statusEvidence, 'status');
         if (status === 'completed' && /\babsent\b/i.test(statusEvidence)) status = /\b(teacher|provider|staff)\b[^.]{0,30}\babsent\b|\babsent\b[^.]{0,30}\b(teacher|provider|staff)\b/i.test(statusEvidence) ? 'provider_absent' : 'student_absent';
-        if (['provider_absent', 'student_absent', 'canceled', 'rescheduled'].includes(status)) delivered = 0;
-        const duration = ['provider_absent', 'student_absent', 'canceled', 'rescheduled'].includes(status) ? 0 : (delivered ?? statedDuration ?? minutesBetween(start, end));
+        const noServiceStatuses = ['provider_absent', 'student_absent', 'school_activity', 'canceled', 'rescheduled'];
+        if (noServiceStatuses.includes(status)) delivered = 0;
+        const duration = noServiceStatuses.includes(status) ? 0 : (delivered ?? statedDuration ?? minutesBetween(start, end));
 
         const parsedQuant = quantitativeValues(rawQuant);
         const correct = num(get(r, map, 'correct')) ?? parsedQuant.correct; const total = num(get(r, map, 'total')) ?? parsedQuant.total;
