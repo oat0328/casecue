@@ -141,6 +141,26 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       const reversed = [...tokens].reverse().join(' '); if (studentByName.has(reversed)) return studentByName.get(reversed);
       const matches = students.filter(s => tokens.includes(normalizeName(s.first_name)) && tokens.includes(normalizeName(s.last_name)));
       if (matches.length === 1) return matches[0].id;
+
+      // Handle a small roster typo without guessing between students. We require
+      // the first name to match exactly, then allow only a one-character edit in
+      // the last name (for example Cisneros vs Cisnersos).
+      const oneEditApart = (a, b) => {
+        a = normalizeName(a); b = normalizeName(b); if (!a || !b || Math.abs(a.length - b.length) > 1) return false;
+        if (a === b) return true;
+        let i = 0, j = 0, edits = 0;
+        while (i < a.length && j < b.length) {
+          if (a[i] === b[j]) { i++; j++; continue; }
+          if (++edits > 1) return false;
+          if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+        }
+        return edits + (i < a.length || j < b.length ? 1 : 0) <= 1;
+      };
+      const fuzzy = students.filter(s => {
+        const first = normalizeName(s.first_name); const last = normalizeName(s.last_name);
+        return tokens.includes(first) && tokens.some(t => oneEditApart(t, last));
+      });
+      if (fuzzy.length === 1) return fuzzy[0].id;
     }
     return '';
   };
@@ -185,13 +205,21 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         const full = get(r, map, 'student') || `${get(r, map, 'first_name')} ${get(r, map, 'last_name')}`.trim(); const sid = resolveStudent(full);
         const date = dateValue(r[map.date]); const start = timeValue(get(r, map, 'start_time')); const end = timeValue(get(r, map, 'end_time'));
         const statedDuration = minutesValue(get(r, map, 'duration_minutes')); const delivered = minutesValue(get(r, map, 'delivered_minutes')); const scheduled = minutesValue(get(r, map, 'scheduled_minutes'));
-        const duration = delivered ?? statedDuration ?? minutesBetween(start, end);
+        const qualitative = get(r, map, 'qualitative');
+        const serviceMinutesText = get(r, map, 'duration_minutes');
+        const statusText = normalize(`${get(r, map, 'status')} ${serviceMinutesText} ${qualitative}`);
+        let inferredStatus = enumValue(get(r, map, 'status'), 'status');
+        const hasParticipationEvidence = /participat|engaged|completed|worked|responded|accuracy|correct/.test(normalize(qualitative));
+        if (/teacher absent|provider absent|session was not held because the teacher|session not held because the teacher/.test(statusText)) inferredStatus = 'provider_absent';
+        else if (/student absent/.test(statusText) || (normalize(serviceMinutesText).includes('absent') && !hasParticipationEvidence)) inferredStatus = 'student_absent';
+        const effectiveDelivered = ['provider_absent','student_absent','canceled','rescheduled'].includes(inferredStatus) ? 0 : delivered;
+        const duration = effectiveDelivered ?? statedDuration ?? minutesBetween(start, end);
         const rawQuant = get(r, map, 'quantitative_note'); const frac = fraction(rawQuant);
         const correct = num(get(r, map, 'correct')) ?? frac?.correct ?? null; const total = num(get(r, map, 'total')) ?? frac?.total ?? null;
         let pct = percentValue(get(r, map, 'percentage')); if (pct == null && /%/.test(rawQuant)) pct = percentValue(rawQuant); if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
         const goalText = get(r, map, 'goal'); const gid = goalFor(sid, goalText); const activity = get(r, map, 'activity') || goalText || get(r, map, 'service_type') || 'Imported session';
         const key = `${sid}|${date}|${start || ''}|${normalize(activity)}`;
-        return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? duration ?? null, delivered_minutes: delivered ?? duration ?? null, status: enumValue(get(r, map, 'status'), 'status'), correct, total, percentage: pct, quantitative_note: rawQuant, qualitative: get(r, map, 'qualitative'), follow_up_note: get(r, map, 'follow_up_note'), duplicate: !!(sid && date && duplicateKeys.has(key)) };
+        return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? statedDuration ?? duration ?? null, delivered_minutes: effectiveDelivered ?? duration ?? null, status: inferredStatus, correct, total, percentage: pct, quantitative_note: rawQuant, qualitative, follow_up_note: get(r, map, 'follow_up_note'), duplicate: !!(sid && date && duplicateKeys.has(key)) };
       }).filter(r => r.student_name || r.date || r.activity);
       setRows(parsed); setFileName(file.name);
     } catch (e) { toast({ title: 'Could not read session file', description: e.message, variant: 'destructive' }); }
