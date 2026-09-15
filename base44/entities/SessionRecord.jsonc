@@ -133,6 +133,18 @@
       "type": "string",
       "title": "Organization ID"
     },
+    "source_fingerprint": {
+      "type": "string",
+      "title": "Import Source Fingerprint"
+    },
+    "source_file": {
+      "type": "string",
+      "title": "Import Source File"
+    },
+    "source_row": {
+      "type": "number",
+      "title": "Import Source Row"
+    },
     "medicaid_billable": {
       "type": "boolean",
       "default": false,

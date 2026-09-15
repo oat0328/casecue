@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string"
+    },
+    "checked_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAudit"
+}

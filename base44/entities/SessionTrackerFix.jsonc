@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "fix": {
+      "type": "string"
+    },
+    "applied": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerFix"
+}

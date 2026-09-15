@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "patch": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditPatch"
+}

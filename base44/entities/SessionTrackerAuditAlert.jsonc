@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "alert": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditAlert"
+}

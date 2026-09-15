@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "finding": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditFindingV2"
+}

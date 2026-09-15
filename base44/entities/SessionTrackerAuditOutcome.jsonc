@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "outcome": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditOutcome"
+}

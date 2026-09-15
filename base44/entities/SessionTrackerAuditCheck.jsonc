@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "check": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditCheck"
+}

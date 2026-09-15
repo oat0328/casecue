@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "score": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditScore"
+}

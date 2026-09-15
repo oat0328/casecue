@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "flag": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditFlag"
+}

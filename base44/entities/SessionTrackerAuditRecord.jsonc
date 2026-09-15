@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "record": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditRecord"
+}

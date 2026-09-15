@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "issue": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "SessionAuditIssue"
+}

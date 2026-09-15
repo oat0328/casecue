@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditHistory"
+}

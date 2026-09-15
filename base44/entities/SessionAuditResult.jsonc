@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "audit_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionAuditResult"
+}

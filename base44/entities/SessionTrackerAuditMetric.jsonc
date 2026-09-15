@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "metric": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditMetric"
+}

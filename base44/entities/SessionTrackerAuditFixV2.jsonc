@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "fix": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditFixV2"
+}

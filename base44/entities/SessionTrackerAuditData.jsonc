@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "SessionTrackerAuditData"
+}
