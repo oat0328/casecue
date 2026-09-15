@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import readXlsxFile from "read-excel-file";
-import { Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2, ShieldCheck, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
@@ -170,7 +170,7 @@ function enumValue(v, type) {
 
 export default function SessionImportPanel({ students = [], goals = [], sessions = [], onImported }) {
   const { toast } = useToast(); const inputRef = useRef(null);
-  const [rows, setRows] = useState([]); const [fileName, setFileName] = useState(""); const [busy, setBusy] = useState(false); const [summary, setSummary] = useState(null);
+  const [rows, setRows] = useState([]); const [fileName, setFileName] = useState(""); const [busy, setBusy] = useState(false); const [summary, setSummary] = useState(null); const [cleanupSummary, setCleanupSummary] = useState(null);
 
   const studentByName = useMemo(() => {
     const m = new Map();
@@ -374,6 +374,37 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
   const missingDateCount = reviewRows.filter(r => !r.date).length;
   const unusualMinutesCount = reviewRows.filter(r => r.minutes_review).length;
 
+  const cleanupLegacyImports = async () => {
+    if (!window.confirm('Clean duplicate spreadsheet imports? CaseCue will keep one copy of each identical imported session, delete only extra identical copies, and add permanent fingerprints to the records it keeps.')) return;
+    setBusy(true);
+    try {
+      const imported = await base44.entities.SessionRecord.filter({ tags: { $in: ['Imported spreadsheet'] } }, 'created_date', 500);
+      const groups = new Map();
+      (imported || []).forEach(s => {
+        const fp = s.source_fingerprint || fingerprintOf(s);
+        if (!groups.has(fp)) groups.set(fp, []);
+        groups.get(fp).push(s);
+      });
+      const duplicates = [];
+      const keepers = [];
+      groups.forEach((group, fp) => {
+        const sorted = [...group].sort((a, b) => String(a.created_date || '').localeCompare(String(b.created_date || '')));
+        const keeper = sorted[0];
+        if (keeper) keepers.push({ record: keeper, fp });
+        duplicates.push(...sorted.slice(1));
+      });
+      for (const { record, fp } of keepers) {
+        if (!record.source_fingerprint) await base44.entities.SessionRecord.update(record.id, { source_fingerprint: fp });
+      }
+      for (const record of duplicates) await base44.entities.SessionRecord.delete(record.id);
+      setCleanupSummary({ deleted: duplicates.length, kept: keepers.length, scanned: (imported || []).length });
+      if (onImported) await onImported();
+      toast({ title: 'Duplicate cleanup complete', description: `${duplicates.length} duplicate session${duplicates.length === 1 ? '' : 's'} removed. ${keepers.length} imported sessions protected with permanent fingerprints.` });
+    } catch (e) {
+      toast({ title: 'Cleanup failed', description: e.message, variant: 'destructive' });
+    } finally { setBusy(false); }
+  };
+
   const doImport = async () => {
     if (!ready.length) return; setBusy(true);
     try {
@@ -402,6 +433,7 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
     <Card className="p-6 border-sky-100 bg-gradient-to-br from-white to-sky-50/50">
       <div className="flex gap-4"><div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0"><FileSpreadsheet className="h-6 w-6" /></div><div><h3 className="font-black text-lg">Import session tracking spreadsheet</h3><p className="text-sm text-slate-600 mt-1 max-w-2xl">Upload or drag in Excel/CSV. CaseCue matches students, reads dates, service minutes, service area, quantitative data and narrative notes, previews every row, skips duplicates, then creates session records after you approve.</p><div className="flex items-center gap-2 mt-2 text-xs text-slate-500"><ShieldCheck className="h-4 w-4 text-emerald-600" />Nothing is saved until you review and approve the import.</div></div></div>
       <div className="mt-5"><input ref={inputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={e => parseFile(e.target.files?.[0])} /><div onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('border-blue-500'); }} onDragLeave={e => e.currentTarget.classList.remove('border-blue-500')} onDrop={e => { e.preventDefault(); e.currentTarget.classList.remove('border-blue-500'); parseFile(e.dataTransfer.files?.[0]); }} onClick={() => inputRef.current?.click()} className="cursor-pointer rounded-2xl border-2 border-dashed border-blue-200 bg-white p-7 text-center transition-colors hover:border-blue-500"><Upload className="h-7 w-7 mx-auto text-blue-700" /><div className="font-black mt-2">Drag & drop your session tracking file here</div><div className="text-sm text-slate-500 mt-1">or click to browse · Excel (.xlsx) or CSV · up to 5 MB</div><Button type="button" className="mt-3 bg-slate-950 hover:bg-slate-800 text-white" disabled={busy}>{busy ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}{busy ? 'Reading file…' : 'Choose Excel / CSV'}</Button></div></div>
+      <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4"><div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><div className="font-black text-amber-950">One-time duplicate cleanup</div><div className="text-xs text-amber-800 mt-1">Keeps one copy of each identical spreadsheet-imported session, removes only extra copies, and protects the records you keep for future daily uploads.</div></div><Button type="button" variant="outline" onClick={cleanupLegacyImports} disabled={busy} className="border-amber-300 bg-white text-amber-950 hover:bg-amber-100 shrink-0"><Trash2 className="h-4 w-4 mr-2" />Clean Duplicate Imports</Button></div>{cleanupSummary && <div className="text-xs font-bold text-emerald-800 mt-3">Cleanup complete: {cleanupSummary.deleted} duplicates deleted · {cleanupSummary.kept} sessions kept/protected · {cleanupSummary.scanned} imported records checked.</div>}</div>
       {summary && <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><div className="font-black flex items-center gap-2"><CheckCircle2 className="h-4 w-4" />Import complete</div><div className="mt-1">{summary.sessions} sessions · {summary.progress} goal progress points · {summary.skipped} rows skipped/reviewed</div></div>}
     </Card>
 
