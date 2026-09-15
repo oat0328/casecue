@@ -218,10 +218,40 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
 
       let headerIndex = 0, map = indexMap((raw[0] || []).map(cellText)); let bestScore = headerScore((raw[0] || []).map(cellText), map);
       for (let hi = 1; hi < Math.min(raw.length, 12); hi++) { const headers = (raw[hi] || []).map(cellText); const candidate = indexMap(headers); const score = headerScore(headers, candidate); if (score > bestScore) { headerIndex = hi; map = candidate; bestScore = score; } }
+      const headers = (raw[headerIndex] || []).map(cellText); const normalizedHeaders = headers.map(normalize);
       const sample = raw.slice(headerIndex + 1, Math.min(raw.length, headerIndex + 51)); const width = Math.max(...sample.map(r => r.length), 0);
+
+      // Lock the known Google Forms session-tracker columns after the header row is chosen.
+      // This prevents activity/score/narrative cells from ever becoming Student or Minutes.
+      const explicitDate = normalizedHeaders.findIndex(x => x === 'date' || x === 'session date' || x === 'service date');
+      const cleanMinutesColumn = normalizedHeaders.findIndex(x => x === 'clean minutes');
+      const serviceMinutesColumn = normalizedHeaders.findIndex(x => x === 'service minutes');
+      const areaColumn = normalizedHeaders.findIndex(x => x === 'area of service');
+      const locationColumn = normalizedHeaders.findIndex(x => x === 'location of services');
+      const quantitativeColumn = normalizedHeaders.findIndex(x => x.startsWith('quantitative'));
+      const qualitativeColumn = normalizedHeaders.findIndex(x => x.startsWith('qualitative'));
+      if (explicitDate >= 0) map.date = explicitDate;
+      if (cleanMinutesColumn >= 0) map.delivered_minutes = cleanMinutesColumn;
+      if (serviceMinutesColumn >= 0) map.scheduled_minutes = serviceMinutesColumn;
+      if (areaColumn >= 0) map.service_type = areaColumn;
+      if (locationColumn >= 0) map.location = locationColumn;
+      if (quantitativeColumn >= 0) map.quantitative_note = quantitativeColumn;
+      if (qualitativeColumn >= 0) map.qualitative = qualitativeColumn;
+      if (map.percentage === quantitativeColumn || map.percentage === qualitativeColumn) delete map.percentage;
       let bestStudentColumn = -1, bestStudentHits = 0, secondStudentHits = 0;
       for (let c = 0; c < width; c++) { const hits = sample.filter(r => resolveStudent(r[c])).length; if (hits > bestStudentHits) { secondStudentHits = bestStudentHits; bestStudentHits = hits; bestStudentColumn = c; } else if (hits > secondStudentHits) secondStudentHits = hits; }
       if (bestStudentColumn >= 0 && bestStudentHits >= Math.max(2, Math.ceil(sample.length * 0.15)) && bestStudentHits > secondStudentHits) map.student = bestStudentColumn;
+
+      // Special case for Google Forms exports where the student question was accidentally
+      // named after one student. The column itself still contains the real student names.
+      // It sits between Timestamp and Date in this tracker, so use that structural evidence
+      // when roster scoring cannot identify the column from the current roster alone.
+      if (normalizedHeaders[0] === 'timestamp' && explicitDate > 1) {
+        const betweenTimestampAndDate = explicitDate - 1;
+        const candidateHeader = normalizedHeaders[betweenTimestampAndDate];
+        const protectedHeaders = new Set(['service minutes','clean minutes','area of service','location of services']);
+        if (candidateHeader && !protectedHeaders.has(candidateHeader)) map.student = betweenTimestampAndDate;
+      }
       let bestDateColumn = -1, bestDateScore = -1;
       for (let c = 0; c < width; c++) { const vals = sample.map(r => r[c]).filter(v => v !== '' && v != null); if (!vals.length) continue; const ratio = vals.filter(v => v instanceof Date || dateValue(v)).length / vals.length; if (ratio < 0.7) continue; const header = normalize(cellText(raw[headerIndex]?.[c])); const score = ratio + (/^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(header) || header === 'date' || header.includes('session date') ? 0.3 : 0) - (header.includes('timestamp') ? 0.2 : 0); if (score > bestDateScore) { bestDateScore = score; bestDateColumn = c; } }
       if (bestDateColumn >= 0) map.date = bestDateColumn;
@@ -256,7 +286,7 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
   };
 
   const patchRow = (idx, patch) => setRows(v => v.map((r, i) => i === idx ? { ...r, ...patch } : r));
-  const ready = rows.filter(r => r.student_id && r.date && !r.duplicate); const issues = rows.length - ready.length;
+  const ready = rows.filter(r => r.student_id && r.date && !r.duplicate && !(r.delivered_minutes > 120)); const issues = rows.length - ready.length;
 
   const doImport = async () => {
     if (!ready.length) return; setBusy(true);
