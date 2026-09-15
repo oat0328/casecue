@@ -204,7 +204,13 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
     return strong.length === 1 ? strong[0].id : '';
   };
 
-  const duplicateKeys = useMemo(() => new Set((sessions || []).map(s => `${s.student_id}|${s.date}|${s.start_time || ''}|${normalize(s.activity || '')}`)), [sessions]);
+  // Tracker rows often have no start time and reuse the same service-area label.
+  // Date + activity alone is too broad, so duplicate matching includes the actual evidence.
+  const duplicateKeys = useMemo(() => new Set((sessions || []).map(s => [
+    s.student_id || '', s.date || '', s.start_time || '', normalize(s.activity || ''),
+    Number(s.delivered_minutes ?? s.duration_minutes ?? 0) || 0,
+    normalize(s.quantitative?.raw || ''), normalize(s.qualitative || '')
+  ].join('|'))), [sessions]);
 
   const parseFile = async (file) => {
     setSummary(null); if (!file) return;
@@ -285,7 +291,7 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         let pct = map.percentage != null ? percentValue(get(r, map, 'percentage')) : parsedQuant.percentage;
         if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
         const goalText = get(r, map, 'goal') || get(r, map, 'service_type'); const gid = goalFor(sid, goalText); const activity = get(r, map, 'activity') || get(r, map, 'service_type') || goalText || 'Imported session';
-        const key = `${sid}|${date}|${start || ''}|${normalize(activity)}`;
+        const key = [sid || '', date || '', start || '', normalize(activity), Number(delivered ?? duration ?? 0) || 0, normalize(rawQuant || ''), normalize(qualitative || '')].join('|');
         return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? statedDuration ?? (duration ?? null), delivered_minutes: delivered ?? duration ?? null, status, correct, total, percentage: pct, quantitative_note: rawQuant, qualitative, follow_up_note: get(r, map, 'follow_up_note'), duplicate: !!(sid && date && duplicateKeys.has(key)) };
       }).filter(r => r.student_name || r.date || r.activity);
       setRows(parsed); setFileName(file.name);
