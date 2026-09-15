@@ -169,6 +169,9 @@ export function sessionDocSections(sessions, students, goals) {
 export function weeksElapsedIn(range, today = new Date()) {
   const start = new Date(`${range.start}T00:00:00`);
   const end = new Date(`${range.end}T00:00:00`);
+  // A future month has no elapsed service weeks yet. Previously it could report
+  // one required week before the reporting period had even started.
+  if (today < start) return 0;
   const ref = today < end ? today : end;
   const days = Math.max(1, Math.round((ref - start) / 86400000) + 1);
   return Math.max(1, Math.min(6, Math.ceil(days / 7)));
@@ -217,8 +220,13 @@ export function monthCompliance(sessions, students, range) {
 // ---- Report builders (data-derived, no AI) -----------------------------------
 
 function goalStats(list) {
-  const pcts = list.map((s) => pctOf(s)).filter((p) => p != null);
-  const sorted = [...list].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const sorted = [...list].sort((a, b) =>
+    `${a.date || ""} ${a.start_time || ""}`.localeCompare(`${b.date || ""} ${b.start_time || ""}`)
+  );
+  // Trend points must follow chronological session order. Building percentages
+  // before sorting could report the wrong first/latest value when records arrived
+  // from imports in a different order.
+  const pcts = sorted.map((s) => pctOf(s)).filter((p) => p != null);
   const first = pcts.length ? pcts[0] : null;
   const latest = pcts.length ? pcts[pcts.length - 1] : null;
   return {
