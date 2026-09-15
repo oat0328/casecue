@@ -219,7 +219,6 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       let headerIndex = 0, map = indexMap((raw[0] || []).map(cellText)); let bestScore = headerScore((raw[0] || []).map(cellText), map);
       for (let hi = 1; hi < Math.min(raw.length, 12); hi++) { const headers = (raw[hi] || []).map(cellText); const candidate = indexMap(headers); const score = headerScore(headers, candidate); if (score > bestScore) { headerIndex = hi; map = candidate; bestScore = score; } }
       const headers = (raw[headerIndex] || []).map(cellText); const normalizedHeaders = headers.map(normalize);
-      const headers = (raw[headerIndex] || []).map(cellText); const normalizedHeaders = headers.map(normalize);
       const sample = raw.slice(headerIndex + 1, Math.min(raw.length, headerIndex + 51)); const width = Math.max(...sample.map(r => r.length), 0);
       const explicitDate = normalizedHeaders.findIndex(x => x === 'date' || x === 'session date' || x === 'service date');
       const cleanMinutesColumn = normalizedHeaders.findIndex(x => x === 'clean minutes');
@@ -237,23 +236,6 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       if (qualitativeColumn >= 0) map.qualitative = qualitativeColumn;
       if (map.percentage === quantitativeColumn || map.percentage === qualitativeColumn) delete map.percentage;
 
-      // Lock the known Google Forms session-tracker columns after the header row is chosen.
-      // This prevents activity/score/narrative cells from ever becoming Student or Minutes.
-      const explicitDate = normalizedHeaders.findIndex(x => x === 'date' || x === 'session date' || x === 'service date');
-      const cleanMinutesColumn = normalizedHeaders.findIndex(x => x === 'clean minutes');
-      const serviceMinutesColumn = normalizedHeaders.findIndex(x => x === 'service minutes');
-      const areaColumn = normalizedHeaders.findIndex(x => x === 'area of service');
-      const locationColumn = normalizedHeaders.findIndex(x => x === 'location of services');
-      const quantitativeColumn = normalizedHeaders.findIndex(x => x.startsWith('quantitative'));
-      const qualitativeColumn = normalizedHeaders.findIndex(x => x.startsWith('qualitative'));
-      if (explicitDate >= 0) map.date = explicitDate;
-      if (cleanMinutesColumn >= 0) map.delivered_minutes = cleanMinutesColumn;
-      if (serviceMinutesColumn >= 0) map.scheduled_minutes = serviceMinutesColumn;
-      if (areaColumn >= 0) map.service_type = areaColumn;
-      if (locationColumn >= 0) map.location = locationColumn;
-      if (quantitativeColumn >= 0) map.quantitative_note = quantitativeColumn;
-      if (qualitativeColumn >= 0) map.qualitative = qualitativeColumn;
-      if (map.percentage === quantitativeColumn || map.percentage === qualitativeColumn) delete map.percentage;
       let bestStudentColumn = -1, bestStudentHits = 0, secondStudentHits = 0;
       for (let c = 0; c < width; c++) { const hits = sample.filter(r => resolveStudent(r[c])).length; if (hits > bestStudentHits) { secondStudentHits = bestStudentHits; bestStudentHits = hits; bestStudentColumn = c; } else if (hits > secondStudentHits) secondStudentHits = hits; }
       if (bestStudentColumn >= 0 && bestStudentHits >= Math.max(2, Math.ceil(sample.length * 0.15)) && bestStudentHits > secondStudentHits) map.student = bestStudentColumn;
