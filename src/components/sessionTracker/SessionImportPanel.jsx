@@ -244,8 +244,9 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       // named after one student. The column itself still contains the real student names.
       // It sits between Timestamp and Date in this tracker, so use that structural evidence
       // when roster scoring cannot identify the column from the current roster alone.
-      if (normalizedHeaders[0] === 'timestamp' && explicitDate > 1) {
-        const betweenTimestampAndDate = explicitDate - 1;
+      const structuralDateColumn = explicitDate >= 0 ? explicitDate : map.date;
+      if (normalizedHeaders[0] === 'timestamp' && structuralDateColumn > 1) {
+        const betweenTimestampAndDate = structuralDateColumn - 1;
         const candidateHeader = normalizedHeaders[betweenTimestampAndDate];
         const protectedHeaders = new Set(['service minutes','clean minutes','area of service','location of services']);
         if (candidateHeader && !protectedHeaders.has(candidateHeader)) map.student = betweenTimestampAndDate;
