@@ -265,7 +265,16 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         const rawQuant = get(r, map, 'quantitative_note'); const qualitative = get(r, map, 'qualitative');
         const statusEvidence = [get(r, map, 'status'), rawScheduled, qualitative, rawQuant].filter(Boolean).join(' ');
         let status = enumValue(statusEvidence, 'status');
-        if (status === 'completed' && /\babsent\b/i.test(statusEvidence)) status = /\b(teacher|provider|staff)\b[^.]{0,30}\babsent\b|\babsent\b[^.]{0,30}\b(teacher|provider|staff)\b/i.test(statusEvidence) ? 'provider_absent' : 'student_absent';
+        const providerAbsent = /\b(teacher|provider|staff)\b[^.]{0,40}\babsent\b|\babsent\b[^.]{0,40}\b(teacher|provider|staff)\b|session\s+was\s+not\s+held[^.]{0,80}\b(teacher|provider|staff)\b/i.test(statusEvidence);
+        const explicitStudentAbsent = /\bstudent\b[^.]{0,40}\babsent\b|\bstudent\s+absence\b|\bno\s*show\b/i.test(statusEvidence);
+        const participationEvidence = /\b(participat(?:e|ed|ion)|engag(?:e|ed|ement)|completed?|worked?|respond(?:ed|ing)?|accuracy|correct|worksheet|activity)\b/i.test(`${rawQuant} ${qualitative}`);
+        // A bare spreadsheet value such as "Absent 30 minutes" must not erase
+        // documented performance from the same row. Explicit provider/student
+        // absence still wins; otherwise performance evidence means the session occurred.
+        if (providerAbsent) status = 'provider_absent';
+        else if (explicitStudentAbsent) status = 'student_absent';
+        else if (/\babsent\b/i.test(statusEvidence)) status = participationEvidence ? 'completed' : 'student_absent';
+        else if (status === 'student_absent' && participationEvidence) status = 'completed';
         const noServiceStatuses = ['provider_absent', 'student_absent', 'school_activity', 'canceled', 'rescheduled'];
         if (noServiceStatuses.includes(status)) delivered = 0;
         const duration = noServiceStatuses.includes(status) ? 0 : (delivered ?? statedDuration ?? minutesBetween(start, end));
