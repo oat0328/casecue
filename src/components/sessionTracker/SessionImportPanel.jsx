@@ -70,6 +70,15 @@ function headerScore(headers, map) {
   if (h.some(x => x.startsWith('quantitative'))) score += 10; if (h.some(x => x.startsWith('qualitative'))) score += 10; return score;
 }
 function get(row, map, key) { return map[key] == null ? "" : cellText(row[map[key]]); }
+function nonEmpty(v) { return v !== '' && v != null; }
+function columnProfile(sample, c, resolveStudent) {
+  const vals = sample.map(r => r[c]).filter(nonEmpty); const n = vals.length || 1;
+  const studentHits = vals.filter(v => resolveStudent(v)).length;
+  const dateHits = vals.filter(v => v instanceof Date || dateValue(v)).length;
+  const minuteHits = vals.filter(v => minutesValue(v) != null).length;
+  const textHits = vals.filter(v => /[a-z]/i.test(String(v))).length;
+  return { count: vals.length, studentRatio: studentHits / n, dateRatio: dateHits / n, minuteRatio: minuteHits / n, textRatio: textHits / n };
+}
 function num(v) { const s = String(v ?? '').replace(/,/g, '').trim(); const m = s.match(/-?\d+(?:\.\d+)?/); if (!m) return null; const n = Number(m[0]); return Number.isFinite(n) ? n : null; }
 function fraction(v) { const m = String(v ?? '').match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/); return m ? { correct: Number(m[1]), total: Number(m[2]) } : null; }
 function editDistance(a, b) {
@@ -242,9 +251,15 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       if (qualitativeColumn >= 0) map.qualitative = qualitativeColumn;
       if (map.percentage === quantitativeColumn || map.percentage === qualitativeColumn) delete map.percentage;
 
-      let bestStudentColumn = -1, bestStudentHits = 0, secondStudentHits = 0;
-      for (let c = 0; c < width; c++) { const hits = sample.filter(r => resolveStudent(r[c])).length; if (hits > bestStudentHits) { secondStudentHits = bestStudentHits; bestStudentHits = hits; bestStudentColumn = c; } else if (hits > secondStudentHits) secondStudentHits = hits; }
-      if (bestStudentColumn >= 0 && bestStudentHits >= Math.max(2, Math.ceil(sample.length * 0.15)) && bestStudentHits > secondStudentHits) map.student = bestStudentColumn;
+      const profiles = Array.from({ length: width }, (_, c) => columnProfile(sample, c, resolveStudent));
+      let bestStudentColumn = -1, bestStudentScore = -1;
+      for (let c = 0; c < width; c++) {
+        const header = normalizedHeaders[c] || ''; const p = profiles[c];
+        const nameHeader = /student|learner|pupil|child|name/.test(header) ? 0.35 : 0;
+        const score = p.studentRatio * 1.4 + nameHeader + (p.textRatio > 0.8 ? 0.08 : 0) - (p.dateRatio > 0.6 ? 0.5 : 0);
+        if (score > bestStudentScore) { bestStudentScore = score; bestStudentColumn = c; }
+      }
+      if (bestStudentColumn >= 0 && bestStudentScore >= 0.35) map.student = bestStudentColumn;
 
       // Special case for Google Forms exports where the student question was accidentally
       // named after one student. The column itself still contains the real student names.
@@ -258,16 +273,48 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         if (candidateHeader && !protectedHeaders.has(candidateHeader)) map.student = betweenTimestampAndDate;
       }
       let bestDateColumn = -1, bestDateScore = -1;
-      for (let c = 0; c < width; c++) { const vals = sample.map(r => r[c]).filter(v => v !== '' && v != null); if (!vals.length) continue; const ratio = vals.filter(v => v instanceof Date || dateValue(v)).length / vals.length; if (ratio < 0.7) continue; const header = normalize(cellText(raw[headerIndex]?.[c])); const score = ratio + (/^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(header) || header === 'date' || header.includes('session date') ? 0.3 : 0) - (header.includes('timestamp') ? 0.2 : 0); if (score > bestDateScore) { bestDateScore = score; bestDateColumn = c; } }
+      for (let c = 0; c < width; c++) {
+        const p = profiles[c]; if (!p.count || p.dateRatio < 0.55) continue;
+        const header = normalizedHeaders[c] || '';
+        const headerBoost = /^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(header) || header === 'date' || header.includes('session date') || header.includes('service date') ? 0.45 : 0;
+        const timestampPenalty = header.includes('timestamp') ? 0.3 : 0;
+        const score = p.dateRatio + headerBoost - timestampPenalty;
+        if (score > bestDateScore) { bestDateScore = score; bestDateColumn = c; }
+      }
       if (bestDateColumn >= 0) map.date = bestDateColumn;
+
+      // Value-based fallback for unfamiliar spreadsheets. Header names help, but the
+      // contents underneath them are authoritative when a teacher uses custom labels.
+      if (map.delivered_minutes == null) {
+        let best = -1, score = 0;
+        for (let c = 0; c < width; c++) { const p = profiles[c]; const h = normalizedHeaders[c] || ''; const s = p.minuteRatio + (/minute|duration|service time|time served/.test(h) ? 0.45 : 0) - (p.dateRatio > 0.5 ? 0.6 : 0); if (s > score && p.minuteRatio >= 0.6) { score = s; best = c; } }
+        if (best >= 0) map.delivered_minutes = best;
+      }
       if (map.date == null) throw new Error('CaseCue could not identify the session date. Add a Date/Session Date column or keep the Google Forms Timestamp column.');
       if (map.student == null && (map.first_name == null || map.last_name == null)) throw new Error('CaseCue could not identify the student column. Use Student Name, First/Last Name, or names matching your CaseCue roster.');
 
       const parsed = raw.slice(headerIndex + 1).map((r, i) => {
-        const full = get(r, map, 'student') || `${get(r, map, 'first_name')} ${get(r, map, 'last_name')}`.trim(); const sid = resolveStudent(full);
-        const date = dateValue(r[map.date]); const start = timeValue(get(r, map, 'start_time')); const end = timeValue(get(r, map, 'end_time'));
+        let full = get(r, map, 'student') || `${get(r, map, 'first_name')} ${get(r, map, 'last_name')}`.trim();
+        let sid = resolveStudent(full);
+        // Row-level recovery: if a custom/messy sheet has occasional shifted cells,
+        // search the row for one unambiguous roster name instead of losing the session.
+        if (!sid) {
+          const rowMatches = r.map((v, c) => ({ c, value: cellText(v), sid: resolveStudent(v) })).filter(x => x.sid);
+          const uniqueIds = [...new Set(rowMatches.map(x => x.sid))];
+          if (uniqueIds.length === 1) { sid = uniqueIds[0]; const hit = rowMatches.find(x => x.sid === sid); if (hit?.value) full = hit.value; }
+        }
+        let date = dateValue(r[map.date]);
+        // Row-level date recovery, preferring non-timestamp date cells.
+        if (!date) {
+          const candidates = r.map((v, c) => ({ c, date: dateValue(v), header: normalizedHeaders[c] || '' })).filter(x => x.date);
+          const preferred = candidates.find(x => !x.header.includes('timestamp')) || candidates[0];
+          if (preferred) date = preferred.date;
+        } const start = timeValue(get(r, map, 'start_time')); const end = timeValue(get(r, map, 'end_time'));
         const rawScheduled = get(r, map, 'scheduled_minutes');
         const statedDuration = minutesValue(get(r, map, 'duration_minutes')); let delivered = minutesValue(get(r, map, 'delivered_minutes')); const scheduled = minutesValue(rawScheduled);
+        // If a sheet lacks a recognized minutes header, recover from a value-based
+        // minutes column. Do not use timestamps/dates as minutes.
+        if (delivered == null && map.delivered_minutes != null) delivered = minutesValue(r[map.delivered_minutes]);
         const rawQuant = get(r, map, 'quantitative_note'); const qualitative = get(r, map, 'qualitative');
         const statusEvidence = [get(r, map, 'status'), rawScheduled, qualitative, rawQuant].filter(Boolean).join(' ');
         let status = enumValue(statusEvidence, 'status');
@@ -292,7 +339,10 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
         const goalText = get(r, map, 'goal') || get(r, map, 'service_type'); const gid = goalFor(sid, goalText); const activity = get(r, map, 'activity') || get(r, map, 'service_type') || goalText || 'Imported session';
         const key = [sid || '', date || '', start || '', normalize(activity), Number(delivered ?? duration ?? 0) || 0, normalize(rawQuant || ''), normalize(qualitative || '')].join('|');
-        return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? statedDuration ?? (duration ?? null), delivered_minutes: delivered ?? duration ?? null, status, correct, total, percentage: pct, quantitative_note: rawQuant, qualitative, follow_up_note: get(r, map, 'follow_up_note'), duplicate: !!(sid && date && duplicateKeys.has(key)) };
+        const deliveredFinal = delivered ?? duration ?? null;
+        const testingLike = /\b(map|testing|assessment|diagnostic|benchmark)\b/i.test(`${activity} ${goalText}`);
+        const minutesReview = deliveredFinal > 120 && !testingLike;
+        return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? statedDuration ?? (duration ?? null), delivered_minutes: deliveredFinal, status, correct, total, percentage: pct, quantitative_note: rawQuant, qualitative, follow_up_note: get(r, map, 'follow_up_note'), minutes_review: minutesReview, duplicate: !!(sid && date && duplicateKeys.has(key)) };
       }).filter(r => r.student_name || r.date || r.activity);
       setRows(parsed); setFileName(file.name);
     } catch (e) { toast({ title: 'Could not read session file', description: e.message, variant: 'destructive' }); }
