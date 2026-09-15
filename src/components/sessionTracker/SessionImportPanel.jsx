@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 
 const MAX_BYTES = 5 * 1024 * 1024;
-const MAX_ROWS = 2000;
+const MAX_ROWS = 10000;
 const MAX_REASONABLE_SESSION_MINUTES = 240;
 
 const aliases = {
@@ -40,6 +40,11 @@ const aliases = {
 const normalize = (v) => String(v ?? "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const normalizeName = (v) => normalize(v).replace(/\s+/g, " ");
 const cellText = (v) => v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? "").trim();
+const fingerprintOf = (r) => [
+  r.student_id || '', r.date || '', r.start_time || '', normalize(r.activity || ''),
+  Number(r.delivered_minutes ?? r.duration_minutes ?? 0) || 0,
+  normalize(r.quantitative_note ?? r.quantitative?.raw ?? ''), normalize(r.qualitative || '')
+].join('|');
 
 function csvRows(text) {
   const rows = []; let row = []; let cell = ""; let quoted = false;
@@ -215,11 +220,10 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
 
   // Tracker rows often have no start time and reuse the same service-area label.
   // Date + activity alone is too broad, so duplicate matching includes the actual evidence.
-  const duplicateKeys = useMemo(() => new Set((sessions || []).map(s => [
-    s.student_id || '', s.date || '', s.start_time || '', normalize(s.activity || ''),
-    Number(s.delivered_minutes ?? s.duration_minutes ?? 0) || 0,
-    normalize(s.quantitative?.raw || ''), normalize(s.qualitative || '')
-  ].join('|'))), [sessions]);
+  // Keep the locally loaded ledger as a fast preview hint only. The authoritative
+  // duplicate check runs against persisted source_fingerprint values in the database,
+  // so daily imports still work after the account has thousands of sessions.
+  const duplicateKeys = useMemo(() => new Set((sessions || []).map(s => s.source_fingerprint || fingerprintOf(s))), [sessions]);
 
   const parseFile = async (file) => {
     setSummary(null); if (!file) return;
@@ -338,13 +342,25 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         let pct = map.percentage != null ? percentValue(get(r, map, 'percentage')) : parsedQuant.percentage;
         if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
         const goalText = get(r, map, 'goal') || get(r, map, 'service_type'); const gid = goalFor(sid, goalText); const activity = get(r, map, 'activity') || get(r, map, 'service_type') || goalText || 'Imported session';
-        const key = [sid || '', date || '', start || '', normalize(activity), Number(delivered ?? duration ?? 0) || 0, normalize(rawQuant || ''), normalize(qualitative || '')].join('|');
         const deliveredFinal = delivered ?? duration ?? null;
+        const key = fingerprintOf({ student_id: sid, date, start_time: start, activity, delivered_minutes: deliveredFinal, quantitative_note: rawQuant, qualitative });
         const testingLike = /\b(map|testing|assessment|diagnostic|benchmark)\b/i.test(`${activity} ${goalText}`);
         const minutesReview = deliveredFinal > 120 && !testingLike;
         return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? statedDuration ?? (duration ?? null), delivered_minutes: deliveredFinal, status, correct, total, percentage: pct, quantitative_note: rawQuant, qualitative, follow_up_note: get(r, map, 'follow_up_note'), minutes_review: minutesReview, duplicate: !!(sid && date && duplicateKeys.has(key)) };
       }).filter(r => r.student_name || r.date || r.activity);
-      setRows(parsed); setFileName(file.name);
+
+      // Database-backed dedupe: query only fingerprints present in this upload, in
+      // small chunks. This is independent of dashboard/history pagination limits.
+      const candidateFingerprints = [...new Set(parsed.filter(r => r.student_id && r.date).map(r => fingerprintOf(r)))];
+      const existingFingerprints = new Set();
+      const CHUNK = 75;
+      for (let i = 0; i < candidateFingerprints.length; i += CHUNK) {
+        const chunk = candidateFingerprints.slice(i, i + CHUNK);
+        const found = await base44.entities.SessionRecord.filter({ source_fingerprint: { $in: chunk } }, '-date', Math.min(500, chunk.length));
+        (found || []).forEach(s => { if (s.source_fingerprint) existingFingerprints.add(s.source_fingerprint); });
+      }
+      const reconciled = parsed.map(r => ({ ...r, duplicate: r.duplicate || existingFingerprints.has(fingerprintOf(r)) }));
+      setRows(reconciled); setFileName(file.name);
     } catch (e) { toast({ title: 'Could not read session file', description: e.message, variant: 'destructive' }); }
     finally { setBusy(false); if (inputRef.current) inputRef.current.value = ''; }
   };
@@ -361,11 +377,23 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
   const doImport = async () => {
     if (!ready.length) return; setBusy(true);
     try {
-      const sessionRecords = ready.map(r => ({ student_id: r.student_id, date: r.date, start_time: r.start_time || undefined, end_time: r.end_time || undefined, duration_minutes: r.duration_minutes ?? undefined, provider: r.provider || undefined, service_type: r.service_type, delivery: r.delivery, setting: r.setting, location: r.location || undefined, goal_id: r.goal_id || undefined, activity: r.activity, scheduled_minutes: r.scheduled_minutes ?? undefined, delivered_minutes: r.delivered_minutes ?? undefined, status: r.status, quantitative: (r.correct != null || r.total != null || r.percentage != null || r.quantitative_note) ? { correct: r.correct, total: r.total, percentage: r.percentage, raw: r.quantitative_note || undefined } : undefined, qualitative: r.qualitative || undefined, follow_up_needed: !!r.follow_up_note, follow_up_note: r.follow_up_note || undefined, tags: ['Imported spreadsheet'] }));
+      // Recheck immediately before writing in case the ledger changed after preview.
+      // This prevents double-clicks, another tab, or a repeated daily upload from
+      // creating duplicates.
+      const fingerprints = [...new Set(ready.map(r => fingerprintOf(r)))];
+      const existing = new Set();
+      const CHUNK = 75;
+      for (let i = 0; i < fingerprints.length; i += CHUNK) {
+        const chunk = fingerprints.slice(i, i + CHUNK);
+        const found = await base44.entities.SessionRecord.filter({ source_fingerprint: { $in: chunk } }, '-date', Math.min(500, chunk.length));
+        (found || []).forEach(s => { if (s.source_fingerprint) existing.add(s.source_fingerprint); });
+      }
+      const freshReady = ready.filter(r => !existing.has(fingerprintOf(r)));
+      const sessionRecords = freshReady.map(r => ({ student_id: r.student_id, date: r.date, start_time: r.start_time || undefined, end_time: r.end_time || undefined, duration_minutes: r.duration_minutes ?? undefined, provider: r.provider || undefined, service_type: r.service_type, delivery: r.delivery, setting: r.setting, location: r.location || undefined, goal_id: r.goal_id || undefined, activity: r.activity, scheduled_minutes: r.scheduled_minutes ?? undefined, delivered_minutes: r.delivered_minutes ?? undefined, status: r.status, quantitative: (r.correct != null || r.total != null || r.percentage != null || r.quantitative_note) ? { correct: r.correct, total: r.total, percentage: r.percentage, raw: r.quantitative_note || undefined } : undefined, qualitative: r.qualitative || undefined, follow_up_needed: !!r.follow_up_note, follow_up_note: r.follow_up_note || undefined, source_fingerprint: fingerprintOf(r), source_file: fileName || undefined, source_row: r.row, tags: ['Imported spreadsheet'] }));
       await base44.entities.SessionRecord.bulkCreate(sessionRecords);
-      const progressRecords = ready.filter(r => r.goal_id && (r.correct != null || r.total != null || r.percentage != null || r.qualitative)).map(r => ({ student_id: r.student_id, goal_id: r.goal_id, date: r.date, correct: r.correct ?? undefined, total: r.total ?? undefined, percentage: r.percentage ?? undefined, decimal: r.percentage != null ? Math.round((r.percentage / 100) * 100) / 100 : undefined, qualitative_notes: r.qualitative || undefined, observation_notes: r.qualitative || undefined, prompting_level: 'independent' }));
+      const progressRecords = freshReady.filter(r => r.goal_id && (r.correct != null || r.total != null || r.percentage != null || r.qualitative)).map(r => ({ student_id: r.student_id, goal_id: r.goal_id, date: r.date, correct: r.correct ?? undefined, total: r.total ?? undefined, percentage: r.percentage ?? undefined, decimal: r.percentage != null ? Math.round((r.percentage / 100) * 100) / 100 : undefined, qualitative_notes: r.qualitative || undefined, observation_notes: r.qualitative || undefined, prompting_level: 'independent' }));
       if (progressRecords.length) await base44.entities.ProgressData.bulkCreate(progressRecords);
-      setSummary({ sessions: sessionRecords.length, progress: progressRecords.length, skipped: rows.length - ready.length }); setRows([]); if (onImported) await onImported();
+      setSummary({ sessions: sessionRecords.length, progress: progressRecords.length, skipped: rows.length - freshReady.length }); setRows([]); if (onImported) await onImported();
       toast({ title: 'Session import complete', description: `${sessionRecords.length} sessions imported${progressRecords.length ? ` and ${progressRecords.length} progress points created` : ''}.` });
     } catch (e) { toast({ title: 'Import failed', description: e.message, variant: 'destructive' }); } finally { setBusy(false); }
   };
