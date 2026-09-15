@@ -22,7 +22,7 @@ export default function Reports() {
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.list('-date', 500), []);
   const { data: meetings } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
-  const { data: sessions } = useAsync(() => base44.entities.SessionLog.list('-date', 300), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 500), []);
   const { data: assignments } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 200), []);
   const { data: schedule } = useAsync(() => base44.entities.ScheduleEntry.list('-updated_date', 300), []);
 
