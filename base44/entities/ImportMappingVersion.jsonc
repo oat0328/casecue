@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportMappingVersion"
+}

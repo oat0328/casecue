@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "alias": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportNameAlias"
+}

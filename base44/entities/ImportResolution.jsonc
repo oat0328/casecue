@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportResolution"
+}

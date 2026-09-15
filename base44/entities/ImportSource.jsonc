@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportSource"
+}

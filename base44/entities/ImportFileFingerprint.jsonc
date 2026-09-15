@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "fingerprint": {
+      "type": "string"
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_imported_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportFileFingerprint"
+}

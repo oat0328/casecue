@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "match_text": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportCategoryRule"
+}

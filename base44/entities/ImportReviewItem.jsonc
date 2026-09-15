@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "student_name": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "minutes": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewItem"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": "string"
+    },
+    "resolution": {
+      "type": "string"
+    },
+    "accepted_count": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewLearning"
+}

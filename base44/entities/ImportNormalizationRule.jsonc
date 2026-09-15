@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "field": {
+      "type": "string"
+    },
+    "from_value": {
+      "type": "string"
+    },
+    "to_value": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportNormalizationRule"
+}

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "behavior": {
+      "type": "string"
+    },
+    "threshold": {
+      "type": "number"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportMinutesRule"
+}

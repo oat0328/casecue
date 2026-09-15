@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "activity": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "review_long_minutes": {
+      "type": "boolean"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSessionTypeRule"
+}

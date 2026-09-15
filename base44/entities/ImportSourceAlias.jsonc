@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source_name": {
+      "type": "string"
+    },
+    "canonical_name": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSourceAlias"
+}

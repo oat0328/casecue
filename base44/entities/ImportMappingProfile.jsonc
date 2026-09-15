@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportMappingProfile"
+}

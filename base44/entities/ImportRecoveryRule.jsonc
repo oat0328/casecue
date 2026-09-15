@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "pattern": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportRecoveryRule"
+}

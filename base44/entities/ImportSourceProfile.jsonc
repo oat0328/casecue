@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "source_name": {
+      "type": "string"
+    },
+    "header_signature": {
+      "type": "string"
+    },
+    "student_column": {
+      "type": "number"
+    },
+    "date_column": {
+      "type": "number"
+    },
+    "minutes_column": {
+      "type": "number"
+    },
+    "service_column": {
+      "type": "number"
+    },
+    "location_column": {
+      "type": "number"
+    },
+    "quantitative_column": {
+      "type": "number"
+    },
+    "qualitative_column": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportSourceProfile"
+}

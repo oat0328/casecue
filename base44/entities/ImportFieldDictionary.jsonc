@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "field": {
+      "type": "string"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportFieldDictionary"
+}

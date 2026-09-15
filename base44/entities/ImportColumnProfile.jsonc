@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "column_index": {
+      "type": "number"
+    },
+    "header": {
+      "type": "string"
+    },
+    "student_ratio": {
+      "type": "number"
+    },
+    "date_ratio": {
+      "type": "number"
+    },
+    "minutes_ratio": {
+      "type": "number"
+    },
+    "text_ratio": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportColumnProfile"
+}

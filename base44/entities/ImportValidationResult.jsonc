@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [],
+  "name": "ImportValidationResult"
+}

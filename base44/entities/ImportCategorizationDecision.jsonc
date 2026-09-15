@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportCategorizationDecision"
+}

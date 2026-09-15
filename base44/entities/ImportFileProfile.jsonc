@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "stats": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "ImportFileProfile"
+}

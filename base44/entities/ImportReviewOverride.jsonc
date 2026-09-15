@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_signature": {
+      "type": "string"
+    },
+    "row_signature": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewOverride"
+}

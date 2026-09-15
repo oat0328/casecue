@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "column_index": {
+      "type": "number"
+    },
+    "header": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportFieldGuess"
+}

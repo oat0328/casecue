@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "source_header": {
+      "type": "string"
+    },
+    "target_field": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "source_signature": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportFieldMapping"
+}

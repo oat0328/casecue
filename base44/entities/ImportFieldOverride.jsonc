@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_signature": {
+      "type": "string"
+    },
+    "source_header": {
+      "type": "string"
+    },
+    "target_field": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportFieldOverride"
+}

@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "raw_minutes": {
+      "type": "string"
+    },
+    "minutes": {
+      "type": "number"
+    },
+    "method": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportMinutesResolution"
+}

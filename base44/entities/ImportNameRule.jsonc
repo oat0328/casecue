@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "behavior": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportNameRule"
+}

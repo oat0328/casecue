@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportDataSource"
+}

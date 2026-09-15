@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportStatusRule"
+}

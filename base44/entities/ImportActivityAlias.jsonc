@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "activity": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportActivityAlias"
+}

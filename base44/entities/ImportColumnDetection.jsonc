@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [],
+  "name": "ImportColumnDetection"
+}

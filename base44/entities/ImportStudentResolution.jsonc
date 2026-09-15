@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "raw_name": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportStudentResolution"
+}

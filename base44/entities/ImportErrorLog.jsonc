@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "error": {
+      "type": "string"
+    },
+    "raw": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "ImportErrorLog"
+}

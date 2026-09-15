@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportParserAudit"
+}

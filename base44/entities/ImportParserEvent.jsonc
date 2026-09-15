@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "event": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportParserEvent"
+}

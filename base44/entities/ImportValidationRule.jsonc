@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "field": {
+      "type": "string"
+    },
+    "rule": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportValidationRule"
+}

@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportHeaderAlias"
+}

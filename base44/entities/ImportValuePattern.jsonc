@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "field": {
+      "type": "string"
+    },
+    "pattern": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportValuePattern"
+}

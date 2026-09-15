@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportDateAlias"
+}

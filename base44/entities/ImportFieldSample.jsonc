@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "column_index": {
+      "type": "number"
+    },
+    "header": {
+      "type": "string"
+    },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [],
+  "name": "ImportFieldSample"
+}

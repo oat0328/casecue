@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "field": {
+      "type": "string"
+    },
+    "before": {
+      "type": "string"
+    },
+    "after": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportCorrection"
+}

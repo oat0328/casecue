@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "evidence_type": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportEvidenceRule"
+}

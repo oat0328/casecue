@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "setting": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportLocationRule"
+}

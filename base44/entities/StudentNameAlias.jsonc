@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "alias": {
+      "type": "string"
+    },
+    "normalized_alias": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "StudentNameAlias"
+}

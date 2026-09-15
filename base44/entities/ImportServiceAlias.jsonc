@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "goal_area": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportServiceAlias"
+}

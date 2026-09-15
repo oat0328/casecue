@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "goal_area": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSessionCategory"
+}

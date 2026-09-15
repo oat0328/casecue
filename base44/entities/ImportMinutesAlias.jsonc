@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportMinutesAlias"
+}

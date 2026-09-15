@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportMetric"
+}

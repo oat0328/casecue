@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "classification": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportRowClassification"
+}

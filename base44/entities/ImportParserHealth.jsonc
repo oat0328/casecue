@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "last_tested": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportParserHealth"
+}

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "source_value": {
+      "type": "string"
+    },
+    "resolved_value": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "uses": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportResolutionMemory"
+}

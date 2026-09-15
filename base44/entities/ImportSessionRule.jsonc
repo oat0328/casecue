@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "minutes_behavior": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSessionRule"
+}

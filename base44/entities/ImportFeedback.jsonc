@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "field": {
+      "type": "string"
+    },
+    "original_value": {
+      "type": "string"
+    },
+    "corrected_value": {
+      "type": "string"
+    },
+    "accepted": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportFeedback"
+}

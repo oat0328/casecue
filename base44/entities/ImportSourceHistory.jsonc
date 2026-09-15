@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "header_signature": {
+      "type": "string"
+    },
+    "last_mapping": {
+      "type": "object"
+    },
+    "last_result": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "ImportSourceHistory"
+}

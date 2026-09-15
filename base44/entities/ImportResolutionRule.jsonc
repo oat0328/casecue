@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "issue": {
+      "type": "string"
+    },
+    "pattern": {
+      "type": "string"
+    },
+    "resolution": {
+      "type": "object"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportResolutionRule"
+}

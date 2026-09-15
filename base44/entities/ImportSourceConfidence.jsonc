@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "signature": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "successful_runs": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportSourceConfidence"
+}

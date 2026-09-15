@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "file_signature": {
+      "type": "string"
+    },
+    "row_signature": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "minutes": {
+      "type": "number"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewDecision"
+}

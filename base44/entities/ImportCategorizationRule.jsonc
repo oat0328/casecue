@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "pattern": {
+      "type": "string"
+    },
+    "activity": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportCategorizationRule"
+}

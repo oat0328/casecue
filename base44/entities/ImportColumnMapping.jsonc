@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source_signature": {
+      "type": "string"
+    },
+    "columns": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportColumnMapping"
+}

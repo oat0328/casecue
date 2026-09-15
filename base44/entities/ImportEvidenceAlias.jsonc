@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "evidence_type": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportEvidenceAlias"
+}

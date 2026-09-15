@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "accepted_count": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportCategoryLearning"
+}

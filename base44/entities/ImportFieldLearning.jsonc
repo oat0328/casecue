@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "accepted_count": {
+      "type": "number"
+    },
+    "rejected_count": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportFieldLearning"
+}

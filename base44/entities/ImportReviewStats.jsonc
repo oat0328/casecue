@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "total": {
+      "type": "number"
+    },
+    "student": {
+      "type": "number"
+    },
+    "date": {
+      "type": "number"
+    },
+    "minutes": {
+      "type": "number"
+    },
+    "duplicate": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewStats"
+}

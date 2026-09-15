@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "signature": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSchemaProfile"
+}

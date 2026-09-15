@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "rule_type": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "result": {
+      "type": "string"
+    },
+    "accepted": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportRuleFeedback"
+}

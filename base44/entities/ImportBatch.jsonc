@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "file_signature": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "total_rows": {
+      "type": "number"
+    },
+    "imported_rows": {
+      "type": "number"
+    },
+    "skipped_rows": {
+      "type": "number"
+    },
+    "review_rows": {
+      "type": "number"
+    },
+    "imported_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportBatch"
+}

@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "total_rows": {
+      "type": "number"
+    },
+    "ready_rows": {
+      "type": "number"
+    },
+    "already_imported_rows": {
+      "type": "number"
+    },
+    "review_rows": {
+      "type": "number"
+    },
+    "missing_student_rows": {
+      "type": "number"
+    },
+    "missing_date_rows": {
+      "type": "number"
+    },
+    "minutes_review_rows": {
+      "type": "number"
+    },
+    "mapping_summary": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportAudit"
+}

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "header_signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "use_count": {
+      "type": "number"
+    },
+    "last_used": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportTemplate"
+}

@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "raw_student": {
+      "type": "string"
+    },
+    "raw_date": {
+      "type": "string"
+    },
+    "raw_minutes": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportException"
+}

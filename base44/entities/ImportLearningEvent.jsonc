@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "input": {
+      "type": "string"
+    },
+    "output": {
+      "type": "string"
+    },
+    "accepted": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportLearningEvent"
+}

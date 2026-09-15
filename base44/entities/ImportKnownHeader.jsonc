@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportKnownHeader"
+}

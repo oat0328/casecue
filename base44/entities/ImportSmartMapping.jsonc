@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "source_signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "successful": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSmartMapping"
+}

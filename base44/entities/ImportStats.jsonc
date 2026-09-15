@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "total": {
+      "type": "number"
+    },
+    "ready": {
+      "type": "number"
+    },
+    "existing": {
+      "type": "number"
+    },
+    "review": {
+      "type": "number"
+    },
+    "timestamp": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportStats"
+}

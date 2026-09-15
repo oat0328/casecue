@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "source_text": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportAutoCategory"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "rule": {
+      "type": "string"
+    },
+    "matched": {
+      "type": "number"
+    },
+    "file_name": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportRuleAudit"
+}

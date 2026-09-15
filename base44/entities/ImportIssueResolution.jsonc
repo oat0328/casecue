@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "issue_type": {
+      "type": "string"
+    },
+    "source_value": {
+      "type": "string"
+    },
+    "resolution": {
+      "type": "object"
+    },
+    "uses": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportIssueResolution"
+}

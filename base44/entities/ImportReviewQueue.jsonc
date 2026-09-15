@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "raw": {
+      "type": "object"
+    },
+    "resolved": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewQueue"
+}

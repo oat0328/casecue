@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "metric": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number"
+    },
+    "file_name": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportParserStat"
+}

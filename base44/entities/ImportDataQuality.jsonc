@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "duplicate_count": {
+      "type": "number"
+    },
+    "missing_student_count": {
+      "type": "number"
+    },
+    "missing_date_count": {
+      "type": "number"
+    },
+    "unusual_minutes_count": {
+      "type": "number"
+    },
+    "score": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportDataQuality"
+}

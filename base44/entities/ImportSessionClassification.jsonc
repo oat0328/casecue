@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "classification": {
+      "type": "string"
+    },
+    "review_long_minutes": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportSessionClassification"
+}

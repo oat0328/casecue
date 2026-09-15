@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "long_minutes_threshold": {
+      "type": "number"
+    },
+    "allow_testing_over_threshold": {
+      "type": "boolean"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewConfig"
+}

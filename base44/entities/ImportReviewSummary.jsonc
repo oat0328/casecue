@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "student_match": {
+      "type": "number"
+    },
+    "missing_date": {
+      "type": "number"
+    },
+    "minutes_review": {
+      "type": "number"
+    },
+    "already_imported": {
+      "type": "number"
+    },
+    "ready": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewSummary"
+}

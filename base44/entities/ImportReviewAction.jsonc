@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "action": {
+      "type": "string"
+    },
+    "value": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "ImportReviewAction"
+}

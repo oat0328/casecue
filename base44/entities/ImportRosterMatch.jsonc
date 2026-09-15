@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "raw_name": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "method": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportRosterMatch"
+}

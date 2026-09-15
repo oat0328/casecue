@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSheetProfile"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "fingerprint": {
+      "type": "string"
+    },
+    "session_record_id": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSessionFingerprint"
+}

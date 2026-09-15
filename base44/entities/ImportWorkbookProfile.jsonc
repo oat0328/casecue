@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "sheet_name": {
+      "type": "string"
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportWorkbookProfile"
+}

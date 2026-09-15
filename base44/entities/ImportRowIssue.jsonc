@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "resolved": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportRowIssue"
+}

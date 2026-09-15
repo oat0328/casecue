@@ -35,7 +35,10 @@ export default function SessionTracker() {
   const [searchParams] = useSearchParams();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: sessions, refetch: refetchSessions } = useAsync(
-    () => base44.entities.SessionRecord.filter({}, '-date', 200),
+    // Reports, duplicate detection, minutes, attendance, and progress must use the
+    // complete session ledger. A 200-record cap silently undercounted the dashboard
+    // as soon as the caseload passed 200 records.
+    () => base44.entities.SessionRecord.filter({}, '-date', 500),
     []
   );
   const { data: goals } = useAsync(() => base44.entities.Goal.list(), []);

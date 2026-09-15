@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "code": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "resolved": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportWarning"
+}

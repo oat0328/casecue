@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "field": {
+      "type": "string"
+    },
+    "header_regex": {
+      "type": "string"
+    },
+    "value_regex": {
+      "type": "string"
+    },
+    "weight": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportDetectionRule"
+}

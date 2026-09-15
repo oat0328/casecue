@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "field": {
+      "type": "string"
+    },
+    "alias": {
+      "type": "string"
+    },
+    "normalized_alias": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportColumnAlias"
+}

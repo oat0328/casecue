@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number"
+    },
+    "ready_percent": {
+      "type": "number"
+    },
+    "review_percent": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportHealthCheck"
+}

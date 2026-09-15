@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "fingerprint": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "activity": {
+      "type": "string"
+    },
+    "minutes": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportRowFingerprint"
+}

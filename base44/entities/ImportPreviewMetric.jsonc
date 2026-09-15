@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "ready": {
+      "type": "number"
+    },
+    "already_imported": {
+      "type": "number"
+    },
+    "review": {
+      "type": "number"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportPreviewMetric"
+}

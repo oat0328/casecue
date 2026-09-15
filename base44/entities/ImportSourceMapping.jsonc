@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "source_signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "successful_runs": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportSourceMapping"
+}

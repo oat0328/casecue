@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "success_rate": {
+      "type": "number"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportFormatProfile"
+}

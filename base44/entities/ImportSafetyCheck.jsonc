@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "check": {
+      "type": "string"
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "details": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportSafetyCheck"
+}

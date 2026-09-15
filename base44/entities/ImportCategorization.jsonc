@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "source_text": {
+      "type": "string"
+    },
+    "activity": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportCategorization"
+}

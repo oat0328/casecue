@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "raw_name": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "accepted_count": {
+      "type": "number"
+    },
+    "rejected_count": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportNameLearning"
+}

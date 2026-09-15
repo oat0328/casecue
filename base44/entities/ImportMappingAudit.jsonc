@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "column_index": {
+      "type": "number"
+    },
+    "header": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportMappingAudit"
+}

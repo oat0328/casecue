@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    },
+    "stats": {
+      "type": "object"
+    }
+  },
+  "required": [],
+  "name": "ImportRun"
+}

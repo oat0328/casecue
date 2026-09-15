@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "raw_name": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportRosterOverride"
+}

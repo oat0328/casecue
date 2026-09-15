@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "headers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportSchemaDetection"
+}

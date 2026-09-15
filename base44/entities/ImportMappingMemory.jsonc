@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "signature": {
+      "type": "string"
+    },
+    "mapping": {
+      "type": "object"
+    },
+    "uses": {
+      "type": "number"
+    },
+    "last_used": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportMappingMemory"
+}

@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "field": {
+      "type": "string"
+    },
+    "from_value": {
+      "type": "string"
+    },
+    "to_value": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportAutoFix"
+}

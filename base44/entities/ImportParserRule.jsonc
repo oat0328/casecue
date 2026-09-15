@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "pattern": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object"
+    },
+    "priority": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportParserRule"
+}

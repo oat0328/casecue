@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "approved_rows": {
+      "type": "number"
+    },
+    "skipped_rows": {
+      "type": "number"
+    },
+    "approved_at": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportApproval"
+}

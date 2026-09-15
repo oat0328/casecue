@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "source_column": {
+      "type": "string"
+    },
+    "suggested_field": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "accepted": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "name": "ImportMappingSuggestion"
+}

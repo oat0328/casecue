@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "source_signature": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "column_index": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "uses": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "ImportLearnedMapping"
+}

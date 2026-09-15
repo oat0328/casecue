@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "signature": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "minutes": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportRowResolution"
+}

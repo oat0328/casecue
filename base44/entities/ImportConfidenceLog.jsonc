@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "row_number": {
+      "type": "number"
+    },
+    "student_confidence": {
+      "type": "number"
+    },
+    "date_confidence": {
+      "type": "number"
+    },
+    "minutes_confidence": {
+      "type": "number"
+    },
+    "overall_confidence": {
+      "type": "number"
+    },
+    "review_reason": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "ImportConfidenceLog"
+}
