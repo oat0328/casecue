@@ -9,6 +9,7 @@ import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
 import { REPORT_DEFINITIONS } from "@/lib/caseReports";
 import { textSection, sheetFromTable, safeFilename } from "@/lib/reportExport";
 import { DATA_BANNER } from "@/components/shared/ReportBuilderPanel";
+import CaseloadProgressPacket from "@/components/reports/CaseloadProgressPacket";
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -87,6 +88,8 @@ export default function Reports() {
           />
         }
       />
+
+      <CaseloadProgressPacket students={s} goals={goals || []} progress={progress || []} sessions={sessions || []} />
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {cards.map((c) => (
