@@ -55,25 +55,47 @@ function csvRows(text) {
 
 function indexMap(headers) {
   const h = headers.map(normalize); const out = {};
+
+  // Use exact aliases for ordinary columns. Broad substring matching caused
+  // narrative/data cells to masquerade as headers (for example "score" inside
+  // a long performance prompt), which shifted the entire import.
   Object.entries(aliases).forEach(([key, list]) => {
     const normalized = list.map(normalize);
-    const idx = h.findIndex(x => normalized.some(a => x === a || (a.length >= 5 && x.includes(a)) || (x.length >= 5 && a.includes(x))));
+    const idx = h.findIndex(x => normalized.includes(x));
     if (idx >= 0) out[key] = idx;
   });
-  if (out.date == null) {
-    const dateLike = h.findIndex(x => /\b(date|day)\b/.test(x) || /^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(x));
-    if (dateLike >= 0) out.date = dateLike;
-  }
-  if (out.date == null && h[0]?.includes('timestamp')) out.date = 0;
 
-  // Google Forms trackers often contain both a descriptive Service Minutes
-  // column and a numeric CLEAN MINUTES column. When both exist, CLEAN MINUTES
-  // is the actual delivered time and Service Minutes is the scheduled/context field.
+  // Long Google Forms question labels are intentionally matched only to the
+  // fields they describe.
+  const quantitative = h.findIndex(x => x.startsWith('quantitative') || (x.includes('student performance') && x.includes('quantitative')));
+  const qualitative = h.findIndex(x => x.startsWith('qualitative') || (x.includes('student performance') && x.includes('qualitative')));
+  if (quantitative >= 0) out.quantitative_note = quantitative;
+  if (qualitative >= 0) out.qualitative = qualitative;
+
+  // A Google Forms export may use the first entered student name as the header
+  // for the student-name question and the first session date as the date header.
+  const dateLike = h.findIndex((x, i) => i !== 0 && /^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(x));
+  if (dateLike >= 0) out.date = dateLike;
+  else if (out.date == null && h[0]?.includes('timestamp')) out.date = 0;
+
   const cleanMinutes = h.findIndex(x => x === 'clean minutes');
   const serviceMinutes = h.findIndex(x => x === 'service minutes');
   if (cleanMinutes >= 0) out.delivered_minutes = cleanMinutes;
   if (cleanMinutes >= 0 && serviceMinutes >= 0) out.scheduled_minutes = serviceMinutes;
   return out;
+}
+
+function headerScore(headers, map) {
+  const h = headers.map(normalize);
+  let score = Object.keys(map).length;
+  if (h[0] === 'timestamp') score += 12;
+  if (h.includes('service minutes')) score += 8;
+  if (h.includes('clean minutes')) score += 10;
+  if (h.includes('area of service')) score += 8;
+  if (h.includes('location of services')) score += 8;
+  if (h.some(x => x.startsWith('quantitative'))) score += 10;
+  if (h.some(x => x.startsWith('qualitative'))) score += 10;
+  return score;
 }
 
 function get(row, map, key) { return map[key] == null ? "" : cellText(row[map[key]]); }
@@ -223,20 +245,36 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       if (raw.length < 2) throw new Error('No data rows were found.');
       if (raw.length - 1 > MAX_ROWS) throw new Error(`This file has more than ${MAX_ROWS} rows. Split it into smaller imports.`);
 
-      let headerIndex = 0, map = indexMap((raw[0] || []).map(cellText)); let bestScore = Object.keys(map).length;
-      for (let hi = 1; hi < Math.min(raw.length, 12); hi++) { const candidate = indexMap((raw[hi] || []).map(cellText)); const score = Object.keys(candidate).length; if (score > bestScore) { headerIndex = hi; map = candidate; bestScore = score; } }
-      const sample = raw.slice(headerIndex + 1, Math.min(raw.length, headerIndex + 31)); const width = Math.max(...sample.map(r => r.length), 0);
+      let headerIndex = 0, map = indexMap((raw[0] || []).map(cellText)); let bestScore = headerScore((raw[0] || []).map(cellText), map);
+      for (let hi = 1; hi < Math.min(raw.length, 12); hi++) {
+        const headers = (raw[hi] || []).map(cellText); const candidate = indexMap(headers); const score = headerScore(headers, candidate);
+        if (score > bestScore) { headerIndex = hi; map = candidate; bestScore = score; }
+      }
+      const sample = raw.slice(headerIndex + 1, Math.min(raw.length, headerIndex + 51)); const width = Math.max(...sample.map(r => r.length), 0);
 
-      if (map.student == null && (map.first_name == null || map.last_name == null)) {
-        let bestColumn = -1, bestHits = 0;
-        for (let c = 0; c < width; c++) { const hits = sample.filter(r => resolveStudent(r[c])).length; if (hits > bestHits) { bestHits = hits; bestColumn = c; } }
-        if (bestColumn >= 0 && bestHits >= Math.max(1, Math.ceil(sample.length * 0.2))) map.student = bestColumn;
+      // Data beats a misleading header. Always score every column against the
+      // actual CaseCue roster and use the strongest unique student-name column.
+      let bestStudentColumn = -1, bestStudentHits = 0, secondStudentHits = 0;
+      for (let c = 0; c < width; c++) {
+        const hits = sample.filter(r => resolveStudent(r[c])).length;
+        if (hits > bestStudentHits) { secondStudentHits = bestStudentHits; bestStudentHits = hits; bestStudentColumn = c; }
+        else if (hits > secondStudentHits) secondStudentHits = hits;
       }
-      if (map.date == null) {
-        let bestColumn = -1, bestRatio = 0;
-        for (let c = 0; c < width; c++) { const vals = sample.map(r => r[c]).filter(v => v !== '' && v != null); if (!vals.length) continue; const ratio = vals.filter(v => v instanceof Date || dateValue(v)).length / vals.length; if (ratio > bestRatio) { bestRatio = ratio; bestColumn = c; } }
-        if (bestColumn >= 0 && bestRatio >= 0.7) map.date = bestColumn;
+      if (bestStudentColumn >= 0 && bestStudentHits >= Math.max(2, Math.ceil(sample.length * 0.15)) && bestStudentHits > secondStudentHits) map.student = bestStudentColumn;
+
+      // Prefer the session-date column over the Google Forms submission timestamp.
+      let bestDateColumn = -1, bestDateScore = -1;
+      for (let c = 0; c < width; c++) {
+        const vals = sample.map(r => r[c]).filter(v => v !== '' && v != null); if (!vals.length) continue;
+        const valid = vals.filter(v => v instanceof Date || dateValue(v)).length; const ratio = valid / vals.length;
+        if (ratio < 0.7) continue;
+        const header = normalize(cellText(raw[headerIndex]?.[c]));
+        const timestampPenalty = header.includes('timestamp') ? 0.2 : 0;
+        const dateHeaderBonus = /^\d{1,2}\s\d{1,2}\s\d{2,4}$/.test(header) || header.includes('session date') || header === 'date' ? 0.3 : 0;
+        const score = ratio + dateHeaderBonus - timestampPenalty;
+        if (score > bestDateScore) { bestDateScore = score; bestDateColumn = c; }
       }
+      if (bestDateColumn >= 0) map.date = bestDateColumn;
       if (map.date == null) throw new Error('CaseCue could not identify the session date. Add a Date/Session Date column or keep the Google Forms Timestamp column.');
       if (map.student == null && (map.first_name == null || map.last_name == null)) throw new Error('CaseCue could not identify the student column. Use Student Name, First/Last Name, or names matching your CaseCue roster.');
 
@@ -254,8 +292,10 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         const duration = noServiceStatuses.includes(status) ? 0 : (delivered ?? statedDuration ?? minutesBetween(start, end));
 
         const parsedQuant = quantitativeValues(rawQuant);
-        const correct = num(get(r, map, 'correct')) ?? parsedQuant.correct; const total = num(get(r, map, 'total')) ?? parsedQuant.total;
-        let pct = percentValue(get(r, map, 'percentage')) ?? parsedQuant.percentage; if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
+        const correct = map.correct != null ? (num(get(r, map, 'correct')) ?? parsedQuant.correct) : parsedQuant.correct;
+        const total = map.total != null ? (num(get(r, map, 'total')) ?? parsedQuant.total) : parsedQuant.total;
+        let pct = map.percentage != null ? percentValue(get(r, map, 'percentage')) : parsedQuant.percentage;
+        if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
         const goalText = get(r, map, 'goal') || get(r, map, 'service_type'); const gid = goalFor(sid, goalText); const activity = get(r, map, 'activity') || get(r, map, 'service_type') || goalText || 'Imported session';
         const key = `${sid}|${date}|${start || ''}|${normalize(activity)}`;
         return { row: i + headerIndex + 2, student_name: full, student_id: sid, date, start_time: start, end_time: end, duration_minutes: duration ?? null, provider: get(r, map, 'provider'), service_type: enumValue(get(r, map, 'service_type'), 'service'), delivery: enumValue(get(r, map, 'delivery'), 'delivery'), setting: enumValue(get(r, map, 'setting'), 'setting'), location: get(r, map, 'location'), goal_text: goalText, goal_id: gid, activity, scheduled_minutes: scheduled ?? statedDuration ?? (duration ?? null), delivered_minutes: delivered ?? duration ?? null, status, correct, total, percentage: pct, quantitative_note: rawQuant, qualitative, follow_up_note: get(r, map, 'follow_up_note'), duplicate: !!(sid && date && duplicateKeys.has(key)) };
