@@ -25,13 +25,16 @@ const goalAreaOf = (goalId, goals) => {
 const byDate = (arr) => (arr || []).slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 const round1 = (n) => Math.round(n * 10) / 10;
 const pctOfScore = (a) => (a.score_possible > 0 ? round1((a.score_earned / a.score_possible) * 100) : 0);
+const sessionHasStudent = (s, id) => s?.student_id === id || (s?.student_ids || []).includes(id);
+const sessionMinutes = (s) => Number(s?.delivered_minutes ?? s?.duration_minutes ?? s?.minutes ?? 0) || 0;
+const sessionNotes = (s) => s?.qualitative || s?.notes || s?.quantitative?.raw || "";
 
 // ============ Student Report ============
 
 export function buildStudentDataReport({ student, goals = [], progress = [], sessions = [], assignments = [] }) {
   const sGoals = goals.filter((g) => g.student_id === student.id);
   const sProg = byDate(progress.filter((p) => p.student_id === student.id));
-  const sSess = byDate(sessions.filter((s) => (s.student_ids || []).includes(student.id)));
+  const sSess = byDate(sessions.filter((s) => sessionHasStudent(s, student.id)));
   const sAsg = byDate(assignments.filter((a) => a.student_id === student.id));
 
   const infoRows = [
@@ -64,7 +67,7 @@ export function buildStudentDataReport({ student, goals = [], progress = [], ses
     p.prompting_level || "—",
     (p.observation_notes || "").slice(0, 40),
   ]);
-  const sessRows = sSess.map((s) => [s.date, s.delivery || "—", s.minutes ?? "—", (s.notes || "").slice(0, 40)]);
+  const sessRows = sSess.map((s) => [s.date, s.delivery || "—", sessionMinutes(s), sessionNotes(s).slice(0, 80)]);
   const asgRows = sAsg.map((a) => [a.date || "—", (a.title || "").slice(0, 40), a.score_earned ?? "—", a.score_possible ?? "—", pctOfScore(a)]);
 
   return {
@@ -102,7 +105,7 @@ export function buildStudentDataReport({ student, goals = [], progress = [], ses
 export function buildCaseloadDataReport({ students = [], goals = [], progress = [], sessions = [], assignments = [] }) {
   const rows = students.map((st) => {
     const sp = byDate(progress.filter((p) => p.student_id === st.id));
-    const ss = sessions.filter((s) => (s.student_ids || []).includes(st.id));
+    const ss = sessions.filter((s) => sessionHasStudent(s, st.id));
     const sa = assignments.filter((a) => a.student_id === st.id);
     const pcts = sa.filter((a) => a.score_possible > 0).map(pctOfScore);
     return [
@@ -112,7 +115,7 @@ export function buildCaseloadDataReport({ students = [], goals = [], progress = 
       sp.length,
       sp.length ? sp[sp.length - 1].percentage ?? "—" : "—",
       ss.length,
-      ss.reduce((n, s) => n + (s.minutes || 0), 0),
+      ss.reduce((n, s) => n + sessionMinutes(s), 0),
       sa.length,
       pcts.length ? round1(pcts.reduce((a, b) => a + b, 0) / pcts.length) : "—",
     ];
@@ -220,8 +223,8 @@ export function buildServiceDeliveryReport({ students = [], sessions = [], sched
     const scheduled = activeSchedule
       .filter((e) => (e.student_ids || []).includes(st.id))
       .reduce((n, e) => n + (e.service_minutes || 0), 0);
-    const mine = sessions.filter((s) => (s.student_ids || []).includes(st.id));
-    const delivered = mine.reduce((n, s) => n + (s.minutes || 0), 0);
+    const mine = sessions.filter((s) => sessionHasStudent(s, st.id));
+    const delivered = mine.reduce((n, s) => n + sessionMinutes(s), 0);
     const pct = scheduled > 0 ? round1((delivered / scheduled) * 100) : null;
     return [
       studentName(st),
@@ -239,8 +242,8 @@ export function buildServiceDeliveryReport({ students = [], sessions = [], sched
     s.date,
     s.goal_area || "—",
     s.delivery || "—",
-    s.minutes ?? "—",
-    (s.student_ids || []).length,
+    sessionMinutes(s) || "—",
+    s.student_id ? 1 : (s.student_ids || []).length,
     (s.notes || "").slice(0, 40),
   ]);
 
@@ -372,11 +375,11 @@ export function buildMeetingPrepReport({ meetings = [], students = [], goals = [
             recentProg.map((p) => [p.date, goalAreaOf(p.goal_id, goals), p.percentage ?? "—", p.prompting_level || "—"]))
         );
       }
-      const recentSess = byDate(sessions.filter((s) => (s.student_ids || []).includes(st.id))).slice(-5).reverse();
+      const recentSess = byDate(sessions.filter((s) => sessionHasStudent(s, st.id))).slice(-5).reverse();
       if (recentSess.length) {
         sections.push(
           tableSection(`${studentName(st)} — Recent Sessions`, ["Date", "Delivery", "Minutes"],
-            recentSess.map((s) => [s.date, s.delivery || "—", s.minutes ?? "—"]))
+            recentSess.map((s) => [s.date, s.delivery || "—", sessionMinutes(s) || "—"]))
         );
       }
     }
@@ -396,7 +399,7 @@ export function buildMeetingPrepReport({ meetings = [], students = [], goals = [
 
 export function buildParentProgressReport({ student, goals = [], progress = [], sessions = [] }) {
   const sGoals = goals.filter((g) => g.student_id === student.id);
-  const totalMinutes = sessions.filter((s) => (s.student_ids || []).includes(student.id)).reduce((n, s) => n + (s.minutes || 0), 0);
+  const totalMinutes = sessions.filter((s) => sessionHasStudent(s, student.id)).reduce((n, s) => n + sessionMinutes(s), 0);
 
   const lines = [];
   sGoals.forEach((g) => {
@@ -424,7 +427,7 @@ export function buildParentProgressReport({ student, goals = [], progress = [], 
     sections: [
       textSection("Overview", [
         `This report summarizes ${student.first_name}'s recorded progress on IEP goals, in everyday language.`,
-        `${sessions.filter((s) => (s.student_ids || []).includes(student.id)).length} session(s) logged · ${totalMinutes} total minutes of recorded service.`,
+        `${sessions.filter((s) => sessionHasStudent(s, student.id)).length} session(s) logged · ${totalMinutes} total minutes of recorded service.`,
       ]),
       sGoals.length ? textSection("Goal-by-Goal Progress", lines) : textSection("Goal-by-Goal Progress", "No IEP goals are recorded yet."),
       textSection("Notes", [
