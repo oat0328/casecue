@@ -41,6 +41,33 @@
       "default": "Other",
       "title": "Document Type"
     },
+    "iep_role": {
+      "type": "string",
+      "enum": [
+        "historical",
+        "current",
+        "draft",
+        "final",
+        "supporting",
+        "not_applicable"
+      ],
+      "default": "not_applicable",
+      "title": "IEP Lifecycle Role"
+    },
+    "iep_cycle_id": {
+      "type": "string",
+      "title": "IEP Cycle ID"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Document Effective Date"
+    },
+    "meeting_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Related Meeting Date"
+    },
     "date_uploaded": {
       "type": "string",
       "format": "date",
