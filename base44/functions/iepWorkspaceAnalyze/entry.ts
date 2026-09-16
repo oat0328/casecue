@@ -16,12 +16,17 @@ export default async function(req) {
     if (!workspace) return Response.json({ error: 'Workspace not found.' }, { status: 404 });
 
     const student = await base44.entities.Student.get(workspace.student_id);
-    const documents = await base44.entities.Document.filter({ student_id: workspace.student_id }, '-date_uploaded', 6);
+    const documents = (await base44.entities.Document.filter({ student_id: workspace.student_id }, '-date_uploaded', 50))
+      .filter((d) => d.extraction_status === 'processed');
     if (!documents || !documents.length) {
       return Response.json({ error: 'Upload at least one document (the current IEP or the latest evaluation report) before extraction.' }, { status: 400 });
     }
 
-    const docIndex = documents.map((d, i) => `DOCUMENT ${i + 1}: "${d.filename}" (${d.document_type})`).join('\n');
+    const docIndex = documents.map((d, i) => {
+      const pages = d.processing_results?.pages || [];
+      const savedExtraction = JSON.stringify({ pages }).slice(0, 24000);
+      return `DOCUMENT ${i + 1}: "${d.filename}" (${d.document_type})\nSAVED PAGE EXTRACTION:\n${savedExtraction}`;
+    }).join('\n\n').slice(0, 120000);
 
     const schema = {
       type: 'object',
@@ -79,6 +84,9 @@ STRICT EXTRACTION RULES:
 - Anything an IEP needs that the documents do not cover goes under gaps — never invent it.
 - If two documents disagree on something, list it under conflicts.
 - Keep each fact concise and factual: dates, scores, service minutes, accommodations, statements, eligibility, evaluation findings.
+- Read and extract ALL saved page content, including questions_and_answers, present_level_evidence, goal_evidence, and evaluation_findings.
+- For MDT/evaluation reports, extract each measurable finding that can support present levels and aligned goals. Do not convert recommendations into team decisions.
+- Explicitly extract unanswered document prompts as gaps instead of inventing an answer.
 
 DOCUMENTS:
 ${docIndex}
@@ -89,7 +97,6 @@ Return JSON matching the schema.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
-      file_urls: documents.map((d) => d.file_url),
       model: 'automatic',
       response_json_schema: schema
     });
