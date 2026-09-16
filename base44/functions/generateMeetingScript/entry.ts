@@ -107,18 +107,22 @@ OPENING:
 - State the purpose in one or two simple sentences ONLY when the meeting type is verified. If it is not verified, say: "We are here today to review [Student]'s information, talk through the IEP together, and make sure the team has a chance to share input." Do not label it annual/MET/reevaluation/eligibility/amendment.
 - Invite introductions and parent input early.
 - Keep the opening short enough to actually say in a meeting. No robotic language.
+- MODEL THE SPEAKING STYLE on this exact pattern (adapt names/purpose only when verified): "Thank you. Good afternoon everyone. My name is [Name], and I'm [Student]'s special education resource teacher. I'm going to take us through [Student]'s IEP. We'll go page by page so it's easy for everyone to follow." Then: "Alright, let's start on page 1."
+- The entire flow should feel like a teacher's clean read-aloud notes, not an AI report.
 
 PAGE FLOW:
 - Walk through the CURRENT IEP from page 1 through the final page in exact order. Produce ONE page_flow item for EVERY source page, including procedural/signature/blank pages.
 - Never combine page ranges such as "pages 4-6." Say "Page 4", then "Page 5", then "Page 6" separately.
 - For every page provide: page_number, section_name, say_this, ask_team, facilitator_note, and source.
-- say_this must be a REAL facilitator script, not a one-sentence page caption. For substantive pages, use roughly 3-7 short spoken sentences: (1) orient the team to the page/section, (2) explain the important information in easy words, (3) state the key verified numbers/details, and (4) connect it to why the information matters for the student's IEP when the source supports that connection.
+- say_this must be a REAL facilitator script, not a one-sentence page caption. For substantive pages, use roughly 3-7 short spoken sentences: (1) start with "Page [N] is..." / "Page [N] covers..." / "Page [N] is where we...", (2) explain the important information in easy words, (3) state the key verified numbers/details, and (4) connect it to why the information matters when the source supports that connection.
+- End most pages with a natural transition such as "Alright, let's move to page [N+1]." Keep transitions short and varied. Do not use corporate/clinical filler.
 - Preserve all important facts, dates, assessment names/scores, goal skill/condition/criterion, services/minutes/frequency/location, accommodations, placement/LRE information, procedural information, and documented decisions. Never reduce a detailed page to only "this page reviews..." when the source contains useful specifics.
 - Present levels must include the actual current-performance evidence available, not only test names and scores. Goals must explain what skill is being worked on and the measurable criterion. Services must state minutes/frequency and setting when documented. Accommodations should be grouped/explained in practical language rather than dumped as a comma list.
 - When recent progress data is available in the verified student record but is newer than the source IEP, clearly label it as "current progress since this IEP" and use it at the most relevant goal/present-level page; never pretend it was printed on the old IEP page.
 - Do not read boilerplate word-for-word when a short parent-friendly explanation preserves its meaning. For procedural/legal pages, explain what the page is for in plain language and identify any action/signature documented.
 - If a page is blank or has no substantive content, say that briefly and move on; never fabricate content.
-- At natural decision points, pause and ask the parent/team a short, useful question. Examples: "Does that match what you're seeing at home?" "Teacher, is this still accurate in class?" "Does anyone have anything to add before we move on?" Do not force a question onto every page, and never answer for the parent or team.
+- At natural decision points, pause and ask the parent/team a short, useful question. Examples: "Mom and Dad, does that still sound accurate to you?" "Is there anything he's doing really well with right now that you want us to include?" "Does anybody have any questions or concerns about that?" Do not force a question onto every page, and never answer for the parent or team.
+- Use plain phrases like "Basically...", "So with writing...", "We're looking at...", and "Right now..." only when they make the explanation easier to say aloud. Keep the tone warm, confident, and natural.
 - If the source says a parent did not attend a PRIOR meeting, do not speak as if the current parent is absent. If the source records prior disagreement, say exactly that it was documented previously and invite the parent/team to clarify the concern today; do not claim it was resolved.
 - Explain acronyms the first time in plain language (for example, LRE, SDI, ESY) without turning the meeting into a lecture.
 - Clearly distinguish CURRENT DOCUMENTED information from PROPOSED/DRAFT changes. Never present a CaseCue draft as already agreed to by the team.
@@ -126,6 +130,7 @@ PAGE FLOW:
 
 CLOSING:
 - Because this script is generated BEFORE/DURING the meeting, do not claim today's team "addressed," "agreed," "decided," or "resolved" anything unless those decisions were actually captured during the current meeting. Recap what was reviewed, identify items that still need team discussion, and leave editable pauses for current-meeting decisions.
+- Closing style should be simple and spoken: "Alright, that brings us to the end of [Student]'s IEP." Briefly explain the next step if it is verified, ask the family if they have any final questions, thank everyone, and end with "That completes my portion of the meeting" when appropriate.
 - Ask whether the parent/guardian or team has any final questions or concerns.
 - End warmly and professionally.
 
