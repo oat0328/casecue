@@ -15,8 +15,10 @@ import GradebookCharts from "@/components/gradebook/GradebookCharts";
 import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
 import { GRADEBOOK_REPORT_DEFINITIONS } from "@/lib/gradebookReporting";
 import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
+import BatchWorkEvidencePanel from "@/components/evidence/BatchWorkEvidencePanel";
+import { formatDate, todayISO } from "@/lib/dateUtils";
 
-const emptyForm = () => ({ student_id: "", goal_id: "", title: "", course: "", gen_ed_teacher: "", assignment_type: "", term: "", score_earned: "", score_possible: "", current_grade_percent: "", current_grade_letter: "", missing_assignment: false, accommodations_provided: "unknown", notes: "", date: new Date().toISOString().slice(0,10) });
+const emptyForm = () => ({ student_id: "", goal_id: "", title: "", course: "", gen_ed_teacher: "", assignment_type: "", term: "", score_earned: "", score_possible: "", current_grade_percent: "", current_grade_letter: "", missing_assignment: false, accommodations_provided: "unknown", notes: "", date: todayISO() });
 const clean = (v) => String(v ?? "").trim();
 const normalize = (v) => clean(v).toLowerCase().replace(/[^a-z0-9]/g, "");
 const csvCell = (v) => `"${String(v ?? "").replaceAll('"','""')}"`;
@@ -80,7 +82,7 @@ export default function Gradebook() {
         if (!student) { skipped++; continue; }
         const title = idx.title >= 0 ? clean(row[idx.title]) : "Gen Ed grade update";
         const rawDate = idx.date >= 0 ? row[idx.date] : "";
-        let date = new Date().toISOString().slice(0,10);
+        let date = todayISO();
         if (rawDate instanceof Date) date = rawDate.toISOString().slice(0,10);
         else if (clean(rawDate)) { const d = new Date(rawDate); if (!Number.isNaN(d.getTime())) date = d.toISOString().slice(0,10); }
         await base44.entities.GradebookAssignment.create({
@@ -95,17 +97,17 @@ export default function Gradebook() {
 
   const exportCsv = () => {
     const headers = ["Student","Course","Gen Ed Teacher","Assignment","Assignment Type","Points Earned","Points Possible","Current Grade Percent","Letter Grade","Missing Assignment","Accommodations Provided","Quarter/Term","Date","Notes"];
-    const body = (assignments || []).map((a) => [studentName(a.student_id),a.course,a.gen_ed_teacher,a.title,a.assignment_type,a.score_earned,a.score_possible,a.current_grade_percent,a.current_grade_letter,a.missing_assignment?"Yes":"No",a.accommodations_provided,a.term,a.date,a.notes].map(csvCell).join(","));
+    const body = (assignments || []).map((a) => [studentName(a.student_id),a.course,a.gen_ed_teacher,a.title,a.assignment_type,a.score_earned,a.score_possible,a.current_grade_percent,a.current_grade_letter,a.missing_assignment?"Yes":"No",a.accommodations_provided,a.term,formatDate(a.date),a.notes].map(csvCell).join(","));
     const blob = new Blob([[headers.map(csvCell).join(","), ...body].join("\n")], {type:"text/csv;charset=utf-8"});
-    const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download=`casecue-gen-ed-grades-${new Date().toISOString().slice(0,10)}.csv`; link.click(); URL.revokeObjectURL(url);
+    const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download=`casecue-gen-ed-grades-${todayISO()}.csv`; link.click(); URL.revokeObjectURL(url);
   };
 
   const remove = async (id) => { await base44.entities.GradebookAssignment.delete(id); refetch(); };
 
   return <div>
-    <PageHeader title="Gradebook" subtitle="Gen Ed grades, assignments, IEP goal connections, drag-and-drop imports, and easy exports." icon={GraduationCap} />
+    <PageHeader title="Gradebook" subtitle="Gen Ed grades, student work, IEP goal connections, and fast evidence review." icon={GraduationCap} />
     <Tabs defaultValue="assignments">
-      <TabsList className="mb-4"><TabsTrigger value="assignments">Gen Ed Grades</TabsTrigger><TabsTrigger value="import">Drag & Drop</TabsTrigger><TabsTrigger value="upload">Upload & Grade Work</TabsTrigger><TabsTrigger value="charts">Charts</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
+      <TabsList className="mb-4 flex-wrap h-auto"><TabsTrigger value="assignments">Gen Ed Grades</TabsTrigger><TabsTrigger value="import">Drag & Drop</TabsTrigger><TabsTrigger value="upload">Quick Grade</TabsTrigger><TabsTrigger value="stackscan">StackScan</TabsTrigger><TabsTrigger value="charts">Charts</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
       <TabsContent value="assignments">
         <Card className="p-6 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary"/> Add Gen Ed grade</h3>
@@ -129,7 +131,7 @@ export default function Gradebook() {
           <Button onClick={add} disabled={saving} className="brand-gradient text-white mt-5"><Plus className="h-4 w-4 mr-1"/>{saving?"Saving…":"Add Grade"}</Button>
         </Card>
         <div className="flex justify-end mb-3"><Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-2"/>Export CSV</Button></div>
-        <div className="space-y-2">{(assignments||[]).map(a=><Card key={a.id} className="p-4 flex items-center gap-4"><div className="flex-1"><div className="font-medium">{studentName(a.student_id)} · {a.course||"Gen Ed"}</div><div className="text-sm">{a.title}</div><div className="text-xs text-muted-foreground">{a.gen_ed_teacher||"Teacher not entered"} · {a.date}{a.term?` · ${a.term}`:""}{a.accommodations_provided?` · Accommodations: ${a.accommodations_provided}`:""}</div></div><div className="text-right"><div className="font-semibold">{a.current_grade_percent!=null?`${a.current_grade_percent}%`:a.score_possible>0?`${pct(a)}%`:"—"}</div><div className="text-sm">{a.current_grade_letter||""}</div>{a.missing_assignment&&<div className="text-xs text-rose-600 font-medium">Missing</div>}</div><Button variant="ghost" size="icon" onClick={()=>remove(a.id)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></Card>)}</div>
+        <div className="space-y-2">{(assignments||[]).map(a=><Card key={a.id} className="p-4 flex items-center gap-4"><div className="flex-1"><div className="font-medium">{studentName(a.student_id)} · {a.course||"Gen Ed"}</div><div className="text-sm">{a.title}</div><div className="text-xs text-muted-foreground">{a.gen_ed_teacher||"Teacher not entered"} · {formatDate(a.date)}{a.term?` · ${a.term}`:""}{a.accommodations_provided?` · Accommodations: ${a.accommodations_provided}`:""}</div></div><div className="text-right"><div className="font-semibold">{a.current_grade_percent!=null?`${a.current_grade_percent}%`:a.score_possible>0?`${pct(a)}%`:"—"}</div><div className="text-sm">{a.current_grade_letter||""}</div>{a.missing_assignment&&<div className="text-xs text-rose-600 font-medium">Missing</div>}</div><Button variant="ghost" size="icon" onClick={()=>remove(a.id)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></Card>)}</div>
       </TabsContent>
       <TabsContent value="import">
         <Card className={`p-8 border-2 border-dashed text-center transition ${dragging?'border-primary bg-primary/5':'border-border'}`} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);importFile(e.dataTransfer.files?.[0])}}>
@@ -139,6 +141,7 @@ export default function Gradebook() {
         </Card>
       </TabsContent>
       <TabsContent value="upload"><WorkEvidencePanel students={students||[]} goals={goals||[]}/></TabsContent>
+      <TabsContent value="stackscan"><BatchWorkEvidencePanel students={students||[]} goals={goals||[]} onSaved={refetch}/></TabsContent>
       <TabsContent value="charts"><GradebookCharts assignments={assignments||[]} sessions={sessions||[]} students={students||[]} goals={goals||[]}/></TabsContent>
       <TabsContent value="reports"><ReportBuilderPanel definitions={GRADEBOOK_REPORT_DEFINITIONS} data={{students:students||[],goals:goals||[],assignments:assignments||[],sessions:sessions||[]}} heading="Gradebook Reports"/></TabsContent>
     </Tabs>
