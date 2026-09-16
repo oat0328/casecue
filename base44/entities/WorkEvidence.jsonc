@@ -108,7 +108,8 @@
         "auto_filed",
         "needs_review",
         "approved",
-        "rejected"
+        "rejected",
+        "duplicate"
       ],
       "default": "needs_review",
       "title": "Review Status"
@@ -116,6 +117,10 @@
     "duplicate_fingerprint": {
       "type": "string",
       "title": "Duplicate Fingerprint"
+    },
+    "duplicate_of_evidence_id": {
+      "type": "string",
+      "title": "Duplicate Of Work Evidence ID"
     },
     "evidence_strength": {
       "type": "string",
@@ -133,6 +138,10 @@
         "type": "string"
       },
       "title": "Teacher Confirmed Supports"
+    },
+    "progress_data_id": {
+      "type": "string",
+      "title": "Linked Progress Data ID"
     }
   },
   "required": [
