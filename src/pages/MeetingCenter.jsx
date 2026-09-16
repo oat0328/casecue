@@ -124,7 +124,7 @@ export default function MeetingCenter() {
             <div className="text-sm whitespace-pre-wrap leading-relaxed">{prep.content}</div>
             <ExportBar
               title={`Meeting Prep — ${prep.meeting.title}`}
-              subtitle="AI meeting preparation"
+              subtitle="Meeting preparation"
               filename={`Meeting-Prep-${prep.meeting.title}`}
               sections={[{ heading: "Meeting Preparation", body: prep.content }]}
               gated

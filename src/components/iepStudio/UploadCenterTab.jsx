@@ -420,7 +420,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
           </div>
         )}
         <p className="text-xs text-muted-foreground mt-4">
-          Files are stored privately — only your organization can open them. Each document is read once (duplicates are blocked) to keep AI credit use predictable.
+          Files are stored privately — only your organization can open them. Each document is read once (duplicates are blocked) to keep processing use predictable.
         </p>
       </Card>
     </div>

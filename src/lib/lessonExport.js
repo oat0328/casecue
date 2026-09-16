@@ -73,7 +73,7 @@ export function buildLessonHtml(lesson, students, goals) {
   ${practice ? `<h2>Original Practice Materials</h2>${practice}` : ""}
   <div class="banner ${lesson.status === "approved" ? "approved" : ""}">
     ${lesson.status === "approved"
-      ? "Teacher-reviewed and approved in CaseCue. Generated with AI assistance — CaseCue never guarantees IEP compliance."
+      ? "Teacher-reviewed and approved in CaseCue. Generated with system assistance — educator review is required and CaseCue does not guarantee IEP compliance."
       : "Draft — Teacher Review Required. system-assisted content must be reviewed by the educator before use. CaseCue never guarantees IEP compliance."}
   </div>
   </body></html>`;

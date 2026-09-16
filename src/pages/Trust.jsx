@@ -72,8 +72,8 @@ export default function Trust() {
             <p>Sensitive actions are recorded in a tamper-restricted audit log visible only to administrators. Logged actions include logins, document uploads and processing, exports and shares, subscription and billing changes, and administrative actions.</p>
           </Section>
 
-          <Section heading="AI safeguards & the human review model">
-            <p>Every AI feature in CaseCue follows one rule: CaseCue assists, educators decide, students come first. Concretely:</p>
+          <Section heading="Assisted-processing safeguards & the human review model">
+            <p>Every assisted feature in CaseCue follows one rule: CaseCue assists, educators decide, students come first. Concretely:</p>
             <p>• generated drafts are always labeled as drafts requiring educator review — they are never presented as final, compliant, or certified.</p>
             <p>• The system never invents student facts. When information is missing or conflicting, CaseCue says so instead of guessing.</p>
             <p>• Extracted data shows its source — which document, which page, and a confidence rating — so you can verify everything.</p>

@@ -17,7 +17,7 @@ const STEPS = [
   },
   {
     icon: FileEdit,
-    title: "Draft IEPs with AI",
+    title: "Draft IEPs from your records",
     body: "IEP Studio drafts present levels and annual goals from your recorded data. Everything is labeled Draft and requires your review — the The system never invents student facts.",
   },
   {

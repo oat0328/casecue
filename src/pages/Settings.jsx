@@ -138,7 +138,7 @@ export default function Settings() {
 
   return (
     <div>
-      <PageHeader title="Settings" subtitle="Manage your profile, organization, AI, privacy, and subscription." icon={SettingsIcon} />
+      <PageHeader title="Settings" subtitle="Manage your profile, organization, processing, privacy, and subscription." icon={SettingsIcon} />
 
       <Tabs defaultValue="profile">
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
@@ -194,7 +194,7 @@ export default function Settings() {
 
         <TabsContent value="privacy"><Card className="p-6 max-w-lg">
           <h3 className="font-semibold mb-2">Privacy & security</h3>
-          <p className="text-sm text-muted-foreground mb-4">CaseCue is designed with FERPA-focused privacy and security controls for authorized education use. We do not claim FERPA or HIPAA certification. Features include private document storage, row-level access control, audit logging, minimum-necessary AI, one-click data export, and data deletion requests.</p>
+          <p className="text-sm text-muted-foreground mb-4">CaseCue is designed with FERPA-focused privacy and security controls for authorized education use. We do not claim FERPA or HIPAA certification. Features include private document storage, row-level access control, audit logging, minimum-necessary processing, one-click data export, and data deletion requests.</p>
           <div className="rounded-xl border border-border p-4">
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" checked={acknowledged} onChange={acknowledge} className="mt-0.5" />
