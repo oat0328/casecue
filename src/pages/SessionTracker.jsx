@@ -22,7 +22,7 @@ const TABS = [
   { key: "detailed", label: "Detailed Entry", sub: "Full session record", icon: ClipboardList },
   { key: "group", label: "Group Session", sub: "One group, separate student records", icon: Users },
   { key: "log", label: "Student Log", sub: "Minutes, goals & history", icon: Clock3 },
-  { key: "import", label: "Import", sub: "Bring in session spreadsheets", icon: FileUp },
+  { key: "import", label: "10,000-Entry Import", sub: "Bulk session tracking system", icon: FileUp },
   { key: "reports", label: "Reports", sub: "Caseload analytics & exports", icon: BarChart3 },
 ];
 
@@ -32,7 +32,8 @@ export default function SessionTracker() {
   const [tab, setTab] = useState("quick");
   const [logStudentId, setLogStudentId] = useState("");
   const [searchParams] = useSearchParams();
-  const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
+  const { data: rawStudents } = useAsync(() => base44.entities.Student.list('-last_name', 500), []);
+  const students = useMemo(() => [...(rawStudents || [])].sort((a,b)=>`${a.last_name||''},${a.first_name||''}`.localeCompare(`${b.last_name||''},${b.first_name||''}`,undefined,{sensitivity:'base'})), [rawStudents]);
   const { data: sessions, refetch: refetchSessions } = useAsync(() => base44.entities.SessionRecord.filter({}, '-date', 500), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-created_date',1000), []);
   const { data: scheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list('-created_date',500), []);
@@ -82,7 +83,7 @@ export default function SessionTracker() {
           <div className="max-w-3xl">
             <div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">CaseCue Service Documentation</div>
             <div className="mt-3 flex items-center gap-3"><div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10"><Timer className="h-6 w-6 text-sky-300"/></div><h1 className="text-3xl sm:text-4xl font-black tracking-tight">Session Tracker</h1></div>
-            <p className="mt-3 max-w-2xl text-sm sm:text-base leading-7 text-slate-300">Capture individual or group sessions fast, tie instruction to IEP goals, track delivered minutes, import historical logs, and leave with clean progress evidence instead of another spreadsheet.</p>
+            <p className="mt-3 max-w-2xl text-sm sm:text-base leading-7 text-slate-300">Your full service-data system: individual and group sessions, weekly quantitative and qualitative notes, IEP-goal alignment, delivered minutes, reports, and the 10,000-entry historical import engine.</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 min-w-[320px]">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3"><div className="text-2xl font-black">{todaySessions.length}</div><div className="text-[11px] text-slate-400">Sessions today</div></div>
