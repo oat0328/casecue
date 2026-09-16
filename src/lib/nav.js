@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Users, FileEdit, ShieldCheck, BarChart3,
   CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
   FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown, Timer,
-  LifeBuoy, TicketPercent, Library, Archive, ClipboardCheck, Settings2, Blocks
+  LifeBuoy, TicketPercent, Library, Archive, ClipboardCheck, Settings2, Blocks, Plug
 } from "lucide-react";
 
 export const navItems = [
@@ -29,6 +29,7 @@ export const navItems = [
   { label: "Ask CaseCue", path: "/ask-casecue", icon: MessageCircle },
   { label: "Help Center", path: "/help", icon: LifeBuoy },
   { label: "Configuration Center", path: "/configuration", icon: Settings2 },
+  { label: "Integrations", path: "/integrations", icon: Plug },
   { label: "Settings", path: "/settings", icon: Settings },
   { label: "Admin", path: "/admin", icon: ShieldCheck, adminOnly: true },
   { label: "Promo Codes", path: "/promo-codes", icon: TicketPercent, adminOnly: true },
