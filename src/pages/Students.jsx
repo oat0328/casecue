@@ -52,7 +52,11 @@ export default function Students() {
   const [form, setForm] = useState(emptyForm);
 
   const filtered = useMemo(() => {
-    const list = students || [];
+    const list = [...(students || [])].sort((a, b) =>
+      `${a.first_name || ""} ${a.last_name || ""}`.trim().localeCompare(
+        `${b.first_name || ""} ${b.last_name || ""}`.trim(), undefined, { sensitivity: "base", numeric: true }
+      )
+    );
     if (!query.trim()) return list;
     const q = query.toLowerCase();
     return list.filter((s) => `${s.first_name} ${s.last_name}`.toLowerCase().includes(q) || (s.eligibility_category || "").toLowerCase().includes(q));
