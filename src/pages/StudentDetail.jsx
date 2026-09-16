@@ -25,6 +25,8 @@ import EvaluationPanel from "@/components/students/EvaluationPanel";
 import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
 import InputRecordsPanel from "@/components/students/InputRecordsPanel";
 import SupportPlansPanel from "@/components/students/SupportPlansPanel";
+import StudentNotesPanel from "@/components/notes/StudentNotesPanel";
+import QuickNoteDialog from "@/components/notes/QuickNoteDialog";
 import { Library } from "lucide-react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine
@@ -54,6 +56,7 @@ export default function StudentDetail() {
   const { data: sessions } = useAsync(() => base44.entities.SessionRecord.filter({ student_id: id }, '-date', 300), [id]);
   const { data: workEvidence } = useAsync(() => base44.entities.WorkEvidence.filter({ student_id: id }, '-date', 200), [id]);
   const { data: phases, refetch: refetchPhases } = useAsync(() => base44.entities.InterventionPhase.filter({ student_id: id }, 'start_date', 100), [id]);
+  const { data: studentNotes, refetch: refetchStudentNotes } = useAsync(() => base44.entities.StudentNote.filter({ student_id: id }, '-date', 300), [id]);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(null);
@@ -66,7 +69,7 @@ export default function StudentDetail() {
   const [newProg, setNewProg] = useState({ date: new Date().toISOString().slice(0,10), goal_id: "", correct: "", total: "", observation_notes: "", prompting_level: "independent" });
   const [savingProg, setSavingProg] = useState(false);
 
-  const [newNote, setNewNote] = useState("");
+  const [quickNoteOpen, setQuickNoteOpen] = useState(false);
   const [genLoading, setGenLoading] = useState(false);
   const [bankOpen, setBankOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -144,12 +147,6 @@ export default function StudentDetail() {
     finally { setGenLoading(false); }
   };
 
-  const saveNote = async () => {
-    if (!newNote.trim()) return;
-    const updated = await base44.entities.Student.update(id, { notes: (student.notes ? student.notes + "\n\n" : "") + `[${new Date().toLocaleDateString()}] ${newNote}` });
-    setStudent(updated); setNewNote(""); toast({ title: "Note added" });
-  };
-
   const verifyDates = async () => {
     setVerifyingDates(true);
     try {
@@ -222,6 +219,7 @@ export default function StudentDetail() {
           ) : (
             <div className="flex flex-wrap gap-2">
               <Button className="bg-white text-slate-950 hover:bg-slate-100" onClick={() => navigate(`/iep-studio?student=${id}`)}>Open IEP Studio</Button>
+              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => setQuickNoteOpen(true)}><StickyNote className="h-4 w-4 mr-1"/>Add Note</Button>
               <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => navigate(`/session-tracker?student_id=${id}`)}>Log session</Button>
               <ExportGate documentName="IEP draft" onExport={() => exportIepPdf(student, goals || [])}>
                 <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-1" /> Export</Button>
@@ -445,7 +443,8 @@ export default function StudentDetail() {
               ...(workEvidence||[]).map(x=>({date:x.date||'',type:'Evidence',title:x.title||'Work evidence',detail:x.score_possible>0?`${x.score_earned}/${x.score_possible} (${x.percentage}%)`:(x.qualitative_notes||'Evidence saved')})),
               ...(meetings||[]).map(x=>({date:x.date||'',type:'Meeting',title:x.title||x.meeting_type||'Meeting',detail:x.status||'scheduled'})),
               ...(documents||[]).map(x=>({date:x.date_uploaded||'',type:'Document',title:x.filename||x.document_type||'Document',detail:x.document_type||'Uploaded record'})),
-            ].filter(x=>x.date).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,100).map((x,i)=><div key={`${x.type}-${x.date}-${i}`} className="flex gap-3 rounded-2xl border bg-white p-4"><div className="w-24 shrink-0 text-xs font-bold text-slate-500">{x.date}</div><div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xs font-black">{x.type[0]}</div><div className="min-w-0"><div className="text-xs font-black uppercase tracking-wider text-blue-700">{x.type}</div><div className="font-semibold">{x.title}</div><div className="text-sm text-slate-500 mt-0.5">{x.detail}</div></div></div>)}{![...(sessions||[]),...(progress||[]),...(workEvidence||[]),...(meetings||[]),...(documents||[])].length&&<div className="text-sm text-slate-500 py-8 text-center">No timeline records yet.</div>}</div>
+              ...(studentNotes||[]).filter(x=>x.status!=='deleted').map(x=>({date:x.date||'',type:'Note',title:x.title||'Student note',detail:x.description||'Note saved'})),
+            ].filter(x=>x.date).sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,100).map((x,i)=><div key={`${x.type}-${x.date}-${i}`} className="flex gap-3 rounded-2xl border bg-white p-4"><div className="w-24 shrink-0 text-xs font-bold text-slate-500">{x.date}</div><div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xs font-black">{x.type[0]}</div><div className="min-w-0"><div className="text-xs font-black uppercase tracking-wider text-blue-700">{x.type}</div><div className="font-semibold">{x.title}</div><div className="text-sm text-slate-500 mt-0.5">{x.detail}</div></div></div>)}{![...(sessions||[]),...(progress||[]),...(workEvidence||[]),...(meetings||[]),...(documents||[]),...(studentNotes||[])].length&&<div className="text-sm text-slate-500 py-8 text-center">No timeline records yet.</div>}</div>
           </Card>
         </TabsContent>
         <TabsContent value="input"><InputRecordsPanel student={student}/></TabsContent>
@@ -481,13 +480,11 @@ export default function StudentDetail() {
 
         {/* Notes */}
         <TabsContent value="notes">
-          <Card className="p-6">
-            <Textarea rows={4} value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Add a quick note…" />
-            <Button onClick={saveNote} className="brand-gradient text-white mt-3">Add note</Button>
-            <div className="mt-6 whitespace-pre-wrap text-sm">{student.notes || "No notes yet."}</div>
-          </Card>
+          <StudentNotesPanel student={student} onChanged={refetchStudentNotes}/>
+          {student.notes&&<Card className="p-5 mt-4 border-amber-100 bg-amber-50/30"><div className="text-xs font-black uppercase tracking-wider text-amber-800">Legacy profile notes</div><div className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{student.notes}</div><p className="mt-2 text-xs text-slate-500">Older free-text notes are preserved here. New notes use the structured Notes System above.</p></Card>}
         </TabsContent>
       </Tabs>
+      <QuickNoteDialog open={quickNoteOpen} onOpenChange={setQuickNoteOpen} studentId={student.id} onSaved={refetchStudentNotes}/>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
