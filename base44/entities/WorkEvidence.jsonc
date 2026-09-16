@@ -90,6 +90,49 @@
     "gradebook_assignment_id": {
       "type": "string",
       "title": "Gradebook Assignment ID"
+    },
+    "scan_run_id": {
+      "type": "string",
+      "title": "SmartStack Run ID"
+    },
+    "source_pages": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "title": "Source Pages"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "auto_filed",
+        "needs_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "needs_review",
+      "title": "Review Status"
+    },
+    "duplicate_fingerprint": {
+      "type": "string",
+      "title": "Duplicate Fingerprint"
+    },
+    "evidence_strength": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "supporting",
+        "classroom_only",
+        "needs_review"
+      ],
+      "title": "Evidence Strength"
+    },
+    "teacher_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Teacher Confirmed Supports"
     }
   },
   "required": [
