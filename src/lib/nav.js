@@ -3,7 +3,7 @@ export const navItems=[
  {label:'Command Center',path:'/app',icon:LayoutDashboard},
  {label:'Students',path:'/students',icon:Users},
  {label:'Instruction',path:'/instruction',icon:BookOpen},
- {label:'AI Gradebook',path:'/gradebook',icon:ScanLine},
+ {label:'Gradebook',path:'/gradebook',icon:ScanLine},
  {label:'Goals & Progress',path:'/progress',icon:BarChart3},
  {label:'IEP Center',path:'/ieps',icon:FileEdit},
  {label:'Communication',path:'/communication',icon:MessagesSquare},
