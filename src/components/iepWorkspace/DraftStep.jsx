@@ -79,8 +79,8 @@ export default function DraftStep({ workspace, save, onReviewed }) {
         {sections.map((s, i) => <SectionEditor key={s.key || i} section={s} onChange={(patch) => updateSection(i, patch)} />)}
       </div>
 
-      <h3 className="font-semibold text-lg pt-2">Measurable annual goals</h3>
-      <p className="text-xs text-muted-foreground -mt-2 mb-3">Each goal links to a present level and an evaluation finding. Accept, edit, or reject every goal.</p>
+      <h3 className="font-semibold text-lg pt-2">Measurable annual goal drafts</h3>
+      <p className="text-xs text-muted-foreground -mt-2 mb-3">These are proposals, not active goals. Each must link to a documented need, measurable baseline, present level, measurement method, and source evidence before educator/team adoption.</p>
       <div className="grid lg:grid-cols-2 gap-3">
         {goals.map((g, i) => <GoalCard key={i} goal={g} index={i} onChange={(patch) => updateGoal(i, patch)} />)}
         {goals.length === 0 && <p className="text-sm text-muted-foreground">No goals suggested — verify present levels and evaluation findings first.</p>}
