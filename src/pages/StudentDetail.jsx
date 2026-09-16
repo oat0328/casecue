@@ -153,12 +153,12 @@ export default function StudentDetail() {
   const verifyDates = async () => {
     setVerifyingDates(true);
     try {
-      const currentIeps = (documents || []).filter((d) => d.document_type === "IEP" && ["current", "final"].includes(d.iep_role) && d.extraction_status === "processed");
-      if (!currentIeps.length) throw new Error("Upload and process a current or final IEP first.");
-      const source = currentIeps.sort((a,b) => String(b.date_uploaded || b.updated_date || "").localeCompare(String(a.date_uploaded || a.updated_date || "")))[0];
+      const dateRecords = (documents || []).filter((d) => d.extraction_status === "processed" && (["Evaluation","Reevaluation","Eligibility Report","MDT Report","Psychological Report"].includes(d.document_type) || (d.document_type === "IEP" && ["current", "final"].includes(d.iep_role))));
+      if (!dateRecords.length) throw new Error("Upload and process a current/final IEP or evaluation record first.");
+      const source = dateRecords.sort((a,b) => String(b.date_uploaded || b.updated_date || "").localeCompare(String(a.date_uploaded || a.updated_date || "")))[0];
       const res = await base44.functions.invoke("verifyStudentDates", { student_id: id, document_id: source.id });
       if (res.data?.student) setStudent(res.data.student); else await refetch();
-      toast({ title: res.data?.status === "verified" ? "Student dates verified" : "Dates checked — review needed", description: res.data?.student?.date_verification_note || "CaseCue compared the student dates with the current/final IEP." });
+      toast({ title: res.data?.status === "verified" ? "Student dates verified" : "Dates checked — review needed", description: res.data?.student?.date_verification_note || "CaseCue compared the student dates with the uploaded source record." });
     } catch (e) {
       toast({ title: "Could not verify dates", description: e?.response?.data?.error || e.message, variant: "destructive" });
     } finally { setVerifyingDates(false); }
@@ -226,7 +226,7 @@ export default function StudentDetail() {
               <ExportGate documentName="IEP draft" onExport={() => exportIepPdf(student, goals || [])}>
                 <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-1" /> Export</Button>
               </ExportGate>
-              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={verifyDates} disabled={verifyingDates}>{verifyingDates ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-1" />}{verifyingDates ? "Checking dates…" : "Verify IEP dates"}</Button>
+              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={verifyDates} disabled={verifyingDates}>{verifyingDates ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-1" />}{verifyingDates ? "Checking dates…" : "Verify student dates"}</Button>
               <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={startEdit}>Edit profile</Button>
               <Button variant="outline" className="border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20" onClick={() => setDeleteOpen(true)}><Trash2 className="h-4 w-4 mr-1" /> Delete</Button>
             </div>
@@ -278,7 +278,7 @@ export default function StudentDetail() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4" /> IEP & evaluation date check</div>
-                  <p className="mt-1 text-sm text-slate-600">{student.date_verification_status === "verified" ? "Verified against the uploaded current/final IEP." : student.date_verification_status === "needs_review" ? "CaseCue found a date issue or could not verify every date. Review the source IEP." : "Dates have not been verified against a processed current/final IEP yet."}</p>
+                  <p className="mt-1 text-sm text-slate-600">{student.date_verification_status === "verified" ? "Verified against uploaded student records." : student.date_verification_status === "needs_review" ? "CaseCue found a date issue or could not verify a date. Review the source record." : "Dates have not been verified against a processed IEP or evaluation record yet."}</p>
                   {student.date_verification_note && <p className="mt-2 text-xs text-slate-500">{student.date_verification_note}</p>}
                 </div>
                 <Button variant="outline" size="sm" onClick={verifyDates} disabled={verifyingDates}>{verifyingDates ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5 mr-1" />}{verifyingDates ? "Checking…" : "Check dates"}</Button>
