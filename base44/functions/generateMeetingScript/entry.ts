@@ -91,7 +91,7 @@ export default async function(req) {
 
     const meetingInfo = meetings && meetings.length
       ? `Upcoming/last meeting on file: "${meetings[0].title}" (${meetings[0].meeting_type}) on ${meetings[0].date}. Parent concerns on file: ${meetings[0].parent_concerns || "none recorded"}. Teacher concerns: ${meetings[0].teacher_concerns || "none recorded"}.`
-      : "No meeting on file — assume this is the annual review meeting.";
+      : "No meeting type is verified on file. Do NOT assume annual review, MET, reevaluation, eligibility, amendment, or any other meeting type. Use neutral purpose language and leave the exact meeting type for the educator to confirm.";
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}
 
@@ -104,23 +104,28 @@ PART 2 — FACILITATOR SCRIPT. Act like an excellent, warm IEP case-manager FACI
 OPENING:
 - Start with a short natural greeting: "Good afternoon, everyone. Thank you for being here. My name is [case manager name if known], and I am [Student]'s special education teacher/case manager." If the facilitator's name/role is not verified, use a bracketed editable placeholder instead of guessing.
 - Thank the parent/guardian and team.
-- State the purpose of the meeting in one or two simple sentences based on the meeting type on file. Do not guess annual/MET/reevaluation if the meeting type is documented differently.
+- State the purpose in one or two simple sentences ONLY when the meeting type is verified. If it is not verified, say: "We are here today to review [Student]'s information, talk through the IEP together, and make sure the team has a chance to share input." Do not label it annual/MET/reevaluation/eligibility/amendment.
 - Invite introductions and parent input early.
+- Keep the opening short enough to actually say in a meeting. No robotic language.
 
 PAGE FLOW:
 - Walk through the CURRENT IEP from page 1 through the final page in exact order. Produce ONE page_flow item for EVERY source page, including procedural/signature/blank pages.
 - Never combine page ranges such as "pages 4-6." Say "Page 4", then "Page 5", then "Page 6" separately.
 - For every page provide: page_number, section_name, say_this, ask_team, facilitator_note, and source.
-- say_this must sound human and conversational, using short sentences and easy words while preserving all important facts, dates, scores, services, minutes, accommodations, goals, placement/LRE information, procedural information, and decisions actually documented on that page.
+- say_this must be a REAL facilitator script, not a one-sentence page caption. For substantive pages, use roughly 3-7 short spoken sentences: (1) orient the team to the page/section, (2) explain the important information in easy words, (3) state the key verified numbers/details, and (4) connect it to why the information matters for the student's IEP when the source supports that connection.
+- Preserve all important facts, dates, assessment names/scores, goal skill/condition/criterion, services/minutes/frequency/location, accommodations, placement/LRE information, procedural information, and documented decisions. Never reduce a detailed page to only "this page reviews..." when the source contains useful specifics.
+- Present levels must include the actual current-performance evidence available, not only test names and scores. Goals must explain what skill is being worked on and the measurable criterion. Services must state minutes/frequency and setting when documented. Accommodations should be grouped/explained in practical language rather than dumped as a comma list.
+- When recent progress data is available in the verified student record but is newer than the source IEP, clearly label it as "current progress since this IEP" and use it at the most relevant goal/present-level page; never pretend it was printed on the old IEP page.
 - Do not read boilerplate word-for-word when a short parent-friendly explanation preserves its meaning. For procedural/legal pages, explain what the page is for in plain language and identify any action/signature documented.
 - If a page is blank or has no substantive content, say that briefly and move on; never fabricate content.
-- At natural decision points, pause and ask the parent/team a short question. Never answer for the parent or team.
+- At natural decision points, pause and ask the parent/team a short, useful question. Examples: "Does that match what you're seeing at home?" "Teacher, is this still accurate in class?" "Does anyone have anything to add before we move on?" Do not force a question onto every page, and never answer for the parent or team.
+- If the source says a parent did not attend a PRIOR meeting, do not speak as if the current parent is absent. If the source records prior disagreement, say exactly that it was documented previously and invite the parent/team to clarify the concern today; do not claim it was resolved.
 - Explain acronyms the first time in plain language (for example, LRE, SDI, ESY) without turning the meeting into a lecture.
 - Clearly distinguish CURRENT DOCUMENTED information from PROPOSED/DRAFT changes. Never present a CaseCue draft as already agreed to by the team.
 - Do not call a recommendation a team decision. Placement, services changes, ESY, eligibility changes, and other team decisions remain questions for the team unless the source IEP already documents the prior decision.
 
 CLOSING:
-- Recap the decisions actually made/recorded, unresolved items, and next steps without inventing agreement.
+- Because this script is generated BEFORE/DURING the meeting, do not claim today's team "addressed," "agreed," "decided," or "resolved" anything unless those decisions were actually captured during the current meeting. Recap what was reviewed, identify items that still need team discussion, and leave editable pauses for current-meeting decisions.
 - Ask whether the parent/guardian or team has any final questions or concerns.
 - End warmly and professionally.
 
