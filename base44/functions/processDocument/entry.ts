@@ -19,7 +19,22 @@ const PAGE_SUMMARY_SCHEMA = {
           summary: { type: 'string' },
           important_facts: { type: 'array', items: { type: 'string' } },
           measurable_statements: { type: 'array', items: { type: 'string' } },
-          action_items: { type: 'array', items: { type: 'string' } }
+          action_items: { type: 'array', items: { type: 'string' } },
+          questions_and_answers: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                question: { type: 'string' },
+                answer: { type: 'string' },
+                evidence: { type: 'string' }
+              },
+              required: ['question', 'answer']
+            }
+          },
+          present_level_evidence: { type: 'array', items: { type: 'string' } },
+          goal_evidence: { type: 'array', items: { type: 'string' } },
+          evaluation_findings: { type: 'array', items: { type: 'string' } }
         },
         required: ['page_number', 'summary']
       }
@@ -77,6 +92,12 @@ For each page:
 - important_facts: specific, verifiable statements found on the page (dates, scores, names of services, minutes, accommodations). Never invent anything not written.
 - measurable_statements: any measurable or quantified statements quoted or closely paraphrased
 - action_items: any action items, responsibilities, or follow-ups mentioned
+- questions_and_answers: capture EVERY explicit form question, prompt, checkbox question, or labeled field on the page and its documented answer/value. If the page asks a question but no answer is provided, use "Not answered in document". Do not skip questions just because they seem procedural.
+- present_level_evidence: scores, observations, classroom performance, assessment findings, strengths, needs, disability impact, grade-level comparisons, and other facts that could support a present-level draft
+- goal_evidence: measurable baselines, skill deficits, prior-goal progress, frequency/accuracy/duration data, and assessment findings that could support a measurable goal
+- evaluation_findings: MDT/evaluation/reevaluation findings, tests, standard scores, percentiles, observations, eligibility evidence, recommendations, and educational impact statements
+
+COMPLETENESS RULE: read the ENTIRE document, including tables, checkboxes, form prompts, headers, footers, signature/procedural pages, and attachments. The saved page extraction must preserve enough information for CaseCue to answer the document's questions later without reopening or guessing.
 
 If a page is unreadable or the file is not a document, say so in that page's summary instead of guessing.`,
       file_urls: [fileUrl],
