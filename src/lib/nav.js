@@ -1,11 +1,11 @@
-import { LayoutDashboard, Users, BookOpen, FileEdit, BarChart3, UsersRound, FileBarChart, MessageCircle, Settings, Plug, ShieldCheck, TicketPercent, Crown } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, FileEdit, BarChart3, MessagesSquare, FileBarChart, MessageCircle, Settings, Plug, ShieldCheck, TicketPercent, Crown } from 'lucide-react';
 export const navItems=[
  {label:'Command Center',path:'/app',icon:LayoutDashboard},
  {label:'Students',path:'/students',icon:Users},
  {label:'Instruction',path:'/instruction',icon:BookOpen},
  {label:'Goals & Progress',path:'/progress',icon:BarChart3},
  {label:'IEP Center',path:'/ieps',icon:FileEdit},
- {label:'Meetings',path:'/meetings-workspace',icon:UsersRound},
+ {label:'Communication',path:'/communication',icon:MessagesSquare},
  {label:'Reports',path:'/reports',icon:FileBarChart},
  {label:'Ask CaseCue',path:'/ask-casecue',icon:MessageCircle},
  {label:'Integrations',path:'/integrations',icon:Plug},
