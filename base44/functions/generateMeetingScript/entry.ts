@@ -76,7 +76,14 @@ export default async function(req) {
     // If a workspace page summary has not been generated yet, use the saved full-page
     // extraction from the newest processed IEP rather than pretending a page flow exists.
     const documents = await base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 50);
-    const currentIep = (documents || []).find((d) => d.extraction_status === 'processed' && /iep/i.test(`${d.document_type || ''} ${d.filename || ''}`));
+    const rolePriority: Record<string, number> = { draft: 4, current: 3, final: 2, historical: 1, not_applicable: 0 };
+    const currentIep = [...(documents || [])]
+      .filter((d) => d.extraction_status === 'processed' && /iep/i.test(`${d.document_type || ''} ${d.filename || ''}`))
+      .sort((a, b) => {
+        const roleDiff = (rolePriority[b.iep_role] || 0) - (rolePriority[a.iep_role] || 0);
+        if (roleDiff) return roleDiff;
+        return String(b.date_uploaded || b.created_date || '').localeCompare(String(a.date_uploaded || a.created_date || ''));
+      })[0];
     const fallbackPages = currentIep?.processing_results?.pages || [];
     const pageSummarySource = workspace?.page_summaries?.pages?.length
       ? workspace.page_summaries
