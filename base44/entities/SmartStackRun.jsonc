@@ -1,0 +1,93 @@
+{
+  "name": "SmartStackRun",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    },
+    "file_uri": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "processing",
+        "review",
+        "completed",
+        "failed"
+      ],
+      "default": "queued"
+    },
+    "page_count": {
+      "type": "number"
+    },
+    "processed_pages": {
+      "type": "number",
+      "default": 0
+    },
+    "chunk_count": {
+      "type": "number",
+      "default": 0
+    },
+    "completed_chunks": {
+      "type": "number",
+      "default": 0
+    },
+    "detected_items": {
+      "type": "number",
+      "default": 0
+    },
+    "approved_items": {
+      "type": "number",
+      "default": 0
+    },
+    "answer_key": {
+      "type": "string"
+    },
+    "rubric": {
+      "type": "string"
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "organization_id",
+    "user_id",
+    "filename",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
