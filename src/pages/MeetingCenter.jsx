@@ -10,14 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import AddToCalendar from "@/components/meetings/AddToCalendar";
 import MeetingNotesGenerator from "@/components/meetings/MeetingNotesGenerator";
 import StudentSelector from "@/components/forms/StudentSelector";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
 import ExportBar from "@/components/shared/ExportBar";
+import { formatDate } from "@/lib/dateUtils";
 
 const MEETING_TYPES = ["IEP", "MET", "Evaluation", "Other"];
 
@@ -34,14 +33,9 @@ export default function MeetingCenter() {
   const [preparing, setPreparing] = useState(null);
   const [timeSuggestions, setTimeSuggestions] = useState([]);
 
-  // Preserve student context: /meetings?student=<id> opens the schedule
-  // dialog with that student already preselected.
   useEffect(() => {
     const p = new URLSearchParams(window.location.search).get("student");
-    if (p) {
-      setForm((f) => ({ ...f, student_id: p }));
-      setOpen(true);
-    }
+    if (p) { setForm((f) => ({ ...f, student_id: p })); setOpen(true); }
   }, []);
 
   const studentName = (id) => { const s = (students || []).find((x) => x.id === id); return s ? `${s.first_name} ${s.last_name}` : "—"; };
@@ -63,9 +57,9 @@ export default function MeetingCenter() {
       const student = m.student_id ? await base44.entities.Student.get(m.student_id) : null;
       const goals = m.student_id ? await base44.entities.Goal.filter({ student_id: m.student_id }) : [];
       const progress = m.student_id ? await base44.entities.ProgressData.filter({ student_id: m.student_id }, '-date', 10) : [];
-      const context = student ? `Student: ${student.first_name} ${student.last_name} (Grade ${student.grade}). Strengths: ${student.strengths || "—"}. Needs: ${student.areas_of_need || "—"}. Goals: ${goals.map((g) => g.goal_text).join("; ") || "—"}. Recent progress: ${progress.map((p) => `${p.date}: ${p.percentage}%`).join(", ") || "—"}` : "No student linked.";
+      const context = student ? `Student: ${student.first_name} ${student.last_name} (Grade ${student.grade}). Strengths: ${student.strengths || "—"}. Needs: ${student.areas_of_need || "—"}. Goals: ${goals.map((g) => g.goal_text).join("; ") || "—"}. Recent progress: ${progress.map((p) => `${formatDate(p.date)}: ${p.percentage}%`).join(", ") || "—"}` : "No student linked.";
       const res = await base44.functions.invoke("askCaseCue", {
-        question: `Prepare me for this ${m.meeting_type} meeting titled "${m.title}" on ${m.date}. Provide an agenda, student snapshot, recent progress summary, and suggested discussion points. ${context}`,
+        question: `Prepare me for this ${m.meeting_type} meeting titled "${m.title}" on ${formatDate(m.date)}. Provide an agenda, student snapshot, recent progress summary, and suggested discussion points. ${context}`,
         history: [], mode: "caseload",
       });
       setPrep({ meeting: m, content: res.data.answer });
@@ -93,23 +87,12 @@ export default function MeetingCenter() {
     <div>
       <PageHeader title="Meeting Center" subtitle="Upcoming IEP, MET, and evaluation meetings. Prepare agendas, snapshots, and follow-up tasks with CaseCue." icon={UsersRound}
         actions={<Button className="brand-gradient text-white" onClick={() => setOpen(true)}><Plus className="h-4 w-4 mr-1" /> Schedule meeting</Button>} />
-
       <div className="space-y-3">
         {(meetings || []).map((m) => (
           <Card key={m.id} className="p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="font-semibold">{m.title}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> {m.date}{m.time ? ` · ${m.time}` : ""} · {m.meeting_type} · {studentName(m.student_id)}{m.location ? ` · ${m.location}` : ""}</div>
-              </div>
-              <div className="flex gap-2">
-                <AddToCalendar meeting={m} student={(students || []).find((x) => x.id === m.student_id)} />
-                <Button variant="outline" size="sm" onClick={() => prepare(m)} disabled={preparing === m.id} className="border-primary/30 text-primary">
-                  {preparing === m.id ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />} Prepare Meeting With CaseCue
-                </Button>
-                <MeetingNotesGenerator meeting={m} onSaved={refetch} />
-                <Button variant="ghost" size="icon" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
-              </div>
+              <div><div className="font-semibold">{m.title}</div><div className="text-sm text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> {formatDate(m.date)}{m.time ? ` · ${m.time}` : ""} · {m.meeting_type} · {studentName(m.student_id)}{m.location ? ` · ${m.location}` : ""}</div></div>
+              <div className="flex gap-2"><AddToCalendar meeting={m} student={(students || []).find((x) => x.id === m.student_id)} /><Button variant="outline" size="sm" onClick={() => prepare(m)} disabled={preparing === m.id} className="border-primary/30 text-primary">{preparing === m.id ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />} Prepare Meeting With CaseCue</Button><MeetingNotesGenerator meeting={m} onSaved={refetch} /><Button variant="ghost" size="icon" onClick={() => remove(m.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button></div>
             </div>
             {m.agenda && <div className="mt-3 text-sm text-muted-foreground"><span className="font-medium text-foreground">Agenda:</span> {m.agenda}</div>}
           </Card>
@@ -117,43 +100,14 @@ export default function MeetingCenter() {
         {(meetings || []).length === 0 && <p className="text-muted-foreground text-center py-8">No meetings scheduled.</p>}
       </div>
 
-      {prep && (
-        <Dialog open onOpenChange={(o) => !o && setPrep(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Meeting prep — {prep.meeting.title}</DialogTitle></DialogHeader>
-            <div className="text-sm whitespace-pre-wrap leading-relaxed">{prep.content}</div>
-            <ExportBar
-              title={`Meeting Prep — ${prep.meeting.title}`}
-              subtitle="Meeting preparation"
-              filename={`Meeting-Prep-${prep.meeting.title}`}
-              sections={[{ heading: "Meeting Preparation", body: prep.content }]}
-              gated
-              className="mt-3"
-            />
-            <AiDisclaimer className="mt-2" />
-          </DialogContent>
-        </Dialog>
-      )}
+      {prep && <Dialog open onOpenChange={(o) => !o && setPrep(null)}><DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto"><DialogHeader><DialogTitle>Meeting prep — {prep.meeting.title}</DialogTitle></DialogHeader><div className="text-sm whitespace-pre-wrap leading-relaxed">{prep.content}</div><ExportBar title={`Meeting Prep — ${prep.meeting.title}`} subtitle={`Meeting preparation · ${formatDate(prep.meeting.date)}`} filename={`Meeting-Prep-${prep.meeting.title}`} sections={[{ heading: "Meeting Preparation", body: prep.content }]} gated className="mt-3"/><AiDisclaimer className="mt-2" /></DialogContent></Dialog>}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Schedule meeting</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Schedule meeting</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-2">
             <div className="col-span-2"><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-            <div>
-              <StudentSelector
-                students={students || []}
-                value={form.student_id}
-                onChange={(id) => setForm({ ...form, student_id: id })}
-                placeholder="—"
-                noBottomSpace
-              />
-            </div>
-            <div><Label>Type</Label>
-              <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.meeting_type} onChange={(e) => setForm({ ...form, meeting_type: e.target.value })}>
-                {MEETING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
+            <div><StudentSelector students={students || []} value={form.student_id} onChange={(id) => setForm({ ...form, student_id: id })} placeholder="—" noBottomSpace /></div>
+            <div><Label>Type</Label><select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.meeting_type} onChange={(e) => setForm({ ...form, meeting_type: e.target.value })}>{MEETING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></div>
             <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => {setForm({ ...form, date: e.target.value });setTimeSuggestions([]);}} /></div>
             <div><Label>Time</Label><Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
             <div className="col-span-2 rounded-xl border bg-slate-50 p-3"><div className="flex items-center justify-between gap-3"><div><div className="text-sm font-semibold">Automatic meeting time proposals</div><div className="text-xs text-muted-foreground">Checks your CaseCue instruction schedule and already-scheduled CaseCue meetings for open 45-minute slots.</div></div><Button type="button" variant="outline" size="sm" onClick={suggestTimes}>Suggest times</Button></div>{timeSuggestions.length>0&&<div className="flex flex-wrap gap-2 mt-3">{timeSuggestions.map(t=><button key={t} type="button" onClick={()=>setForm({...form,time:t})} className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${form.time===t?'border-blue-600 bg-blue-50 text-blue-700':'bg-white'}`}>{t}</button>)}</div>}</div>
@@ -162,10 +116,7 @@ export default function MeetingCenter() {
             <div><Label>Parent concerns</Label><Textarea rows={2} value={form.parent_concerns} onChange={(e) => setForm({ ...form, parent_concerns: e.target.value })} /></div>
             <div><Label>Teacher concerns</Label><Textarea rows={2} value={form.teacher_concerns} onChange={(e) => setForm({ ...form, teacher_concerns: e.target.value })} /></div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={add} disabled={saving} className="brand-gradient text-white">{saving ? "Saving…" : "Schedule"}</Button>
-          </DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button onClick={add} disabled={saving} className="brand-gradient text-white">{saving ? "Saving…" : "Schedule"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
