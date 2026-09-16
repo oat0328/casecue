@@ -124,6 +124,20 @@ If a page is unreadable or the file is not a document, say so in that page's sum
     }))).filter((qa) => qa.question && qa.answer);
     if (qaRows.length) await svc.entities.IepDocumentAnswer.bulkCreate(qaRows);
 
+    const evidenceRows = pages.flatMap((p) => [
+      ...(p.present_level_evidence || []).map((text) => ({ evidence_type: 'present_level', text })),
+      ...(p.goal_evidence || []).map((text) => ({ evidence_type: 'goal', text })),
+      ...(p.evaluation_findings || []).map((text) => ({ evidence_type: 'evaluation', text })),
+    ].map((item) => ({
+      student_id: doc.student_id,
+      document_id: docId,
+      page_number: p.page_number,
+      evidence_type: item.evidence_type,
+      text: item.text,
+      source_label: `${doc.document_type} - ${doc.filename}, p.${p.page_number}`,
+    }))).filter((row) => row.text);
+    if (evidenceRows.length) await svc.entities.IepSourceEvidence.bulkCreate(evidenceRows);
+
     await svc.entities.AuditLog.create({
       action: 'document_processed',
       entity_type: 'Document',
