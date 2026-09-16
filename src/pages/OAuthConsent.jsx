@@ -113,7 +113,7 @@ export default function OAuthConsent() {
         if ([400, 403, 404, 409].includes(res.status)) {
           let detail = "";
           try { detail = (await res.json()).detail; } catch (_) { /* keep default */ }
-          setReconnect(detail || "This authorization can no longer be completed. Reconnect from your AI client to try again.");
+          setReconnect(detail || "This authorization can no longer be completed. Reconnect from your connected client to try again.");
           setSubmitting(false);
           return;
         }
@@ -145,7 +145,7 @@ export default function OAuthConsent() {
     );
   }
 
-  const client = (info && info.client_name) || "An AI client";
+  const client = (info && info.client_name) || "A connected client";
   const appName = (info && info.app_name) || "this app";
 
   if (decided) {
