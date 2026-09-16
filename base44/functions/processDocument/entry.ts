@@ -137,6 +137,13 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       source_label: `${doc.document_type} - ${doc.filename}, p.${p.page_number}`,
     }))).filter((row) => row.text);
     if (evidenceRows.length) await svc.entities.IepSourceEvidence.bulkCreate(evidenceRows);
+    await svc.entities.IepStudioProcessingVersion.create({
+      student_id: doc.student_id,
+      document_id: docId,
+      version: 'full-document-v2',
+      processed_at: now,
+      notes: `Captured ${pages.length} pages, ${qaRows.length} question/answer items, and ${evidenceRows.length} evidence items.`,
+    });
 
     await svc.entities.AuditLog.create({
       action: 'document_processed',

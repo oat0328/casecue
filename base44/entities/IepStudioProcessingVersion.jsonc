@@ -1,0 +1,26 @@
+{
+  "name": "IepStudioProcessingVersion",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "processed_at": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "document_id",
+    "version"
+  ]
+}
