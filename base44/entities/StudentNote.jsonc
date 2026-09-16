@@ -50,7 +50,7 @@
         "general"
       ],
       "default": "general",
-      "title": "Note Type"
+      "title": "Record Type"
     },
     "description": {
       "type": "string",
@@ -77,6 +77,10 @@
     "attachment_url": {
       "type": "string",
       "title": "Private Attachment"
+    },
+    "original_filename": {
+      "type": "string",
+      "title": "Original File Name"
     },
     "follow_up_date": {
       "type": "string",
@@ -119,6 +123,8 @@
       "enum": [
         "manual",
         "voice",
+        "scan",
+        "upload",
         "meeting",
         "email",
         "system"
