@@ -58,6 +58,10 @@
     "organization_id": {
       "type": "string",
       "title": "Organization ID"
+    },
+    "work_evidence_id": {
+      "type": "string",
+      "title": "Linked Work Evidence ID"
     }
   },
   "required": [
