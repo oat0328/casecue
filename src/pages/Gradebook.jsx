@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
+import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet, Eye } from "lucide-react";
 import readXlsxFile from "read-excel-file";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
@@ -25,7 +25,8 @@ const csvCell = (v) => `"${String(v ?? "").replaceAll('"','""')}"`;
 export default function Gradebook() {
   const { toast } = useToast();
   const fileRef = useRef(null);
-  const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
+  const { data: rawStudents } = useAsync(() => base44.entities.Student.list('-last_name', 500), []);
+  const students = useMemo(() => [...(rawStudents || [])].sort((a,b)=>`${a.last_name||''},${a.first_name||''}`.localeCompare(`${b.last_name||''},${b.first_name||''}`,undefined,{sensitivity:'base'})), [rawStudents]);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: assignments, refetch } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 500), []);
   const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 300), []);
@@ -110,6 +111,7 @@ export default function Gradebook() {
   };
 
   const remove = async (id) => { await base44.entities.GradebookAssignment.delete(id); refetch(); };
+  const openAssignment = async (a) => { try { let uri=a.file_url; if(!uri&&a.work_evidence_id){const ev=await base44.entities.WorkEvidence.filter({id:a.work_evidence_id},'-created_date',1);uri=ev?.[0]?.file_url;} if(!uri)throw new Error('No assignment image/PDF is linked to this grade yet.'); const s=await base44.integrations.Core.CreateFileSignedUrl({file_uri:uri,expires_in:900}); if(!s?.signed_url)throw new Error('Could not create a private viewing link.'); window.open(s.signed_url,'_blank','noopener,noreferrer'); } catch(e){toast({title:'Could not open assignment',description:e.message,variant:'destructive'})} };
 
   return <div>
     <PageHeader title="Gradebook" subtitle="Drop mixed student work, let CaseCue identify and grade it, capture quantitative data, connect it to goals, and file the work to each student." icon={GraduationCap} />
