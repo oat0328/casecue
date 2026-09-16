@@ -41,6 +41,33 @@
       "format": "date",
       "title": "Reevaluation Due"
     },
+    "last_evaluation_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Last Evaluation Date"
+    },
+    "date_verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "needs_review",
+        "unverified"
+      ],
+      "default": "unverified",
+      "title": "Date Verification Status"
+    },
+    "date_verified_at": {
+      "type": "string",
+      "title": "Dates Verified At"
+    },
+    "date_verification_source_document_id": {
+      "type": "string",
+      "title": "Date Verification Source Document ID"
+    },
+    "date_verification_note": {
+      "type": "string",
+      "title": "Date Verification Note"
+    },
     "strengths": {
       "type": "string",
       "title": "Strengths"
