@@ -85,11 +85,13 @@ export default async function(req) {
       return Response.json({ error: 'No processed documents yet. Upload and process documents first — analysis reads what has already been extracted.' }, { status: 400 });
     }
 
-    // Build the document context from saved extraction results (bounded).
+    // Build document context from the complete saved page extraction. Preserve a
+    // generous per-document window so long MDT/IEP reports do not silently lose
+    // later pages before profile/draft generation.
     const docContext = processed.map((d) => {
-      const content = JSON.stringify(d.processing_results).slice(0, 8000);
+      const content = JSON.stringify(d.processing_results).slice(0, 24000);
       return `===== ${d.document_type}: ${d.filename} =====\n${content}`;
-    }).join("\n\n").slice(0, 45000);
+    }).join("\n\n").slice(0, 120000);
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}
 
@@ -104,6 +106,10 @@ STRICT EXTRACTION RULES:
 - progress_information: any progress data, scores, or growth statements found.
 - behavior_information: any behavior, FBA, or BIP content found.
 - parent_concerns: any parent concerns or parent input documented.
+- For MDT, evaluation, reevaluation, psychological, eligibility, and assessment reports: use documented test results, observations, educational impact, strengths, needs, and measurable findings to build a DRAFT present level. Do not merely say the report exists.
+- When evaluation evidence documents a measurable skill deficit and baseline, include enough detail in present_levels and areas_of_need for the IEP Builder to draft aligned measurable goals later.
+- Never turn an evaluation recommendation into a final team decision. Recommendations remain source information for educator/team review.
+- Review all saved questions_and_answers from every page. Preserve explicit answers and identify unanswered prompts in data_gaps rather than guessing.
 
 CONFIDENCE RULES (confidence object — one entry per field in the confidence schema):
 - level: "high" ONLY when the information is explicitly and clearly stated in a source document; "medium" when stated once with ambiguous wording or scattered across documents; "low" when pieced together from indirect references; "missing" when not found.
