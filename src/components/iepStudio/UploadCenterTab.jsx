@@ -389,7 +389,8 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
             <h3 className="font-semibold mb-1">One-click actions</h3>
             <p className="text-sm text-muted-foreground mb-4">Everything CaseCue found is saved to {student.first_name}'s record — jump straight into generating.</p>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" onClick={() => onNavigate?.("builder")}><ArrowRight className="h-3.5 w-3.5 mr-1" />Create IEP Draft from Records</Button>
+              <Button size="sm" onClick={() => onNavigate?.("flow")}><ArrowRight className="h-3.5 w-3.5 mr-1" />Open State-Aware IEP Flow</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("met-mdt")}>Build Present Levels &amp; Goal Drafts</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("amendments")}>Generate Amendment</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Script</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate IEP Meeting Navigator</Button>
