@@ -89,14 +89,14 @@ export default function Landing() {
                 <Sparkles className="h-3.5 w-3.5" /> Built for special education teams
               </div>
               <h1 className="mt-6 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.045em] leading-[0.98]">
-                The operating system for your <span className="text-sky-300">SPED caseload.</span>
+                Everything Special Education.<br/><span className="text-sky-300">One Place.</span>
               </h1>
               <p className="mt-6 text-lg sm:text-xl leading-8 text-slate-300">
-                Connect IEPs, progress data, session notes, student work, meeting prep, lessons, and family communication in one premium workspace built around the evidence you already collect.
+                IEPs. Evaluations. BIPs. Progress. Services. Meetings. Documentation. CaseCue brings the work together so your team can focus on supporting students instead of chasing paperwork.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Link to="/register"><Button size="lg" className="h-12 px-7 bg-white text-slate-950 hover:bg-slate-100 text-base font-bold">Start free trial <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
-                <a href="#video"><Button size="lg" variant="outline" className="h-12 px-7 border-white/20 bg-white/5 text-white hover:bg-white/10 text-base"><PlayCircle className="mr-2 h-4 w-4" /> See product preview</Button></a>
+                <Link to="/register"><Button size="lg" className="h-12 px-7 bg-white text-slate-950 hover:bg-slate-100 text-base font-bold">See How Life Gets Easier <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+                <a href="#video"><Button size="lg" variant="outline" className="h-12 px-7 border-white/20 bg-white/5 text-white hover:bg-white/10 text-base"><PlayCircle className="mr-2 h-4 w-4" /> Watch the 2 Minute Story</Button></a>
               </div>
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-300">
                 <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-300" /> 14-day free trial</span>
@@ -161,19 +161,19 @@ export default function Landing() {
       {/* Problem */}
       <Section id="problem" className="bg-card">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Tired of managing your caseload in multiple places?</h2>
-          <p className="mt-4 text-muted-foreground">Special education professionals juggle:</p>
+          <div className="text-xs font-black uppercase tracking-[.2em] text-primary">We know your day</div><h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">Special education is hard enough.</h2>
+          <p className="mt-4 text-muted-foreground">The work should not be scattered across spreadsheets, emails, paper files, drives, shared folders and disconnected systems.</p>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
-            {["IEP deadlines", "Reevaluation timelines", "Meeting notes", "Compliance requirements", "Student documentation", "Parent communication"].map((p) => (
+            {["Drowning in paperwork", "Lost in multiple systems", "Compliance anxiety", "Fear of missing deadlines", "Taking work home", "Disconnected teams", "Duplicate data entry", "Limited visibility", "Staff burnout"].map((p) => (
               <div key={p} className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium">
                 <span className="h-2 w-2 rounded-full bg-rose-400 shrink-0" />
                 {p}
               </div>
             ))}
           </div>
-          <p className="mt-8 text-lg font-semibold">One missed deadline can create unnecessary stress.</p>
+          <p className="mt-8 text-2xl font-black">What if tomorrow looked different?</p>
           <p className="mt-2 text-muted-foreground">
-            CaseCue keeps everything organized in one place.{" "}
+            One place. One login. One workflow. One team. One source of truth.{" "}
             <a href="#pricing" className="text-primary font-medium hover:underline">See how →</a>
           </p>
         </div>
@@ -238,8 +238,8 @@ export default function Landing() {
       {/* AI platform */}
       <Section id="platform">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Everything SPED, connected.</h2>
-          <p className="mt-3 text-muted-foreground">One workspace replaces the scattered spreadsheets, sticky notes, and shared drives.</p>
+          <div className="text-xs font-black uppercase tracking-[.2em] text-primary">Special Education Command Center</div><h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">Everything connected.</h2>
+          <p className="mt-3 text-muted-foreground">Students, schedules, IEP work, services, evidence, meetings and reporting move through one connected home base.</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
@@ -371,9 +371,9 @@ export default function Landing() {
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 brand-gradient" />
         <div className="relative max-w-3xl mx-auto px-4 text-center text-white">
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">Ready to simplify case management?</h2>
-          <p className="mt-4 text-white/90 text-lg">Stop chasing spreadsheets and start focusing on students.</p>
-          <Link to="/register" className="inline-block mt-8"><Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-8 text-base">Start Your Free Trial Today</Button></Link>
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight">You Already Have Enough To Manage.</h2>
+          <p className="mt-4 text-white/90 text-lg">Let CaseCue become the place where your special education work finally feels organized, connected, and manageable.</p>
+          <Link to="/register" className="inline-block mt-8"><Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-8 text-base">See How CaseCue Can Help</Button></Link>
         </div>
       </section>
 
