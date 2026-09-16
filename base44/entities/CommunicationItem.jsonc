@@ -1,0 +1,172 @@
+{
+  "name": "CommunicationItem",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "user_id": {
+      "type": "string",
+      "title": "User ID"
+    },
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "meeting_id": {
+      "type": "string",
+      "title": "Meeting ID"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "gmail",
+        "outlook",
+        "manual",
+        "system"
+      ],
+      "default": "manual",
+      "title": "Source"
+    },
+    "source_id": {
+      "type": "string",
+      "title": "External Source ID"
+    },
+    "thread_id": {
+      "type": "string",
+      "title": "External Thread ID"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound",
+        "internal"
+      ],
+      "default": "inbound",
+      "title": "Direction"
+    },
+    "sender_name": {
+      "type": "string",
+      "title": "Sender Name"
+    },
+    "sender_email": {
+      "type": "string",
+      "title": "Sender Email"
+    },
+    "recipient_summary": {
+      "type": "string",
+      "title": "Recipients"
+    },
+    "subject": {
+      "type": "string",
+      "title": "Subject"
+    },
+    "snippet": {
+      "type": "string",
+      "title": "Snippet"
+    },
+    "received_at": {
+      "type": "string",
+      "title": "Received At"
+    },
+    "is_unread": {
+      "type": "boolean",
+      "default": false,
+      "title": "Unread"
+    },
+    "needs_action": {
+      "type": "boolean",
+      "default": false,
+      "title": "Needs Action"
+    },
+    "action_reason": {
+      "type": "string",
+      "title": "Action Reason"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "meeting",
+        "parent",
+        "team",
+        "deadline",
+        "document",
+        "general"
+      ],
+      "default": "general",
+      "title": "Category"
+    },
+    "match_status": {
+      "type": "string",
+      "enum": [
+        "unmatched",
+        "suggested",
+        "confirmed"
+      ],
+      "default": "unmatched",
+      "title": "Student Match Status"
+    },
+    "sensitivity": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "restricted"
+      ],
+      "default": "standard",
+      "title": "Sensitivity"
+    },
+    "external_url": {
+      "type": "string",
+      "title": "Open in Source URL"
+    }
+  },
+  "required": [
+    "organization_id",
+    "user_id",
+    "subject"
+  ],
+  "rls": {
+    "read": {
+      "$and": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$and": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$and": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$and": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

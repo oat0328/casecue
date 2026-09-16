@@ -2,33 +2,165 @@
   "name": "Student",
   "type": "object",
   "properties": {
-    "first_name": { "type": "string", "title": "First Name" },
-    "last_name": { "type": "string", "title": "Last Name" },
-    "grade": { "type": "string", "title": "Grade" },
-    "eligibility_category": { "type": "string", "title": "Primary Eligibility Category" },
-    "eligibility_categories": { "type": "array", "items": { "type": "string" }, "maxItems": 10, "title": "Eligibility Categories" },
-    "iep_date": { "type": "string", "format": "date", "title": "IEP Date" },
-    "annual_review_due": { "type": "string", "format": "date", "title": "Annual Review Due" },
-    "reevaluation_due": { "type": "string", "format": "date", "title": "Reevaluation Due" },
-    "strengths": { "type": "string", "title": "Strengths" },
-    "areas_of_need": { "type": "string", "title": "Areas of Need" },
-    "present_levels": { "type": "string", "title": "Present Levels" },
-    "accommodations": { "type": "string", "title": "Accommodations" },
-    "services": { "type": "array", "items": { "type": "string" }, "title": "Services" },
-    "service_minutes": { "type": "number", "title": "Service Minutes" },
-    "status": { "type": "string", "enum": ["active", "transition", "exited"], "default": "active", "title": "Status" },
-    "roster_status": { "type": "string", "enum": ["active", "archived"], "default": "active", "title": "Roster Status" },
-    "exit_date": { "type": "string", "format": "date", "title": "Exit Date" },
-    "exit_reason": { "type": "string", "enum": ["transferred", "graduated", "no_longer_eligible", "inactive", "other"], "title": "Exit Reason" },
-    "notes": { "type": "string", "title": "Notes" },
-    "avatar_color": { "type": "string", "default": "violet", "title": "Avatar Color" },
-    "organization_id": { "type": "string", "title": "Organization ID" }
+    "first_name": {
+      "type": "string",
+      "title": "First Name"
+    },
+    "last_name": {
+      "type": "string",
+      "title": "Last Name"
+    },
+    "grade": {
+      "type": "string",
+      "title": "Grade"
+    },
+    "eligibility_category": {
+      "type": "string",
+      "title": "Primary Eligibility Category"
+    },
+    "eligibility_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 50,
+      "title": "Eligibility Categories"
+    },
+    "iep_date": {
+      "type": "string",
+      "format": "date",
+      "title": "IEP Date"
+    },
+    "annual_review_due": {
+      "type": "string",
+      "format": "date",
+      "title": "Annual Review Due"
+    },
+    "reevaluation_due": {
+      "type": "string",
+      "format": "date",
+      "title": "Reevaluation Due"
+    },
+    "strengths": {
+      "type": "string",
+      "title": "Strengths"
+    },
+    "areas_of_need": {
+      "type": "string",
+      "title": "Areas of Need"
+    },
+    "present_levels": {
+      "type": "string",
+      "title": "Present Levels"
+    },
+    "accommodations": {
+      "type": "string",
+      "title": "Accommodations"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Services"
+    },
+    "service_minutes": {
+      "type": "number",
+      "title": "Service Minutes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "transition",
+        "exited"
+      ],
+      "default": "active",
+      "title": "Status"
+    },
+    "roster_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active",
+      "title": "Roster Status"
+    },
+    "exit_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Exit Date"
+    },
+    "exit_reason": {
+      "type": "string",
+      "enum": [
+        "transferred",
+        "graduated",
+        "no_longer_eligible",
+        "inactive",
+        "other"
+      ],
+      "title": "Exit Reason"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    },
+    "avatar_color": {
+      "type": "string",
+      "default": "violet",
+      "title": "Avatar Color"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
   },
-  "required": ["first_name", "last_name"],
+  "required": [
+    "first_name",
+    "last_name"
+  ],
   "rls": {
-    "read": { "$or": [{ "data.organization_id": "{{user.data.organization_id}}" }, { "created_by_id": "{{user.id}}" }] },
-    "create": { "$or": [{ "created_by_id": "{{user.id}}" }, { "data.organization_id": "{{user.data.organization_id}}" }] },
-    "update": { "$or": [{ "data.organization_id": "{{user.data.organization_id}}" }, { "created_by_id": "{{user.id}}" }] },
-    "delete": { "$or": [{ "data.organization_id": "{{user.data.organization_id}}" }, { "created_by_id": "{{user.id}}" }] }
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
   }
 }
