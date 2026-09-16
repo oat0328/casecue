@@ -11,10 +11,36 @@ export const base44 = createClient({
   appBaseUrl
 });
 
+// ===== Global student roster order =====
+// Canonical CaseCue order: Last Name A-Z, then First Name A-Z.
+// Enforce this once at the shared client so every page, tab, dropdown,
+// selector, schedule, gradebook, report, and workflow receives students
+// in the same predictable alphabetical order.
+const compareStudents = (a = {}, b = {}) => {
+  const last = String(a.last_name || '').trim().localeCompare(String(b.last_name || '').trim(), undefined, { sensitivity: 'base', numeric: true });
+  if (last !== 0) return last;
+  const first = String(a.first_name || '').trim().localeCompare(String(b.first_name || '').trim(), undefined, { sensitivity: 'base', numeric: true });
+  if (first !== 0) return first;
+  return String(a.student_id || a.id || '').localeCompare(String(b.student_id || b.id || ''), undefined, { sensitivity: 'base', numeric: true });
+};
+
+const sortStudentResult = (result) => {
+  if (Array.isArray(result)) return [...result].sort(compareStudents);
+  if (result && Array.isArray(result.data)) return { ...result, data: [...result.data].sort(compareStudents) };
+  if (result && Array.isArray(result.items)) return { ...result, items: [...result.items].sort(compareStudents) };
+  return result;
+};
+
+const studentEntity = base44.entities.Student;
+if (studentEntity) {
+  ['list', 'filter'].forEach((methodName) => {
+    if (typeof studentEntity[methodName] !== 'function') return;
+    const original = studentEntity[methodName].bind(studentEntity);
+    studentEntity[methodName] = async (...args) => sortStudentResult(await original(...args));
+  });
+}
+
 // ===== Organization stamping =====
-// Every record created in these organization-owned entities is automatically
-// tagged with the current user's organization, so backend security rules can
-// keep each school's/teacher's data completely separate.
 const ORG_ENTITIES = [
   'Student', 'Goal', 'ProgressData', 'SessionLog', 'GradebookAssignment',
   'Document', 'Meeting', 'Lesson', 'SubPlan', 'ScheduleEntry', 'SavedReport',
@@ -24,8 +50,6 @@ const ORG_ENTITIES = [
 
 let cachedOrgId;
 const resolveOrgId = async () => {
-  // Cached once found; re-checked on every create until the user has one,
-  // so an organization set up mid-session is picked up immediately.
   if (cachedOrgId) return cachedOrgId;
   try {
     const me = await base44.auth.me();
