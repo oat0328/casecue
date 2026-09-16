@@ -16,8 +16,10 @@ export default async function(req) {
     if (!workspace) return Response.json({ error: 'Workspace not found.' }, { status: 404 });
 
     const student = await base44.entities.Student.get(workspace.student_id);
+    // Existing Goal records are context only. Document reprocessing never creates/adopts goals.
+    // This prevents historical IEP benchmarks or evaluation recommendations from becoming active goals.
     const goals = await base44.entities.Goal.filter({ student_id: workspace.student_id });
-    const progress = await base44.entities.ProgressData.filter({ student_id: workspace.student_id }, '-date', 30);
+    const progress = await base44.entities.ProgressData.filter({ student_id: workspace.student_id }, '-date', 100);
     const studentContext = buildStudentContext(student, goals, progress);
 
     const analysis = workspace.analysis || {};
@@ -58,9 +60,12 @@ export default async function(req) {
               measurement_method: { type: 'string' },
               data_schedule: { type: 'string' },
               present_level_link: { type: 'string' },
-              evaluation_link: { type: 'string' }
+              evaluation_link: { type: 'string' },
+              source_citations: { type: 'array', items: { type: 'string' } },
+              confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+              rationale: { type: 'string' }
             },
-            required: ['goal_area', 'conditions', 'action', 'baseline', 'target', 'criterion']
+            required: ['goal_area', 'conditions', 'action', 'baseline', 'target', 'criterion', 'measurement_method', 'data_schedule', 'present_level_link', 'source_citations']
           }
         },
         accommodations: {
@@ -114,6 +119,9 @@ DRAFTING RULES:
 - When evidence for a statement is missing, write exactly "Needs verification — <what is missing>" in place of the statement.
 - When something is a team decision (e.g. placement, ESY, service changes), write "Team decision required — <the question for the team>".
 - Every section must include a citations array listing its supporting sources (document name + page, or "verified CaseCue record").
+- Preserve the source document's state/district terminology when it matters, but draft in plain professional educator language.
+- Never treat an evaluation recommendation, benchmark, short-term objective, classroom strategy, accommodation, or service as an adopted annual goal.
+- Existing active Goal records are historical/current CaseCue context only. Do not copy them blindly into the new draft; reconcile them against current evidence and recent progress.
 
 The "sections" array MUST contain exactly these 25 sections with these keys (titles may be human-readable):
 student_profile, parent_concerns, strengths, evaluation_summary, eligibility_summary, academic_present_levels, functional_present_levels, disability_impact, special_factors, progress_measurement, modifications, supplementary_aids, special_ed_services, related_services, service_frequency, testing_accommodations, behavior_supports, assistive_technology, esy_consideration, transportation, lre_discussion, placement_info, participation_percentages, transition_services, progress_reporting_schedule.
@@ -122,7 +130,7 @@ PRESENT LEVELS sections (academic_present_levels, functional_present_levels) mus
 - When the source is an MDT/evaluation/reevaluation, turn its documented measurable findings into readable educator-ready DRAFT present-level language while preserving the actual scores, dates, observations, and source citation.
 - Cover each documented area of need separately (for example reading, writing, math, behavior, communication, executive functioning) instead of collapsing unrelated findings into a vague paragraph.
 
-GOALS: suggest measurable annual goals only where a present level and evidence exist. Each goal must include: goal_area, conditions, observable action, baseline, measurable target, criterion (accuracy/frequency/duration/quality), measurement_method, data_schedule, present_level_link (which present level it connects to), evaluation_link (which evaluation finding supports it).
+GOALS: create DRAFT annual-goal proposals only where a documented need and defensible baseline exist. First distinguish true annual goals from benchmarks/objectives/recommendations. Each proposed goal must include goal_area, conditions, observable action, baseline, measurable target, criterion (accuracy/frequency/duration/quality), measurement_method, data_schedule, present_level_link, evaluation_link when applicable, source_citations, confidence, and rationale. A baseline must be a measurable current-performance statement supported by a dated source or recent progress data; never use "Not specified" as if it were a baseline. If no defensible baseline exists, do NOT manufacture a complete goal—put the missing baseline in unresolved_decisions and either omit the goal or clearly mark its baseline "Needs verification". Make goals individualized, observable, data-collectable, and aligned one-to-one with the need described in the present level.
 
 ACCOMMODATIONS: for each, state need_addressed, source (document + page or "Needs verification"), setting, frequency, responsible_staff, and change_type (existing / revised / new / proposed_for_removal). Flag duplicates, vague wording, and anything unsupported in unresolved_decisions.
 
