@@ -104,9 +104,9 @@ export default function Gradebook() {
   const remove = async (id) => { await base44.entities.GradebookAssignment.delete(id); refetch(); };
 
   return <div>
-    <PageHeader title="AI Gradebook" subtitle="Drop mixed student work, let CaseCue identify and grade it, capture quantitative data, connect it to goals, and file the work to each student." icon={GraduationCap} />
+    <PageHeader title="Gradebook" subtitle="Drop mixed student work, let CaseCue identify and grade it, capture quantitative data, connect it to goals, and file the work to each student." icon={GraduationCap} />
     <Tabs defaultValue="stack">
-      <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="stack">AI Paper Scanner</TabsTrigger><TabsTrigger value="upload">Single Student Scan</TabsTrigger><TabsTrigger value="assignments">Gradebook</TabsTrigger><TabsTrigger value="import">School Grade Import</TabsTrigger><TabsTrigger value="charts">Data & Trends</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
+      <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="stack">Paper Scanner</TabsTrigger><TabsTrigger value="upload">Single Student Scan</TabsTrigger><TabsTrigger value="assignments">Gradebook</TabsTrigger><TabsTrigger value="import">School Grade Import</TabsTrigger><TabsTrigger value="charts">Data & Trends</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
       <TabsContent value="assignments">
         <Card className="p-6 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary"/> Add Gen Ed grade</h3>
