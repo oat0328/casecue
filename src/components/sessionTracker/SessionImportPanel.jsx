@@ -375,33 +375,65 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
   const unusualMinutesCount = reviewRows.filter(r => r.minutes_review).length;
 
   const cleanupLegacyImports = async () => {
-    if (!window.confirm('Clean duplicate spreadsheet imports? CaseCue will keep one copy of each identical imported session, delete only extra identical copies, and add permanent fingerprints to the records it keeps.')) return;
+    // Cleanup used to issue hundreds of per-record update/delete requests and could
+    // hit Base44's rate limit. Daily import dedupe is now database-backed, so legacy
+    // cleanup is deliberately conservative: process a small batch per click and pause
+    // between writes. This keeps the UI responsive and avoids another rate-limit burst.
+    if (!window.confirm('Clean a safe batch of duplicate spreadsheet imports? CaseCue will keep one copy and remove only identical extras. You can run it again if more duplicates remain.')) return;
     setBusy(true);
     try {
       const imported = await base44.entities.SessionRecord.filter({ tags: { $in: ['Imported spreadsheet'] } }, 'created_date', 500);
       const groups = new Map();
       (imported || []).forEach(s => {
+        if (s.tags?.includes('Excluded duplicate')) return;
         const fp = s.source_fingerprint || fingerprintOf(s);
         if (!groups.has(fp)) groups.set(fp, []);
         groups.get(fp).push(s);
       });
-      const duplicates = [];
-      const keepers = [];
+      const duplicatePairs = [];
       groups.forEach((group, fp) => {
         const sorted = [...group].sort((a, b) => String(a.created_date || '').localeCompare(String(b.created_date || '')));
-        const keeper = sorted[0];
-        if (keeper) keepers.push({ record: keeper, fp });
-        duplicates.push(...sorted.slice(1));
+        if (sorted.length > 1) duplicatePairs.push({ keeper: sorted[0], fp, extras: sorted.slice(1) });
       });
-      for (const { record, fp } of keepers) {
-        if (!record.source_fingerprint) await base44.entities.SessionRecord.update(record.id, { source_fingerprint: fp });
+
+      // Maximum writes per click. A second click continues safely if needed.
+      const MAX_WRITES = 20;
+      let writes = 0;
+      let deleted = 0;
+      let protectedCount = 0;
+      const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+      for (const pair of duplicatePairs) {
+        if (writes >= MAX_WRITES) break;
+        if (!pair.keeper.source_fingerprint) {
+          await base44.entities.SessionRecord.update(pair.keeper.id, { source_fingerprint: pair.fp });
+          writes += 1; protectedCount += 1;
+          await sleep(175);
+        }
+        for (const record of pair.extras) {
+          if (writes >= MAX_WRITES) break;
+          await base44.entities.SessionRecord.delete(record.id);
+          writes += 1; deleted += 1;
+          await sleep(175);
+        }
       }
-      for (const record of duplicates) await base44.entities.SessionRecord.delete(record.id);
-      setCleanupSummary({ deleted: duplicates.length, kept: keepers.length, scanned: (imported || []).length });
+
+      const remaining = Math.max(0, duplicatePairs.reduce((n, p) => n + p.extras.length, 0) - deleted);
+      setCleanupSummary({ deleted, kept: protectedCount, scanned: (imported || []).length, remaining });
       if (onImported) await onImported();
-      toast({ title: 'Duplicate cleanup complete', description: `${duplicates.length} duplicate session${duplicates.length === 1 ? '' : 's'} removed. ${keepers.length} imported sessions protected with permanent fingerprints.` });
+      toast({
+        title: remaining ? 'Cleanup batch complete' : 'Duplicate cleanup complete',
+        description: remaining
+          ? `${deleted} duplicates removed safely. ${remaining} duplicate records remain; run cleanup again after a few seconds.`
+          : `${deleted} duplicate session${deleted === 1 ? '' : 's'} removed. No identical duplicates remain in the scanned import history.`
+      });
     } catch (e) {
-      toast({ title: 'Cleanup failed', description: e.message, variant: 'destructive' });
+      const rateLimited = /rate limit/i.test(String(e?.message || ''));
+      toast({
+        title: rateLimited ? 'Cleanup paused safely' : 'Cleanup failed',
+        description: rateLimited ? 'Base44 temporarily limited database writes. Nothing else will be attempted. Wait about 30 seconds, then run cleanup again.' : e.message,
+        variant: 'destructive'
+      });
     } finally { setBusy(false); }
   };
 
