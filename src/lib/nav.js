@@ -1,37 +1,15 @@
-import {
-  LayoutDashboard, Users, FileEdit, ShieldCheck, BarChart3,
-  CalendarClock, BookOpen, ClipboardList, GraduationCap, UsersRound, Network,
-  FileBarChart, FlaskConical, MessageCircle, Settings, FileText, Crown, Timer,
-  LifeBuoy, TicketPercent, Library, Archive, ClipboardCheck, Settings2, Blocks, Plug
-} from "lucide-react";
-
-export const navItems = [
-  { label: "Command Center", path: "/command-center", icon: Blocks },
-  { label: "Today", path: "/app", icon: LayoutDashboard },
-  { label: "Students", path: "/students", icon: Users },
-  { label: "IEP Studio", path: "/iep-studio", icon: FileEdit },
-  { label: "Meeting Navigator", path: "/meeting-navigator", icon: ClipboardList },
-  { label: "Session Tracker", path: "/session-tracker", icon: Timer },
-  { label: "CaseCue Check", path: "/iep-review", icon: ShieldCheck },
-  { label: "Data Center", path: "/data-center", icon: BarChart3 },
-  { label: "Progress Monitoring Day", path: "/progress-monitoring-day", icon: ClipboardCheck },
-  { label: "Instruction & Schedule", path: "/schedule", icon: CalendarClock },
-  { label: "Lesson Studio", path: "/lesson-studio", icon: BookOpen },
-  { label: "Substitute Plans", path: "/sub-plans", icon: ClipboardList },
-  { label: "Gradebook", path: "/gradebook", icon: GraduationCap },
-  { label: "Meeting Center", path: "/meetings", icon: UsersRound },
-  { label: "Goal Groups", path: "/goal-groups", icon: Network },
-  { label: "Reports", path: "/reports", icon: FileBarChart },
-  { label: "Progress Reports", path: "/progress-reports", icon: FileText },
-  { label: "Evidence Vault", path: "/evidence-vault", icon: Archive },
-  { label: "Resource Hub", path: "/resource-hub", icon: Library },
-  { label: "Practice Lab", path: "/practice-lab", icon: FlaskConical },
-  { label: "Ask CaseCue", path: "/ask-casecue", icon: MessageCircle },
-  { label: "Help Center", path: "/help", icon: LifeBuoy },
-  { label: "Configuration Center", path: "/configuration", icon: Settings2 },
-  { label: "Integrations", path: "/integrations", icon: Plug },
-  { label: "Settings", path: "/settings", icon: Settings },
-  { label: "Admin", path: "/admin", icon: ShieldCheck, adminOnly: true },
-  { label: "Promo Codes", path: "/promo-codes", icon: TicketPercent, adminOnly: true },
-  { label: "Platform Admin", path: "/platform-admin", icon: Crown, adminOnly: true },
+import { LayoutDashboard, Users, BookOpen, FileEdit, BarChart3, UsersRound, FileBarChart, MessageCircle, Settings, ShieldCheck, TicketPercent, Crown } from 'lucide-react';
+export const navItems=[
+ {label:'Today',path:'/app',icon:LayoutDashboard},
+ {label:'Students',path:'/students',icon:Users},
+ {label:'Instruction',path:'/instruction',icon:BookOpen},
+ {label:'IEPs',path:'/ieps',icon:FileEdit},
+ {label:'Progress',path:'/progress',icon:BarChart3},
+ {label:'Meetings',path:'/meetings-workspace',icon:UsersRound},
+ {label:'Reports',path:'/reports',icon:FileBarChart},
+ {label:'Ask CaseCue',path:'/ask-casecue',icon:MessageCircle},
+ {label:'Settings',path:'/settings',icon:Settings},
+ {label:'Admin',path:'/admin',icon:ShieldCheck,adminOnly:true},
+ {label:'Promo Codes',path:'/promo-codes',icon:TicketPercent,adminOnly:true},
+ {label:'Platform Admin',path:'/platform-admin',icon:Crown,adminOnly:true}
 ];
