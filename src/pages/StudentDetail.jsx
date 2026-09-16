@@ -71,6 +71,7 @@ export default function StudentDetail() {
   const [bankOpen, setBankOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingStudent, setDeletingStudent] = useState(false);
+  const [verifyingDates, setVerifyingDates] = useState(false);
 
   if (!student) return <div className="text-center py-20 text-muted-foreground">Loading student…</div>;
 
@@ -147,6 +148,20 @@ export default function StudentDetail() {
     if (!newNote.trim()) return;
     const updated = await base44.entities.Student.update(id, { notes: (student.notes ? student.notes + "\n\n" : "") + `[${new Date().toLocaleDateString()}] ${newNote}` });
     setStudent(updated); setNewNote(""); toast({ title: "Note added" });
+  };
+
+  const verifyDates = async () => {
+    setVerifyingDates(true);
+    try {
+      const currentIeps = (documents || []).filter((d) => d.document_type === "IEP" && ["current", "final"].includes(d.iep_role) && d.extraction_status === "processed");
+      if (!currentIeps.length) throw new Error("Upload and process a current or final IEP first.");
+      const source = currentIeps.sort((a,b) => String(b.date_uploaded || b.updated_date || "").localeCompare(String(a.date_uploaded || a.updated_date || "")))[0];
+      const res = await base44.functions.invoke("verifyStudentDates", { student_id: id, document_id: source.id });
+      if (res.data?.student) setStudent(res.data.student); else await refetch();
+      toast({ title: res.data?.status === "verified" ? "Student dates verified" : "Dates checked — review needed", description: res.data?.student?.date_verification_note || "CaseCue compared the student dates with the current/final IEP." });
+    } catch (e) {
+      toast({ title: "Could not verify dates", description: e?.response?.data?.error || e.message, variant: "destructive" });
+    } finally { setVerifyingDates(false); }
   };
 
   const chartData = (progress || []).map((p) => ({ date: p.date, percentage: p.percentage || 0 }));
