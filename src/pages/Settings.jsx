@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical, Archive, Plug, GraduationCap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
@@ -23,6 +23,9 @@ import BillingCard from "@/components/settings/BillingCard";
 export default function Settings() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const settingsTab = requestedTab === 'integrations' ? 'integrations' : 'profile';
   const { user, checkUserAuth } = useAuth();
   const { data: students, refetch: refetchStudents } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
   const { data: retentionRows, refetch: refetchRetention } = useAsync(() => base44.entities.RetentionPolicy.list('-updated_date', 5), []);
@@ -142,10 +145,11 @@ export default function Settings() {
     <div>
       <PageHeader title="Settings" subtitle="Manage your profile, organization, integrations, processing, privacy, and subscription." icon={SettingsIcon} actions={<div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>navigate('/academy')}><GraduationCap className="h-4 w-4 mr-2"/>CaseCue Academy</Button><Button variant="outline" onClick={()=>navigate('/integrations')}><Plug className="h-4 w-4 mr-2"/>Integrations</Button></div>} />
 
-      <Tabs defaultValue="profile">
+      <Tabs key={settingsTab} defaultValue={settingsTab}>
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
           <TabsTrigger value="profile"><User className="h-4 w-4 mr-1.5" /> Profile</TabsTrigger>
           <TabsTrigger value="organization"><Building2 className="h-4 w-4 mr-1.5" /> Organization</TabsTrigger>
+          <TabsTrigger value="integrations"><Plug className="h-4 w-4 mr-1.5" /> Integrations</TabsTrigger>
           <TabsTrigger value="ai"><Sparkles className="h-4 w-4 mr-1.5" /> Processing Settings</TabsTrigger>
           <TabsTrigger value="privacy"><Lock className="h-4 w-4 mr-1.5" /> Privacy</TabsTrigger>
           <TabsTrigger value="retention"><Archive className="h-4 w-4 mr-1.5" /> Data Retention</TabsTrigger>
@@ -172,6 +176,8 @@ export default function Settings() {
           <Label className="mt-4 block">Your role</Label><Input value={user?.role || "user"} disabled className="mt-1" />
           <Button className="brand-gradient text-white mt-5">Save organization</Button>
         </Card></TabsContent>
+
+        <TabsContent value="integrations"><Card className="p-6 max-w-2xl"><div className="flex items-start gap-3"><div className="h-11 w-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0"><Plug className="h-5 w-5 text-blue-700"/></div><div className="flex-1"><h3 className="font-semibold">Email, calendar & school connections</h3><p className="text-sm text-muted-foreground mt-1">Connect Gmail, calendar services, and approved school systems from one place. Gmail and calendar connection status, permissions, and import options live here.</p><Button onClick={()=>navigate('/integrations')} className="mt-4 bg-slate-950 text-white">Open Integrations</Button></div></div></Card></TabsContent>
 
         <TabsContent value="ai"><Card className="p-6 max-w-lg">
           <h3 className="font-semibold mb-4">processing provider</h3>
