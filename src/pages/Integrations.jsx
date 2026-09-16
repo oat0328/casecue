@@ -1,0 +1,21 @@
+import React from 'react';
+import { Link2, Database, Mail, CalendarDays, ShieldCheck, RefreshCw, CheckCircle2, LockKeyhole } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
+import { Card } from '@/components/ui/cards';
+import { Button } from '@/components/ui/button';
+
+const integrations = [
+  { name:'Infinite Campus', type:'Student Information System', icon:Database, description:'OneRoster-ready connection for authorized rosters, students, classes, teachers, schedules and supported academic data.', status:'Setup required', action:'Configure OneRoster', detail:'District/API approval required. Direct writeback stays off until the organization has an authorized connection.' },
+  { name:'Microsoft 365 / Outlook', type:'Email + Calendar', icon:Mail, description:'Bring school communication and calendar context into the CaseCue Communication Hub.', status:'Setup required', action:'Connect Microsoft 365', detail:'Use organization-approved OAuth permissions. Do not silently attach email to a student record.' },
+  { name:'Google Workspace', type:'Gmail + Google Calendar', icon:CalendarDays, description:'Connect approved Gmail and Calendar data for meetings, reminders and educator communication.', status:'Setup required', action:'Connect Google Workspace', detail:'Organization authorization and minimum-necessary scopes required.' },
+];
+
+export default function Integrations(){
+ return <div>
+  <PageHeader title="Integrations Center" subtitle="Connect the school systems CaseCue needs to become your one-stop Special Education workspace." icon={Link2}/>
+  <Card className="p-5 mb-6 border-blue-200 bg-blue-50/50"><div className="flex gap-3"><ShieldCheck className="h-5 w-5 text-blue-700 shrink-0 mt-0.5"/><div><div className="font-bold">Organization-controlled connections</div><p className="text-sm text-slate-600 mt-1">Credentials and tokens belong server-side and must be isolated by organization. CaseCue should request only the data needed for the approved workflow. No integration silently changes an official school, SIS, email, calendar or IEP record.</p></div></div></Card>
+  <div className="grid xl:grid-cols-3 gap-4">{integrations.map(x=>{const Icon=x.icon;return <Card key={x.name} className="p-5 flex flex-col"><div className="flex items-start justify-between gap-3"><div className="h-11 w-11 rounded-xl bg-slate-100 flex items-center justify-center"><Icon className="h-5 w-5 text-blue-700"/></div><span className="text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1">{x.status}</span></div><div className="mt-4 font-extrabold text-lg">{x.name}</div><div className="text-xs font-bold uppercase tracking-wide text-slate-400 mt-0.5">{x.type}</div><p className="text-sm text-slate-600 mt-3 flex-1">{x.description}</p><div className="mt-4 rounded-lg bg-slate-50 border p-3 text-xs text-slate-500"><LockKeyhole className="h-3.5 w-3.5 inline mr-1"/>{x.detail}</div><Button className="mt-4 w-full" disabled>{x.action}</Button></Card>})}</div>
+  <Card className="p-6 mt-6"><h2 className="font-extrabold text-lg">One connected workflow</h2><div className="grid md:grid-cols-4 gap-3 mt-4">{[['1','Sync school context','Roster, schedule, grades and permitted attendance/context'],['2','Work in CaseCue','Sessions, progress, evidence, communication and meetings'],['3','Build the IEP','Evidence-linked present levels, goals and team-review drafts'],['4','Review & transfer','Educator approval, source trace, export or authorized SIS transfer']].map(([n,t,d])=><div key={n} className="rounded-xl border p-4"><div className="h-7 w-7 rounded-full bg-slate-950 text-white flex items-center justify-center text-xs font-black">{n}</div><div className="font-bold mt-3">{t}</div><p className="text-xs text-slate-500 mt-1">{d}</p></div>)}</div></Card>
+  <Card className="p-6 mt-6"><div className="flex items-center gap-2 font-extrabold"><RefreshCw className="h-5 w-5 text-blue-700"/>Sync Health</div><p className="text-sm text-slate-500 mt-1">When connectors are enabled, this area will show last successful sync, records updated, unmatched students, permission problems and data requiring educator review.</p><div className="mt-4 flex items-center gap-2 text-sm text-slate-500"><CheckCircle2 className="h-4 w-4"/>No live external connection has been configured yet.</div></Card>
+ </div>
+}
