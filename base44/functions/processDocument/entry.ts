@@ -52,6 +52,7 @@ export default async function(req) {
 
     const body = await req.json().catch(() => ({}));
     docId = body.document_id;
+    const force = body.force === true;
     if (!docId) return Response.json({ error: 'Missing document_id' }, { status: 400 });
 
     // RLS-scoped read: only this organization's documents are visible.
@@ -61,9 +62,14 @@ export default async function(req) {
 
     const svc = base44.asServiceRole;
 
-    // Duplicate-processing prevention: if already in flight, don't start again.
+    // Duplicate-processing prevention: an in-flight read is never interrupted.
+    // A completed document CAN be deliberately re-read when force=true so older
+    // extraction versions are upgraded without deleting/re-uploading the source file.
     if (doc.extraction_status === 'processing' || doc.extraction_status === 'ocr_processing') {
       return Response.json({ error: 'This document is already processing.' }, { status: 409 });
+    }
+    if (doc.extraction_status === 'processed' && !force) {
+      return Response.json({ ok: true, skipped: true, reason: 'already_processed', pages: doc.processing_results?.pages || [] });
     }
 
     const now = new Date().toISOString();
@@ -173,10 +179,10 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       action: 'document_processed',
       entity_type: 'Document',
       entity_id: docId,
-      details: `Document "${doc.filename}" processed (${pages.length} pages) by ${user.email}`,
+      details: `Document "${doc.filename}" ${force ? 'force-reprocessed' : 'processed'} (${pages.length} pages) by ${user.email}`,
     });
 
-    return Response.json({ ok: true, pages });
+    return Response.json({ ok: true, force_reprocessed: force, processed_at: now, pages });
   } catch (error) {
     console.error('processDocument failed:', error);
     try {
