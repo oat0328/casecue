@@ -249,9 +249,9 @@ Generate New IEP · Generate Amendment · Generate Meeting Script · Generate Me
 - **Marketing pages** ✅ — features & pricing on the landing page, testimonials, request demo, contact@getcasecue.com on public pages.
 
 ### 14.2 Simple SaaS billing & account management
-*The $24.99/month launch model: individual SPED teachers, case managers, small teams, independent consultants. A teacher can sign up → upload documents → generate IEP content → prepare meetings → track progress → pay $24.99/month with no demo, sales call, or contract.*
+*The $29.99/month launch model: individual SPED teachers, case managers, small teams, independent consultants. A teacher can sign up → upload documents → generate IEP content → prepare meetings → track progress → pay $29.99/month with no demo, sales call, or contract.*
 
-- **Plans** ✅ — free trial + Professional plan ($24.99/month); access-code grants (trial / complimentary / demo).
+- **Plans** ✅ — free trial + Professional plan ($29.99/month); access-code grants (trial / complimentary / demo).
 - **Self-service signup** ✅ — create account → start free trial → upgrade via Base44 Payments checkout → payment method at checkout.
 - **Account management** ✅ — update profile, change password, manage subscription, redeem access code, cancel through platform admin.
 - **Customer support** ✅ — Help Center, contact support (contact@getcasecue.com), feature requests, bug reports, reviews (1–5 stars + would-recommend 0–10) with a public feedback center.

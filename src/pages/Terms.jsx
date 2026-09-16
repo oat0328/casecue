@@ -50,7 +50,7 @@ export default function Terms() {
       </Section>
 
       <Section heading="2. Subscription and billing">
-        <p>CaseCue is offered on a subscription basis. New accounts start with a 14-day free trial. Unless canceled, your subscription automatically renews at the then-current rate (currently $24.99/month for the Founding Teacher plan). You may cancel at any time; cancellation stops future charges, and you retain access until the end of the paid period. Prices may change with reasonable advance notice.</p>
+        <p>CaseCue is offered on a subscription basis. New accounts start with a 14-day free trial. Unless canceled, your subscription automatically renews at the then-current rate (currently $29.99/month for the Founding Teacher plan). You may cancel at any time; cancellation stops future charges, and you retain access until the end of the paid period. Prices may change with reasonable advance notice.</p>
       </Section>
 
       <Section heading="3. Authorization and student data">

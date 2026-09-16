@@ -109,10 +109,10 @@ export default function PromoCodeManager() {
   };
 
   const perUseSaved = (c) => {
-    if (c.discount_type === "percent_off") return 24.99 * ((c.value || 0) / 100);
+    if (c.discount_type === "percent_off") return 29.99 * ((c.value || 0) / 100);
     if (c.discount_type === "fixed_off") return c.value || 0;
-    if (c.discount_type === "first_month_free") return 24.99;
-    if (c.discount_type === "months_free") return 24.99 * Math.max(1, c.value || 1);
+    if (c.discount_type === "first_month_free") return 29.99;
+    if (c.discount_type === "months_free") return 29.99 * Math.max(1, c.value || 1);
     return 0;
   };
 

@@ -11,7 +11,7 @@ import DemoRequestsTable from "@/components/admin/DemoRequestsTable";
 import DistrictAnalytics from "@/components/admin/DistrictAnalytics";
 import FeedbackReviewCenter from "@/components/admin/FeedbackReviewCenter";
 
-const PLAN_PRICE = 24.99;
+const PLAN_PRICE = 29.99;
 
 export default function Admin() {
   const { user } = useAuth();

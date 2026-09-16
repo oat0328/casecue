@@ -124,7 +124,7 @@ export default function BillingCard() {
         {user?.data?.founding_member && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">★ Founding Member</span>}
         {user?.data?.beta_tester && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Beta Tester</span>}
       </div>
-      <div className="flex items-end gap-1 mt-1"><span className="text-3xl font-bold">$24.99</span><span className="text-muted-foreground mb-1">/ month</span></div>
+      <div className="flex items-end gap-1 mt-1"><span className="text-3xl font-bold">$29.99</span><span className="text-muted-foreground mb-1">/ month</span></div>
 
       {plan === "founding_teacher" ? (
         <>
@@ -176,7 +176,7 @@ export default function BillingCard() {
           </div>
           <Button onClick={startCheckout} disabled={startingCheckout} className="brand-gradient text-white mt-4">
             {startingCheckout ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CreditCard className="h-4 w-4 mr-1" />}
-            {startingCheckout ? "Opening checkout…" : `Start subscription${promo ? ` — ${promo.breakdown.final_price}` : " — $24.99/mo"}`}
+            {startingCheckout ? "Opening checkout…" : `Start subscription${promo ? ` — ${promo.breakdown.final_price}` : " — $29.99/mo"}`}
           </Button>
         </div>
       )}

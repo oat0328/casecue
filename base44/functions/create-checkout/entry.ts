@@ -82,9 +82,9 @@ Deno.serve(async (req: Request) => {
     const PLANS: Record<string, { name: string; price: string; title: string; description: string }> = {
       "founding-teacher": {
         name: "CaseCue Founding Teacher",
-        price: "24.99",
+        price: "29.99",
         title: "CaseCue Founding Teacher",
-        description: "Full CaseCue access. 14-day free trial, then $24.99/month. Cancel anytime.",
+        description: "Full CaseCue access. 14-day free trial, then $29.99/month. Cancel anytime.",
       },
     };
     const plan = PLANS[productId];

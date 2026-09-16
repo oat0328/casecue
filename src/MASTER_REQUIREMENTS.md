@@ -262,9 +262,9 @@ Generate New IEP · Generate Amendment · Generate Meeting Script · Generate IE
 - **Marketing pages** ✅ — features & pricing on the landing page, testimonials, request demo, contact@getcasecue.com on public pages. **Every claim must be demonstrable — audited 2026-09-09.**
 
 ### 14.2 Simple SaaS billing & account management
-*The $24.99/month launch model: individual SPED teachers, case managers, small teams, independent consultants. A teacher can sign up → upload documents → generate IEP content → prepare meetings → track progress → pay $24.99/month with no demo, sales call, or contract.*
+*The $29.99/month launch model: individual SPED teachers, case managers, small teams, independent consultants. A teacher can sign up → upload documents → generate IEP content → prepare meetings → track progress → pay $29.99/month with no demo, sales call, or contract.*
 
-- **Plans** ✅ — free trial + Professional plan ($24.99/month); access-code grants (trial / complimentary / demo).
+- **Plans** ✅ — free trial + Professional plan ($29.99/month); access-code grants (trial / complimentary / demo).
 - **Self-service signup** ✅ — create account → start free trial → upgrade via Base44 Payments checkout → payment method at checkout.
 - **Account management** ✅ — update profile, change password, manage subscription, redeem access code.
 - **Self-service subscription management** ✅ — Settings billing card: view plan, billing history, downloadable PDF receipts, and self-service cancel (soft cancel: auto-renew off, access continues through the paid period; the payments webhook revokes at cycle end). No support contact required for any of it.
@@ -335,7 +335,7 @@ Scripted sequence:
 5. **Meeting Mode** — script, parent summary, IEP Meeting Navigator, discussion notes. VO: "Walk into every IEP meeting prepared."
 6. **Goals & progress** — graphs, goal tracking, trend charts. VO: "Track student growth with visual progress monitoring and actionable insights."
 7. **Emotional ending** — teacher spending less time on paperwork, more time supporting students. VO: "Less paperwork. More impact."
-8. **Final screen** — CaseCue logo, tagline, CTA "Start Your Free Trial — Only $24.99/Month."
+8. **Final screen** — CaseCue logo, tagline, CTA "Start Your Free Trial — Only $29.99/Month."
 
 ### 16.4 Social media content
 Formats: 15s/30s Facebook ads, 15s/30s Instagram Reels, 30s TikTok, 60s demo, LinkedIn administrator video, YouTube pre-roll. Facebook ad hooks: "What if IEP prep took 15 minutes instead of 3 hours?", "Still digging through old IEPs?", "Your next IEP meeting is already prepared.", "Upload the records. Let CaseCue do the heavy lifting." Short-form pillars: IEP tips, case management tips, meeting preparation, progress monitoring, goal writing, SPED productivity — always ending with "Try CaseCue Free."

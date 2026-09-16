@@ -3,7 +3,7 @@
 // The checkout re-validates at session creation — the client's "applied"
 // state is never trusted for pricing.
 
-export const BASE_PRICE = 24.99;
+export const BASE_PRICE = 29.99;
 
 export async function validatePromo(base44, codeRaw, appUser) {
   const code = String(codeRaw || '').trim().toUpperCase();
