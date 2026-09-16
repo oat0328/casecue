@@ -163,7 +163,7 @@ Return JSON matching the schema.`;
 
     await base44.entities.IepWorkspace.update(body.workspace_id, { draft, status: 'draft' });
     const sourceDocumentIds = Array.isArray(workspace.analysis?.source_documents) ? workspace.analysis.source_documents : [];
-    await base44.asServiceRole.entities.IepDraftArtifact.create({
+    const artifact = await base44.asServiceRole.entities.IepDraftArtifact.create({
       student_id: workspace.student_id,
       workspace_id: body.workspace_id,
       source_document_ids: sourceDocumentIds,
@@ -172,6 +172,14 @@ Return JSON matching the schema.`;
       status: 'draft',
       generated_at: new Date().toISOString(),
     });
+    if (sourceDocumentIds.length) {
+      await base44.asServiceRole.entities.IepDraftSourceLink.bulkCreate(sourceDocumentIds.map((source_document_id) => ({
+        student_id: workspace.student_id,
+        workspace_id: body.workspace_id,
+        draft_artifact_id: artifact.id,
+        source_document_id,
+      })));
+    }
     return Response.json({ draft });
   } catch (error) {
     console.error('iepWorkspaceDraft failed:', error);

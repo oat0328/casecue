@@ -1,0 +1,23 @@
+{
+  "name": "IepDraftSourceLink",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "draft_artifact_id": {
+      "type": "string"
+    },
+    "source_document_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "workspace_id",
+    "source_document_id"
+  ]
+}
