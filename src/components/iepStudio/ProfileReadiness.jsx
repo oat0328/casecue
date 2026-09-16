@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/cards";
 
 // IEP Readiness score: shows a case manager at a glance what's complete and
 // what's missing before an IEP meeting. Computed from real records — no AI.
-export default function ProfileReadiness({ student, analysis = null }) {
+export default function ProfileReadiness({ student, analysis = null, evidence = null }) {
   const { data: goals } = useAsync(() => base44.entities.Goal.filter({ student_id: student.id }, '-created_date', 100), [student?.id]);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.filter({ student_id: student.id }, '-date', 200), [student?.id]);
   const { data: documents } = useAsync(() => base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 100), [student?.id]);
@@ -15,8 +15,8 @@ export default function ProfileReadiness({ student, analysis = null }) {
   const hasDoc = (type) => docTypes.includes(type);
   const extracted = analysis?.auto_extracted || analysis || {};
   const textHas = (value) => typeof value === 'string' && value.trim().length > 0;
-  const hasParentInput = hasDoc("Parent Input") || textHas(extracted.parent_concerns);
-  const hasBehaviorNeed = textHas(extracted.behavior_information);
+  const hasParentInput = hasDoc("Parent Input") || textHas(extracted.parent_concerns) || evidence?.parent_concerns_found === true;
+  const hasBehaviorNeed = textHas(extracted.behavior_information) || evidence?.behavior_supports_found === true;
   const hasBehaviorPlan = hasDoc("BIP") || hasDoc("FBA") || hasDoc("Behavior Log");
   const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
   const hasRecentProgress = (progress || []).some((p) => p.date && new Date(p.date).getTime() > ninetyDaysAgo);
