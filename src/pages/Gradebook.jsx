@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet, Eye } from "lucide-react";
+import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet, Eye, FileText, TrendingUp, Users, ClipboardCheck } from "lucide-react";
 import readXlsxFile from "read-excel-file";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
@@ -29,7 +29,8 @@ export default function Gradebook() {
   const students = useMemo(() => [...(rawStudents || [])].sort((a,b)=>`${a.last_name||''},${a.first_name||''}`.localeCompare(`${b.last_name||''},${b.first_name||''}`,undefined,{sensitivity:'base'})), [rawStudents]);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: assignments, refetch } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 500), []);
-  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 300), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 1000), []);
+  const { data: documents } = useAsync(() => base44.entities.Document.list('-updated_date', 1000), []);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -57,7 +58,9 @@ export default function Gradebook() {
   const rowsFromFile = async (file) => {
     if (/\.pdf$/i.test(file.name)) {
       const up = await base44.integrations.Core.UploadPrivateFile({ file });
-      const signed = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: up.file_uri, expires_in: 900 });
+      const signedResult = await base44.functions.invoke('openPrivateFileUrl',{file_uri:up.file_uri});
+      const signed = signedResult?.data || signedResult;
+      if(!signed?.signed_url) throw new Error('CaseCue could not securely open the uploaded grade report.');
       const schema = {type:'object',properties:{rows:{type:'array',items:{type:'object',properties:{student:{type:'string'},course:{type:'string'},teacher:{type:'string'},assignment:{type:'string'},assignment_type:{type:'string'},points_earned:{type:'number'},points_possible:{type:'number'},current_grade_percent:{type:'number'},letter_grade:{type:'string'},missing:{type:'boolean'},accommodations:{type:'string'},term:{type:'string'},date:{type:'string'},notes:{type:'string'}},required:['student','course','current_grade_percent','letter_grade']}}},required:['rows']};
       const result = await base44.integrations.Core.InvokeLLM({prompt:'Extract the Gen Ed grade report into one row per visible course for each student. Preserve the visible student name, course/subject, teacher, current grade percent, letter grade, term/quarter and report date. Do not invent missing values. A course grade is Gen Ed context only, not IEP progress.',file_urls:[signed.signed_url],response_json_schema:schema,model:'automatic'});
       const data = typeof result === 'object' ? result : JSON.parse(result);
@@ -85,6 +88,7 @@ export default function Gradebook() {
       };
       if (idx.student < 0) throw new Error("Add a Student or Student Name column so CaseCue can match each row.");
       let added=0, skipped=0, duplicates=0;
+      const seen=new Set((assignments||[]).map(a=>[a.student_id,normalize(a.course),normalize(a.title),normalize(a.term),String(a.date||''),Number(a.current_grade_percent??-1),normalize(a.current_grade_letter)].join('|')));
       for (const row of rows.slice(1)) {
         const student = findStudent(row[idx.student]);
         if (!student) { skipped++; continue; }
@@ -94,9 +98,9 @@ export default function Gradebook() {
         if (rawDate instanceof Date) date = rawDate.toISOString().slice(0,10);
         else if (clean(rawDate)) { const d = new Date(rawDate); if (!Number.isNaN(d.getTime())) date = d.toISOString().slice(0,10); }
         const payload={student_id: student.id, title: title || "Gen Ed grade update", course: idx.course>=0?clean(row[idx.course]):"", gen_ed_teacher: idx.teacher>=0?clean(row[idx.teacher]):"", assignment_type: idx.type>=0?clean(row[idx.type]):"", term: idx.term>=0?clean(row[idx.term]):"", score_earned: idx.earned>=0?Number(row[idx.earned])||0:0, score_possible: idx.possible>=0?Number(row[idx.possible])||0:0, current_grade_percent: idx.percent>=0?Number(String(row[idx.percent]).replace('%',''))||0:null, current_grade_letter: idx.letter>=0?clean(row[idx.letter]):"", missing_assignment: idx.missing>=0?["yes","true","1","missing"].includes(clean(row[idx.missing]).toLowerCase()):false, accommodations_provided: idx.accommodations>=0?(["yes","no"].includes(clean(row[idx.accommodations]).toLowerCase())?clean(row[idx.accommodations]).toLowerCase():"unknown"):"unknown", notes: idx.notes>=0?clean(row[idx.notes]):"", date};
-        const duplicate=(assignments||[]).find(a=>a.student_id===payload.student_id&&normalize(a.course)===normalize(payload.course)&&normalize(a.title)===normalize(payload.title)&&normalize(a.term)===normalize(payload.term)&&String(a.date||'')===String(payload.date||'')&&Number(a.current_grade_percent??-1)===Number(payload.current_grade_percent??-1)&&normalize(a.current_grade_letter)===normalize(payload.current_grade_letter));
-        if(duplicate){duplicates++;continue;}
-        await base44.entities.GradebookAssignment.create(payload);added++;
+        const fingerprint=[payload.student_id,normalize(payload.course),normalize(payload.title),normalize(payload.term),String(payload.date||''),Number(payload.current_grade_percent??-1),normalize(payload.current_grade_letter)].join('|');
+        if(seen.has(fingerprint)){duplicates++;continue;}
+        await base44.entities.GradebookAssignment.create({...payload,source_type:'gen_ed_import'});seen.add(fingerprint);added++;
       }
       refetch(); toast({ title: `${added} new grade row${added===1?'':'s'} imported`, description: `${duplicates} duplicate${duplicates===1?'':'s'} skipped${skipped?` · ${skipped} unmatched row(s) need review`:''}.` });
     } catch (e) { toast({ title: "Import failed", description: e.message, variant: "destructive" }); }
@@ -111,10 +115,17 @@ export default function Gradebook() {
   };
 
   const remove = async (id) => { await base44.entities.GradebookAssignment.delete(id); refetch(); };
-  const openAssignment = async (a) => { try { let uri=a.file_url; if(!uri&&a.work_evidence_id){const ev=await base44.entities.WorkEvidence.filter({id:a.work_evidence_id},'-created_date',1);uri=ev?.[0]?.file_url;} if(!uri)throw new Error('No assignment image/PDF is linked to this grade yet.'); const s=await base44.integrations.Core.CreateFileSignedUrl({file_uri:uri,expires_in:900}); if(!s?.signed_url)throw new Error('Could not create a private viewing link.'); window.open(s.signed_url,'_blank','noopener,noreferrer'); } catch(e){toast({title:'Could not open assignment',description:e.message,variant:'destructive'})} };
+  const openAssignment = async (a) => { try { let uri=a.file_url; if(!uri&&a.work_evidence_id){const ev=await base44.entities.WorkEvidence.filter({id:a.work_evidence_id},'-created_date',1);uri=ev?.[0]?.file_url;} if(!uri)throw new Error('No assignment image/PDF is linked to this grade yet.'); const r=await base44.functions.invoke('openPrivateFileUrl',{file_uri:uri});const s=r?.data||r;if(!s?.signed_url)throw new Error('Could not create a private viewing link.'); window.open(s.signed_url,'_blank','noopener,noreferrer'); } catch(e){toast({title:'Could not open assignment',description:e.message,variant:'destructive'})} };
+  const iepForStudent=(studentId)=>(documents||[]).find(d=>d.student_id===studentId&&/iep/i.test(String(d.document_type||d.type||d.title||'')));
+  const openIep=async(studentId)=>{try{const d=iepForStudent(studentId);if(!d)throw new Error('No IEP document is currently linked to this student.');const r=await base44.functions.invoke('openDocumentUrl',{document_id:d.id});const s=r?.data||r;if(!s?.signed_url)throw new Error('Could not create an IEP viewing link.');window.open(s.signed_url,'_blank','noopener,noreferrer')}catch(e){toast({title:'Could not open IEP',description:e.message,variant:'destructive'})}};
+  const gradeRows=(assignments||[]).filter(a=>a.current_grade_percent!=null||Number(a.score_possible)>0);
+  const avgGrade=gradeRows.length?Math.round(gradeRows.reduce((sum,a)=>sum+Number(a.current_grade_percent!=null?a.current_grade_percent:pct(a)),0)/gradeRows.length):0;
+  const studentsWithGrades=new Set((assignments||[]).map(a=>a.student_id).filter(Boolean)).size;
+  const workLinked=(assignments||[]).filter(a=>a.file_url||a.work_evidence_id).length;
 
   return <div>
     <PageHeader title="Gradebook" subtitle="Drop mixed student work, let CaseCue identify and grade it, capture quantitative data, connect it to goals, and file the work to each student." icon={GraduationCap} />
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6"><Card className="p-5 bg-gradient-to-br from-slate-950 to-slate-800 text-white"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-slate-300">Average grade</div><div className="text-3xl font-black mt-1">{avgGrade}%</div></div><TrendingUp className="h-7 w-7 text-sky-300"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Students with grades</div><div className="text-3xl font-black mt-1">{studentsWithGrades}</div></div><Users className="h-7 w-7 text-blue-600"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Assignments</div><div className="text-3xl font-black mt-1">{(assignments||[]).length}</div></div><ClipboardCheck className="h-7 w-7 text-emerald-600"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Work attached</div><div className="text-3xl font-black mt-1">{workLinked}</div></div><FileText className="h-7 w-7 text-violet-600"/></div></Card></div>
     <Tabs defaultValue="stack">
       <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="stack">Paper Scanner</TabsTrigger><TabsTrigger value="upload">Single Student Scan</TabsTrigger><TabsTrigger value="assignments">Gradebook</TabsTrigger><TabsTrigger value="import">School Grade Import</TabsTrigger><TabsTrigger value="charts">Data & Trends</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
       <TabsContent value="assignments">
@@ -140,7 +151,7 @@ export default function Gradebook() {
           <Button onClick={add} disabled={saving} className="brand-gradient text-white mt-5"><Plus className="h-4 w-4 mr-1"/>{saving?"Saving…":"Add Grade"}</Button>
         </Card>
         <div className="flex justify-end mb-3"><Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-2"/>Export CSV</Button></div>
-        <div className="space-y-2">{[...(assignments||[])].sort((a,b)=>studentName(a.student_id).localeCompare(studentName(b.student_id),undefined,{sensitivity:'base'})||String(b.date||'').localeCompare(String(a.date||''))).map(a=><Card key={a.id} className="p-4"><div className="flex flex-wrap items-start gap-4"><div className="flex-1 min-w-[240px]"><div className="font-black">{studentName(a.student_id)} · {a.course||"Resource"}</div><div className="text-sm font-semibold mt-0.5">{a.title}</div><div className="text-xs text-muted-foreground mt-1">{a.gen_ed_teacher||((a.source_type==='resource_assignment')?'Resource assignment':'Teacher not entered')} · {a.date}{a.term?` · ${a.term}`:""}{a.accommodations_provided?` · Accommodations: ${a.accommodations_provided}`:""}</div>{a.quantitative_note&&<div className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-900"><b>Quantitative:</b> {a.quantitative_note}</div>}{(a.qualitative_note||a.notes)&&<div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700"><b>Qualitative:</b> {a.qualitative_note||a.notes}</div>}</div><div className="text-right"><div className="font-black text-lg">{a.current_grade_percent!=null?`${a.current_grade_percent}%`:a.score_possible>0?`${a.score_earned}/${a.score_possible} · ${pct(a)}%`:"—"}</div><div className="text-sm">{a.current_grade_letter||""}</div>{a.missing_assignment&&<div className="text-xs text-rose-600 font-medium">Missing</div>}</div><div className="flex gap-1">{a.file_url&&<Button variant="outline" size="sm" onClick={()=>openAssignment(a)}><Eye className="h-3.5 w-3.5 mr-1"/>View work</Button>}<Button variant="ghost" size="icon" onClick={()=>remove(a.id)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></div></div></Card>)}</div>
+        <div className="space-y-2">{[...(assignments||[])].sort((a,b)=>studentName(a.student_id).localeCompare(studentName(b.student_id),undefined,{sensitivity:'base'})||String(b.date||'').localeCompare(String(a.date||''))).map(a=><Card key={a.id} className="p-4"><div className="flex flex-wrap items-start gap-4"><div className="flex-1 min-w-[240px]"><div className="font-black">{studentName(a.student_id)} · {a.course||"Resource"}</div><div className="text-sm font-semibold mt-0.5">{a.title}</div><div className="text-xs text-muted-foreground mt-1">{a.gen_ed_teacher||((a.source_type==='resource_assignment')?'Resource assignment':'Teacher not entered')} · {a.date}{a.term?` · ${a.term}`:""}{a.accommodations_provided?` · Accommodations: ${a.accommodations_provided}`:""}</div>{a.quantitative_note&&<div className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-900"><b>Quantitative:</b> {a.quantitative_note}</div>}{(a.qualitative_note||a.notes)&&<div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700"><b>Qualitative:</b> {a.qualitative_note||a.notes}</div>}</div><div className="text-right"><div className="font-black text-lg">{a.current_grade_percent!=null?`${a.current_grade_percent}%`:a.score_possible>0?`${a.score_earned}/${a.score_possible} · ${pct(a)}%`:"—"}</div><div className="text-sm">{a.current_grade_letter||""}</div>{a.missing_assignment&&<div className="text-xs text-rose-600 font-medium">Missing</div>}</div><div className="flex flex-wrap gap-1">{(a.file_url||a.work_evidence_id)&&<Button variant="outline" size="sm" onClick={()=>openAssignment(a)}><Eye className="h-3.5 w-3.5 mr-1"/>View work</Button>}{iepForStudent(a.student_id)&&<Button variant="outline" size="sm" onClick={()=>openIep(a.student_id)}><FileText className="h-3.5 w-3.5 mr-1"/>View IEP</Button>}<Button variant="ghost" size="icon" onClick={()=>remove(a.id)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></div></div></Card>)}</div>
       </TabsContent>
       <TabsContent value="import">
         <Card className={`p-8 border-2 border-dashed text-center transition ${dragging?'border-primary bg-primary/5':'border-border'}`} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);importFile(e.dataTransfer.files?.[0])}}>
