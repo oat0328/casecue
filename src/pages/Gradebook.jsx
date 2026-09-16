@@ -54,6 +54,14 @@ export default function Gradebook() {
   };
 
   const rowsFromFile = async (file) => {
+    if (/\.pdf$/i.test(file.name)) {
+      const up = await base44.integrations.Core.UploadPrivateFile({ file });
+      const signed = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: up.file_uri, expires_in: 900 });
+      const schema = {type:'object',properties:{rows:{type:'array',items:{type:'object',properties:{student:{type:'string'},course:{type:'string'},teacher:{type:'string'},assignment:{type:'string'},assignment_type:{type:'string'},points_earned:{type:'number'},points_possible:{type:'number'},current_grade_percent:{type:'number'},letter_grade:{type:'string'},missing:{type:'boolean'},accommodations:{type:'string'},term:{type:'string'},date:{type:'string'},notes:{type:'string'}},required:['student','course','current_grade_percent','letter_grade']}}},required:['rows']};
+      const result = await base44.integrations.Core.InvokeLLM({prompt:'Extract the Gen Ed grade report into one row per visible course for each student. Preserve the visible student name, course/subject, teacher, current grade percent, letter grade, term/quarter and report date. Do not invent missing values. A course grade is Gen Ed context only, not IEP progress.',file_urls:[signed.signed_url],response_json_schema:schema,model:'automatic'});
+      const data = typeof result === 'object' ? result : JSON.parse(result);
+      return [["Student","Course","Teacher","Assignment","Assignment Type","Points Earned","Points Possible","Current Grade Percent","Letter Grade","Missing","Accommodations","Quarter/Term","Date","Notes"],...(data.rows||[]).map(r=>[r.student,r.course,r.teacher,r.assignment||'Gen Ed grade report',r.assignment_type||'Grade report',r.points_earned??'',r.points_possible??'',r.current_grade_percent??'',r.letter_grade,r.missing?'Yes':'No',r.accommodations||'Unknown',r.term,r.date,r.notes])];
+    }
     if (/\.xlsx?$/i.test(file.name)) return await readXlsxFile(file);
     const text = await file.text();
     return text.split(/\r?\n/).filter(Boolean).map((line) => {
@@ -134,8 +142,8 @@ export default function Gradebook() {
       </TabsContent>
       <TabsContent value="import">
         <Card className={`p-8 border-2 border-dashed text-center transition ${dragging?'border-primary bg-primary/5':'border-border'}`} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);importFile(e.dataTransfer.files?.[0])}}>
-          <UploadCloud className="h-12 w-12 mx-auto text-primary mb-3"/><h3 className="text-lg font-semibold">Drop Gen Ed grade exports here</h3><p className="text-sm text-muted-foreground mt-2">CSV, XLSX, or XLS. CaseCue matches students by name or ID and imports the grade rows.</p>
-          <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={e=>importFile(e.target.files?.[0])}/><Button className="mt-5" onClick={()=>fileRef.current?.click()} disabled={importing}><FileSpreadsheet className="h-4 w-4 mr-2"/>{importing?"Importing…":"Choose File"}</Button>
+          <UploadCloud className="h-12 w-12 mx-auto text-primary mb-3"/><h3 className="text-lg font-semibold">Drop Gen Ed grade reports here</h3><p className="text-sm text-muted-foreground mt-2">PDF, CSV, XLSX, or XLS. CaseCue reads school grade-report PDFs like the one you uploaded, matches the student, and imports one row per visible course.</p>
+          <input ref={fileRef} type="file" accept=".pdf,.csv,.xlsx,.xls,application/pdf" className="hidden" onChange={e=>importFile(e.target.files?.[0])}/><Button className="mt-5" onClick={()=>fileRef.current?.click()} disabled={importing}><FileSpreadsheet className="h-4 w-4 mr-2"/>{importing?"Importing…":"Choose File"}</Button>
           <p className="text-xs text-muted-foreground mt-5">Recognized columns include Student, Subject/Course, Teacher, Assignment, Points Earned, Points Possible, Current Grade, Letter Grade, Missing, Accommodations, Quarter/Term, Date, and Notes.</p>
         </Card>
       </TabsContent>
