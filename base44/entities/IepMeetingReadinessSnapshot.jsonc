@@ -1,0 +1,35 @@
+{
+  "name": "IepMeetingReadinessSnapshot",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "page_count": {
+      "type": "number"
+    },
+    "pages_ready": {
+      "type": "number"
+    },
+    "missing_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "page_count",
+    "created_at"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "IepMeetingTeamInput",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "page_number": {
+      "type": "number"
+    },
+    "role": {
+      "type": "string"
+    },
+    "input": {
+      "type": "string"
+    },
+    "captured_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "role",
+    "input"
+  ]
+}

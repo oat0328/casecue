@@ -1,0 +1,35 @@
+{
+  "name": "IepMeetingVerificationFlag",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "page_number": {
+      "type": "number"
+    },
+    "issue": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "review",
+        "important"
+      ],
+      "default": "review"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "student_id",
+    "issue"
+  ]
+}

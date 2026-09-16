@@ -1,0 +1,27 @@
+{
+  "name": "IepMeetingExportRecord",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "export_type": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "reviewed": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "student_id",
+    "export_type",
+    "created_at"
+  ]
+}

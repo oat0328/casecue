@@ -1,0 +1,32 @@
+{
+  "name": "IepMeetingChangeComparison",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "area": {
+      "type": "string"
+    },
+    "previous_value": {
+      "type": "string"
+    },
+    "proposed_value": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "student_id",
+    "area"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "IepMeetingFacilitatorPreference",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "intro_name": {
+      "type": "string"
+    },
+    "intro_role": {
+      "type": "string"
+    },
+    "language_style": {
+      "type": "string",
+      "default": "easy_humanized"
+    },
+    "page_by_page": {
+      "type": "boolean",
+      "default": true
+    },
+    "explain_acronyms": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

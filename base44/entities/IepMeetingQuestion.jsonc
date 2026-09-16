@@ -1,0 +1,38 @@
+{
+  "name": "IepMeetingQuestion",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "page_number": {
+      "type": "number"
+    },
+    "question": {
+      "type": "string"
+    },
+    "asked_by": {
+      "type": "string"
+    },
+    "answer_or_resolution": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "answered",
+        "follow_up"
+      ],
+      "default": "open"
+    }
+  },
+  "required": [
+    "student_id",
+    "question",
+    "status"
+  ]
+}

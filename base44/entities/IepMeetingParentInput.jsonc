@@ -1,0 +1,26 @@
+{
+  "name": "IepMeetingParentInput",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "input": {
+      "type": "string"
+    },
+    "captured_at": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "meeting"
+    }
+  },
+  "required": [
+    "student_id",
+    "input"
+  ]
+}

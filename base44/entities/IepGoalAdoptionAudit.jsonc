@@ -1,0 +1,35 @@
+{
+  "name": "IepGoalAdoptionAudit",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "goal_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "adopted",
+        "rejected",
+        "edited"
+      ]
+    },
+    "source": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "action",
+    "timestamp"
+  ]
+}

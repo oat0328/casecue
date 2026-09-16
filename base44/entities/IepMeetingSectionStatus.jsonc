@@ -1,0 +1,34 @@
+{
+  "name": "IepMeetingSectionStatus",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "page_number": {
+      "type": "number"
+    },
+    "section_name": {
+      "type": "string"
+    },
+    "discussed": {
+      "type": "boolean",
+      "default": false
+    },
+    "team_input_captured": {
+      "type": "boolean",
+      "default": false
+    },
+    "decision_needed": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "student_id",
+    "page_number"
+  ]
+}

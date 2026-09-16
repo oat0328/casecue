@@ -1,0 +1,39 @@
+{
+  "name": "IepMeetingDecision",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "topic": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "agreed",
+        "deferred",
+        "needs_follow_up"
+      ],
+      "default": "open"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "topic",
+    "status"
+  ]
+}
