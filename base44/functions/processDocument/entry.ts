@@ -1,7 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
-// OCR document processing — reads an uploaded student document page by page and
-// saves the extraction results to the Document record.
+// Universal student-record processing — reads an uploaded student document page by page and
+// saves the extraction results to the Document record. It is intentionally not IEP-only:
+// MDT/MET 1/MET 2, evaluations, eligibility reports, 504s, behavior, medical, progress,
+// assessment, and service-provider records can all supply verified student-profile facts.
 // Status lifecycle: queued -> processing -> ocr_processing -> processed | failed.
 // Guards against duplicate processing (in-flight check) and records the error
 // reason so the teacher sees exactly why a file failed and can retry.
@@ -95,7 +97,7 @@ For each page:
 - page_number: the page number in the document
 - section_name: the section this page belongs to (e.g. "Present Levels", "Goals", "Services")
 - summary: 1-2 sentences describing what the page contains
-- important_facts: specific, verifiable statements found on the page (dates, scores, names of services, minutes, accommodations). Never invent anything not written.
+- important_facts: specific, verifiable statements found on the page (student name, grade, dates, explicitly documented disability/eligibility categories, scores, names of services, minutes, accommodations). Never invent anything not written.
 - measurable_statements: any measurable or quantified statements quoted or closely paraphrased
 - action_items: any action items, responsibilities, or follow-ups mentioned
 - questions_and_answers: capture EVERY explicit form question, prompt, checkbox question, or labeled field on the page and its documented answer/value. If the page asks a question but no answer is provided, use "Not answered in document". Do not skip questions just because they seem procedural.
@@ -106,7 +108,9 @@ For each page:
 COMPLETENESS RULE: read the ENTIRE document, including tables, checkboxes, form prompts, headers, footers, signature/procedural pages, and attachments. The saved page extraction must preserve enough information for CaseCue to answer the document's questions later without reopening or guessing.
 
 UNIVERSAL FORM RULES:
-- Recognize equivalent labels across states/vendors (for example PLAAFP/PLOP/Present Levels; SDI/Specially Designed Instruction; LRE/Placement/Participation; Evaluation/MDT/MET/Eligibility/Reevaluation).
+- Recognize equivalent labels across states/vendors (for example PLAAFP/PLOP/Present Levels; SDI/Specially Designed Instruction; LRE/Placement/Participation; Evaluation/MDT/MET/MET 1/MET 2/Eligibility/Reevaluation).
+- Student profile facts may come from ANY supported record, not only an IEP. Capture explicit student identity, grade, eligibility/disability category, dates, strengths, needs, evaluation findings, accommodations, services, and other usable profile facts wherever they appear.
+- A diagnosis, medical condition, symptom, medication, suspected disability, or evaluation recommendation is NOT automatically an IDEA eligibility category. Only capture a disability/eligibility category as such when the source explicitly identifies it that way.
 - Preserve state/district terminology in extracted text rather than rewriting it into another state's terminology.
 - Capture checked/unchecked choices when visually clear, but never infer a selection that is not visible.
 - Capture tables row-by-row when they contain goals, services, accommodations, assessment results, dates, transition content, or progress data.
