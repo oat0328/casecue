@@ -29,12 +29,12 @@ const ACCOMMODATION_SDI_SECTIONS = [
   { key: "sdi", label: "SDI / Support Language" },
 ];
 
-const GETTING_STARTED = ["Select Student", "Upload Documents", "Review CaseCue Analysis", "Generate IEP Draft", "Prepare For Meeting"];
+const GETTING_STARTED = ["Select Student", "Upload Any State IEP / Evaluation", "Review Evidence & Gaps", "Build Evidence-Linked IEP Draft", "Run Readiness & Meeting Prep"];
 
 const TAB_TIPS = [
   ["overview", "Overview", "The verified student record at a glance, with the readiness score, Meeting Mode, and Copilot."],
   ["summary", "CaseCue Summary", "CaseCue-generated summary of every uploaded document for educator review."],
-  ["builder", "IEP Builder", "The 4-step pipeline: documents → extraction review → IEP draft → review & export."],
+  ["builder", "IEP Builder", "Evidence-first builder: source documents → page-level extraction → present levels → aligned goals → services/accommodations → review & export."],
   ["goals", "Goals & Progress", "Goals with live progress graphs — green on track, yellow monitor, red at risk."],
   ["accommodations", "Accommodations & SDI", "Draft and manage accommodations and specially designed instruction language."],
   ["behavior", "BIP & FBA", "Analyze FBAs and BIPs — triggers, function of behavior, replacement behaviors, and BIP drafts."],
@@ -57,7 +57,7 @@ export default function IEPStudio() {
     <div>
       <PageHeader
         title="IEP Studio"
-        subtitle="The single IEP workspace — upload documents once, and CaseCue handles analysis, drafting, amendments, behavior planning, meetings, progress monitoring, and compliance from here."
+        subtitle="Universal IEP workspace — read IEPs and evaluations from any U.S. state, preserve page-level evidence, draft present levels and measurable goals, prepare meetings, monitor progress, and run readiness checks from one place."
         icon={FileEdit}
       />
 
@@ -78,7 +78,7 @@ export default function IEPStudio() {
         <Card className="p-6 sm:p-8 brand-gradient-soft border-primary/20">
           <h2 className="text-2xl font-bold tracking-tight">Welcome to IEP Studio</h2>
           <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-2xl">
-            Everything IEP happens here — upload documents once and CaseCue automatically reads them, builds the student profile, pre-fills every section, and prepares your meeting.{" "}
+            Everything IEP happens here — upload an IEP, MDT, evaluation, reevaluation, progress report, behavior plan, transition assessment, or supporting record from any U.S. state. CaseCue reads the document structure instead of depending on one state's form, preserves source evidence, builds educator-review drafts, and prepares the record for the meeting.{" "}
             <strong className="text-foreground">Select a student above and the Upload Center appears directly below the selector — no other clicks needed.</strong>
           </p>
           <div className="grid gap-3 sm:grid-cols-5 mb-6">
