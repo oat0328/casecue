@@ -18,7 +18,7 @@ export default function BehaviorStudio() {
       <PageHeader
         icon={Brain}
         title="Behavior & Amendments"
-        subtitle="Analyze BIPs and FBAs, and draft IEP amendment language. All AI output is a draft that requires educator and IEP team review."
+        subtitle="Analyze BIPs and FBAs, and draft IEP amendment language. All CaseCue-generated content is a draft that requires educator and IEP team review."
       />
       <Tabs defaultValue="bip">
         <TabsList>
