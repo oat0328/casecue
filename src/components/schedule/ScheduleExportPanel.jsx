@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuth } from "@/lib/AuthContext";
 import { Printer, FileSpreadsheet } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,16 @@ import ExportBar from "@/components/shared/ExportBar";
 import { exportXlsx } from "@/lib/xlsxExport";
 import { scheduleSections, caseloadSections, rosterSections, scheduleRows, SCHEDULE_HEADERS, byGroup, studentName, DELIVERY_LABEL, formatScheduleTime } from "@/lib/scheduleUtils";
 
-const BANNER = "Instruction & Schedule — generated from your saved CaseCue data.";
+const PROMO = "Created with CaseCue · Special Education Workspace";
 
 // Print & Export: weekly schedule, caseload schedule, and group rosters in
 // Print / PDF / DOCX / Email / Share, plus a full Excel workbook.
 export default function ScheduleExportPanel({ entries, students, timeFormat = "12h" }) {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const teacherName = user?.full_name || "Teacher";
+  const teacherClass = user?.room || user?.classroom || user?.data?.room || user?.data?.classroom || "";
+  const printSubtitle = `${teacherName}${teacherClass ? ` · ${teacherClass}` : ""}`;
 
   const weekly = scheduleSections(entries, students, timeFormat);
   const caseload = caseloadSections(entries, students, timeFormat);
@@ -55,10 +60,10 @@ export default function ScheduleExportPanel({ entries, students, timeFormat = "1
           <span className="text-sm font-medium">{item.label}</span>
           <ExportBar
             title={item.title}
-            subtitle="Generated from your saved schedule"
+            subtitle={printSubtitle}
             sections={item.sections}
             filename={item.filename}
-            banner={BANNER}
+            banner={PROMO}
           />
         </div>
       ))}
