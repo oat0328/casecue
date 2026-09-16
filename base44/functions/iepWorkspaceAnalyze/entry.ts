@@ -84,6 +84,10 @@ STRICT EXTRACTION RULES:
 - Anything an IEP needs that the documents do not cover goes under gaps — never invent it.
 - If two documents disagree on something, list it under conflicts.
 - Keep each fact concise and factual: dates, scores, service minutes, accommodations, statements, eligibility, evaluation findings.
+- Classify annual goals, benchmarks/short-term objectives, evaluation recommendations, accommodations, services, and classroom strategies as DIFFERENT categories. Never collapse them into one goal list.
+- For every annual goal found, extract the complete goal as one fact: area, condition, observable skill, baseline if documented, target/criterion, measurement method, progress schedule, and source page. Attach its benchmarks/objectives as subordinate facts rather than additional annual goals.
+- Extract dates with their exact label and source page: IEP/meeting date, implementation/start date, annual review due/date, reevaluation date/due date. Do not substitute one date for another.
+- For present-level evidence, preserve the actual metric, score/accuracy/frequency/duration, comparison/percentile when stated, date/assessment window, and source page.
 - Read and extract ALL saved page content, including questions_and_answers, present_level_evidence, goal_evidence, and evaluation_findings.
 - For MDT/evaluation reports, extract each measurable finding that can support present levels and aligned goals. Do not convert recommendations into team decisions.
 - Explicitly extract unanswered document prompts as gaps instead of inventing an answer.
