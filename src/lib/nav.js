@@ -1,10 +1,10 @@
 import { LayoutDashboard, Users, BookOpen, FileEdit, BarChart3, UsersRound, FileBarChart, MessageCircle, Settings, ShieldCheck, TicketPercent, Crown } from 'lucide-react';
 export const navItems=[
- {label:'Today',path:'/app',icon:LayoutDashboard},
+ {label:'Command Center',path:'/app',icon:LayoutDashboard},
  {label:'Students',path:'/students',icon:Users},
  {label:'Instruction',path:'/instruction',icon:BookOpen},
- {label:'IEPs',path:'/ieps',icon:FileEdit},
- {label:'Progress',path:'/progress',icon:BarChart3},
+ {label:'Goals & Progress',path:'/progress',icon:BarChart3},
+ {label:'IEP Center',path:'/ieps',icon:FileEdit},
  {label:'Meetings',path:'/meetings-workspace',icon:UsersRound},
  {label:'Reports',path:'/reports',icon:FileBarChart},
  {label:'Ask CaseCue',path:'/ask-casecue',icon:MessageCircle},
