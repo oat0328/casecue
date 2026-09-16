@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FolderOpen, FileText, Trash2, RefreshCw, ShieldCheck, Loader2, Upload } from "lucide-react";
+import { FolderOpen, FileText, Trash2, RefreshCw, ShieldCheck, Loader2, Upload, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -19,6 +19,16 @@ export default function Documents() {
   const studentName = (id) => { const s = (students || []).find((x) => x.id === id); return s ? `${s.first_name} ${s.last_name}` : "—"; };
 
   const remove = async (id) => { await base44.entities.Document.delete(id); refetch(); };
+  const openDoc = async (d) => {
+    try {
+      const res = await base44.functions.invoke("openDocumentUrl", { document_id: d.id });
+      const url = res.data?.signed_url || res.data?.url || res.signed_url || res.url;
+      if (!url) throw new Error(res.data?.error || "No viewable document URL was returned.");
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast({ title: "Could not open document", description: e?.response?.data?.error || e.message, variant: "destructive" });
+    }
+  };
 
   const [processingId, setProcessingId] = useState(null);
   // A stuck "processing" status older than 10 minutes is treated as stale and can be retried.
@@ -85,6 +95,7 @@ export default function Documents() {
                       {d.extraction_status === "failed" || isStaleProcessing(d) ? "Retry" : "Process"}
                     </Button>
                   ) : null}
+                  <Button variant="outline" size="sm" onClick={() => openDoc(d)}><ExternalLink className="h-3.5 w-3.5 mr-1" /> View</Button>
                   <Button variant="ghost" size="icon" onClick={() => remove(d.id)}><Trash2 className="h-4 w-4 text-rose-500" /></Button>
                 </div>
               </div>
