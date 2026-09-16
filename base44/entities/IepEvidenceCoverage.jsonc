@@ -1,0 +1,28 @@
+{
+  "name": "IepEvidenceCoverage",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "present_level_items": {
+      "type": "number"
+    },
+    "goal_items": {
+      "type": "number"
+    },
+    "evaluation_items": {
+      "type": "number"
+    },
+    "generated_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "document_id"
+  ]
+}

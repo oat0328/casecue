@@ -145,6 +145,14 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       source_label: `${doc.document_type} - ${doc.filename}, p.${p.page_number}`,
     }))).filter((row) => row.text);
     if (evidenceRows.length) await svc.entities.IepSourceEvidence.bulkCreate(evidenceRows);
+    await svc.entities.IepEvidenceCoverage.create({
+      student_id: doc.student_id,
+      document_id: docId,
+      present_level_items: evidenceRows.filter((row) => row.evidence_type === 'present_level').length,
+      goal_items: evidenceRows.filter((row) => row.evidence_type === 'goal').length,
+      evaluation_items: evidenceRows.filter((row) => row.evidence_type === 'evaluation').length,
+      generated_at: now,
+    });
     await svc.entities.IepStudioProcessingVersion.create({
       student_id: doc.student_id,
       document_id: docId,
