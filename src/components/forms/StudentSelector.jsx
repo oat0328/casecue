@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils";
  * CaseCue standard Student Selector — the ONE component used everywhere a
  * single student is picked from a dropdown.
  *
- * Spacing standard (applies everywhere it is used):
- * - Label sits ABOVE the dropdown, left-aligned, 8px (mt-2) above it
- * - 20px after the dropdown before the next field (mb-5), removable via noBottomSpace
- * - Dropdown: full width inside its container, max 480px on desktop, 100% on mobile,
- *   min height 44px, comfortable horizontal padding, vertically centered value
+ * Students are ordered like a school roster: last name A-Z, then first name A-Z.
+ * The visible label remains First Last unless a custom nameOf function is supplied.
  */
 export default function StudentSelector({
   students = [],
@@ -25,14 +22,17 @@ export default function StudentSelector({
   className,
   wrapperClassName,
   noBottomSpace = false,
-  nameOf, // optional (s) => string — custom option label
+  nameOf,
 }) {
   const autoId = useId();
   const selectId = id || `student-select-${autoId}`;
   const labelFn = nameOf || ((s) => `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Unnamed student");
-  const sortedStudents = [...(students || [])].sort((a, b) =>
-    labelFn(a).localeCompare(labelFn(b), undefined, { sensitivity: "base", numeric: true })
-  );
+  const sortedStudents = [...(students || [])].sort((a, b) => {
+    if (nameOf) return labelFn(a).localeCompare(labelFn(b), undefined, { sensitivity: "base", numeric: true });
+    const last = String(a.last_name || "").localeCompare(String(b.last_name || ""), undefined, { sensitivity: "base", numeric: true });
+    if (last !== 0) return last;
+    return String(a.first_name || "").localeCompare(String(b.first_name || ""), undefined, { sensitivity: "base", numeric: true });
+  });
 
   return (
     <div className={cn("w-full max-w-[480px]", !noBottomSpace && "mb-5", wrapperClassName)}>
