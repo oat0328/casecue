@@ -6,13 +6,18 @@ import { Card } from "@/components/ui/cards";
 
 // IEP Readiness score: shows a case manager at a glance what's complete and
 // what's missing before an IEP meeting. Computed from real records — no AI.
-export default function ProfileReadiness({ student }) {
+export default function ProfileReadiness({ student, analysis = null }) {
   const { data: goals } = useAsync(() => base44.entities.Goal.filter({ student_id: student.id }, '-created_date', 100), [student?.id]);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.filter({ student_id: student.id }, '-date', 200), [student?.id]);
   const { data: documents } = useAsync(() => base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 100), [student?.id]);
 
   const docTypes = (documents || []).map((d) => d.document_type);
   const hasDoc = (type) => docTypes.includes(type);
+  const extracted = analysis?.auto_extracted || analysis || {};
+  const textHas = (value) => typeof value === 'string' && value.trim().length > 0;
+  const hasParentInput = hasDoc("Parent Input") || textHas(extracted.parent_concerns);
+  const hasBehaviorNeed = textHas(extracted.behavior_information);
+  const hasBehaviorPlan = hasDoc("BIP") || hasDoc("FBA") || hasDoc("Behavior Log");
   const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
   const hasRecentProgress = (progress || []).some((p) => p.date && new Date(p.date).getTime() > ninetyDaysAgo);
   const gradeNum = parseInt(String(student.grade || "").replace(/[^0-9]/g, ""), 10);
@@ -24,9 +29,9 @@ export default function ProfileReadiness({ student }) {
     { label: "Goals", warning: "Missing Goals", ok: (goals || []).length > 0 },
     { label: "Services", warning: "Missing Services", ok: !!(student.services && student.services.length) },
     { label: "Accommodations", warning: "Missing Accommodations", ok: !!student.accommodations },
-    { label: "Progress Monitoring", warning: "Missing Recent Progress Data", ok: (progress || []).length > 0 },
-    { label: "Parent Input", warning: "Missing Parent Input", ok: hasDoc("Parent Input") },
-    { label: "Behavior Supports", warning: "Missing Behavior Supports", ok: hasDoc("BIP") || hasDoc("FBA") || hasDoc("Behavior Log") },
+    { label: "Progress Monitoring", warning: "Missing Recent Progress Data", ok: hasRecentProgress },
+    { label: "Parent Input", warning: "Missing Parent Input", ok: hasParentInput },
+    { label: "Behavior", warning: hasBehaviorNeed ? "Behavior documented — supports/plan need review" : "No behavior concern documented", ok: !hasBehaviorNeed || hasBehaviorPlan },
   ];
   const warnings = checks.filter((c) => !c.ok).map((c) => c.warning);
   if ((progress || []).length > 0 && !hasRecentProgress) warnings.push("Recent progress data is over 90 days old");
