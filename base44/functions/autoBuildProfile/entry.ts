@@ -210,29 +210,12 @@ Return JSON matching the schema.`;
       await base44.entities.Student.update(student.id, patch);
     }
 
-    // Draft goals — created only when the student has none on file.
+    // IMPORTANT: document analysis must never mutate the student's active Goal ledger.
+    // Uploaded IEPs may be historical, and evaluation/MDT recommendations are not adopted
+    // annual goals. Keep extracted annual goals in the workspace as source evidence/draft
+    // material; the educator explicitly adopts/edits goals in the IEP Builder.
     const existingGoals = await base44.entities.Goal.filter({ student_id: student.id });
-    let goalsCreated = 0;
-    if (!(existingGoals || []).length && Array.isArray(extracted.goals) && extracted.goals.length) {
-      const goalRecords = extracted.goals
-        .filter((g) => (g.goal_text || "").trim())
-        .slice(0, 20)
-        .map((g) => ({
-          student_id: student.id,
-          goal_area: g.goal_area || "",
-          goal_text: g.goal_text,
-          baseline: g.baseline || "",
-          target: g.target || "",
-          criterion: g.criterion || "",
-          measurement_method: g.measurement_method || "",
-          status: "active",
-          notes: "Extracted from uploaded documents — educator review required."
-        }));
-      if (goalRecords.length) {
-        await base44.entities.Goal.bulkCreate(goalRecords);
-        goalsCreated = goalRecords.length;
-      }
-    }
+    const goalsCreated = 0;
 
     // Save the full extraction to the IEP workspace so the IEP Builder,
     // accommodations, amendments, and meeting tools can use it.
@@ -257,9 +240,9 @@ Return JSON matching the schema.`;
       eligibility: extracted.eligibility_category || '',
       strengths_found: listCount(extracted.strengths),
       needs_found: listCount(extracted.areas_of_need),
-      // Report actual annual Goal records, not every benchmark/objective the extraction
-      // model may have mentioned. This keeps the snapshot aligned with the student's ledger.
-      goals_found: (existingGoals || []).length + goalsCreated,
+      // This is the number of annual-goal candidates found in the uploaded source documents.
+      // They are NOT silently written to the active Goal ledger.
+      goals_found: Array.isArray(extracted.goals) ? extracted.goals.length : 0,
       accommodations_found: listCount(extracted.accommodations),
       services_found: Array.isArray(extracted.services) ? extracted.services.length : 0,
       behavior_supports_found: !!extracted.behavior_information,
