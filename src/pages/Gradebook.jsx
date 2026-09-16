@@ -15,6 +15,7 @@ import GradebookCharts from "@/components/gradebook/GradebookCharts";
 import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
 import { GRADEBOOK_REPORT_DEFINITIONS } from "@/lib/gradebookReporting";
 import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
+import BatchWorkEvidencePanel from "@/components/evidence/BatchWorkEvidencePanel";
 
 const emptyForm = () => ({ student_id: "", goal_id: "", title: "", course: "", gen_ed_teacher: "", assignment_type: "", term: "", score_earned: "", score_possible: "", current_grade_percent: "", current_grade_letter: "", missing_assignment: false, accommodations_provided: "unknown", notes: "", date: new Date().toISOString().slice(0,10) });
 const clean = (v) => String(v ?? "").trim();
@@ -104,8 +105,8 @@ export default function Gradebook() {
 
   return <div>
     <PageHeader title="Gradebook" subtitle="Gen Ed grades, assignments, IEP goal connections, drag-and-drop imports, and easy exports." icon={GraduationCap} />
-    <Tabs defaultValue="assignments">
-      <TabsList className="mb-4"><TabsTrigger value="assignments">Gen Ed Grades</TabsTrigger><TabsTrigger value="import">Drag & Drop</TabsTrigger><TabsTrigger value="upload">Upload & Grade Work</TabsTrigger><TabsTrigger value="charts">Charts</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
+    <Tabs defaultValue="stack">
+      <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="stack">Mass Assignment Grader</TabsTrigger><TabsTrigger value="upload">Single Student Work</TabsTrigger><TabsTrigger value="assignments">Gen Ed Grades</TabsTrigger><TabsTrigger value="import">Grade Import</TabsTrigger><TabsTrigger value="charts">Charts</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
       <TabsContent value="assignments">
         <Card className="p-6 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary"/> Add Gen Ed grade</h3>
@@ -138,6 +139,7 @@ export default function Gradebook() {
           <p className="text-xs text-muted-foreground mt-5">Recognized columns include Student, Subject/Course, Teacher, Assignment, Points Earned, Points Possible, Current Grade, Letter Grade, Missing, Accommodations, Quarter/Term, Date, and Notes.</p>
         </Card>
       </TabsContent>
+      <TabsContent value="stack"><BatchWorkEvidencePanel students={students||[]} goals={goals||[]} onSaved={refetch}/></TabsContent>
       <TabsContent value="upload"><WorkEvidencePanel students={students||[]} goals={goals||[]}/></TabsContent>
       <TabsContent value="charts"><GradebookCharts assignments={assignments||[]} sessions={sessions||[]} students={students||[]} goals={goals||[]}/></TabsContent>
       <TabsContent value="reports"><ReportBuilderPanel definitions={GRADEBOOK_REPORT_DEFINITIONS} data={{students:students||[],goals:goals||[],assignments:assignments||[],sessions:sessions||[]}} heading="Gradebook Reports"/></TabsContent>
