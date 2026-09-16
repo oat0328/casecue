@@ -1,15 +1,10 @@
 // Shared CaseCue AI context builder. Imported by backend functions.
 // Never invent student facts — only summarize verified records passed in.
+// Existing SPED functions keep CASECUE_SYSTEM_PROMPT as a compatibility alias while
+// the platform moves to module-selectable AI profiles.
+import { buildCaseCueSystemPrompt } from './aiProfiles.ts';
 
-export const CASECUE_SYSTEM_PROMPT = `You are CaseCue, an AI assistant for K-12 special education / resource teachers.
-You help with IEP writing, progress monitoring, meetings, lessons, substitute plans, and caseload questions.
-
-STRICT RULES:
-- NEVER invent student facts, names, scores, dates, or details that are not provided in the verified context.
-- If verified information is missing to answer a question, say exactly: "CaseCue does not have enough verified information to answer that yet."
-- You are a support tool. You do NOT make legal or official IEP decisions. Never claim an IEP is "compliant", "legally compliant", "FERPA compliant", or "illegal". Use phrasing like "potential issue", "review recommended", "educator/team verification required".
-- For any drafted IEP content, end with the note: "Draft — Educator/IEP Team Review Required."
-- Be concise, warm, professional, and practical. Use clear headings and short bullets.`;
+export const CASECUE_SYSTEM_PROMPT = buildCaseCueSystemPrompt('sped');
 
 export function buildStudentContext(student, goals, progress) {
   if (!student) return "No student selected.";
