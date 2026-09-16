@@ -18,6 +18,9 @@ export default function ProfileReadiness({ student, analysis = null, evidence = 
   const hasParentInput = hasDoc("Parent Input") || textHas(extracted.parent_concerns) || evidence?.parent_concerns_found === true;
   const hasBehaviorNeed = textHas(extracted.behavior_information) || evidence?.behavior_supports_found === true;
   const hasBehaviorPlan = hasDoc("BIP") || hasDoc("FBA") || hasDoc("Behavior Log");
+  const hasDocumentProgress = textHas(extracted.progress_information) || evidence?.progress_information_found === true;
+  const hasProgressEvidence = hasDocumentProgress || (progress || []).length > 0;
+  const hasGoalEvidence = (goals || []).length > 0 || (Array.isArray(extracted.goals) && extracted.goals.length > 0) || (evidence?.goals_found || 0) > 0;
   const ninetyDaysAgo = Date.now() - 90 * 24 * 3600 * 1000;
   const hasRecentProgress = (progress || []).some((p) => p.date && new Date(p.date).getTime() > ninetyDaysAgo);
   const gradeNum = parseInt(String(student.grade || "").replace(/[^0-9]/g, ""), 10);
@@ -26,15 +29,18 @@ export default function ProfileReadiness({ student, analysis = null, evidence = 
   const checks = [
     { label: "Eligibility", warning: "Missing Eligibility", ok: !!student.eligibility_category },
     { label: "Present Levels", warning: "Missing Present Levels", ok: !!student.present_levels },
-    { label: "Goals", warning: "Missing Goals", ok: (goals || []).length > 0 },
+    { label: "Goals", warning: "Missing annual goal evidence", ok: hasGoalEvidence },
     { label: "Services", warning: "Missing Services", ok: !!(student.services && student.services.length) },
     { label: "Accommodations", warning: "Missing Accommodations", ok: !!student.accommodations },
-    { label: "Progress Monitoring", warning: "Missing Recent Progress Data", ok: hasRecentProgress },
+    { label: "Progress Evidence", warning: "Missing progress evidence", ok: hasProgressEvidence },
     { label: "Parent Input", warning: "Missing Parent Input", ok: hasParentInput },
-    { label: "Behavior", warning: hasBehaviorNeed ? "Behavior documented — supports/plan need review" : "No behavior concern documented", ok: !hasBehaviorNeed || hasBehaviorPlan },
+    // Behavior documentation is evidence, not proof that an FBA/BIP is legally required.
+    // Keep plan review as a separate informational note rather than docking every student's score.
+    { label: "Behavior Reviewed", warning: "Behavior information not reviewed", ok: true },
   ];
   const warnings = checks.filter((c) => !c.ok).map((c) => c.warning);
-  if ((progress || []).length > 0 && !hasRecentProgress) warnings.push("Recent progress data is over 90 days old");
+  if ((progress || []).length > 0 && !hasRecentProgress && !hasDocumentProgress) warnings.push("Structured progress data is over 90 days old");
+  if (hasBehaviorNeed && !hasBehaviorPlan) warnings.push("Behavior information documented — review whether additional behavior supports are needed");
   if (transitionRelevant && !hasDoc("Transition Assessment")) warnings.push("Transition section needs review");
 
   const complete = checks.filter((c) => c.ok).length;
