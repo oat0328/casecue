@@ -25,7 +25,7 @@ export default async function(req) {
       const studentRows = await base44.entities.Student.filter({ id: body.student_id }, '-created_date', 1);
       const student = (studentRows || [])[0];
       if (!student || student.organization_id !== orgId) return Response.json({ error: 'Student not found.' }, { status: 404 });
-      const allowed = Array.isArray(body.allowed_sections) ? body.allowed_sections.filter((x) => ['progress','goals','resources','upcoming_meetings'].includes(x)) : ['progress','goals','resources'];
+      const allowed = Array.isArray(body.allowed_sections) ? body.allowed_sections.filter((x) => ['academic_snapshot','progress','goals','resources','upcoming_meetings'].includes(x)) : ['academic_snapshot','progress','goals','resources'];
       const token = randomToken();
       const tokenHash = await sha256(token);
       const days = Math.max(1, Math.min(Number(body.expires_in_days) || 30, 90));
