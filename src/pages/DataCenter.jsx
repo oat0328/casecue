@@ -55,8 +55,8 @@ export default function DataCenter() {
     finally { setSaving(false); }
   };
 
-  const chartFor = (sid) => (progress || []).filter((p) => p.student_id === sid).map((p) => ({ date: p.date, percentage: p.percentage || 0 }));
-  const studentsWithTrends = (students || []).filter((s) => chartFor(s.id).filter(p=>p.percentage!=null).length >= 2);
+  const chartFor = (sid) => (progress || []).filter((p) => p.student_id === sid && p.record_status !== 'duplicate' && p.record_status !== 'superseded' && p.percentage != null).map((p) => ({ date: p.date, percentage: p.percentage }));
+  const studentsWithTrends = (students || []).filter((s) => chartFor(s.id).length >= 2);
   const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const docMatchesStudent = (d, s) => {
     const firstPage = d?.processing_results?.pages?.[0];
