@@ -1,46 +1,71 @@
 {
-  "name": "IepWorkspace",
+  "name": "IepCycle",
   "type": "object",
   "properties": {
     "student_id": {
       "type": "string",
       "title": "Student ID"
     },
-    "iep_cycle_id": {
+    "title": {
       "type": "string",
-      "title": "IEP Cycle ID"
+      "title": "Cycle Title"
+    },
+    "cycle_type": {
+      "type": "string",
+      "enum": [
+        "annual",
+        "interim",
+        "reevaluation",
+        "initial",
+        "amendment",
+        "other"
+      ],
+      "default": "annual",
+      "title": "Cycle Type"
     },
     "status": {
       "type": "string",
       "enum": [
-        "documents",
-        "analysis",
-        "draft",
-        "review",
-        "exported"
+        "planning",
+        "drafting",
+        "meeting_ready",
+        "meeting_complete",
+        "finalized",
+        "archived"
       ],
-      "default": "documents",
+      "default": "planning",
       "title": "Status"
     },
-    "analysis": {
-      "type": "object",
-      "title": "Document Analysis"
+    "meeting_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Meeting Date"
     },
-    "draft": {
-      "type": "object",
-      "title": "IEP Draft"
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Start Date"
     },
-    "placement": {
-      "type": "object",
-      "title": "Placement Worksheet"
+    "finalized_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Finalized Date"
     },
-    "review": {
-      "type": "object",
-      "title": "CaseCue Review"
+    "previous_iep_document_id": {
+      "type": "string",
+      "title": "Previous IEP Document"
     },
-    "page_summaries": {
-      "type": "object",
-      "title": "Page-by-Page IEP Summary"
+    "draft_iep_document_id": {
+      "type": "string",
+      "title": "Draft IEP Document"
+    },
+    "final_iep_document_id": {
+      "type": "string",
+      "title": "Final IEP Document"
+    },
+    "workspace_id": {
+      "type": "string",
+      "title": "IEP Workspace ID"
     },
     "organization_id": {
       "type": "string",
@@ -48,7 +73,8 @@
     }
   },
   "required": [
-    "student_id"
+    "student_id",
+    "title"
   ],
   "rls": {
     "read": {
