@@ -111,6 +111,19 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       last_attempted: now,
     });
 
+    // Persist the document's explicit questions/answers so IEP Studio can surface
+    // and reuse them independently of the page-summary UI.
+    const qaRows = pages.flatMap((p) => (p.questions_and_answers || []).map((qa) => ({
+      student_id: doc.student_id,
+      document_id: docId,
+      page_number: p.page_number,
+      question: qa.question,
+      answer: qa.answer,
+      evidence: qa.evidence || '',
+      status: /not answered in document/i.test(String(qa.answer || '')) ? 'not_answered' : 'documented',
+    }))).filter((qa) => qa.question && qa.answer);
+    if (qaRows.length) await svc.entities.IepDocumentAnswer.bulkCreate(qaRows);
+
     await svc.entities.AuditLog.create({
       action: 'document_processed',
       entity_type: 'Document',

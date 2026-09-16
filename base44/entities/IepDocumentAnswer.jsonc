@@ -1,0 +1,39 @@
+{
+  "name": "IepDocumentAnswer",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "page_number": {
+      "type": "number"
+    },
+    "question": {
+      "type": "string"
+    },
+    "answer": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "documented",
+        "not_answered",
+        "needs_review"
+      ],
+      "default": "documented"
+    }
+  },
+  "required": [
+    "student_id",
+    "document_id",
+    "question",
+    "answer"
+  ]
+}

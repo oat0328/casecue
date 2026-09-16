@@ -1,0 +1,47 @@
+{
+  "name": "IepDraftArtifact",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "source_document_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "draft_type": {
+      "type": "string",
+      "enum": [
+        "present_levels",
+        "goals",
+        "full_iep"
+      ],
+      "default": "full_iep"
+    },
+    "content": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "generated_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "student_id",
+    "draft_type",
+    "content"
+  ]
+}
