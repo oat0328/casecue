@@ -69,6 +69,8 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
   const [building, setBuilding] = useState(false);
   const [profileResult, setProfileResult] = useState(null);
   const [autoBuilt, setAutoBuilt] = useState(false);
+  const [reprocessingAll, setReprocessingAll] = useState(false);
+  const [reprocessProgress, setReprocessProgress] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -116,6 +118,40 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
     e.preventDefault();
     setDragOver(false);
     uploadFile(e.dataTransfer.files?.[0]);
+  };
+
+  const reprocessAll = async () => {
+    const allDocs = docs || [];
+    if (!allDocs.length) return;
+    if (!window.confirm(`Reprocess all ${allDocs.length} document(s) for ${student.first_name} with the upgraded universal reader? Existing files stay in place; their extraction and student analysis will be refreshed.`)) return;
+    setReprocessingAll(true);
+    setReprocessProgress({ done: 0, total: allDocs.length, failed: 0 });
+    let done = 0;
+    let failed = 0;
+    try {
+      // Sequential processing prevents a large caseload from bursting the function/API limits.
+      for (const doc of allDocs) {
+        try {
+          await base44.functions.invoke("processDocument", { document_id: doc.id });
+        } catch {
+          failed += 1;
+        }
+        done += 1;
+        setReprocessProgress({ done, total: allDocs.length, failed });
+      }
+      await load();
+      const res = await base44.functions.invoke("autoBuildProfile", { student_id: student.id });
+      setProfileResult(res.data);
+      setAutoBuilt(true);
+      toast({
+        title: failed ? "Reprocessing finished with review items" : "All documents reprocessed",
+        description: failed ? `${done - failed} document(s) refreshed; ${failed} could not be refreshed. Student analysis was rebuilt from the successfully processed records.` : `${done} document(s) refreshed with the universal reader and the student analysis was rebuilt.`
+      });
+    } catch (e) {
+      toast({ title: "Reprocessing stopped", description: e.message, variant: "destructive" });
+    } finally {
+      setReprocessingAll(false);
+    }
   };
 
   const buildProfile = async () => {
@@ -185,9 +221,18 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
   return (
     <div className="space-y-6">
       <Card className="p-5 sm:p-6">
-        <h3 className="font-semibold mb-1">Upload Center — records for {student.first_name} {student.last_name}</h3>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
+          <h3 className="font-semibold">Upload Center — records for {student.first_name} {student.last_name}</h3>
+          {(docs || []).length > 0 && (
+            <Button size="sm" variant="outline" onClick={reprocessAll} disabled={reprocessingAll || busy}>
+              {reprocessingAll ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
+              {reprocessingAll ? `Reprocessing ${reprocessProgress?.done || 0}/${reprocessProgress?.total || (docs || []).length}` : "Reprocess All Documents"}
+            </Button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground mb-4">
           Upload the full IEP, MDT, evaluation, reevaluation, or supporting report. CaseCue reads every page, captures the document's questions and answers, extracts measurable evidence, and prepares educator-review drafts for present levels and aligned goals.
+          {reprocessProgress && !reprocessingAll && <span className="block mt-1 text-xs">Last reprocess: {reprocessProgress.done}/{reprocessProgress.total} completed{reprocessProgress.failed ? ` · ${reprocessProgress.failed} need review` : ""}.</span>}
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="w-full sm:w-72">
