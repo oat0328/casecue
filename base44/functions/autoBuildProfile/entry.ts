@@ -174,6 +174,27 @@ Return JSON matching the schema.`;
       }).filter(Boolean))];
     }
 
+    // A document may omit something that is already present in the student's
+    // verified profile or in another structured record. Do not tell the educator
+    // the STUDENT is missing that information merely because this extraction pass
+    // did not repeat it. Keep document gaps separate from profile gaps.
+    const profileHas = (field) => student[field] != null && String(student[field]).trim() !== '';
+    const extractedGoals = Array.isArray(extracted.goals) ? extracted.goals : [];
+    const effectiveHas = {
+      annual_review_due: profileHas('annual_review_due') || !!String(extracted.annual_review_due || '').trim(),
+      reevaluation_due: profileHas('reevaluation_due') || !!String(extracted.reevaluation_due || '').trim(),
+      iep_date: profileHas('iep_date') || !!String(extracted.iep_date || '').trim(),
+      goals: extractedGoals.length > 0,
+    };
+    const documentGaps = Array.isArray(extracted.data_gaps) ? [...new Set(extracted.data_gaps.filter(Boolean))] : [];
+    const profileGaps = documentGaps.filter((gap) => {
+      const text = String(gap || '').toLowerCase();
+      if (effectiveHas.annual_review_due && /annual.*(?:review|iep).*(?:due|date)|(?:due|date).*annual.*(?:review|iep)/i.test(text)) return false;
+      if (effectiveHas.reevaluation_due && /re-?evaluation|reevaluation/i.test(text) && /due|date/i.test(text)) return false;
+      if (effectiveHas.iep_date && /iep.*date|date.*iep/i.test(text)) return false;
+      return true;
+    });
+
     // Pre-fill the student record — only where fields are empty, so teacher-
     // entered data is never overwritten.
     const filled = [];
@@ -247,7 +268,11 @@ Return JSON matching the schema.`;
       services_found: Array.isArray(extracted.services) ? extracted.services.length : 0,
       behavior_supports_found: !!extracted.behavior_information,
       parent_concerns_found: !!extracted.parent_concerns,
-      missing: extracted.data_gaps || [],
+      progress_information_found: !!String(extracted.progress_information || '').trim(),
+      // `missing` means missing from the effective student profile, not merely
+      // absent from one uploaded document. `document_gaps` preserves the latter.
+      missing: profileGaps,
+      document_gaps: documentGaps,
     };
 
     return Response.json({
@@ -255,7 +280,8 @@ Return JSON matching the schema.`;
       confidence: extracted.confidence || {},
       kept,
       goals_created: goalsCreated,
-      data_gaps: extracted.data_gaps || [],
+      data_gaps: profileGaps,
+      document_gaps: documentGaps,
       snapshot,
       workspace_id: workspace.id,
     });
