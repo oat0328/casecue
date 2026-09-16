@@ -30,31 +30,33 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved}){
  const studentName=id=>{const s=students.find(x=>x.id===id);return s?`${s.first_name} ${s.last_name}`:'Unmatched student'};
  const goalName=id=>{const g=goals.find(x=>x.id===id);return g?`${g.goal_area||'Goal'} — ${(g.goal_text||'').slice(0,100)}`:'No goal match'};
  const choose=f=>{if(!f)return;if(!/pdf|image/i.test(f.type)&&!/[.](pdf|png|jpe?g|webp)$/i.test(f.name)){toast({title:'Use a PDF or scanned image',variant:'destructive'});return;}setFile(f);setItems([]);setFileUri('');setRunId('');setProgress(null)};
- const buildChunks=async f=>{
-   if(!/\.pdf$/i.test(f.name))return[{file:f,start:1,end:1,total:1}];
+ const prepareStack=async f=>{
+   if(!/\.pdf$/i.test(f.name))return{src:null,total:1,chunks:[{start:1,end:1,total:1}]};
    const bytes=await f.arrayBuffer();
    const src=await PDFDocument.load(bytes,{ignoreEncryption:true});
    const total=src.getPageCount();
    const chunks=[];
-   for(let start=0;start<total;start+=CHUNK_PAGES){
-     const end=Math.min(total,start+CHUNK_PAGES),out=await PDFDocument.create();
-     const indexes=Array.from({length:end-start},(_,i)=>start+i);
-     const pages=await out.copyPages(src,indexes);pages.forEach(p=>out.addPage(p));
-     const chunkBytes=await out.save({useObjectStreams:true});
-     chunks.push({file:new File([chunkBytes],`${f.name.replace(/\.pdf$/i,'')}-pages-${start+1}-${end}.pdf`,{type:'application/pdf'}),start:start+1,end,total});
-   }
-   return chunks;
+   for(let start=0;start<total;start+=CHUNK_PAGES){const end=Math.min(total,start+CHUNK_PAGES);chunks.push({start:start+1,end,total});}
+   return{src,total,chunks};
+ };
+ const makeChunkFile=async(src,originalName,start,end)=>{
+   const out=await PDFDocument.create();
+   const indexes=Array.from({length:end-start+1},(_,i)=>start-1+i);
+   const pages=await out.copyPages(src,indexes);pages.forEach(p=>out.addPage(p));
+   const chunkBytes=await out.save({useObjectStreams:true});
+   return new File([chunkBytes],`${originalName.replace(/\.pdf$/i,'')}-pages-${start}-${end}.pdf`,{type:'application/pdf'});
  };
  const analyze=async()=>{if(!file)return;setBusy(true);setItems([]);setProgress({stage:'Preparing scan…',done:0,total:1,pages:0,totalPages:0});let job=null;try{
    const user=await base44.auth.me();const organizationId=user?.organization_id||user?.data?.organization_id||'';if(!organizationId)throw new Error('Your account is missing an organization.');
    const original=await base44.integrations.Core.UploadPrivateFile({file});setFileUri(original.file_uri);
-   const chunks=await buildChunks(file);const totalPages=chunks[0]?.total||1;
+   const prepared=await prepareStack(file),chunks=prepared.chunks,totalPages=prepared.total;
    job=await base44.entities.SmartStackRun.create({organization_id:organizationId,user_id:user.id,filename:file.name,file_uri:original.file_uri,status:'processing',page_count:totalPages,processed_pages:0,chunk_count:chunks.length,completed_chunks:0,detected_items:0,approved_items:0,answer_key:answerKey,rubric,results:[],started_at:new Date().toISOString()});setRunId(job.id);refetchRuns();
    const all=[];let completed=0,processedPages=0,failedChunks=0;
    for(const chunk of chunks){
      setProgress({stage:`Reading pages ${chunk.start}–${chunk.end} of ${totalPages}`,done:completed,total:chunks.length,pages:processedPages,totalPages});
      try{
-       const up=chunks.length===1&&chunk.file===file?original:await base44.integrations.Core.UploadPrivateFile({file:chunk.file});
+       const chunkFile=prepared.src?await makeChunkFile(prepared.src,file.name,chunk.start,chunk.end):file;
+       const up=chunks.length===1&&!prepared.src?original:await base44.integrations.Core.UploadPrivateFile({file:chunkFile});
        const r=await base44.functions.invoke('analyzeBatchStudentWork',{file_uri:up.file_uri,answer_key:answerKey,rubric,page_offset:chunk.start-1,total_pages:totalPages,source_filename:file.name});
        const found=(r.data?.items||r.items||[]).map((x,i)=>({...x,pages:x.pages?`Source pages ${chunk.start}-${chunk.end}; ${x.pages}`:`Source pages ${chunk.start}-${chunk.end}`,_key:`${chunk.start}-${i}-${Date.now()}`,approved:x.student_match_confidence==='high'&&x.scoring_confidence==='high'}));
        all.push(...found);
