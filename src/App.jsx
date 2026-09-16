@@ -51,6 +51,7 @@ import EvidenceVault from '@/pages/EvidenceVault';
 import ProgressMonitoringDay from '@/pages/ProgressMonitoringDay';
 import ConfigurationCenter from '@/pages/ConfigurationCenter';
 import SpecialEdOS from '@/pages/SpecialEdOS';
+import StudioWorkspace from '@/pages/StudioWorkspace';
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
               <Route element={<Layout />}>
                 <Route path="/app" element={<Today />} />
                 <Route path="/command-center" element={<SpecialEdOS />} />
+                <Route path="/studio-workspace" element={<StudioWorkspace />} />
                 <Route path="/students" element={<Students />} />
                 <Route path="/students/:id" element={<StudentDetail />} />
                 <Route path="/iep-studio" element={<IEPStudio />} />
