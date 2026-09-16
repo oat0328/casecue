@@ -36,6 +36,16 @@
     "end_at": {
       "type": "string"
     },
+    "source_date": {
+      "type": "string"
+    },
+    "source_timezone": {
+      "type": "string"
+    },
+    "is_all_day": {
+      "type": "boolean",
+      "default": false
+    },
     "location": {
       "type": "string"
     },
