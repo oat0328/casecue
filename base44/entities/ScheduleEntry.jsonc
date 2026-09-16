@@ -1,120 +1,30 @@
 {
   "type": "object",
   "properties": {
-    "organization_id": {
-      "type": "string"
-    },
-    "group_name": {
-      "type": "string"
-    },
-    "delivery": {
-      "type": "string",
-      "enum": [
-        "pull-out",
-        "push-in",
-        "consultation"
-      ]
-    },
-    "day": {
-      "type": "string"
-    },
-    "start_time": {
-      "type": "string"
-    },
-    "end_time": {
-      "type": "string"
-    },
-    "service_minutes": {
-      "type": "number"
-    },
-    "teacher_classroom": {
-      "type": "string"
-    },
-    "notes": {
-      "type": "string"
-    },
-    "student_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "school_year": {
-      "type": "string"
-    },
-    "archived": {
-      "type": "boolean"
-    },
-    "week_pattern": {
-      "type": "string",
-      "enum": [
-        "every_week",
-        "A_week",
-        "B_week",
-        "alternating"
-      ]
-    },
-    "cycle_day": {
-      "type": "string"
-    },
-    "period": {
-      "type": "string"
-    },
-    "recurrence_note": {
-      "type": "string"
-    },
-    "source_kind": {
-      "type": "string",
-      "enum": [
-        "generated_plan",
-        "resource_schedule",
-        "school_bell_schedule",
-        "student_schedule",
-        "manual"
-      ]
-    }
+    "organization_id": {"type":"string"},
+    "group_name": {"type":"string"},
+    "delivery": {"type":"string","enum":["pull-out","push-in","consultation"]},
+    "day": {"type":"string"},
+    "start_time": {"type":"string"},
+    "end_time": {"type":"string"},
+    "service_minutes": {"type":"number"},
+    "teacher_classroom": {"type":"string"},
+    "notes": {"type":"string"},
+    "student_ids": {"type":"array","items":{"type":"string"}},
+    "student_pull_details": {"type":"array","items":{"type":"object","properties":{"student_id":{"type":"string"},"student_name":{"type":"string"},"source_subject":{"type":"string"},"source_teacher":{"type":"string"},"source_room":{"type":"string"},"source_period":{"type":"string"},"class_start_time":{"type":"string"},"class_end_time":{"type":"string"},"pull_start_time":{"type":"string"},"pull_end_time":{"type":"string"},"pull_rule":{"type":"string"},"source_confidence":{"type":"string"}}}},
+    "school_year": {"type":"string"},
+    "archived": {"type":"boolean"},
+    "week_pattern": {"type":"string","enum":["every_week","A_week","B_week","alternating"]},
+    "cycle_day": {"type":"string"},
+    "period": {"type":"string"},
+    "recurrence_note": {"type":"string"},
+    "source_kind": {"type":"string","enum":["generated_plan","resource_schedule","school_bell_schedule","student_schedule","manual"]}
   },
   "rls": {
-    "read": {
-      "$or": [
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    },
-    "create": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        }
-      ]
-    },
-    "update": {
-      "$or": [
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    }
+    "read":{"$or":[{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}]},
+    "create":{"$or":[{"created_by_id":"{{user.id}}"},{"data.organization_id":"{{user.data.organization_id}}"}]},
+    "update":{"$or":[{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}]},
+    "delete":{"$or":[{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}]}
   },
   "required": [],
   "name": "ScheduleEntry"
