@@ -2,84 +2,28 @@
   "name": "GradebookAssignment",
   "type": "object",
   "properties": {
-    "student_id": {
-      "type": "string",
-      "title": "Student ID"
-    },
-    "goal_id": {
-      "type": "string",
-      "title": "Goal ID"
-    },
-    "title": {
-      "type": "string",
-      "title": "Title"
-    },
-    "score_earned": {
-      "type": "number",
-      "title": "Score Earned"
-    },
-    "score_possible": {
-      "type": "number",
-      "title": "Score Possible"
-    },
-    "notes": {
-      "type": "string",
-      "title": "Notes"
-    },
-    "date": {
-      "type": "string",
-      "format": "date",
-      "title": "Date"
-    },
-    "organization_id": {
-      "type": "string",
-      "title": "Organization ID"
-    }
+    "student_id": { "type": "string", "title": "Student ID" },
+    "goal_id": { "type": "string", "title": "Goal ID" },
+    "title": { "type": "string", "title": "Assignment Title" },
+    "course": { "type": "string", "title": "Gen Ed Course / Subject" },
+    "gen_ed_teacher": { "type": "string", "title": "Gen Ed Teacher" },
+    "assignment_type": { "type": "string", "title": "Assignment Type" },
+    "term": { "type": "string", "title": "Quarter / Term" },
+    "score_earned": { "type": "number", "title": "Score Earned" },
+    "score_possible": { "type": "number", "title": "Score Possible" },
+    "current_grade_percent": { "type": "number", "title": "Current Course Grade %" },
+    "current_grade_letter": { "type": "string", "title": "Current Course Letter Grade" },
+    "missing_assignment": { "type": "boolean", "default": false, "title": "Missing Assignment" },
+    "accommodations_provided": { "type": "string", "enum": ["yes", "no", "unknown"], "default": "unknown", "title": "Accommodations Provided" },
+    "notes": { "type": "string", "title": "Notes" },
+    "date": { "type": "string", "format": "date", "title": "Date" },
+    "organization_id": { "type": "string", "title": "Organization ID" }
   },
-  "required": [
-    "student_id",
-    "title"
-  ],
+  "required": ["student_id", "title"],
   "rls": {
-    "read": {
-      "$or": [
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    },
-    "create": {
-      "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        }
-      ]
-    },
-    "update": {
-      "$or": [
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "data.organization_id": "{{user.data.organization_id}}"
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    }
+    "read": { "$or": [{ "data.organization_id": "{{user.data.organization_id}}" }, { "created_by_id": "{{user.id}}" }] },
+    "create": { "$or": [{ "created_by_id": "{{user.id}}" }, { "data.organization_id": "{{user.data.organization_id}}" }] },
+    "update": { "$or": [{ "data.organization_id": "{{user.data.organization_id}}" }, { "created_by_id": "{{user.id}}" }] },
+    "delete": { "$or": [{ "data.organization_id": "{{user.data.organization_id}}" }, { "created_by_id": "{{user.id}}" }] }
   }
 }
