@@ -15,8 +15,15 @@ const SECTIONS = [
   { key: "strengths", label: "Strengths" },
   { key: "needs", label: "Areas of Need" },
   { key: "annual_goal", label: "Annual Goal" },
+  { key: "disability_impact", label: "Disability Impact" },
   { key: "accommodations", label: "Accommodations" },
   { key: "sdi", label: "SDI / Support Language" },
+  { key: "services", label: "Services & Minutes" },
+  { key: "progress_measurement", label: "Progress Measurement" },
+  { key: "transition", label: "Transition" },
+  { key: "lre", label: "LRE / Participation" },
+  { key: "esy", label: "ESY Consideration" },
+  { key: "assistive_technology", label: "Assistive Technology" },
   { key: "progress_summary", label: "Progress Summary" },
   { key: "meeting_notes", label: "Meeting Notes" },
   { key: "parent_communication", label: "Parent Communication" },
@@ -24,7 +31,9 @@ const SECTIONS = [
 
 const SAVE_TARGET = {
   present_levels: "present_levels", strengths: "strengths", needs: "areas_of_need",
-  annual_goal: null, accommodations: "accommodations", sdi: null, progress_summary: null,
+  annual_goal: null, disability_impact: null, accommodations: "accommodations", sdi: null,
+  services: null, progress_measurement: null, transition: null, lre: null, esy: null,
+  assistive_technology: null, progress_summary: null,
   meeting_notes: null, parent_communication: null,
 };
 
