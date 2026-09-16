@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical, Archive, Plug } from "lucide-react";
+import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical, Archive, Plug, GraduationCap } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -140,7 +140,7 @@ export default function Settings() {
 
   return (
     <div>
-      <PageHeader title="Settings" subtitle="Manage your profile, organization, integrations, processing, privacy, and subscription." icon={SettingsIcon} actions={<Button variant="outline" onClick={()=>navigate('/integrations')}><Plug className="h-4 w-4 mr-2"/>Integrations</Button>} />
+      <PageHeader title="Settings" subtitle="Manage your profile, organization, integrations, processing, privacy, and subscription." icon={SettingsIcon} actions={<div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>navigate('/academy')}><GraduationCap className="h-4 w-4 mr-2"/>CaseCue Academy</Button><Button variant="outline" onClick={()=>navigate('/integrations')}><Plug className="h-4 w-4 mr-2"/>Integrations</Button></div>} />
 
       <Tabs defaultValue="profile">
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
