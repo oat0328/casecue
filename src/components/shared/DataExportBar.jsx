@@ -6,13 +6,11 @@ import ExportGate from "@/components/shared/ExportGate";
 import { printDoc, exportDocPdf, exportDocDocx, emailDoc, shareDoc } from "@/lib/docExport";
 import { exportXlsx } from "@/lib/xlsxExport";
 import { downloadCsv, downloadJson } from "@/lib/reportExport";
+import { formatDatesDeep } from "@/lib/dateUtils";
 import logExportAction from "@/lib/exportAudit";
 
-// The full 8-action export bar for data-derived reports: Save, Print, PDF,
-// DOCX, Excel, CSV, (optional JSON), Email, Share. Same pattern as the
-// Session Tracker exports. `gated` routes downloads through the AI-content
-// acknowledgement gate — leave false for data-derived reports (per the
-// Session Tracker precedent); use true whenever system-assisted content is inside.
+// User-facing exports always use CaseCue's MM/DD/YYYY display standard.
+// Entity/database dates remain ISO for filtering and sorting.
 export default function DataExportBar({
   title,
   subtitle,
@@ -28,7 +26,10 @@ export default function DataExportBar({
 }) {
   const { toast } = useToast();
   const has = (k) => !exclude.includes(k);
-  const opts = { title, subtitle, sections, banner, filename };
+  const displaySections = formatDatesDeep(sections || []);
+  const displaySheets = formatDatesDeep(sheets || []);
+  const displayJson = formatDatesDeep(json);
+  const opts = { title, subtitle: formatDatesDeep(subtitle), sections: displaySections, banner: formatDatesDeep(banner), filename };
 
   const bar = (label, Icon, onClick, disabled) => (
     <Button variant="outline" size="sm" onClick={onClick} disabled={disabled}>
@@ -36,66 +37,38 @@ export default function DataExportBar({
     </Button>
   );
 
-  const gate = (onExport, children) =>
-    gated ? (
-      <ExportGate documentName={title} onExport={onExport}>
-        {children}
-      </ExportGate>
-    ) : (
-      children
-    );
+  const gate = (onExport, children) => gated ? <ExportGate documentName={title} onExport={onExport}>{children}</ExportGate> : children;
 
   const doExcel = () => {
     logExportAction("excel", title);
-    exportXlsx(filename, sheets);
+    exportXlsx(filename, displaySheets);
     toast({ title: "Excel workbook downloaded" });
   };
   const doCsv = () => {
-    const primary = sheets[0];
+    const primary = displaySheets[0];
     logExportAction("csv", title);
     downloadCsv(filename, primary.headers, primary.rows);
     toast({ title: "CSV downloaded" });
   };
   const doJson = () => {
     logExportAction("json", title);
-    downloadJson(filename, json);
+    downloadJson(filename, displayJson);
     toast({ title: "JSON downloaded" });
   };
 
-  const primary = sheets[0];
+  const primary = displaySheets[0];
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {onSave && has("save") && bar("Save", Save, onSave)}
-
-      {has("print") &&
-        bar("Print", Printer, () => {
-          if (!printDoc(opts)) toast({ title: "Allow pop-ups to print", variant: "destructive" });
-        })}
-
+      {has("print") && bar("Print", Printer, () => { if (!printDoc(opts)) toast({ title: "Allow pop-ups to print", variant: "destructive" }); })}
       {has("pdf") && gate(() => exportDocPdf(opts), bar("PDF", FileDown, () => {}))}
-
       {has("docx") && gate(() => exportDocDocx(opts), bar("DOCX", FileText, () => {}))}
-
       {has("excel") && !!primary && gate(doExcel, bar("Excel", FileSpreadsheet, () => {}))}
-
       {has("csv") && !!primary && gate(doCsv, bar("CSV", Table, () => {}))}
-
-      {has("json") && json && gate(doJson, bar("JSON", Braces, () => {}))}
-
-      {has("email") &&
-        bar("Email", Mail, () => {
-          emailDoc(opts);
-          toast({ title: "Opening your email app" });
-        })}
-
-      {has("share") &&
-        bar("Share", Share2, async () => {
-          const result = await shareDoc(opts);
-          if (result === "shared") toast({ title: "Shared" });
-          else if (result === "copied") toast({ title: "Copied to clipboard" });
-          else if (result === "failed") toast({ title: "Could not share", variant: "destructive" });
-        })}
+      {has("json") && displayJson && gate(doJson, bar("JSON", Braces, () => {}))}
+      {has("email") && bar("Email", Mail, () => { emailDoc(opts); toast({ title: "Opening your email app" }); })}
+      {has("share") && bar("Share", Share2, async () => { const result = await shareDoc(opts); if (result === "shared") toast({ title: "Shared" }); else if (result === "copied") toast({ title: "Copied to clipboard" }); else if (result === "failed") toast({ title: "Could not share", variant: "destructive" }); })}
     </div>
   );
 }
