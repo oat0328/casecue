@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { Sparkles, Loader2, CheckCircle2 } from "lucide-react";
+import { Card } from "@/components/ui/cards";
+import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import BuilderDocumentsSummary from "@/components/iepStudio/BuilderDocumentsSummary";
@@ -17,6 +20,8 @@ export default function WorkspacePipeline({ student }) {
   const [workspace, setWorkspace] = useState(null);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [autoBusy, setAutoBusy] = useState(false);
+  const [autoStage, setAutoStage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +48,29 @@ export default function WorkspacePipeline({ student }) {
   const save = async (patch) => {
     const updated = await base44.entities.IepWorkspace.update(workspace.id, patch);
     setWorkspace((w) => ({ ...(updated || w), ...patch }));
+    return updated;
+  };
+
+  const buildMyIep = async () => {
+    if (!workspace || autoBusy) return;
+    setAutoBusy(true);
+    try {
+      setAutoStage("Reading and classifying every uploaded record…");
+      const analyzed = await base44.functions.invoke("iepWorkspaceAnalyze", { workspace_id: workspace.id });
+      const analysis = analyzed.data.analysis;
+      await save({ analysis, status: "analysis" });
+
+      setAutoStage("Building evidence-linked present levels and goal drafts…");
+      const drafted = await base44.functions.invoke("iepWorkspaceDraft", { workspace_id: workspace.id });
+      const draft = drafted.data.draft;
+      await save({ analysis, draft, status: "draft" });
+      setWorkspace((w) => ({ ...w, analysis, draft, status: "draft" }));
+      setStep(2);
+      setAutoStage("Draft ready for educator and IEP-team review.");
+    } catch (e) {
+      toast({ title: "Build My IEP stopped", description: e?.response?.data?.error || e.message, variant: "destructive" });
+      setAutoStage("");
+    } finally { setAutoBusy(false); }
   };
 
   if (loading) return <p className="text-muted-foreground text-sm">Opening workspace…</p>;
