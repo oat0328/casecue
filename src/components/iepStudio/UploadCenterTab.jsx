@@ -362,7 +362,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
             </Card>
           )}
 
-          <ProfileReadiness student={student} />
+          <ProfileReadiness student={student} evidence={profileResult.snapshot} />
 
           <Card className="p-5 sm:p-6">
             <h3 className="font-semibold mb-1">One-click actions</h3>
