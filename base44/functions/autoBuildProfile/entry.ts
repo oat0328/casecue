@@ -21,7 +21,11 @@ const CONF_META = {
 const SCHEMA = {
   type: 'object',
   properties: {
+    student_first_name: { type: 'string' },
+    student_last_name: { type: 'string' },
+    student_grade: { type: 'string' },
     eligibility_category: { type: 'string' },
+    eligibility_categories: { type: 'array', items: { type: 'string' }, maxItems: 10 },
     iep_date: { type: 'string' },
     annual_review_due: { type: 'string' },
     reevaluation_due: { type: 'string' },
@@ -103,7 +107,11 @@ You are the CaseCue Auto-Fill Engine. Extract the student's IEP profile from the
 STRICT EXTRACTION RULES:
 - Use ONLY what is literally in the documents. Never invent, infer, or estimate facts.
 - Quote or closely paraphrase the source wording.
-- eligibility_category: search the ENTIRE IEP, especially eligibility/disability, student information, special education eligibility, evaluation/MDT summary, and services pages. Accept an explicitly documented IDEA disability category even when the page does not use the exact label "Eligibility Category" (for example, "Specific Learning Disability" or "Autism" stated as the student's disability/eligibility). Do not call eligibility missing merely because the exact phrase "eligibility category" is absent.
+- This is NOT IEP-only. Source documents may be an IEP, MDT/MET 1/MET 2, evaluation, reevaluation, eligibility report, psychological report, 504, BIP/FBA, progress report, assessment, service-provider report, medical report, transition assessment, or another student record.
+- student_first_name, student_last_name, student_grade: extract only when explicitly documented in the uploaded records. These fields allow non-IEP records such as MDT/MET/evaluation documents to help build the student profile.
+- eligibility_category: return the primary explicitly documented IDEA disability/eligibility category when one is clearly identified.
+- eligibility_categories: return every explicitly documented disability/eligibility category found across the source records, de-duplicated, with a maximum of 10. Include categories such as Other Health Impairment only when the source actually identifies the student with that category; do not infer a disability from a diagnosis, symptom, medication, recommendation, or suspected condition.
+- Search the ENTIRE source set for eligibility/disability information, especially eligibility/disability, student information, special education eligibility, evaluation/MDT/MET summary, and services pages. Accept an explicitly documented IDEA disability category even when the page does not use the exact label "Eligibility Category". Do not call eligibility missing merely because the exact phrase "eligibility category" is absent.
 - If a field has no information in any document, return an empty string (or empty array) and name the gap in data_gaps.
 - services: list each service exactly as documented (e.g. "Speech — 30 min/week").
 - goals: one entry per ANNUAL IEP GOAL found, with its documented baseline, target, criterion, and measurement method. Do NOT create separate goals from benchmarks, objectives, progress-report rows, criteria, or repeated continuation pages. Benchmarks/objectives belong inside the parent annual goal context. If the source has 4 annual goals with multiple benchmarks, return 4 goals, not the benchmarks as additional goals.
@@ -166,17 +174,17 @@ Return JSON matching the schema.`;
       ['Traumatic Brain Injury', /\btraumatic brain injury|\bTBI\b/i],
       ['Developmental Delay', /\bdevelopmental delay\b/i],
     ];
-    if (!(extracted.eligibility_category || '').trim()) {
-      const likelyEligibilityFacts = pageFacts.filter((x) => /eligib|disabil|exceptional|special education/i.test(`${x.section} ${x.fact}`));
-      for (const [label, pattern] of eligibilityPatterns) {
-        const hit = likelyEligibilityFacts.find((x) => pattern.test(x.fact));
-        if (hit) {
-          extracted.eligibility_category = label;
-          extracted.confidence = extracted.confidence || {};
-          extracted.confidence.eligibility_category = { level: 'high', flags: [], sources: [`${hit.document_type} - ${hit.filename}, p.${hit.page}`] };
-          break;
-        }
-      }
+    const likelyEligibilityFacts = pageFacts.filter((x) => /eligib|disabil|exceptional|special education/i.test(`${x.section} ${x.fact}`));
+    const recoveredCategories = eligibilityPatterns
+      .filter(([, pattern]) => likelyEligibilityFacts.some((x) => pattern.test(x.fact)))
+      .map(([label]) => label);
+    extracted.eligibility_categories = [...new Set([...(extracted.eligibility_categories || []), ...recoveredCategories])].filter(Boolean).slice(0, 10);
+    if (!(extracted.eligibility_category || '').trim() && extracted.eligibility_categories.length) {
+      extracted.eligibility_category = extracted.eligibility_categories[0];
+      const [label, pattern] = eligibilityPatterns.find(([candidate]) => candidate === extracted.eligibility_category) || [];
+      const hit = pattern ? likelyEligibilityFacts.find((x) => pattern.test(x.fact)) : null;
+      extracted.confidence = extracted.confidence || {};
+      if (hit) extracted.confidence.eligibility_category = { level: 'high', flags: [], sources: [`${hit.document_type} - ${hit.filename}, p.${hit.page}`] };
     }
     const serviceFacts = pageFacts.filter((x) =>
       /service/i.test(x.section) && /(?:service|minutes?\s*\/\s*(?:week|month)|minutes? per (?:week|month)|specialized instruction)/i.test(x.fact)
@@ -235,7 +243,10 @@ Return JSON matching the schema.`;
     const kept = [];
     const patch = {};
     const textFields = [
-      ['eligibility_category', 'Eligibility / disability category'],
+      ['first_name', 'First name', 'student_first_name'],
+      ['last_name', 'Last name', 'student_last_name'],
+      ['grade', 'Grade', 'student_grade'],
+      ['eligibility_category', 'Primary eligibility / disability category', 'eligibility_category'],
       ['iep_date', 'IEP date'],
       ['annual_review_due', 'Annual review due'],
       ['reevaluation_due', 'Reevaluation due'],
@@ -244,8 +255,8 @@ Return JSON matching the schema.`;
       ['present_levels', 'Present levels'],
       ['accommodations', 'Accommodations'],
     ];
-    textFields.forEach(([field, label]) => {
-      const value = (extracted[field] || "").trim();
+    textFields.forEach(([field, label, sourceField = field]) => {
+      const value = (extracted[sourceField] || "").trim();
       if (!value) return;
       if (student[field] && String(student[field]).trim()) {
         kept.push(label);
@@ -254,6 +265,14 @@ Return JSON matching the schema.`;
         filled.push(label);
       }
     });
+    if (Array.isArray(extracted.eligibility_categories) && extracted.eligibility_categories.length) {
+      const existing = Array.isArray(student.eligibility_categories) ? student.eligibility_categories : [];
+      const merged = [...new Set([...existing, ...extracted.eligibility_categories])].filter(Boolean).slice(0, 10);
+      if (JSON.stringify(existing) !== JSON.stringify(merged)) {
+        patch.eligibility_categories = merged;
+        filled.push('Eligibility / disability categories');
+      }
+    }
     if (Array.isArray(extracted.services) && extracted.services.length && !(student.services && student.services.length)) {
       patch.services = extracted.services;
       filled.push("Services");
@@ -293,6 +312,7 @@ Return JSON matching the schema.`;
       : 0;
     const snapshot = {
       eligibility: extracted.eligibility_category || '',
+      eligibility_categories: extracted.eligibility_categories || [],
       strengths_found: listCount(extracted.strengths),
       needs_found: listCount(extracted.areas_of_need),
       // This is the number of annual-goal candidates found in the uploaded source documents.
