@@ -23,6 +23,7 @@ import ComplianceReviewTab from "@/components/iepStudio/ComplianceReviewTab";
 import ParentSummaryTab from "@/components/iepStudio/ParentSummaryTab";
 import IEPReadyBridge from "@/components/iepStudio/IEPReadyBridge";
 import MetMdtBuilder from "@/components/iepStudio/MetMdtBuilder";
+import StateAwareIepFlow from "@/components/iepStudio/StateAwareIepFlow";
 
 const ACCOMMODATION_SDI_SECTIONS = [
   { key: "accommodations", label: "Accommodations" },
@@ -32,7 +33,8 @@ const ACCOMMODATION_SDI_SECTIONS = [
 const GETTING_STARTED = ["Select Student", "Upload Any State IEP / Evaluation", "Review Evidence & Gaps", "Build Evidence-Linked IEP Draft", "Run Readiness & Meeting Prep"];
 
 const TAB_TIPS = [
-  ["overview", "Overview", "The verified student record at a glance, with the readiness score, Meeting Mode, and Copilot."],
+  ["flow", "Guided IEP Flow", "State-aware IEP blueprint that detects the jurisdiction from uploaded records and walks the teacher through the correct sequence."],
+  ["overview", "Student Record", "The verified student record at a glance, with the readiness score, Meeting Mode, and Copilot."],
   ["summary", "CaseCue Summary", "CaseCue-generated summary of every uploaded document for educator review."],
   ["builder", "IEP Builder", "Evidence-first builder: source documents → page-level extraction → present levels → aligned goals → services/accommodations → review & export."],
   ["met-mdt", "MET / MDT Builder", "Turn processed MDT/MET/evaluation records into source-grounded MET 1 or MET 2 present levels, goal drafts, impact, accommodations/SDI, data gaps, and meeting talking points."],
@@ -49,7 +51,7 @@ const TAB_TIPS = [
 export default function IEPStudio() {
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const [studentId, setStudentId] = useState(() => new URLSearchParams(window.location.search).get("student") || "");
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState("flow");
   const [meetingAuto, setMeetingAuto] = useState(false);
   const student = (students || []).find((s) => s.id === studentId);
 
@@ -67,9 +69,10 @@ export default function IEPStudio() {
         </Card>
       ) : <>
         <div className="mb-4"><FerpaUploadNotice /></div>
-        <div className="mb-8"><UploadCenterTab key={student.id} student={student} onProfileBuilt={() => setTab("overview")} onNavigate={setTab} /></div>
+        <div className="mb-8"><UploadCenterTab key={student.id} student={student} onProfileBuilt={() => setTab("flow")} onNavigate={setTab} /></div>
         <Tabs value={tab} onValueChange={setTab}>
           <div className="overflow-x-auto -mx-1 px-1 pb-1"><TooltipProvider delayDuration={250}><TabsList className="flex-wrap h-auto gap-1 w-max min-w-full">{TAB_TIPS.map(([value,label,tip]) => <Tooltip key={value}><TooltipTrigger asChild><TabsTrigger value={value}>{label}</TabsTrigger></TooltipTrigger><TooltipContent side="bottom" className="max-w-[240px]">{tip}</TooltipContent></Tooltip>)}</TabsList></TooltipProvider></div>
+          <TabsContent value="flow" className="mt-6"><StateAwareIepFlow student={student} onNavigate={setTab} /></TabsContent>
           <TabsContent value="overview" className="mt-6"><StudentOverviewTab student={student} onRunMeetingMode={() => { setMeetingAuto(true); setTab("meeting"); }} /></TabsContent>
           <TabsContent value="summary" className="mt-6"><AiSummaryTab student={student} /></TabsContent>
           <TabsContent value="builder" className="mt-6"><WorkspacePipeline student={student} /></TabsContent>
