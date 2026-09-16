@@ -187,7 +187,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
       <Card className="p-5 sm:p-6">
         <h3 className="font-semibold mb-1">Upload Center — records for {student.first_name} {student.last_name}</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Drag a document in and CaseCue does the rest automatically — no extra clicks. Start with the current IEP and latest evaluation, then add MDT, reevaluation, BIP, FBA, progress reports, and parent/teacher input as you have them.
+          Upload the full IEP, MDT, evaluation, reevaluation, or supporting report. CaseCue reads every page, captures the document's questions and answers, extracts measurable evidence, and prepares educator-review drafts for present levels and aligned goals.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="w-full sm:w-72">
@@ -322,11 +322,12 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
             <h3 className="font-semibold mb-1">One-click actions</h3>
             <p className="text-sm text-muted-foreground mb-4">Everything CaseCue found is saved to {student.first_name}'s record — jump straight into generating.</p>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" onClick={() => onNavigate?.("builder")}><ArrowRight className="h-3.5 w-3.5 mr-1" />Generate New IEP</Button>
+              <Button size="sm" onClick={() => onNavigate?.("builder")}><ArrowRight className="h-3.5 w-3.5 mr-1" />Create IEP Draft from Records</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("amendments")}>Generate Amendment</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate Meeting Script</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("meeting")}>Generate IEP Meeting Navigator</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("parent")}>Generate Parent Summary</Button>
+              <Button size="sm" variant="outline" onClick={() => onNavigate?.("builder")}>Draft Present Levels &amp; Goals</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("goals")}>Generate Progress Summary</Button>
               <Button size="sm" variant="outline" onClick={() => onNavigate?.("compliance")}>Review Compliance</Button>
             </div>
