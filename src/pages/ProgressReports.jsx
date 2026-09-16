@@ -15,6 +15,7 @@ import AiDisclaimer from "@/components/shared/AiDisclaimer";
 import ExportGate from "@/components/shared/ExportGate";
 import ExportBar from "@/components/shared/ExportBar";
 import WeeklyFamilyUpdate from "@/components/progressReports/WeeklyFamilyUpdate";
+import CaseloadFridayDashboard from "@/components/progressReports/CaseloadFridayDashboard";
 
 function TrendIcon({ trend }) {
   if (trend === null || trend === undefined) return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -68,6 +69,8 @@ export default function ProgressReports() {
     <div>
       <PageHeader title="Progress Reports" subtitle="Generate parent-ready progress reports from your recorded goal data — every draft requires educator review."
         icon={FileText} />
+
+      <div className="mb-6"><CaseloadFridayDashboard students={s} progress={progress || []} sessions={sessions || []} assignments={assignments || []} /></div>
 
       <Card className="p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
