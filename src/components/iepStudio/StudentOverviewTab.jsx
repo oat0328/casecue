@@ -49,7 +49,7 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
   const ieps = (documents || []).filter(d => d.document_type === 'IEP');
   const supporting = (documents || []).filter(d => d.document_type !== 'IEP');
   const currentIep = ieps.find(d=>['current','final'].includes(d.iep_role)) || ieps[0];
-  const openDocument=async d=>{if(!d?.file_url)return;try{const signed=await base44.integrations.Core.CreateFileSignedUrl({file_uri:d.file_url,expires_in:900});window.open(signed.signed_url,'_blank','noopener,noreferrer');}catch{window.open(d.file_url,'_blank','noopener,noreferrer')}};
+  const openDocument=async d=>{if(!d?.id||!d?.file_url)return;try{const r=await base44.functions.invoke('openDocumentUrl',{document_id:d.id});const url=r.data?.signed_url||r.signed_url;if(!url)throw new Error(r.data?.error||r.error||'No viewable document URL was returned.');window.open(url,'_blank','noopener,noreferrer');}catch(err){console.error('Could not open IEP:',err);}};
   return (
     <div className="space-y-6">
       <Card className="p-5 brand-gradient text-white flex flex-col sm:flex-row sm:items-center gap-4">
