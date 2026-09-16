@@ -292,8 +292,13 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
                 {profileResult.kept?.length > 0 && (
                   <p><strong className="text-foreground">Kept as-is:</strong> {profileResult.kept.join(", ")} (you already entered this).</p>
                 )}
-                {profileResult.data_gaps?.length > 0 && (
-                  <p className="text-amber-700">Still missing: {profileResult.data_gaps.join(", ")}</p>
+                {profileResult.data_gaps?.length > 0 ? (
+                  <p className="text-amber-700"><strong>Profile still needs:</strong> {profileResult.data_gaps.join(", ")}</p>
+                ) : (
+                  <p className="text-emerald-700"><strong>Profile coverage:</strong> No unresolved profile gaps found in the uploaded records and saved student profile.</p>
+                )}
+                {profileResult.document_gaps?.length > 0 && (
+                  <p className="text-muted-foreground text-xs"><strong>Not stated in the uploaded document:</strong> {profileResult.document_gaps.join(", ")}. These do not reduce profile coverage when the information is already on the student record.</p>
                 )}
                 <div className="flex flex-wrap gap-2 pt-1">
                   <Button size="sm" onClick={onProfileBuilt} className="brand-gradient text-white">
