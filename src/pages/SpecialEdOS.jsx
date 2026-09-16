@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, FileEdit, ShieldCheck, Users, ClipboardList, Timer, BarChart3, Brain, HeartHandshake, GraduationCap, FileSearch, BookOpen, Stethoscope, Activity, Building2, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { Sparkles, FileEdit, ShieldCheck, Users, ClipboardList, Timer, Brain, HeartHandshake, GraduationCap, FileSearch, BookOpen, Stethoscope, Activity, Building2, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/components/ui/cards';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
