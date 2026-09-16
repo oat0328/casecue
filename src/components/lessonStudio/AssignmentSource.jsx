@@ -49,7 +49,7 @@ export default function AssignmentSource({ students, onComplete, analyzing, onAn
     onAnalyzing(true);
     try {
       const res = await base44.functions.invoke("analyzeAssignment", { file_url: fileUrl || undefined, pasted_text: pastedText.trim() || undefined, page_url: pageUrl.trim() || undefined, grade_hint: grade });
-      await onComplete({ analysis: res.data.analysis, target: { mode: targetMode, student_ids: studentIds, group_label: groupLabel, grade }, autoGenerate });
+      await onComplete({ analysis: res.data.analysis, target: { mode: targetMode, student_ids: studentIds, group_label: groupLabel, grade, duration_minutes: initialTarget?.duration_minutes }, autoGenerate });
     } catch (e) { toast({ title: "Could not read assignment", description: e?.response?.data?.error || e.message, variant: "destructive" }); }
     finally { onAnalyzing(false); }
   };
@@ -58,7 +58,7 @@ export default function AssignmentSource({ students, onComplete, analyzing, onAn
   return <div className="space-y-5">
     <Card className="p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3 mb-4"><div><h3 className="font-semibold flex items-center gap-2"><Users className="h-4 w-4 text-primary"/>Who are you teaching?</h3><p className="text-xs text-muted-foreground mt-1">Optional. If you opened this from Schedule, your group is already loaded.</p></div></div>
-      {initialTarget?.group_label&&<div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3"><div className="text-xs font-black uppercase tracking-wide text-blue-700">Loaded from schedule</div><div className="font-semibold mt-1">{initialTarget.group_label}</div>{selectedNames.length>0&&<div className="text-xs text-slate-600 mt-1">{selectedNames.join(", ")}</div>}</div>}
+      {initialTarget?.group_label&&<div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3"><div className="text-xs font-black uppercase tracking-wide text-blue-700">Loaded from schedule</div><div className="font-semibold mt-1">{initialTarget.group_label}</div>{selectedNames.length>0&&<div className="text-xs text-slate-600 mt-1">{selectedNames.join(", ")}</div>}{initialTarget.duration_minutes&&<div className="text-xs text-slate-500 mt-1">{initialTarget.duration_minutes} minute lesson window</div>}</div>}
       <div className="flex flex-wrap gap-2 mb-4">{["students","group"].map((m)=><button key={m} type="button" onClick={()=>setTargetMode(m)} className={cn("rounded-full px-4 py-2 text-sm border",targetMode===m?"bg-primary text-white border-primary":"border-border")}>{m==="students"?"Student(s)":"Group"}</button>)}</div>
       {targetMode==="students" ? <div className="flex flex-wrap gap-2 max-h-44 overflow-y-auto">{(students||[]).map((s)=><button key={s.id} type="button" onClick={()=>toggleStudent(s.id)} className={cn("text-sm rounded-full border px-4 py-2",studentIds.includes(s.id)?"bg-primary text-white border-primary":"border-border")}>{s.first_name} {s.last_name}</button>)}</div> : <div className="grid sm:grid-cols-2 gap-4"><div><label className={labelCls}>Group name</label><input className={inputCls} value={groupLabel} onChange={e=>setGroupLabel(e.target.value)} placeholder="Reading Group"/></div><div><label className={labelCls}>Grade</label><input className={inputCls} value={grade} onChange={e=>setGrade(e.target.value)} placeholder="6th grade"/></div></div>}
     </Card>
