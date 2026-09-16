@@ -16,7 +16,15 @@
     },
     "eligibility_category": {
       "type": "string",
-      "title": "Eligibility Category"
+      "title": "Primary Eligibility Category"
+    },
+    "eligibility_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 5,
+      "title": "Eligibility Categories"
     },
     "iep_date": {
       "type": "string",
