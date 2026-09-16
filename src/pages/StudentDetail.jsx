@@ -226,6 +226,7 @@ export default function StudentDetail() {
               <ExportGate documentName="IEP draft" onExport={() => exportIepPdf(student, goals || [])}>
                 <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-1" /> Export</Button>
               </ExportGate>
+              <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={verifyDates} disabled={verifyingDates}>{verifyingDates ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-1" />}{verifyingDates ? "Checking dates…" : "Verify IEP dates"}</Button>
               <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={startEdit}>Edit profile</Button>
               <Button variant="outline" className="border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20" onClick={() => setDeleteOpen(true)}><Trash2 className="h-4 w-4 mr-1" /> Delete</Button>
             </div>
@@ -269,8 +270,19 @@ export default function StudentDetail() {
               <Field label="IEP date" value={student.iep_date} name="iep_date" />
               <Field label="Annual review due" value={student.annual_review_due} name="annual_review_due" />
               <Field label="Reevaluation due" value={student.reevaluation_due} name="reevaluation_due" />
+              <Field label="Last evaluation date" value={student.last_evaluation_date} name="last_evaluation_date" />
               <Field label="Service minutes" value={student.service_minutes} name="service_minutes" />
               <Field label="Status" value={student.status} name="status" />
+            </div>
+            <div className={`mt-6 rounded-2xl border p-4 ${student.date_verification_status === "verified" ? "border-emerald-200 bg-emerald-50" : student.date_verification_status === "needs_review" ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-slate-50"}`}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4" /> IEP & evaluation date check</div>
+                  <p className="mt-1 text-sm text-slate-600">{student.date_verification_status === "verified" ? "Verified against the uploaded current/final IEP." : student.date_verification_status === "needs_review" ? "CaseCue found a date issue or could not verify every date. Review the source IEP." : "Dates have not been verified against a processed current/final IEP yet."}</p>
+                  {student.date_verification_note && <p className="mt-2 text-xs text-slate-500">{student.date_verification_note}</p>}
+                </div>
+                <Button variant="outline" size="sm" onClick={verifyDates} disabled={verifyingDates}>{verifyingDates ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5 mr-1" />}{verifyingDates ? "Checking…" : "Check dates"}</Button>
+              </div>
             </div>
             <div className="mt-6 space-y-5">
               <div>
