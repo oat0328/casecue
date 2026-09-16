@@ -1,143 +1,16 @@
-import React, { useRef, useState } from "react";
-import { Loader2, AlertTriangle, FileUp } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { base44 } from "@/api/base44Client";
-import { useToast } from "@/components/ui/use-toast";
-import FerpaUploadNotice from "@/components/shared/FerpaUploadNotice";
-import ScheduleReview from "./ScheduleReview";
-
-const ACCEPT = ".pdf,.xlsx,.xls,.csv,.docx,.doc,.png,.jpg,.jpeg,.webp";
-
-// Upload Schedule → Document analysis → review → save. The teacher reviews every
-// extraction before anything is written.
-export default function UploadScheduleDialog({ open, onOpenChange, students, onSaved }) {
-  const { toast } = useToast();
-  const inputRef = useRef(null);
-  const [step, setStep] = useState("upload"); // upload | analyzing | review | saving
-  const [fileName, setFileName] = useState("");
-  const [pullPreferences, setPullPreferences] = useState("");
-  const [analysis, setAnalysis] = useState(null);
-  const [error, setError] = useState("");
-
-  const reset = () => {
-    setStep("upload");
-    setFileName("");
-    setAnalysis(null);
-    setError("");
-    setPullPreferences("");
-    if (inputRef.current) inputRef.current.value = "";
-  };
-
-  const handleOpenChange = (next) => {
-    if (!next) reset();
-    onOpenChange(next);
-  };
-
-  const analyzeFiles = async (files) => {
-    const list = Array.from(files || []).filter(Boolean);
-    if (!list.length) return;
-    setError("");
-    setFileName(list.map(f => f.name).join(", "));
-    setStep("analyzing");
-    try {
-      const uploaded = await Promise.all(list.map(file => base44.integrations.Core.UploadPrivateFile({ file })));
-      const file_uris = uploaded.map(x => x.file_uri).filter(Boolean);
-      const res = await base44.functions.invoke("scheduleAi", { mode: "analyze", file_uris, pull_preferences: pullPreferences });
-      setAnalysis(res.data);
-      setStep("review");
-    } catch (err) {
-      setError(err.message || "Schedule analysis failed. Try a clearer file.");
-      setStep("upload");
-    }
-  };
-
-  const onPick = (e) => {
-    if (e.target.files?.length) analyzeFiles(e.target.files);
-  };
-
-  const onDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files?.length) analyzeFiles(e.dataTransfer.files);
-  };
-
-  const saveEntries = async (entries) => {
-    setStep("saving");
-    try {
-      await base44.entities.ScheduleEntry.bulkCreate(entries);
-      toast({ title: "Schedule imported", description: `${entries.length} schedule entries saved.` });
-      onSaved?.();
-      handleOpenChange(false);
-    } catch (err) {
-      toast({ title: "Could not save schedule", description: err.message, variant: "destructive" });
-      setStep("review");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Upload Schedule</DialogTitle>
-          <DialogDescription>
-            Upload the school bell schedule, student/class schedules, and/or your current resource schedule together. Tell CaseCue when you prefer to pull students; it will propose groups and compare scheduled minutes with the service minutes already recorded in each student's CaseCue profile.
-          </DialogDescription>
-        </DialogHeader>
-
-        {step === "upload" && (
-          <div className="space-y-4">
-            <FerpaUploadNotice />
-            <div>
-              <label className="text-sm font-semibold">When do you want to provide pull-out / push-in services?</label>
-              <textarea
-                value={pullPreferences}
-                onChange={(e) => setPullPreferences(e.target.value)}
-                placeholder="Example: Prefer pull-out 8:30–11:41 AM and 12:45–2:06 PM. Avoid PE, lunch, electives, and core tests. Reading M/W/F; math T/Th when possible."
-                className="mt-2 w-full min-h-24 rounded-xl border border-border bg-background px-3 py-2 text-sm"
-              />
-              <p className="mt-1 text-xs text-muted-foreground">CaseCue treats this as a planning preference, not proof that a service was delivered.</p>
-            </div>
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={onDrop}
-              onClick={() => inputRef.current?.click()}
-              className="cursor-pointer rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-10 text-center transition-colors hover:border-primary/70"
-            >
-              <FileUp className="h-10 w-10 text-primary mx-auto" />
-              <p className="mt-3 font-semibold">Drop your schedule here, or click to browse</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Add one or several files at once: school bell schedule + student schedules + resource schedule. PDF, Excel (.xlsx), CSV, DOCX, screenshots and images.
-              </p>
-              <input ref={inputRef} type="file" accept={ACCEPT} multiple className="hidden" onChange={onPick} />
-            </div>
-            {error && (
-              <div className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-                <AlertTriangle className="h-4 w-4" /> {error}
-              </div>
-            )}
-          </div>
-        )}
-
-        {step === "analyzing" && (
-          <div className="py-12 text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-            <p className="mt-4 font-semibold">Analyzing {fileName}…</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Reading student names, groups, service types, days, times, and minutes.
-            </p>
-          </div>
-        )}
-
-        {step === "review" && analysis && (
-          <ScheduleReview analysis={analysis} students={students} saving={step === "saving"} onSave={saveEntries} onCancel={() => handleOpenChange(false)} />
-        )}
-
-        {step === "saving" && (
-          <div className="py-12 text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-            <p className="mt-4 font-semibold">Saving schedule…</p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
+import React,{useRef,useState}from'react';
+import{Loader2,AlertTriangle,FileUp,Sparkles}from'lucide-react';
+import{Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription}from'@/components/ui/dialog';
+import{base44}from'@/api/base44Client';
+import{useToast}from'@/components/ui/use-toast';
+import FerpaUploadNotice from'@/components/shared/FerpaUploadNotice';
+import ScheduleReview from'./ScheduleReview';
+const ACCEPT='.pdf,.xlsx,.xls,.csv,.docx,.doc,.png,.jpg,.jpeg,.webp';
+export default function UploadScheduleDialog({open,onOpenChange,students,onSaved}){
+ const{toast}=useToast();const inputRef=useRef(null);const[step,setStep]=useState('upload');const[fileName,setFileName]=useState('');const[analysis,setAnalysis]=useState(null);const[error,setError]=useState('');const[pullRule,setPullRule]=useState('last_30');const[sessionMinutes,setSessionMinutes]=useState(30);const[maxGroupSize,setMaxGroupSize]=useState(4);const[avoid,setAvoid]=useState('PE, lunch, testing, electives when possible');const[days,setDays]=useState('Monday-Thursday; Friday progress monitoring');const[delivery,setDelivery]=useState('pull-out');const[pullPreferences,setPullPreferences]=useState('Group students by compatible IEP goal areas first, then by schedule availability.');
+ const reset=()=>{setStep('upload');setFileName('');setAnalysis(null);setError('');if(inputRef.current)inputRef.current.value=''};const handleOpenChange=n=>{if(!n)reset();onOpenChange(n)};
+ const ruleText=()=>pullRule==='last_30'?'last 30 minutes of class':pullRule==='first_30'?'first 30 minutes of class':pullRule==='middle_30'?'middle 30 minutes of class':pullRule==='full_period'?'entire class period':'custom timing described below';
+ const analyzeFiles=async files=>{const list=Array.from(files||[]).filter(Boolean);if(!list.length)return;setError('');setFileName(list.map(f=>f.name).join(', '));setStep('analyzing');try{const uploaded=await Promise.all(list.map(file=>base44.integrations.Core.UploadPrivateFile({file})));const file_uris=uploaded.map(x=>x.file_uri).filter(Boolean);const res=await base44.functions.invoke('schedulePlanner',{file_uris,pull_rule:ruleText(),session_minutes:Number(sessionMinutes)||30,max_group_size:Number(maxGroupSize)||4,avoid,days,delivery,pull_preferences:pullPreferences});if(!res?.data?.groups)throw new Error(res?.data?.error||'CaseCue could not build a schedule from these files.');setAnalysis(res.data);setStep('review')}catch(err){setError(err.message||'Schedule analysis failed. Make sure the files contain readable schedule information.');setStep('upload')}};
+ const saveEntries=async entries=>{setStep('saving');try{const user=await base44.auth.me();const org=user?.organization_id||user?.data?.organization_id||'';await base44.entities.ScheduleEntry.bulkCreate(entries.map(e=>({...e,organization_id:org,source_kind:'generated_plan'})));toast({title:'Schedule plan saved',description:`${entries.length} schedule blocks saved.`});onSaved?.();handleOpenChange(false)}catch(err){toast({title:'Could not save schedule',description:err.message,variant:'destructive'});setStep('review')}};
+ return <Dialog open={open} onOpenChange={handleOpenChange}><DialogContent className='max-w-4xl max-h-[90vh] overflow-y-auto'><DialogHeader><DialogTitle>Build My SPED Schedule</DialogTitle><DialogDescription>Upload your school bell schedule and SPED/student schedules together. CaseCue uses your actual IEP goal areas and your pull rules to propose groups for you to review.</DialogDescription></DialogHeader>{step==='upload'&&<div className='space-y-5'><FerpaUploadNotice/><div className='rounded-2xl border bg-slate-50 p-4'><div className='flex items-center gap-2 font-bold'><Sparkles className='h-4 w-4 text-primary'/>Scheduling rules</div><div className='mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4'><div><label className='text-sm font-semibold'>When should I pull?</label><select value={pullRule} onChange={e=>setPullRule(e.target.value)} className='mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm'><option value='last_30'>Last 30 minutes of class</option><option value='first_30'>First 30 minutes of class</option><option value='middle_30'>Middle 30 minutes</option><option value='full_period'>Full period</option><option value='custom'>Custom</option></select></div><div><label className='text-sm font-semibold'>Session minutes</label><input type='number' min='10' max='120' value={sessionMinutes} onChange={e=>setSessionMinutes(e.target.value)} className='mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm'/></div><div><label className='text-sm font-semibold'>Maximum group size</label><input type='number' min='1' max='12' value={maxGroupSize} onChange={e=>setMaxGroupSize(e.target.value)} className='mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm'/></div><div><label className='text-sm font-semibold'>Delivery preference</label><select value={delivery} onChange={e=>setDelivery(e.target.value)} className='mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm'><option value='pull-out'>Pull-out</option><option value='push-in'>Push-in</option><option value='pull-out or push-in'>Either</option></select></div><div><label className='text-sm font-semibold'>Days / weekly pattern</label><input value={days} onChange={e=>setDays(e.target.value)} className='mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm'/></div><div><label className='text-sm font-semibold'>Avoid</label><input value={avoid} onChange={e=>setAvoid(e.target.value)} className='mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm'/></div></div><div className='mt-4'><label className='text-sm font-semibold'>Anything else CaseCue should follow?</label><textarea value={pullPreferences} onChange={e=>setPullPreferences(e.target.value)} className='mt-1 min-h-20 w-full rounded-xl border bg-white px-3 py-2 text-sm' placeholder='Example: Avoid PE. Reading groups can be back-to-back. Keep math groups to 4 students.'/></div></div><div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();analyzeFiles(e.dataTransfer.files)}} onClick={()=>inputRef.current?.click()} className='cursor-pointer rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-10 text-center hover:border-primary/70'><FileUp className='h-10 w-10 text-primary mx-auto'/><p className='mt-3 font-semibold'>Drop bell schedule + SPED/student schedules here</p><p className='text-sm text-muted-foreground mt-1'>PDF, Excel, CSV, Word, screenshots, or images. Upload several files together.</p><input ref={inputRef} type='file' accept={ACCEPT} multiple className='hidden' onChange={e=>analyzeFiles(e.target.files)}/></div>{error&&<div className='flex gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700'><AlertTriangle className='h-4 w-4 mt-0.5'/><span><b>Upload did not work.</b> {error} Try uploading the bell schedule and student/SPED schedule separately if needed.</span></div>}</div>}{step==='analyzing'&&<div className='py-12 text-center'><Loader2 className='h-10 w-10 animate-spin text-primary mx-auto'/><p className='mt-4 font-semibold'>Building groups from {fileName}…</p><p className='text-sm text-muted-foreground mt-1'>Reading bell times, student classes, IEP goal areas, service minutes, conflicts, and your pull rules.</p></div>}{step==='review'&&analysis&&<ScheduleReview analysis={analysis} students={students} saving={false} onSave={saveEntries} onCancel={()=>handleOpenChange(false)}/>} {step==='saving'&&<div className='py-12 text-center'><Loader2 className='h-10 w-10 animate-spin text-primary mx-auto'/><p className='mt-4 font-semibold'>Saving your schedule…</p></div>}</DialogContent></Dialog>;
 }
