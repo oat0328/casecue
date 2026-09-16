@@ -396,36 +396,41 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         if (sorted.length > 1) duplicatePairs.push({ keeper: sorted[0], fp, extras: sorted.slice(1) });
       });
 
-      // Maximum writes per click. A second click continues safely if needed.
-      const MAX_WRITES = 20;
-      let writes = 0;
+      // One click cleans the full duplicate set, but writes are deliberately paced
+      // in small batches so Base44 never receives a burst of hundreds of requests.
+      const BATCH_SIZE = 12;
+      const WRITE_DELAY_MS = 225;
+      const BATCH_PAUSE_MS = 1600;
+      let writesInBatch = 0;
       let deleted = 0;
       let protectedCount = 0;
       const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+      const pacedWrite = async (fn) => {
+        await fn();
+        writesInBatch += 1;
+        await sleep(WRITE_DELAY_MS);
+        if (writesInBatch >= BATCH_SIZE) {
+          writesInBatch = 0;
+          await sleep(BATCH_PAUSE_MS);
+        }
+      };
 
       for (const pair of duplicatePairs) {
-        if (writes >= MAX_WRITES) break;
         if (!pair.keeper.source_fingerprint) {
-          await base44.entities.SessionRecord.update(pair.keeper.id, { source_fingerprint: pair.fp });
-          writes += 1; protectedCount += 1;
-          await sleep(175);
+          await pacedWrite(() => base44.entities.SessionRecord.update(pair.keeper.id, { source_fingerprint: pair.fp }));
+          protectedCount += 1;
         }
         for (const record of pair.extras) {
-          if (writes >= MAX_WRITES) break;
-          await base44.entities.SessionRecord.delete(record.id);
-          writes += 1; deleted += 1;
-          await sleep(175);
+          await pacedWrite(() => base44.entities.SessionRecord.delete(record.id));
+          deleted += 1;
         }
       }
 
-      const remaining = Math.max(0, duplicatePairs.reduce((n, p) => n + p.extras.length, 0) - deleted);
-      setCleanupSummary({ deleted, kept: protectedCount, scanned: (imported || []).length, remaining });
+      setCleanupSummary({ deleted, kept: protectedCount, scanned: (imported || []).length, remaining: 0 });
       if (onImported) await onImported();
       toast({
-        title: remaining ? 'Cleanup batch complete' : 'Duplicate cleanup complete',
-        description: remaining
-          ? `${deleted} duplicates removed safely. ${remaining} duplicate records remain; run cleanup again after a few seconds.`
-          : `${deleted} duplicate session${deleted === 1 ? '' : 's'} removed. No identical duplicates remain in the scanned import history.`
+        title: 'Duplicate cleanup complete',
+        description: `${deleted} duplicate session${deleted === 1 ? '' : 's'} removed in one cleanup. ${protectedCount} keeper session${protectedCount === 1 ? '' : 's'} protected with permanent fingerprints.`
       });
     } catch (e) {
       const rateLimited = /rate limit/i.test(String(e?.message || ''));
