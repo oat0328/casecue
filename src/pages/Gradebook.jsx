@@ -83,7 +83,7 @@ export default function Gradebook() {
         student: col("student", "student name", "name", "student id"), course: col("course", "subject", "class"), teacher: col("teacher", "gen ed teacher", "general education teacher"), title: col("assignment", "assignment title", "title"), type: col("assignment type", "type"), earned: col("points earned", "score earned", "earned"), possible: col("points possible", "score possible", "possible"), percent: col("current grade", "current grade percent", "grade percent", "percent"), letter: col("letter grade", "current grade letter"), missing: col("missing", "missing assignment"), accommodations: col("accommodations", "accommodations provided"), term: col("term", "quarter"), date: col("date"), notes: col("notes")
       };
       if (idx.student < 0) throw new Error("Add a Student or Student Name column so CaseCue can match each row.");
-      let added=0, skipped=0;
+      let added=0, skipped=0, duplicates=0;
       for (const row of rows.slice(1)) {
         const student = findStudent(row[idx.student]);
         if (!student) { skipped++; continue; }
@@ -92,12 +92,12 @@ export default function Gradebook() {
         let date = new Date().toISOString().slice(0,10);
         if (rawDate instanceof Date) date = rawDate.toISOString().slice(0,10);
         else if (clean(rawDate)) { const d = new Date(rawDate); if (!Number.isNaN(d.getTime())) date = d.toISOString().slice(0,10); }
-        await base44.entities.GradebookAssignment.create({
-          student_id: student.id, title: title || "Gen Ed grade update", course: idx.course>=0?clean(row[idx.course]):"", gen_ed_teacher: idx.teacher>=0?clean(row[idx.teacher]):"", assignment_type: idx.type>=0?clean(row[idx.type]):"", term: idx.term>=0?clean(row[idx.term]):"", score_earned: idx.earned>=0?Number(row[idx.earned])||0:0, score_possible: idx.possible>=0?Number(row[idx.possible])||0:0, current_grade_percent: idx.percent>=0?Number(String(row[idx.percent]).replace('%',''))||0:null, current_grade_letter: idx.letter>=0?clean(row[idx.letter]):"", missing_assignment: idx.missing>=0?["yes","true","1","missing"].includes(clean(row[idx.missing]).toLowerCase()):false, accommodations_provided: idx.accommodations>=0?(["yes","no"].includes(clean(row[idx.accommodations]).toLowerCase())?clean(row[idx.accommodations]).toLowerCase():"unknown"):"unknown", notes: idx.notes>=0?clean(row[idx.notes]):"", date
-        });
-        added++;
+        const payload={student_id: student.id, title: title || "Gen Ed grade update", course: idx.course>=0?clean(row[idx.course]):"", gen_ed_teacher: idx.teacher>=0?clean(row[idx.teacher]):"", assignment_type: idx.type>=0?clean(row[idx.type]):"", term: idx.term>=0?clean(row[idx.term]):"", score_earned: idx.earned>=0?Number(row[idx.earned])||0:0, score_possible: idx.possible>=0?Number(row[idx.possible])||0:0, current_grade_percent: idx.percent>=0?Number(String(row[idx.percent]).replace('%',''))||0:null, current_grade_letter: idx.letter>=0?clean(row[idx.letter]):"", missing_assignment: idx.missing>=0?["yes","true","1","missing"].includes(clean(row[idx.missing]).toLowerCase()):false, accommodations_provided: idx.accommodations>=0?(["yes","no"].includes(clean(row[idx.accommodations]).toLowerCase())?clean(row[idx.accommodations]).toLowerCase():"unknown"):"unknown", notes: idx.notes>=0?clean(row[idx.notes]):"", date};
+        const duplicate=(assignments||[]).find(a=>a.student_id===payload.student_id&&normalize(a.course)===normalize(payload.course)&&normalize(a.title)===normalize(payload.title)&&normalize(a.term)===normalize(payload.term)&&String(a.date||'')===String(payload.date||'')&&Number(a.current_grade_percent??-1)===Number(payload.current_grade_percent??-1)&&normalize(a.current_grade_letter)===normalize(payload.current_grade_letter));
+        if(duplicate){duplicates++;continue;}
+        await base44.entities.GradebookAssignment.create(payload);added++;
       }
-      refetch(); toast({ title: `${added} grade row${added===1?'':'s'} imported`, description: skipped ? `${skipped} row(s) skipped because the student could not be matched.` : "Students were matched automatically." });
+      refetch(); toast({ title: `${added} new grade row${added===1?'':'s'} imported`, description: `${duplicates} duplicate${duplicates===1?'':'s'} skipped${skipped?` · ${skipped} unmatched row(s) need review`:''}.` });
     } catch (e) { toast({ title: "Import failed", description: e.message, variant: "destructive" }); }
     finally { setImporting(false); if(fileRef.current) fileRef.current.value=""; }
   };
@@ -142,7 +142,7 @@ export default function Gradebook() {
       </TabsContent>
       <TabsContent value="import">
         <Card className={`p-8 border-2 border-dashed text-center transition ${dragging?'border-primary bg-primary/5':'border-border'}`} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);importFile(e.dataTransfer.files?.[0])}}>
-          <UploadCloud className="h-12 w-12 mx-auto text-primary mb-3"/><h3 className="text-lg font-semibold">Drop Gen Ed grade reports here</h3><p className="text-sm text-muted-foreground mt-2">PDF, CSV, XLSX, or XLS. CaseCue reads school grade-report PDFs like the one you uploaded, matches the student, and imports one row per visible course.</p>
+          <UploadCloud className="h-12 w-12 mx-auto text-primary mb-3"/><h3 className="text-lg font-semibold">Drop Gen Ed grade reports here</h3><p className="text-sm text-muted-foreground mt-2">PDF, CSV, XLSX, or XLS. CaseCue matches students, identifies grade rows already on file, skips duplicates, and imports only new grade information.</p>
           <input ref={fileRef} type="file" accept=".pdf,.csv,.xlsx,.xls,application/pdf" className="hidden" onChange={e=>importFile(e.target.files?.[0])}/><Button className="mt-5" onClick={()=>fileRef.current?.click()} disabled={importing}><FileSpreadsheet className="h-4 w-4 mr-2"/>{importing?"Importing…":"Choose File"}</Button>
           <p className="text-xs text-muted-foreground mt-5">Recognized columns include Student, Subject/Course, Teacher, Assignment, Points Earned, Points Possible, Current Grade, Letter Grade, Missing, Accommodations, Quarter/Term, Date, and Notes.</p>
         </Card>
