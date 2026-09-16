@@ -1,0 +1,29 @@
+{
+  "name": "AssignmentUse",
+  "type": "object",
+  "properties": {
+    "organization_id": { "type": "string" },
+    "student_ids": { "type": "array", "items": { "type": "string" } },
+    "goal_ids": { "type": "array", "items": { "type": "string" } },
+    "lesson_id": { "type": "string" },
+    "assignment_title": { "type": "string" },
+    "subject": { "type": "string" },
+    "skills": { "type": "array", "items": { "type": "string" } },
+    "question_signature": { "type": "string" },
+    "source_signature": { "type": "string" },
+    "used_date": { "type": "string", "format": "date" },
+    "purpose": { "type": "string", "enum": ["instruction", "practice", "reteach", "progress_monitoring_retest", "same_assignment_different_student", "new_version", "other"], "default": "instruction" },
+    "teacher_confirmed_duplicate": { "type": "boolean", "default": false },
+    "correct": { "type": "number" },
+    "total": { "type": "number" },
+    "percentage": { "type": "number" },
+    "notes": { "type": "string" }
+  },
+  "required": ["assignment_title", "used_date"],
+  "rls": {
+    "read": { "$or": [{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}] },
+    "create": { "$or": [{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}] },
+    "update": { "$or": [{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}] },
+    "delete": { "$or": [{"data.organization_id":"{{user.data.organization_id}}"},{"created_by_id":"{{user.id}}"}] }
+  }
+}
