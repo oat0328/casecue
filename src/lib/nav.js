@@ -7,7 +7,7 @@ export const navItems=[
  {label:'Goals & Progress',path:'/progress',icon:BarChart3},
  {label:'IEP Center',path:'/ieps',icon:FileEdit},
  {label:'Communication',path:'/communication',icon:MessagesSquare},
- {label:'Notes',path:'/notes',icon:StickyNote},
+ {label:'Case Log',path:'/notes',icon:StickyNote},
  {label:'Reports',path:'/reports',icon:FileBarChart},
  {label:'Ask CaseCue',path:'/ask-casecue',icon:MessageCircle},
  {label:'Integrations',path:'/integrations',icon:Plug},
