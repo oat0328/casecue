@@ -83,7 +83,7 @@ export default async function(req) {
     await base44.entities.Document.update(docId, { extraction_status: 'ocr_processing' });
 
     const result = await svc.integrations.Core.InvokeLLM({
-      prompt: `You are a careful special-education document reader. Read every page of this document and summarize it page by page.
+      prompt: `You are CaseCue's universal U.S. special-education document reader. Read every page of this document and summarize it page by page. The document may come from ANY U.S. state, district, charter, IEP vendor, or locally designed form. Do not depend on fixed page numbers, state-specific labels, or one template. Infer the document's section structure from headings, prompts, tables, labels, and content while preserving the source wording.
 
 For each page:
 - page_number: the page number in the document
@@ -98,6 +98,14 @@ For each page:
 - evaluation_findings: MDT/evaluation/reevaluation findings, tests, standard scores, percentiles, observations, eligibility evidence, recommendations, and educational impact statements
 
 COMPLETENESS RULE: read the ENTIRE document, including tables, checkboxes, form prompts, headers, footers, signature/procedural pages, and attachments. The saved page extraction must preserve enough information for CaseCue to answer the document's questions later without reopening or guessing.
+
+UNIVERSAL FORM RULES:
+- Recognize equivalent labels across states/vendors (for example PLAAFP/PLOP/Present Levels; SDI/Specially Designed Instruction; LRE/Placement/Participation; Evaluation/MDT/MET/Eligibility/Reevaluation).
+- Preserve state/district terminology in extracted text rather than rewriting it into another state's terminology.
+- Capture checked/unchecked choices when visually clear, but never infer a selection that is not visible.
+- Capture tables row-by-row when they contain goals, services, accommodations, assessment results, dates, transition content, or progress data.
+- Capture procedural/team questions and their documented answers, including ESY, AT, behavior/special factors, language/communication, testing, transportation, transition, parent/student input, services, placement/LRE, progress reporting, and participation when present.
+- A form field that is blank is not evidence of "No". Record it as not answered unless the form explicitly marks No/Not Applicable.
 
 If a page is unreadable or the file is not a document, say so in that page's summary instead of guessing.`,
       file_urls: [fileUrl],
