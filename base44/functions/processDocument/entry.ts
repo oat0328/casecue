@@ -123,6 +123,14 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       status: /not answered in document/i.test(String(qa.answer || '')) ? 'not_answered' : 'documented',
     }))).filter((qa) => qa.question && qa.answer);
     if (qaRows.length) await svc.entities.IepDocumentAnswer.bulkCreate(qaRows);
+    await svc.entities.IepQuestionCoverage.create({
+      student_id: doc.student_id,
+      document_id: docId,
+      total_questions: qaRows.length,
+      answered_questions: qaRows.filter((qa) => qa.status === 'documented').length,
+      unanswered_questions: qaRows.filter((qa) => qa.status === 'not_answered').length,
+      generated_at: now,
+    });
 
     const evidenceRows = pages.flatMap((p) => [
       ...(p.present_level_evidence || []).map((text) => ({ evidence_type: 'present_level', text })),
