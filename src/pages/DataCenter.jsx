@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BarChart3, Plus, AlertCircle, TrendingUp } from "lucide-react";
+import { BarChart3, Plus, AlertCircle, TrendingUp, ShieldCheck, FileWarning } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -23,7 +23,9 @@ export default function DataCenter() {
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
   const { data: progress, refetch } = useAsync(() => base44.entities.ProgressData.list('-date', 500), []);
-  const { data: sessions } = useAsync(() => base44.entities.SessionLog.list('-date', 300), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 500), []);
+  const { data: documents } = useAsync(() => base44.entities.Document.list('-date_uploaded', 300), []);
+  const { data: workEvidence } = useAsync(() => base44.entities.WorkEvidence.list('-date', 500), []);
   const { data: assignments } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 200), []);
   const { data: meetings } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
   const { data: schedule } = useAsync(() => base44.entities.ScheduleEntry.list('-updated_date', 300), []);
@@ -54,7 +56,33 @@ export default function DataCenter() {
   };
 
   const chartFor = (sid) => (progress || []).filter((p) => p.student_id === sid).map((p) => ({ date: p.date, percentage: p.percentage || 0 }));
-  const studentsWithTrends = (students || []).filter((s) => chartFor(s.id).length >= 2);
+  const studentsWithTrends = (students || []).filter((s) => chartFor(s.id).filter(p=>p.percentage!=null).length >= 2);
+  const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const docMatchesStudent = (d, s) => {
+    const firstPage = d?.processing_results?.pages?.[0];
+    if (!firstPage || firstPage.section_name === 'File Error') return null;
+    const hay = norm(JSON.stringify(firstPage));
+    const first = norm(s.first_name), last = norm(s.last_name).slice(0,5);
+    return !!first && hay.includes(first) && (!last || hay.includes(last));
+  };
+  const auditRows = useMemo(() => (students || []).filter(s=>s.roster_status!=='archived').map(s=>{
+    const sg=(goals||[]).filter(g=>g.student_id===s.id&&g.status!=='met');
+    const sp=(progress||[]).filter(p=>p.student_id===s.id&&p.record_status!=='duplicate'&&p.record_status!=='superseded');
+    const ss=(sessions||[]).filter(x=>x.student_id===s.id);
+    const sw=(workEvidence||[]).filter(x=>x.student_id===s.id);
+    const sd=(documents||[]).filter(x=>x.student_id===s.id);
+    const mismatch=sd.some(d=>docMatchesStudent(d,s)===false);
+    const fileError=sd.some(d=>d.processing_results?.pages?.[0]?.section_name==='File Error');
+    const issues=[];
+    if(!sd.length)issues.push('No uploaded source document');
+    if(mismatch)issues.push('Uploaded document appears linked to a different student');
+    if(fileError)issues.push('Document extraction contains a file-size/processing error');
+    if(!sg.length)issues.push('No active goals in Goal table');
+    if(sg.length&&!sp.length)issues.push('Goals exist but no formal progress data');
+    if(ss.length&&!ss.some(x=>x.goal_id))issues.push('Sessions exist but are not linked to goals');
+    if(sw.length&&!sw.some(x=>x.goal_id))issues.push('Work evidence exists but is not linked to goals');
+    return {s,goals:sg.length,progress:sp.length,sessions:ss.length,work:sw.length,docs:sd.length,issues};
+  }),[students,goals,progress,sessions,workEvidence,documents]);
 
   return (
     <div>
@@ -64,6 +92,7 @@ export default function DataCenter() {
         <TabsList className="mb-4">
           <TabsTrigger value="log">Log & Trends</TabsTrigger>
           <TabsTrigger value="scan">Scan Data Sheet</TabsTrigger>
+          <TabsTrigger value="audit">Goal Data Audit</TabsTrigger>
           <TabsTrigger value="reports">Reports & Exports</TabsTrigger>
         </TabsList>
 
@@ -139,6 +168,11 @@ export default function DataCenter() {
 
         <TabsContent value="scan">
           <DataSheetScanPanel students={students || []} goals={goals || []} onImported={refetch} />
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <Card className="p-5 mb-5 border-blue-200 bg-blue-50/40"><div className="flex items-start gap-3"><ShieldCheck className="h-5 w-5 text-blue-700 mt-0.5"/><div><h3 className="font-black">Real-data audit</h3><p className="text-sm text-slate-600 mt-1">This checks the live Student, Document, Goal, ProgressData, SessionRecord and WorkEvidence records. A student can have sessions or scanned work and still show no goal trend when those records are not linked to a verified goal.</p></div></div></Card>
+          <div className="space-y-3">{auditRows.map(r=><Card key={r.s.id} className={`p-4 ${r.issues.length?'border-amber-200':'border-emerald-200'}`}><div className="flex flex-col lg:flex-row lg:items-center gap-4"><div className="lg:w-52"><div className="font-black">{r.s.first_name} {r.s.last_name}</div><div className={`text-xs font-bold mt-1 ${r.issues.length?'text-amber-700':'text-emerald-700'}`}>{r.issues.length?`${r.issues.length} issue${r.issues.length===1?'':'s'} to review`:'Data chain connected'}</div></div><div className="grid grid-cols-5 gap-2 flex-1">{[['Docs',r.docs],['Goals',r.goals],['Progress',r.progress],['Sessions',r.sessions],['Work',r.work]].map(([l,v])=><div key={l} className="rounded-xl bg-slate-50 p-2 text-center"><div className="font-black">{v}</div><div className="text-[10px] text-slate-500">{l}</div></div>)}</div><div className="lg:w-[420px]">{r.issues.length?r.issues.map((x,i)=><div key={i} className="text-xs text-amber-800 flex gap-1.5 mb-1"><FileWarning className="h-3.5 w-3.5 shrink-0"/>{x}</div>):<div className="text-xs font-semibold text-emerald-700">Document → goal → data chain is connected.</div>}</div></div></Card>)}</div>
         </TabsContent>
 
         <TabsContent value="reports">
