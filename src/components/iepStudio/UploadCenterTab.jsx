@@ -132,7 +132,8 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
       // Sequential processing prevents a large caseload from bursting the function/API limits.
       for (const doc of allDocs) {
         try {
-          await base44.functions.invoke("processDocument", { document_id: doc.id });
+          const refreshed = await base44.functions.invoke("processDocument", { document_id: doc.id, force: true });
+          if (!refreshed?.data?.force_reprocessed) throw new Error('Document was not force-reprocessed.');
         } catch {
           failed += 1;
         }
