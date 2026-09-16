@@ -25,8 +25,9 @@ export default function ProgressMonitoringDay(){
  const filteredStudents=useMemo(()=>studentId==='all'?(students||[]):(students||[]).filter(s=>s.id===studentId),[students,studentId]);
  const visibleIds=useMemo(()=>new Set(filteredStudents.map(s=>s.id)),[filteredStudents]);
  const visibleGoals=useMemo(()=>(goals||[]).filter(g=>g.status==='active'&&visibleIds.has(g.student_id)),[goals,visibleIds]);
- const visibleEvidence=useMemo(()=>(evidence||[]).filter(e=>visibleIds.has(e.student_id)),[evidence,visibleIds]);
- const visibleProgress=useMemo(()=>(progress||[]).filter(p=>visibleIds.has(p.student_id)),[progress,visibleIds]);
+ const visibleEvidence=useMemo(()=>(evidence||[]).filter(e=>visibleIds.has(e.student_id)&&e.review_status!=='duplicate'),[evidence,visibleIds]);
+ const duplicateProgress=useMemo(()=>(progress||[]).filter(p=>visibleIds.has(p.student_id)&&p.record_status==='duplicate'),[progress,visibleIds]);
+ const visibleProgress=useMemo(()=>(progress||[]).filter(p=>visibleIds.has(p.student_id)&&p.record_status!=='duplicate'),[progress,visibleIds]);
  const visibleSessions=useMemo(()=>(sessions||[]).filter(s=>visibleIds.has(s.student_id)),[sessions,visibleIds]);
  const pending=visibleEvidence.filter(e=>!e.teacher_confirmed||e.review_status==='needs_review'||e.review_status==='auto_filed');
  const approved=visibleEvidence.filter(e=>e.teacher_confirmed||e.review_status==='approved');
@@ -39,7 +40,7 @@ export default function ProgressMonitoringDay(){
  const goalSeries=useMemo(()=>[...new Set(visibleProgress.map(p=>(goals||[]).find(g=>g.id===p.goal_id)?.goal_area||'Goal'))],[visibleProgress,goals]);
  const studentBars=useMemo(()=>filteredStudents.map(s=>{const ev=visibleEvidence.filter(e=>e.student_id===s.id&&Number(e.score_possible)>0);const avg=ev.length?Math.round(ev.reduce((n,e)=>n+Number(e.percentage||0),0)/ev.length):0;return{name:full(s),average:avg,samples:ev.length}}).filter(x=>x.samples>0),[filteredStudents,visibleEvidence]);
  const openEvidence=async e=>{if(!e.file_url){toast({title:'Worksheet file is not attached',description:'The score and analysis are saved, but this older scan did not preserve the individual worksheet file.',variant:'destructive'});return;}try{const r=await base44.functions.invoke('openEvidenceUrl',{evidence_id:e.id});const url=r.data?.signed_url||r.signed_url;if(!url)throw new Error(r.data?.error||r.error||'No viewable worksheet URL was returned.');window.open(url,'_blank','noopener,noreferrer')}catch(err){toast({title:'Could not open worksheet',description:err?.response?.data?.error||err.message,variant:'destructive'})}};
- const auditText=`${approved.length} teacher-approved work sample${approved.length===1?'':'s'}, ${pending.length} awaiting review, ${linked.length} linked to IEP goal evidence, ${visibleSessions.length} session record${visibleSessions.length===1?'':'s'}.`;
+ const auditText=`${approved.length} teacher-approved work sample${approved.length===1?'':'s'}, ${pending.length} awaiting review, ${linked.length} linked to IEP goal evidence, ${visibleSessions.length} session record${visibleSessions.length===1?'':'s'}. ${duplicateProgress.length} duplicate progress point${duplicateProgress.length===1?'':'s'} excluded from trends.`;
  return <div className='space-y-6'>
   <PageHeader title='Progress Monitoring Day' subtitle='Your evidence command center — scanned work, goal data, sessions, trends, and source worksheets in one place.' icon={ClipboardCheck}/>
   <section className='relative overflow-hidden rounded-[30px] bg-gradient-to-br from-slate-950 via-blue-950 to-violet-950 p-6 text-white shadow-2xl'>
