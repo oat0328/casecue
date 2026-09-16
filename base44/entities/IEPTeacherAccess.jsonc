@@ -1,0 +1,54 @@
+{
+  "name": "IEPTeacherAccess",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "teacher_user_id": {
+      "type": "string",
+      "title": "Teacher User ID"
+    },
+    "document_id": {
+      "type": "string",
+      "title": "Current IEP Document ID"
+    },
+    "access_level": {
+      "type": "string",
+      "enum": [
+        "view",
+        "view_and_acknowledge"
+      ],
+      "default": "view",
+      "title": "Access Level"
+    },
+    "acknowledged_at": {
+      "type": "string",
+      "title": "Acknowledged At"
+    }
+  },
+  "required": [
+    "student_id",
+    "organization_id",
+    "teacher_user_id"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}

@@ -48,6 +48,14 @@
       "type": "number",
       "default": 0
     },
+    "new_items": {
+      "type": "number",
+      "default": 0
+    },
+    "duplicate_items": {
+      "type": "number",
+      "default": 0
+    },
     "answer_key": {
       "type": "string"
     },

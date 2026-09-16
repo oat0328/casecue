@@ -1,0 +1,78 @@
+{
+  "name": "ScanRun",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    },
+    "filename": {
+      "type": "string",
+      "title": "Filename"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "Private File URL"
+    },
+    "page_count": {
+      "type": "number",
+      "title": "Page Count"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processing",
+        "review",
+        "completed",
+        "failed"
+      ],
+      "default": "processing",
+      "title": "Status"
+    },
+    "detected_count": {
+      "type": "number",
+      "title": "Detected Work Items"
+    },
+    "new_count": {
+      "type": "number",
+      "title": "New Work Items"
+    },
+    "duplicate_count": {
+      "type": "number",
+      "title": "Duplicate Work Items"
+    },
+    "approved_count": {
+      "type": "number",
+      "title": "Approved Work Items"
+    },
+    "duplicate_fingerprints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Duplicate Fingerprints"
+    },
+    "error_message": {
+      "type": "string",
+      "title": "Error Message"
+    }
+  },
+  "required": [
+    "organization_id",
+    "filename"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
