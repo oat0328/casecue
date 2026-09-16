@@ -79,6 +79,20 @@ export default function WorkspacePipeline({ student }) {
 
   return (
     <div>
+      <Card className="p-5 mb-6 border-blue-200 bg-gradient-to-r from-blue-50 to-white">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+          <div className="flex-1">
+            <div className="text-xs font-black uppercase tracking-wider text-blue-700">Ultimate workflow</div>
+            <h3 className="text-xl font-black mt-1">Build My IEP</h3>
+            <p className="text-sm text-slate-600 mt-1">One click re-analyzes all processed source records and builds an evidence-linked IEP draft. Nothing becomes an official goal, service, placement, eligibility, or team decision until reviewed.</p>
+            {autoStage && <div className="mt-2 text-sm flex items-center gap-2 text-blue-800">{autoBusy ? <Loader2 className="h-4 w-4 animate-spin"/> : <CheckCircle2 className="h-4 w-4 text-emerald-600"/>}{autoStage}</div>}
+          </div>
+          <Button onClick={buildMyIep} disabled={autoBusy} className="brand-gradient text-white h-11 px-5">
+            {autoBusy ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Sparkles className="h-4 w-4 mr-2"/>}
+            {autoBusy ? "Building…" : "Build My IEP"}
+          </Button>
+        </div>
+      </Card>
       <div className="flex flex-wrap gap-2 mb-6">
         {STEPS.map((label, i) => (
           <button
