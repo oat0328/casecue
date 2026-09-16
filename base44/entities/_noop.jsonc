@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {},
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    }
+  },
+  "required": [],
+  "name": "_noop"
+}
