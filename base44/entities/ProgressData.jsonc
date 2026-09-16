@@ -62,6 +62,20 @@
     "work_evidence_id": {
       "type": "string",
       "title": "Linked Work Evidence ID"
+    },
+    "record_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "duplicate",
+        "superseded"
+      ],
+      "default": "active",
+      "title": "Record Status"
+    },
+    "duplicate_of_progress_id": {
+      "type": "string",
+      "title": "Duplicate Of Progress Data ID"
     }
   },
   "required": [
