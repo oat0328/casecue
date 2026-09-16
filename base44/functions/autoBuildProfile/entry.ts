@@ -103,6 +103,7 @@ You are the CaseCue Auto-Fill Engine. Extract the student's IEP profile from the
 STRICT EXTRACTION RULES:
 - Use ONLY what is literally in the documents. Never invent, infer, or estimate facts.
 - Quote or closely paraphrase the source wording.
+- eligibility_category: search the ENTIRE IEP, especially eligibility/disability, student information, special education eligibility, evaluation/MDT summary, and services pages. Accept an explicitly documented IDEA disability category even when the page does not use the exact label "Eligibility Category" (for example, "Specific Learning Disability" or "Autism" stated as the student's disability/eligibility). Do not call eligibility missing merely because the exact phrase "eligibility category" is absent.
 - If a field has no information in any document, return an empty string (or empty array) and name the gap in data_gaps.
 - services: list each service exactly as documented (e.g. "Speech — 30 min/week").
 - goals: one entry per ANNUAL IEP GOAL found, with its documented baseline, target, criterion, and measurement method. Do NOT create separate goals from benchmarks, objectives, progress-report rows, criteria, or repeated continuation pages. Benchmarks/objectives belong inside the parent annual goal context. If the source has 4 annual goals with multiple benchmarks, return 4 goals, not the benchmarks as additional goals.
@@ -146,6 +147,37 @@ Return JSON matching the schema.`;
         filename: d.filename,
       }))
     )).filter((x) => x.fact);
+    // Recover an explicitly documented disability/eligibility category from any
+    // IEP page if the summary model missed it. We only accept recognized IDEA
+    // category wording that appears literally in a saved page fact.
+    const eligibilityPatterns = [
+      ['Specific Learning Disability', /\b(?:specific learning disability|learning disability|\bSLD\b)\b/i],
+      ['Autism', /\bautism(?: spectrum disorder)?\b/i],
+      ['Intellectual Disability', /\bintellectual disabilit(?:y|ies)\b/i],
+      ['Emotional Disturbance', /\bemotional disturbance\b/i],
+      ['Other Health Impairment', /\bother health impairment|\bOHI\b/i],
+      ['Speech or Language Impairment', /\bspeech (?:or|and) language impairment|\bspeech\/language impairment\b/i],
+      ['Visual Impairment', /\bvisual impairment\b/i],
+      ['Hearing Impairment', /\bhearing impairment\b/i],
+      ['Deafness', /\bdeafness\b/i],
+      ['Deaf-Blindness', /\bdeaf[- ]blindness\b/i],
+      ['Orthopedic Impairment', /\borthopedic impairment\b/i],
+      ['Multiple Disabilities', /\bmultiple disabilities\b/i],
+      ['Traumatic Brain Injury', /\btraumatic brain injury|\bTBI\b/i],
+      ['Developmental Delay', /\bdevelopmental delay\b/i],
+    ];
+    if (!(extracted.eligibility_category || '').trim()) {
+      const likelyEligibilityFacts = pageFacts.filter((x) => /eligib|disabil|exceptional|special education/i.test(`${x.section} ${x.fact}`));
+      for (const [label, pattern] of eligibilityPatterns) {
+        const hit = likelyEligibilityFacts.find((x) => pattern.test(x.fact));
+        if (hit) {
+          extracted.eligibility_category = label;
+          extracted.confidence = extracted.confidence || {};
+          extracted.confidence.eligibility_category = { level: 'high', flags: [], sources: [`${hit.document_type} - ${hit.filename}, p.${hit.page}`] };
+          break;
+        }
+      }
+    }
     const serviceFacts = pageFacts.filter((x) =>
       /service/i.test(x.section) && /(?:service|minutes?\s*\/\s*(?:week|month)|minutes? per (?:week|month)|specialized instruction)/i.test(x.fact)
     );
@@ -181,6 +213,7 @@ Return JSON matching the schema.`;
     const profileHas = (field) => student[field] != null && String(student[field]).trim() !== '';
     const extractedGoals = Array.isArray(extracted.goals) ? extracted.goals : [];
     const effectiveHas = {
+      eligibility_category: profileHas('eligibility_category') || !!String(extracted.eligibility_category || '').trim(),
       annual_review_due: profileHas('annual_review_due') || !!String(extracted.annual_review_due || '').trim(),
       reevaluation_due: profileHas('reevaluation_due') || !!String(extracted.reevaluation_due || '').trim(),
       iep_date: profileHas('iep_date') || !!String(extracted.iep_date || '').trim(),
@@ -189,6 +222,7 @@ Return JSON matching the schema.`;
     const documentGaps = Array.isArray(extracted.data_gaps) ? [...new Set(extracted.data_gaps.filter(Boolean))] : [];
     const profileGaps = documentGaps.filter((gap) => {
       const text = String(gap || '').toLowerCase();
+      if (effectiveHas.eligibility_category && /eligib|disabilit(?:y|ies).*categor|categor.*disabilit/i.test(text)) return false;
       if (effectiveHas.annual_review_due && /annual.*(?:review|iep).*(?:due|date)|(?:due|date).*annual.*(?:review|iep)/i.test(text)) return false;
       if (effectiveHas.reevaluation_due && /re-?evaluation|reevaluation/i.test(text) && /due|date/i.test(text)) return false;
       if (effectiveHas.iep_date && /iep.*date|date.*iep/i.test(text)) return false;
