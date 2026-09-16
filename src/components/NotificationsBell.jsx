@@ -3,190 +3,22 @@ import { Link } from "react-router-dom";
 import { Bell, AlertTriangle, CalendarDays, Timer, ClipboardList, ListTodo, FileWarning } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import PhoneAlertsSetup from "@/components/PhoneAlertsSetup";
+import { formatDate } from "@/lib/dateUtils";
 import { cn } from "@/lib/utils";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const TONES = {
-  red: "border-red-200 bg-red-50 text-red-800",
-  amber: "border-amber-200 bg-amber-50 text-amber-800",
-  blue: "border-blue-100 bg-blue-50 text-blue-800",
-};
+const TONES = { red: "border-red-200 bg-red-50 text-red-800", amber: "border-amber-200 bg-amber-50 text-amber-800", blue: "border-blue-100 bg-blue-50 text-blue-800" };
 const PRIORITY = { red: 0, amber: 1, blue: 2 };
-
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  d.setHours(0, 0, 0, 0);
-  return Math.round((d - today) / 86400000);
-}
-
-// In-app reminder center: compliance deadlines, upcoming meetings, today's
-// scheduled sessions, data-entry gaps, and open tasks — computed from live data.
+function daysUntil(dateStr) { if (!dateStr) return null; const d = new Date(`${String(dateStr).slice(0,10)}T00:00:00`); if (isNaN(d.getTime())) return null; const today = new Date(); today.setHours(0,0,0,0); d.setHours(0,0,0,0); return Math.round((d-today)/86400000); }
 export default function NotificationsBell() {
-  const [reminders, setReminders] = useState(null);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const [students, meetings, schedule, tasks, sessions] = await Promise.all([
-          base44.entities.Student.list().catch(() => []),
-          base44.entities.Meeting.filter({ status: "scheduled" }).catch(() => []),
-          base44.entities.ScheduleEntry.list().catch(() => []),
-          base44.entities.Task.list().catch(() => []),
-          base44.entities.SessionRecord.list("-date", 200).catch(() => []),
-        ]);
-        if (!alive) return;
-
-        const items = [];
-        const nameOf = (s) => `${s.first_name || ""} ${s.last_name || ""}`.trim();
-
-        (students || []).forEach((s) => {
-          [["annual_review_due", "Annual IEP review"], ["reevaluation_due", "Reevaluation"]].forEach(([field, type]) => {
-            const d = daysUntil(s[field]);
-            if (d === null || d > 30) return;
-            items.push({
-              id: `${s.id}-${field}`,
-              tone: d <= 14 ? "red" : "amber",
-              icon: FileWarning,
-              title: `${nameOf(s)} — ${type}`,
-              sub: d < 0 ? `${Math.abs(d)}d overdue (${s[field]})` : d === 0 ? "Due today" : `${d}d left (${s[field]})`,
-              link: `/students/${s.id}`,
-            });
-          });
-        });
-
-        (meetings || []).forEach((m) => {
-          const d = daysUntil(m.date);
-          if (d === null || d < 0 || d > 7) return;
-          items.push({
-            id: m.id,
-            tone: "blue",
-            icon: CalendarDays,
-            title: m.title || "Meeting",
-            sub: `${m.date}${m.time ? " · " + m.time : ""}`,
-            link: "/meetings",
-          });
-        });
-
-        const today = DAYS[new Date().getDay()];
-        (schedule || []).filter((e) => e.day === today).forEach((e) => {
-          items.push({
-            id: `sch-${e.id}`,
-            tone: "blue",
-            icon: Timer,
-            title: `Today: ${e.group_name}`,
-            sub: `${e.start_time || ""}${e.end_time ? "–" + e.end_time : ""}${e.delivery ? " · " + e.delivery.replace("_", "-") : ""}`,
-            link: "/schedule",
-          });
-        });
-
-        if ((sessions || []).length > 0) {
-          const lastSession = {};
-          (sessions || []).forEach((r) => {
-            if (!lastSession[r.student_id]) lastSession[r.student_id] = r.date;
-          });
-          (students || []).filter((s) => (s.status || "active") === "active").forEach((s) => {
-            const last = lastSession[s.id];
-            if (!last) return;
-            const gapDays = Math.round((Date.now() - new Date(last).getTime()) / 86400000);
-            if (gapDays < 14) return;
-            items.push({
-              id: `gap-${s.id}`,
-              tone: "amber",
-              icon: ClipboardList,
-              title: `${nameOf(s)} — no session logged in ${gapDays} days`,
-              sub: "Log a session to keep progress data current",
-              link: "/session-tracker",
-            });
-          });
-        }
-
-        (tasks || []).filter((t) => t.status !== "done" && t.due_date).forEach((t) => {
-          const d = daysUntil(t.due_date);
-          if (d === null || d > 7) return;
-          items.push({
-            id: `task-${t.id}`,
-            tone: d < 0 ? "red" : "amber",
-            icon: ListTodo,
-            title: t.title,
-            sub: d < 0 ? `${Math.abs(d)}d overdue` : d === 0 ? "Due today" : `Due in ${d}d`,
-            link: "/app",
-          });
-        });
-
-        items.sort((a, b) => PRIORITY[a.tone] - PRIORITY[b.tone]);
-        setReminders(items);
-      } catch {
-        if (alive) setReminders([]);
-      }
-    })();
-    return () => { alive = false; };
-  }, []);
-
-  const count = reminders?.length || 0;
-  const shown = (reminders || []).slice(0, 8);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          className="relative p-2 rounded-lg hover:bg-muted transition-colors"
-          aria-label={count ? `Reminders (${count})` : "Reminders"}
-        >
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          {count > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
-              {count > 9 ? "9+" : count}
-            </span>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 p-0">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-          <AlertTriangle className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold">Reminders</span>
-          {count > 0 && (
-            <span className="ml-auto rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
-              {count}
-            </span>
-          )}
-        </div>
-        <div className="max-h-80 overflow-y-auto p-2">
-          {reminders === null && (
-            <p className="text-sm text-muted-foreground px-3 py-6 text-center">Loading reminders…</p>
-          )}
-          {reminders !== null && count === 0 && (
-            <p className="text-sm text-muted-foreground px-3 py-6 text-center">
-              You're all caught up — no upcoming deadlines or data gaps.
-            </p>
-          )}
-          {shown.map((r) => (
-            <Link
-              key={r.id}
-              to={r.link}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "flex items-start gap-3 rounded-lg border px-3 py-2.5 mb-1.5 transition-colors hover:opacity-80",
-                TONES[r.tone]
-              )}
-            >
-              <r.icon className="h-4 w-4 mt-0.5 shrink-0" />
-              <span className="min-w-0">
-                <span className="block text-sm font-medium truncate">{r.title}</span>
-                <span className="block text-xs opacity-80">{r.sub}</span>
-              </span>
-            </Link>
-          ))}
-          {count > 8 && (
-            <p className="text-xs text-muted-foreground text-center py-1">+ {count - 8} more reminders</p>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+  const [reminders,setReminders]=useState(null); const [open,setOpen]=useState(false);
+  useEffect(()=>{let alive=true;(async()=>{try{const[students,meetings,schedule,tasks,sessions]=await Promise.all([base44.entities.Student.list().catch(()=>[]),base44.entities.Meeting.filter({status:"scheduled"}).catch(()=>[]),base44.entities.ScheduleEntry.list().catch(()=>[]),base44.entities.Task.list().catch(()=>[]),base44.entities.SessionRecord.list("-date",200).catch(()=>[])]);if(!alive)return;const items=[],nameOf=s=>`${s.first_name||""} ${s.last_name||""}`.trim();
+    (students||[]).forEach(s=>[["annual_review_due","Annual IEP review"],["reevaluation_due","Reevaluation"]].forEach(([field,type])=>{const d=daysUntil(s[field]);if(d===null||d>30)return;items.push({id:`${s.id}-${field}`,tone:d<=14?"red":"amber",icon:FileWarning,title:`${nameOf(s)} — ${type}`,sub:d<0?`${Math.abs(d)}d overdue (${formatDate(s[field])})`:d===0?"Due today":`${d}d left (${formatDate(s[field])})`,link:`/students/${s.id}`});}));
+    (meetings||[]).forEach(m=>{const d=daysUntil(m.date);if(d===null||d<0||d>7)return;items.push({id:m.id,tone:"blue",icon:CalendarDays,title:m.title||"Meeting",sub:`${formatDate(m.date)}${m.time?" · "+m.time:""}`,link:"/meetings"});});
+    const today=DAYS[new Date().getDay()];(schedule||[]).filter(e=>e.day===today&&!e.archived).forEach(e=>items.push({id:`sch-${e.id}`,tone:"blue",icon:Timer,title:`Today: ${e.group_name}`,sub:`${e.start_time||""}${e.end_time?"–"+e.end_time:""}${e.delivery?" · "+e.delivery.replace("_","-"):""}`,link:"/schedule"}));
+    if((sessions||[]).length){const lastSession={};(sessions||[]).forEach(r=>{if(!lastSession[r.student_id])lastSession[r.student_id]=r.date;});(students||[]).filter(s=>(s.roster_status||s.status||"active")==="active").forEach(s=>{const last=lastSession[s.id];if(!last)return;const gapDays=Math.round((Date.now()-new Date(last).getTime())/86400000);if(gapDays<14)return;items.push({id:`gap-${s.id}`,tone:"amber",icon:ClipboardList,title:`${nameOf(s)} — no session logged in ${gapDays} days`,sub:"Log a session to keep progress data current",link:"/session-tracker"});});}
+    (tasks||[]).filter(t=>t.status!=="done"&&t.due_date).forEach(t=>{const d=daysUntil(t.due_date);if(d===null||d>7)return;items.push({id:`task-${t.id}`,tone:d<0?"red":"amber",icon:ListTodo,title:t.title,sub:d<0?`${Math.abs(d)}d overdue`:d===0?"Due today":`Due in ${d}d`,link:"/app"});});items.sort((a,b)=>PRIORITY[a.tone]-PRIORITY[b.tone]);setReminders(items);}catch{if(alive)setReminders([])}})();return()=>{alive=false}},[]);
+  const count=reminders?.length||0,shown=(reminders||[]).slice(0,8);
+  return <Popover open={open} onOpenChange={setOpen}><PopoverTrigger asChild><button className="relative p-2 rounded-lg hover:bg-muted transition-colors" aria-label={count?`Reminders (${count})`:"Reminders"}><Bell className="h-5 w-5 text-muted-foreground"/>{count>0&&<span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">{count>9?"9+":count}</span>}</button></PopoverTrigger><PopoverContent align="end" className="w-[calc(100vw-24px)] sm:w-96 p-0"><div className="flex items-center gap-2 px-4 py-3 border-b"><AlertTriangle className="h-4 w-4 text-primary"/><span className="text-sm font-semibold">Reminders</span>{count>0&&<span className="ml-auto rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">{count}</span>}</div><div className="p-2 border-b"><PhoneAlertsSetup compact/></div><div className="max-h-80 overflow-y-auto p-2">{reminders===null&&<p className="text-sm text-muted-foreground px-3 py-6 text-center">Loading reminders…</p>}{reminders!==null&&count===0&&<p className="text-sm text-muted-foreground px-3 py-6 text-center">You're all caught up.</p>}{shown.map(r=><Link key={r.id} to={r.link} onClick={()=>setOpen(false)} className={cn("flex items-start gap-3 rounded-lg border px-3 py-2.5 mb-1.5 hover:opacity-80",TONES[r.tone])}><r.icon className="h-4 w-4 mt-0.5 shrink-0"/><span className="min-w-0"><span className="block text-sm font-medium truncate">{r.title}</span><span className="block text-xs opacity-80">{r.sub}</span></span></Link>)}{count>8&&<p className="text-xs text-muted-foreground text-center py-1">+ {count-8} more reminders</p>}</div></PopoverContent></Popover>;
 }
