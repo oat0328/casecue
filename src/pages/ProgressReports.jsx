@@ -14,6 +14,7 @@ import StudentSelector from "@/components/forms/StudentSelector";
 import AiDisclaimer from "@/components/shared/AiDisclaimer";
 import ExportGate from "@/components/shared/ExportGate";
 import ExportBar from "@/components/shared/ExportBar";
+import WeeklyFamilyUpdate from "@/components/progressReports/WeeklyFamilyUpdate";
 
 function TrendIcon({ trend }) {
   if (trend === null || trend === undefined) return <Minus className="h-4 w-4 text-muted-foreground" />;
@@ -26,6 +27,10 @@ export default function ProgressReports() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const { data: savedReports, refetch: refetchReports } = useAsync(() => base44.entities.SavedReport.list('-created_date', 200), []);
+  const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 500), []);
+  const { data: progress } = useAsync(() => base44.entities.ProgressData.list('-date', 1000), []);
+  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 1000), []);
+  const { data: assignments } = useAsync(() => base44.entities.Assignment.list('-date', 1000), []);
   const [studentId, setStudentId] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
@@ -81,6 +86,8 @@ export default function ProgressReports() {
         </div>
         {s.length === 0 && <p className="text-sm text-muted-foreground mt-3">Add students first to generate reports.</p>}
       </Card>
+
+      {selectedStudent && <div className="mb-6"><WeeklyFamilyUpdate student={selectedStudent} goals={goals || []} progress={progress || []} sessions={sessions || []} assignments={assignments || []} /></div>}
 
       {loading && (
         <Card className="p-10 text-center">
