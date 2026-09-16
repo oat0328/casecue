@@ -22,6 +22,9 @@ const SCHEMA = {
   type: 'object',
   properties: {
     eligibility_category: { type: 'string' },
+    iep_date: { type: 'string' },
+    annual_review_due: { type: 'string' },
+    reevaluation_due: { type: 'string' },
     strengths: { type: 'string' },
     areas_of_need: { type: 'string' },
     present_levels: { type: 'string' },
@@ -102,7 +105,8 @@ STRICT EXTRACTION RULES:
 - Quote or closely paraphrase the source wording.
 - If a field has no information in any document, return an empty string (or empty array) and name the gap in data_gaps.
 - services: list each service exactly as documented (e.g. "Speech — 30 min/week").
-- goals: one entry per IEP goal found, with its documented baseline, target, criterion, and measurement method.
+- goals: one entry per ANNUAL IEP GOAL found, with its documented baseline, target, criterion, and measurement method. Do NOT create separate goals from benchmarks, objectives, progress-report rows, criteria, or repeated continuation pages. Benchmarks/objectives belong inside the parent annual goal context. If the source has 4 annual goals with multiple benchmarks, return 4 goals, not the benchmarks as additional goals.
+- iep_date, annual_review_due, reevaluation_due: return ISO YYYY-MM-DD only when explicitly documented. Keep empty when not documented.
 - progress_information: any progress data, scores, or growth statements found.
 - behavior_information: any behavior, FBA, or BIP content found.
 - parent_concerns: any parent concerns or parent input documented.
@@ -177,6 +181,9 @@ Return JSON matching the schema.`;
     const patch = {};
     const textFields = [
       ['eligibility_category', 'Eligibility / disability category'],
+      ['iep_date', 'IEP date'],
+      ['annual_review_due', 'Annual review due'],
+      ['reevaluation_due', 'Reevaluation due'],
       ['strengths', 'Strengths'],
       ['areas_of_need', 'Areas of need'],
       ['present_levels', 'Present levels'],
