@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, GraduationCap, CalendarClock, Heart, Target, FileText, Wrench, Clock, Mic } from "lucide-react";
+import { Sparkles, GraduationCap, CalendarClock, Heart, Target, FileText, Wrench, Clock, Mic, ExternalLink, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -43,9 +43,13 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
   const { data: workspaces } = useAsync(() => base44.entities.IepWorkspace.filter({ student_id: student.id }, '-created_date', 1), [student?.id]);
   const { data: documents } = useAsync(() => base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 100), [student?.id]);
   const { data: evidence } = useAsync(() => base44.entities.StudentEvidence.filter({ student_id: student.id }, '-date', 100), [student?.id]);
+  const { data: servicePlans } = useAsync(() => base44.entities.ServicePlan.filter({ student_id: student.id }, '-start_date', 100), [student?.id]);
+  const { data: supplementaryAids } = useAsync(() => base44.entities.SupplementaryAid.filter({ student_id: student.id }, '-start_date', 100), [student?.id]);
   const latestAnalysis = workspaces?.[0]?.analysis?.auto_extracted || null;
   const ieps = (documents || []).filter(d => d.document_type === 'IEP');
   const supporting = (documents || []).filter(d => d.document_type !== 'IEP');
+  const currentIep = ieps.find(d=>['current','final'].includes(d.iep_role)) || ieps[0];
+  const openDocument=async d=>{if(!d?.file_url)return;try{const signed=await base44.integrations.Core.CreateFileSignedUrl({file_uri:d.file_url,expires_in:900});window.open(signed.signed_url,'_blank','noopener,noreferrer');}catch{window.open(d.file_url,'_blank','noopener,noreferrer')}};
   return (
     <div className="space-y-6">
       <Card className="p-5 brand-gradient text-white flex flex-col sm:flex-row sm:items-center gap-4">
@@ -89,6 +93,10 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
         ].filter((s) => s.body)}
       />
 
+      <Card className="p-5 border-blue-200 bg-blue-50/40">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><div className="flex items-center gap-2 font-semibold"><BookOpen className="h-4 w-4 text-blue-700"/>Current IEP</div><p className="mt-1 text-sm text-muted-foreground">Keep the actual IEP one click away while you work. Teachers do not need to leave the student record and hunt for the file.</p>{currentIep&&<div className="mt-2 text-xs font-medium">{currentIep.filename}{currentIep.effective_date?` · Effective ${currentIep.effective_date}`:''}</div>}</div><Button disabled={!currentIep?.file_url} onClick={()=>openDocument(currentIep)}><ExternalLink className="mr-2 h-4 w-4"/>Open Full IEP</Button></div>
+      </Card>
+
       <div className="grid gap-4 lg:grid-cols-2">
         {SECTIONS.map(({ label, value, icon: Icon }) => (
           <Card key={value} className="p-5">
@@ -98,15 +106,8 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
             </p>
           </Card>
         ))}
-        <Card className="p-5">
-          <div className="flex items-center gap-2 font-semibold mb-2"><Clock className="h-4 w-4 text-primary" />Services</div>
-          {student.services?.length ? (
-            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-              {student.services.map((s, i) => <li key={i}>{s}</li>)}
-            </ul>
-          ) : <p className="text-sm text-muted-foreground">No services on file.</p>}
-          {student.service_minutes ? <p className="text-sm text-muted-foreground mt-2">{student.service_minutes} service minutes on file.</p> : null}
-        </Card>
+        <Card className="p-5"><div className="flex items-center gap-2 font-semibold mb-2"><Wrench className="h-4 w-4 text-primary"/>Supplementary Aids & Services</div>{supplementaryAids?.length?supplementaryAids.map(a=><div key={a.id} className="mb-2 rounded-xl border p-3 text-sm"><div className="font-semibold">{a.aid_service}</div><div className="text-xs text-muted-foreground">{[a.condition,a.frequency,a.location].filter(Boolean).join(' · ')}</div></div>):<p className="text-sm text-muted-foreground whitespace-pre-wrap">{student.supplementary_aids_services||'No supplementary aids/services on file.'}</p>}</Card>
+        <Card className="p-5"><div className="flex items-center gap-2 font-semibold mb-2"><Clock className="h-4 w-4 text-primary"/>SDI, Services & Minutes</div>{servicePlans?.length?servicePlans.map(s=><div key={s.id} className="mb-2 rounded-xl border p-3 text-sm"><div className="flex justify-between gap-3"><span className="font-semibold">{s.service_type}</span><span className="font-black text-blue-700">{s.minutes?`${s.minutes} min/${s.period||'period'}`:'Minutes need review'}</span></div><div className="text-xs text-muted-foreground">{[s.frequency,s.setting,s.delivery_model,s.provider_role].filter(Boolean).join(' · ')}</div></div>):<><p className="text-sm text-muted-foreground whitespace-pre-wrap">{student.sdi||'No structured SDI/service plan on file yet.'}</p>{student.services?.length?<ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">{student.services.map((s,i)=><li key={i}>{s}</li>)}</ul>:null}{student.service_minutes?<p className="mt-2 text-sm font-semibold">{student.service_minutes} service minutes on file.</p>:null}</>}</Card>
         <Card className="p-5">
           <div className="flex items-center gap-2 font-semibold mb-2"><FileText className="h-4 w-4 text-primary" />Notes</div>
           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{student.notes || "No notes on file."}</p>
