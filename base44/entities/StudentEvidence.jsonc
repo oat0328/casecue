@@ -1,0 +1,128 @@
+{
+  "name": "StudentEvidence",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "iep_cycle_id": {
+      "type": "string",
+      "title": "IEP Cycle ID"
+    },
+    "goal_id": {
+      "type": "string",
+      "title": "Matched Goal ID"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Evidence Date"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "assignment",
+        "ixl",
+        "assessment",
+        "progress_monitoring",
+        "session",
+        "gradebook",
+        "teacher_observation",
+        "document",
+        "other"
+      ],
+      "title": "Source Type"
+    },
+    "source_id": {
+      "type": "string",
+      "title": "Source Record ID"
+    },
+    "source_name": {
+      "type": "string",
+      "title": "Source Name"
+    },
+    "skill_area": {
+      "type": "string",
+      "title": "Skill / Area"
+    },
+    "score": {
+      "type": "number",
+      "title": "Score"
+    },
+    "points_possible": {
+      "type": "number",
+      "title": "Points Possible"
+    },
+    "percentage": {
+      "type": "number",
+      "title": "Percentage"
+    },
+    "qualitative_notes": {
+      "type": "string",
+      "title": "Qualitative Evidence"
+    },
+    "goal_match_status": {
+      "type": "string",
+      "enum": [
+        "unmatched",
+        "suggested",
+        "confirmed",
+        "rejected"
+      ],
+      "default": "unmatched",
+      "title": "Goal Match Status"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
+  },
+  "required": [
+    "student_id",
+    "date",
+    "source_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

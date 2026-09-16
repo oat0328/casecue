@@ -1,0 +1,93 @@
+{
+  "name": "TeacherAccommodationBrief",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "iep_cycle_id": {
+      "type": "string",
+      "title": "IEP Cycle ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Teacher-Friendly Summary"
+    },
+    "accommodations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Accommodations"
+    },
+    "source_document_id": {
+      "type": "string",
+      "title": "Source IEP"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "shared"
+      ],
+      "default": "draft",
+      "title": "Status"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
+  },
+  "required": [
+    "student_id",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

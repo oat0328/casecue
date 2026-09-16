@@ -1,0 +1,88 @@
+{
+  "name": "IepDocumentVersion",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "document_id": {
+      "type": "string",
+      "title": "Document ID"
+    },
+    "iep_cycle_id": {
+      "type": "string",
+      "title": "IEP Cycle ID"
+    },
+    "version_role": {
+      "type": "string",
+      "enum": [
+        "previous",
+        "working_draft",
+        "meeting_draft",
+        "final_signed"
+      ],
+      "title": "Version Role"
+    },
+    "version_label": {
+      "type": "string",
+      "title": "Version Label"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Effective Date"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
+  },
+  "required": [
+    "student_id",
+    "document_id",
+    "version_role"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

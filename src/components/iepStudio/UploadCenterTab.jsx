@@ -63,6 +63,7 @@ const STATUS_LABEL = {
 export default function UploadCenterTab({ student, onProfileBuilt, onNavigate }) {
   const { toast } = useToast();
   const [docType, setDocType] = useState("IEP");
+  const [iepRole, setIepRole] = useState("current");
   const [docs, setDocs] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -99,7 +100,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
       const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
       const record = await base44.entities.Document.create({
         filename: file.name, file_url: file_uri, student_id: student.id,
-        document_type: docType, date_uploaded: new Date().toISOString().slice(0, 10),
+        document_type: docType, iep_role: docType === "IEP" ? iepRole : "supporting", date_uploaded: new Date().toISOString().slice(0, 10),
         extraction_status: "pending", review_status: "none", is_private: true,
       });
       await base44.entities.AuditLog.create({
@@ -236,11 +237,12 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
           {reprocessProgress && !reprocessingAll && <span className="block mt-1 text-xs">Last reprocess: {reprocessProgress.done}/{reprocessProgress.total} completed{reprocessProgress.failed ? ` · ${reprocessProgress.failed} need review` : ""}.</span>}
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="w-full sm:w-72">
-            <Label>Document type</Label>
+          <div className="w-full sm:w-72 space-y-3">
+            <div><Label>Document type</Label>
             <select value={docType} onChange={(e) => setDocType(e.target.value)} className="mt-2 w-full h-11 rounded-lg border border-input bg-background px-3 text-sm">
               {DOC_TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            </select></div>
+            {docType === "IEP" && <div><Label>Which IEP is this?</Label><select value={iepRole} onChange={(e)=>setIepRole(e.target.value)} className="mt-2 w-full h-11 rounded-lg border border-input bg-background px-3 text-sm"><option value="historical">Previous / old IEP</option><option value="current">Current IEP</option><option value="draft">New draft / proposed IEP</option><option value="final">Final signed IEP</option></select><p className="text-xs text-muted-foreground mt-1">Old and new IEPs stay under the same student instead of replacing each other.</p></div>}
           </div>
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -333,6 +335,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
               <SnapshotRow label="Services Found" value={`${profileResult.snapshot?.services_found || 0} service(s)`} />
               <SnapshotRow label="Missing Information" value={(profileResult.snapshot?.missing || []).length ? profileResult.snapshot.missing.join(", ") : "None — documents look complete"} />
               <SnapshotRow label="Documents Reviewed" value={`${(docs || []).filter((d) => d.extraction_status === "processed").length} document(s)`} />
+              <SnapshotRow label="IEP Versions" value={`${(docs || []).filter((d) => d.document_type === "IEP").length} stored under this student`} />
               <SnapshotRow label="Parent Concerns Found" value={profileResult.snapshot?.parent_concerns_found ? "Yes — documented" : "None found"} />
             </div>
           </Card>
