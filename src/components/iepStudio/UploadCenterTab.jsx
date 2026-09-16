@@ -86,6 +86,16 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
   const processDoc = async (id) => {
     try {
       await base44.functions.invoke("processDocument", { document_id: id });
+      const doc = await base44.entities.Document.get(id);
+      if (doc?.document_type === "IEP" && ["current", "final"].includes(doc?.iep_role)) {
+        try {
+          await base44.functions.invoke("verifyStudentDates", { student_id: student.id, document_id: id });
+          toast({ title: "IEP dates checked", description: "CaseCue verified explicit IEP, annual review, reevaluation, and evaluation dates from the uploaded current/final IEP and updated the student record when supported." });
+          onProfileBuilt?.();
+        } catch (e) {
+          toast({ title: "IEP dates need review", description: e?.response?.data?.error || e.message, variant: "destructive" });
+        }
+      }
       await load();
     } catch { /* status refresh will surface failures */ }
   };
