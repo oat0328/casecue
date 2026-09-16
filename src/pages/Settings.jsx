@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical, Archive } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Settings as SettingsIcon, User, Building2, Sparkles, Lock, Download, Trash2, CreditCard, Bell, Save, Loader2, Check, FlaskConical, Archive, Plug } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
@@ -21,6 +22,7 @@ import BillingCard from "@/components/settings/BillingCard";
 
 export default function Settings() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { user, checkUserAuth } = useAuth();
   const { data: students, refetch: refetchStudents } = useAsync(() => base44.entities.Student.list('-updated_date', 500), []);
   const { data: retentionRows, refetch: refetchRetention } = useAsync(() => base44.entities.RetentionPolicy.list('-updated_date', 5), []);
@@ -138,7 +140,7 @@ export default function Settings() {
 
   return (
     <div>
-      <PageHeader title="Settings" subtitle="Manage your profile, organization, processing, privacy, and subscription." icon={SettingsIcon} />
+      <PageHeader title="Settings" subtitle="Manage your profile, organization, integrations, processing, privacy, and subscription." icon={SettingsIcon} actions={<Button variant="outline" onClick={()=>navigate('/integrations')}><Plug className="h-4 w-4 mr-2"/>Integrations</Button>} />
 
       <Tabs defaultValue="profile">
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
