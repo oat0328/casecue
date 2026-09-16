@@ -52,19 +52,19 @@ export default function Privacy() {
       </Section>
 
       <Section heading="2. How we use information">
-        <p>We use your information to operate and maintain your account, provide the Service's features (including AI-assisted drafting and review), process payments, provide support, and improve the product. We do not sell your information or your students' information.</p>
+        <p>We use your information to operate and maintain your account, provide the Service's features (including system-assisted drafting and review), process payments, provide support, and improve the product. We do not sell your information or your students' information.</p>
       </Section>
 
       <Section heading="3. Student data and FERPA-oriented practices">
         <p>Student information you enter is stored so you can manage your caseload. Each teacher's records are isolated from other users' records through row-level access controls — other CaseCue users cannot see your students. You confirm you are authorized by your school, district, or organization to process this data. If your school directs you to stop using the Service, you can export or request deletion of your data at any time from Settings.</p>
       </Section>
 
-      <Section heading="4. AI processing">
-        <p>When you use AI features (Ask CaseCue, IEP Studio drafting, IEP Review), the minimum necessary student context is sent to our AI provider to generate a response. AI output is a draft for educator review. Full-document AI processing is off by default and only enabled by you.</p>
+      <Section heading="4. automated processing">
+        <p>When you use assisted features (Ask CaseCue, IEP Studio drafting, IEP Review), the minimum necessary student context is sent to our processing provider to generate a response. generated output is a draft for educator review. Full-document automated processing is off by default and only enabled by you.</p>
       </Section>
 
       <Section heading="5. Sharing with processors">
-        <p>We share data only with service providers that help us run the Service: a payment processor (for billing) and an AI provider (for AI features). These providers process data on our behalf and cannot use it for their own purposes.</p>
+        <p>We share data only with service providers that help us run the Service: a payment processor (for billing) and an processing provider (for assisted features). These providers process data on our behalf and cannot use it for their own purposes.</p>
       </Section>
 
       <Section heading="6. Security">

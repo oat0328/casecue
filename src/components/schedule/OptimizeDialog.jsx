@@ -11,7 +11,7 @@ const TYPE_META = {
   improvement: { label: "Improvement", icon: Lightbulb, style: "bg-amber-100 text-amber-700" },
 };
 
-// Optimize Groups: AI recommendations for combinations, pairings, blocks, and
+// Optimize Groups: system suggestions for combinations, pairings, blocks, and
 // improvements. Advisory only — the teacher decides what to apply.
 export default function OptimizeDialog({ open, onOpenChange }) {
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ export default function OptimizeDialog({ open, onOpenChange }) {
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" /> Optimize Groups
           </DialogTitle>
-          <DialogDescription>AI suggestions for group combinations, student pairings, and schedule improvements. You stay in control.</DialogDescription>
+          <DialogDescription>System suggestions for group combinations, student pairings, and schedule improvements. You stay in control.</DialogDescription>
         </DialogHeader>
 
         {loading && (

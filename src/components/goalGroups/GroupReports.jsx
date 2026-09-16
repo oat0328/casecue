@@ -153,7 +153,7 @@ export default function GroupReports({
               ))}
             </div>
           </div>
-          <AiDisclaimer extra="This report is data-derived, not AI-written — but educator review is still required before sharing." />
+          <AiDisclaimer extra="This report is data-derived, not system-written — but educator review is still required before sharing." />
         </Card>
       )}
     </div>

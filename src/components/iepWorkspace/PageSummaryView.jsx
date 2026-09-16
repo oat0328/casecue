@@ -65,7 +65,7 @@ export default function PageSummaryView({ workspace, student, save }) {
       <Card className="p-5">
         <h3 className="font-semibold">Page-by-page IEP summary</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Every page summarized in plain language — including blank, signature, and procedural pages, labeled accurately. Summaries are AI-assisted drafts for educator review.
+          Every page summarized in plain language — including blank, signature, and procedural pages, labeled accurately. Summaries are system-assisted drafts for educator review.
         </p>
 
         {!summaries ? (

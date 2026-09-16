@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export default function LessonStepper({ step, onStep, reachedStep }) {
   const STEPS = [
     { n: 1, label: "Upload & Analyze", hint: "Assignment in, verified analysis out" },
-    { n: 2, label: "Build & Customize", hint: "AI draft, goals, videos, resources" },
+    { n: 2, label: "Build & Customize", hint: "generated draft, goals, videos, resources" },
     { n: 3, label: "Review & Export", hint: "Approve, export, connect" },
   ];
   return (

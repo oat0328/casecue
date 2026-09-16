@@ -74,11 +74,11 @@ export default function Trust() {
 
           <Section heading="AI safeguards & the human review model">
             <p>Every AI feature in CaseCue follows one rule: CaseCue assists, educators decide, students come first. Concretely:</p>
-            <p>• AI drafts are always labeled as drafts requiring educator review — they are never presented as final, compliant, or certified.</p>
-            <p>• AI never invents student facts. When information is missing or conflicting, CaseCue says so instead of guessing.</p>
+            <p>• generated drafts are always labeled as drafts requiring educator review — they are never presented as final, compliant, or certified.</p>
+            <p>• The system never invents student facts. When information is missing or conflicting, CaseCue says so instead of guessing.</p>
             <p>• Extracted data shows its source — which document, which page, and a confidence rating — so you can verify everything.</p>
-            <p>• AI never makes eligibility or placement decisions, and never replaces the IEP team&apos;s judgment.</p>
-            <p>• Exporting AI-generated content requires an explicit acknowledgement that the content is AI-generated and human review is required.</p>
+            <p>• The system never makes eligibility or placement decisions, and never replaces the IEP team&apos;s judgment.</p>
+            <p>• Exporting system-assisted content requires an explicit acknowledgement that the content is system-generated and human review is required.</p>
           </Section>
 
           <Section heading="Data ownership">
@@ -93,7 +93,7 @@ export default function Trust() {
             <p>• Never claims legal compliance or FERPA certification.</p>
             <p>• Never makes eligibility, placement, or discipline decisions.</p>
             <p>• Never invents student data, statistics, or progress.</p>
-            <p>• Never presents AI output as final without educator review.</p>
+            <p>• Never presents generated output as final without educator review.</p>
           </Section>
 
           <Section heading="Questions or concerns">

@@ -140,7 +140,7 @@ export default function SubPlans() {
                   {!meta.has_materials && (
                     <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
                       <p className="text-sm text-amber-800 flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 shrink-0" /> No lesson materials found.</p>
-                      <p className="text-xs text-amber-700 mt-1">The assignments in this plan are AI Generated emergency activities based on your students' grades and goal areas.</p>
+                      <p className="text-xs text-amber-700 mt-1">The assignments in this plan are System Generated emergency activities based on your students' grades and goal areas.</p>
                       <Button size="sm" variant="outline" className="mt-2" onClick={() => generate("emergency")} disabled={generating}>
                         <Sparkles className="h-3.5 w-3.5 mr-1" /> Generate Assignment
                       </Button>

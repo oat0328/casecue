@@ -1,6 +1,6 @@
 import React from "react";
 
-// Standardized AI confidence indicators shown on extracted data.
+// Standardized Source confidence indicators shown on extracted data.
 const LEVELS = {
   high: { label: "High confidence", cls: "bg-emerald-50 border-emerald-200 text-emerald-700" },
   medium: { label: "Medium confidence", cls: "bg-amber-50 border-amber-200 text-amber-700" },

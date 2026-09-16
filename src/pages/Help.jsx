@@ -82,7 +82,7 @@ const GUIDES = [
     title: "Copilot Guide",
     body: (
       <>
-        <p>CaseCue Copilot is your AI case manager, available from the Ask CaseCue button on every page.</p>
+        <p>CaseCue Copilot is your case workspace assistant, available from the Ask CaseCue button on every page.</p>
         <p><strong className="text-foreground">Try asking:</strong> "Summarize this student", "Build a new IEP", "Review an MDT", "Generate SDI", "Create goals", "Draft amendments", "Review accommodations", "Analyze a BIP", "Create meeting notes", "Create a parent summary", or "Prepare me for this meeting".</p>
         <p>Copilot uses your uploaded documents as context and cites its sources — it never invents student facts, and every output is a draft you review.</p>
       </>

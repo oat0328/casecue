@@ -30,7 +30,7 @@ export default function AnalysisReview({ analysis, onChange, onContinue }) {
     <Card className="p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
         <h3 className="font-semibold">Assignment analysis — correct anything, then continue</h3>
-        <span className="text-xs rounded-full border border-primary/30 bg-primary/5 text-primary px-3 py-1">AI analysis · teacher-correctable</span>
+        <span className="text-xs rounded-full border border-primary/30 bg-primary/5 text-primary px-3 py-1">Document analysis · teacher-correctable</span>
       </div>
       <p className="text-xs text-muted-foreground mb-5">Anything you fix here is what the lesson plan is built from. Missing information stays “Not detected”.</p>
 
@@ -100,7 +100,7 @@ export default function AnalysisReview({ analysis, onChange, onContinue }) {
 
       <div className="mt-6 flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
         <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-        <span>Analysis is AI-generated from the uploaded source only. Verify the detected skills and standards before building the lesson.</span>
+        <span>Analysis is system-generated from the uploaded source only. Verify the detected skills and standards before building the lesson.</span>
       </div>
     </Card>
   );

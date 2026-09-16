@@ -5,7 +5,7 @@ import { useAsync } from "@/lib/useAsync";
 import { Card } from "@/components/ui/cards";
 
 // IEP Readiness score: shows a case manager at a glance what's complete and
-// what's missing before an IEP meeting. Computed from real records — no AI.
+// what's missing before an IEP meeting. Computed from real records — data-derived.
 export default function ProfileReadiness({ student, analysis = null, evidence = null }) {
   const { data: goals } = useAsync(() => base44.entities.Goal.filter({ student_id: student.id }, '-created_date', 100), [student?.id]);
   const { data: progress } = useAsync(() => base44.entities.ProgressData.filter({ student_id: student.id }, '-date', 200), [student?.id]);

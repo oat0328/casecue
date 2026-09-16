@@ -217,7 +217,7 @@ export function monthCompliance(sessions, students, range) {
   };
 }
 
-// ---- Report builders (data-derived, no AI) -----------------------------------
+// ---- Report builders (data-derived, data-derived) -----------------------------------
 
 function goalStats(list) {
   const sorted = [...list].sort((a, b) =>

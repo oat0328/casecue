@@ -60,7 +60,7 @@ ${accommodationBlock}
 SECTIONS — return each key exactly, as a string:
 ${sectionInstructions}
 
-CRITICAL ACCOMMODATION RULE: the accommodations_note field MUST open with "Only use accommodations documented in the student's IEP." AI-suggested supports are ideas for the IEP team to review against the IEP — never present them as IEP-mandated, and never change a student's IEP, goal, service, placement, or accommodation.
+CRITICAL ACCOMMODATION RULE: the accommodations_note field MUST open with "Only use accommodations documented in the student's IEP." Suggested supports are ideas for the IEP team to review against the IEP — never present them as IEP-mandated, and never change a student's IEP, goal, service, placement, or accommodation.
 
 End the iep_objective with the note: "Draft — Educator/IEP Team Review Required."
 

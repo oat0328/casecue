@@ -22,7 +22,7 @@ const REPORT_TYPES = [
 
 const BANNER = "This report is generated directly from your recorded session data — no information has been invented. Educator review required before distribution.";
 
-// Generates progress reports straight from Session Tracker data (no AI, no
+// Generates progress reports straight from Session Tracker data (data-derived, no
 // invention): student progress, IEP progress, parent-friendly, and service
 // delivery. Every output has the full export bar.
 export default function SessionReportGenerator({ sessions, students, goals, onSaved }) {
@@ -135,7 +135,7 @@ export default function SessionReportGenerator({ sessions, students, goals, onSa
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
-            <AiDisclaimer extra="This report is data-derived, not AI-written — but educator review is still required before sharing." />
+            <AiDisclaimer extra="This report is data-derived, not system-written — but educator review is still required before sharing." />
             <Button size="sm" variant="outline" onClick={handleSave} disabled={saving}>
               <Loader2 className={`h-3.5 w-3.5 mr-1 ${saving ? "animate-spin" : "hidden"}`} />
               Save to Report History

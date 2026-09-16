@@ -75,7 +75,7 @@ export default function AssignmentCenter() {
       key: r.id,
       name: a.activity_title || "Goal-aligned assignment",
       context: r.student_name ? `for ${r.student_name} — ${r.content?.goal_area || "goal"}` : "",
-      source: "AI Generated — Goal Assignment",
+      source: "System Generated — Goal Assignment",
       sections: [
         { heading: "Activity / Passage", body: a.activity },
         { heading: "Practice Items", body: (a.items || []).map((it, i) => `${i + 1}. ${it.question}`).join("\n") },

@@ -284,7 +284,7 @@ export default function Landing() {
           <Lock className="h-10 w-10 text-primary mx-auto mb-4" />
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Privacy & trust, built in.</h2>
           <p className="mt-4 text-muted-foreground">Designed with FERPA-focused privacy and security controls for authorized education use. Private document storage, row-level access, audit logging, minimum-necessary AI, and data export & deletion.</p>
-          <p className="mt-4 text-xs text-muted-foreground italic">CaseCue does not make legal or IEP-team decisions. All AI output is a draft requiring educator review.</p>
+          <p className="mt-4 text-xs text-muted-foreground italic">CaseCue does not make legal or IEP-team decisions. All generated output is a draft requiring educator review.</p>
         </div>
       </Section>
 
@@ -353,7 +353,7 @@ export default function Landing() {
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-10">Frequently asked questions</h2>
           <Accordion type="single" collapsible>
             {[
-              { q: "Does CaseCue write legal IEPs?", a: "No. CaseCue drafts IEP sections to support your work, but every AI output is labeled 'Draft — Educator/IEP Team Review Required.' CaseCue never makes legal or IEP-team decisions." },
+              { q: "Does CaseCue write legal IEPs?", a: "No. CaseCue drafts IEP sections to support your work, but every generated output is labeled 'Draft — Educator/IEP Team Review Required.' CaseCue never makes legal or IEP-team decisions." },
               { q: "Is CaseCue FERPA certified?", a: "CaseCue is designed with FERPA-focused privacy and security controls for authorized education use. We do not claim certification. You confirm authorization before uploading student data." },
               { q: "Will AI invent facts about my students?", a: "No. Ask CaseCue only uses your verified records. If information is missing, it tells you it doesn't have enough to answer." },
               { q: "Can I export or delete my data?", a: "Yes. Settings includes one-click data export and a data deletion request — you stay in control of your information at all times." },

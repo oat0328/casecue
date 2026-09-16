@@ -12,7 +12,7 @@ import logExportAction from "@/lib/exportAudit";
 // DOCX, Excel, CSV, (optional JSON), Email, Share. Same pattern as the
 // Session Tracker exports. `gated` routes downloads through the AI-content
 // acknowledgement gate — leave false for data-derived reports (per the
-// Session Tracker precedent); use true whenever AI-generated content is inside.
+// Session Tracker precedent); use true whenever system-assisted content is inside.
 export default function DataExportBar({
   title,
   subtitle,

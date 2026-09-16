@@ -70,7 +70,7 @@ Return JSON matching the schema.`;
       document_name: document.filename,
       pages,
       generated_at: new Date().toISOString(),
-      disclaimer: 'Page summaries are AI-assisted drafts for educator review — verify against the original document.',
+      disclaimer: 'Page summaries are system-assisted drafts for educator review — verify against the original document.',
     };
 
     if (body.workspace_id) {

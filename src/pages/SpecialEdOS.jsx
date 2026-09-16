@@ -23,7 +23,7 @@ export default function SpecialEdOS(){
  const nextAction=nextMeeting?`Prepare ${nextMeeting.title||'your next student meeting'}${nextMeeting.date?` for ${nextMeeting.date}`:''}.`:openTasks?`Review ${openTasks} open caseload task${openTasks===1?'':'s'}.`:'Choose a student and review what needs attention next.';
  return <div className="max-w-6xl mx-auto space-y-7 pb-10">
    <section className="pt-3 md:pt-7">
-     <div className="text-xs font-black uppercase tracking-[.2em] text-blue-700">IEP Suite Studio AI™</div>
+     <div className="text-xs font-black uppercase tracking-[.2em] text-blue-700">IEP Suite Studio™</div>
      <h1 className="text-3xl md:text-5xl font-black tracking-tight text-slate-950 mt-2">What do you need to do today?</h1>
      <p className="text-slate-600 mt-3 max-w-2xl text-base md:text-lg">Three simple workflows on the surface. Your IEP, compliance, progress, service and document tools stay connected underneath.</p>
    </section>

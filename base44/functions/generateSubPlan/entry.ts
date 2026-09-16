@@ -6,7 +6,7 @@ import { CASECUE_SYSTEM_PROMPT } from "../../shared/casecueContext.ts";
 // resource links, teacher-uploaded assignments, saved goal assignments, and
 // IEP goal areas. Returns the sources used and the
 // information CaseCue does not have — the plan never invents school-specific
-// facts, and when no lesson materials exist the sub plan includes AI-generated
+// facts, and when no lesson materials exist the sub plan includes system-generated
 // emergency assignments labeled as such.
 export default async function(req) {
   try {
@@ -79,7 +79,7 @@ export default async function(req) {
     }
 
     if (goalAssignments.length) {
-      lines.push('\nGOAL-ALIGNED ASSIGNMENTS (AI Generated, saved by the teacher — include these in full):');
+      lines.push('\nGOAL-ALIGNED ASSIGNMENTS (System Generated, saved by the teacher — include these in full):');
       goalAssignments.forEach((r) => {
         const a = r.content?.assignment || {};
         lines.push(`- "${a.activity_title || 'Goal assignment'}" for ${r.student_name || 'student'} (${r.content?.goal_area || 'goal'}):`);
@@ -108,7 +108,7 @@ export default async function(req) {
     const hasRealWork = lessonsWithMaterials.length || materials.length || goalAssignments.length;
     const assignmentRule = hasRealWork
       ? "Use ONLY the assignments listed in the data below (Lesson Studio materials, teacher uploads, and saved goal assignments). Include each assignment's full directions and answer key where provided, label each with its source exactly as given, and do not invent new assignments."
-      : "No assignments exist anywhere in the account. Instead, generate practical, printable emergency activities based on the students' grade levels and the goal areas on file, and label each one 'AI Generated.' Make them usable by a substitute with no preparation.";
+      : "No assignments exist anywhere in the account. Instead, generate practical, printable emergency activities based on the students' grade levels and the goal areas on file, and label each one 'System Generated.' Make them usable by a substitute with no preparation.";
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}
 

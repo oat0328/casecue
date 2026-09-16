@@ -9,7 +9,7 @@ const labelCls = "block text-sm font-medium mb-2";
 
 // Editable rendering of the full structured plan: header fields, every section,
 // and the accommodations block with verified IEP accommodations kept separate
-// from AI suggestions.
+// from System suggestions.
 export default function PlanEditor({ plan, onChange, verifiedAccommodations = [] }) {
   if (!plan) return null;
   const set = (key, value) => onChange({ ...plan, [key]: value });
@@ -67,12 +67,12 @@ export default function PlanEditor({ plan, onChange, verifiedAccommodations = []
 
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm font-semibold text-amber-800 flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4" /> AI-suggested accommodations
+            <ShieldCheck className="h-4 w-4" /> Suggested accommodations
           </p>
           <p className="text-xs text-amber-700 mt-1 mb-3">
             <strong>Only use accommodations documented in the student's IEP.</strong> The suggestions below are ideas to review against the IEP — never IEP-mandated.
           </p>
-          <label className={labelCls} htmlFor={`pe-${SPECIAL_ACCOMMODATION_KEY}`}>AI-suggested accommodations (editable)</label>
+          <label className={labelCls} htmlFor={`pe-${SPECIAL_ACCOMMODATION_KEY}`}>Suggested accommodations (editable)</label>
           <textarea id={`pe-${SPECIAL_ACCOMMODATION_KEY}`} className={textCls} rows={4}
             value={plan[SPECIAL_ACCOMMODATION_KEY] || ""} onChange={(e) => set(SPECIAL_ACCOMMODATION_KEY, e.target.value)} />
         </div>

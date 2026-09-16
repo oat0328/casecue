@@ -32,7 +32,7 @@ const DOC_TYPES = [
 
 const BUSY = ["pending", "queued", "processing", "ocr_processing"];
 
-// Extracted fields that carry AI confidence + source information.
+// Extracted fields that carry Source confidence + source information.
 const CONFIDENCE_FIELDS = [
   ["eligibility_category", "Eligibility"],
   ["strengths", "Strengths"],
@@ -58,7 +58,7 @@ const STATUS_LABEL = {
 };
 
 // IEP Studio Upload Center: drag-and-drop upload → automatic document
-// processing → automatic AI analysis → automatic student profile pre-fill.
+// processing → automatic Document analysis → automatic student profile pre-fill.
 // The teacher's only job is to review and edit the result.
 export default function UploadCenterTab({ student, onProfileBuilt, onNavigate }) {
   const { toast } = useToast();
@@ -320,7 +320,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
         </div>
       </Card>
 
-      {/* After AI analysis: snapshot, readiness, one-click actions */}
+      {/* After Document analysis: snapshot, readiness, one-click actions */}
       {profileResult && !profileResult.error && (
         <>
           <Card className="p-5 sm:p-6">

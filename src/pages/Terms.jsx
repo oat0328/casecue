@@ -41,7 +41,7 @@ export default function Terms() {
     <LegalShell title="Terms of Service" updated="September 2026">
       <p>
         These Terms of Service ("Terms") govern your use of CaseCue, a web application for special
-        education caseload management, AI-assisted IEP drafting support, and progress monitoring
+        education caseload management, system-assisted IEP drafting support, and progress monitoring
         (the "Service"). By creating an account or using the Service, you agree to these Terms.
       </p>
 
@@ -57,8 +57,8 @@ export default function Terms() {
         <p>You are solely responsible for ensuring that you are authorized by your school, district, or educational organization — and permitted under applicable law, including FERPA and state student-privacy law — to enter, store, and process any student information you provide through the Service. You confirm this authorization in the app before uploading student data.</p>
       </Section>
 
-      <Section heading="4. AI-generated content">
-        <p>CaseCue provides AI-assisted drafting, review, and question-answering tools. All AI output is a <strong>draft</strong> and requires review by you and, where applicable, the IEP team before use. CaseCue does not make legal, compliance, or educational-placement decisions, and its output does not constitute legal advice. You remain responsible for the accuracy, appropriateness, and compliance of anything you adopt from AI output.</p>
+      <Section heading="4. system-assisted content">
+        <p>CaseCue provides system-assisted drafting, review, and question-answering tools. All generated output is a <strong>draft</strong> and requires review by you and, where applicable, the IEP team before use. CaseCue does not make legal, compliance, or educational-placement decisions, and its output does not constitute legal advice. You remain responsible for the accuracy, appropriateness, and compliance of anything you adopt from generated output.</p>
       </Section>
 
       <Section heading="5. Acceptable use">
@@ -70,7 +70,7 @@ export default function Terms() {
       </Section>
 
       <Section heading="7. Third-party services">
-        <p>The Service relies on third-party providers for payment processing and AI processing. Those providers process data only as needed to deliver their function, and are bound by their own privacy and security obligations.</p>
+        <p>The Service relies on third-party providers for payment processing and automated processing. Those providers process data only as needed to deliver their function, and are bound by their own privacy and security obligations.</p>
       </Section>
 
       <Section heading="8. Disclaimers and limitation of liability">

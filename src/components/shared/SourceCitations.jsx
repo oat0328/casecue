@@ -5,7 +5,7 @@ import { useAsync } from "@/lib/useAsync";
 import { cn } from "@/lib/utils";
 
 // On-page source transparency: states exactly which uploaded documents and
-// verified record fields an AI output was built from, without leaving the page.
+// verified record fields an generated output was built from, without leaving the page.
 export default function SourceCitations({ studentId, className }) {
   const { data: docs } = useAsync(
     () =>

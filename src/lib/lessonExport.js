@@ -66,7 +66,7 @@ export function buildLessonHtml(lesson, students, goals) {
   <h2>IEP Goals Addressed</h2><ul>${goalLabels(lesson, goals).map((g) => `<li>${esc(g)}</li>`).join("") || "<li>No specific goals attached.</li>"}</ul>
   ${sections.join("")}
   <h2>Accommodations</h2>
-  <div class="ftext"><strong>Only use accommodations documented in the student's IEP.</strong> AI suggestions below are ideas to review against the IEP.</div>
+  <div class="ftext"><strong>Only use accommodations documented in the student's IEP.</strong> System suggestions below are ideas to review against the IEP.</div>
   <div class="ftext" style="margin-top:8px">${esc(acc) || "<em>—</em>"}</div>
   ${videos ? `<h2>Approved Instructional Videos</h2><ul>${videos}</ul>` : ""}
   ${resources ? `<h2>Saved Resource Links</h2><ul>${resources}</ul>` : ""}
@@ -74,7 +74,7 @@ export function buildLessonHtml(lesson, students, goals) {
   <div class="banner ${lesson.status === "approved" ? "approved" : ""}">
     ${lesson.status === "approved"
       ? "Teacher-reviewed and approved in CaseCue. Generated with AI assistance — CaseCue never guarantees IEP compliance."
-      : "Draft — Teacher Review Required. AI-generated content must be reviewed by the educator before use. CaseCue never guarantees IEP compliance."}
+      : "Draft — Teacher Review Required. system-assisted content must be reviewed by the educator before use. CaseCue never guarantees IEP compliance."}
   </div>
   </body></html>`;
 }
@@ -107,7 +107,7 @@ export function printLesson(lesson, students, goals) {
 // --- PDF-safe text -----------------------------------------------------------
 // The base-14 Helvetica font renders only WinAnsi characters; anything else
 // (arrows, math symbols, typographic punctuation variants) shows up as gaps
-// or inconsistent glyphs in the exported PDF. Normalize AI-generated text to
+// or inconsistent glyphs in the exported PDF. Normalize system-generated text to
 // clean ASCII before it reaches jsPDF.
 const pdfSafe = (t) => String(t == null ? "" : t)
   .replace(/\r\n?/g, "\n")
@@ -295,7 +295,7 @@ export function exportLessonPdf(lesson, students, goals) {
   });
 
   writeHeading("Accommodations");
-  writeBlock("Only use accommodations documented in the student's IEP. AI suggestions are ideas to review against the IEP.", 9, true, 4);
+  writeBlock("Only use accommodations documented in the student's IEP. System suggestions are ideas to review against the IEP.", 9, true, 4);
   writeBlock(plan[SPECIAL_ACCOMMODATION_KEY] || "—", 10, false, 8);
 
   if ((lesson.videos || []).length) {

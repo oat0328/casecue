@@ -1,5 +1,5 @@
 // Deterministic, data-derived caseload report builders shared by the Reports
-// hub and the Data Center. No AI, no invented numbers: every figure comes from
+// hub and the Data Center. Data-derived, no invented numbers: every figure comes from
 // recorded data, and missing data is stated as missing.
 
 import { textSection, tableSection, sheetFromTable, safeFilename } from "@/lib/reportExport";

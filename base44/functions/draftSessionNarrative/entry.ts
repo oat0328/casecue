@@ -50,7 +50,7 @@ Return JSON matching the schema.`;
     });
 
     const parsed = typeof result === 'object' ? result : JSON.parse(result);
-    return Response.json({ narrative: parsed.narrative, note: 'AI-assisted draft — educator review required before saving.' });
+    return Response.json({ narrative: parsed.narrative, note: 'system-assisted draft — educator review required before saving.' });
   } catch (error) {
     console.error('draftSessionNarrative failed:', error);
     return Response.json({ error: error.message }, { status: 500 });

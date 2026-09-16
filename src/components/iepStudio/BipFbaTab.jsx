@@ -20,7 +20,7 @@ const Field = ({ title, children }) => (
   </div>
 );
 
-// Tab 7 — BIP & FBA: upload behavior documents and run AI behavior analysis
+// Tab 7 — BIP & FBA: upload behavior documents and run behavior analysis
 // and BIP drafting, all inside IEP Studio.
 export default function BipFbaTab({ student }) {
   const { toast } = useToast();
@@ -130,7 +130,7 @@ export default function BipFbaTab({ student }) {
       </Card>
 
       <Card className="p-5">
-        <h3 className="font-semibold mb-1">AI behavior analysis & BIP drafting</h3>
+        <h3 className="font-semibold mb-1">behavior analysis & BIP drafting</h3>
         <p className="text-sm text-muted-foreground mb-4">CaseCue reads every uploaded FBA, BIP, behavior log, and discipline report — never inventing incidents that aren't documented.</p>
         <Label className="text-sm">Teacher context / notes (optional)</Label>
         <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. behavior has escalated at recess since October" className="mt-1.5" />

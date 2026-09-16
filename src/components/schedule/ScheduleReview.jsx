@@ -12,7 +12,7 @@ const CONF_STYLE = {
   none: "bg-rose-100 text-rose-700",
 };
 
-// AI Schedule Review: everything found in the uploaded schedule, shown before
+// Schedule Review: everything found in the uploaded schedule, shown before
 // saving. The teacher can exclude groups, fix student matches, and see
 // conflicts — nothing is invented, and nothing saves without approval.
 export default function ScheduleReview({ analysis, students, saving, onSave, onCancel }) {

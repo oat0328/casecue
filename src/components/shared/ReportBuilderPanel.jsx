@@ -203,7 +203,7 @@ export default function ReportBuilderPanel({
             ))}
           </div>
           <div className="mt-4">
-            <AiDisclaimer extra="This report is data-derived, not AI-written — but educator review is still required before sharing." />
+            <AiDisclaimer extra="This report is data-derived, not system-written — but educator review is still required before sharing." />
           </div>
         </Card>
       )}

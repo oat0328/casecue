@@ -5,13 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 const ACKNOWLEDGEMENTS = [
-  "I understand this document contains AI-generated content.",
+  "I understand this document contains system-assisted content.",
   "I have reviewed the content for accuracy and completeness.",
   "I understand all educational decisions remain the responsibility of qualified educational personnel.",
   "I understand this document may require further review prior to official use.",
 ];
 
-// Required acknowledgement gate before any AI-assisted document can be
+// Required acknowledgement gate before any system-assisted document can be
 // downloaded or exported. Wrap the existing export button as a child — its
 // onClick is replaced by this gate, and onExport runs only after all four
 // acknowledgements are checked:
@@ -45,7 +45,7 @@ export default function ExportGate({ documentName, onExport, children, label = "
           <DialogHeader>
             <DialogTitle>Before exporting{documentName ? ` — ${documentName}` : ""}</DialogTitle>
             <DialogDescription>
-              This document contains AI-generated content. Please acknowledge each statement to continue with the export.
+              This document contains system-assisted content. Please acknowledge each statement to continue with the export.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-1">

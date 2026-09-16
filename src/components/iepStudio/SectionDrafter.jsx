@@ -37,7 +37,7 @@ const SAVE_TARGET = {
   meeting_notes: null, parent_communication: null,
 };
 
-// Single-section AI drafter: pick a section, add instructions, draft, edit, and
+// Single-section generated drafter: pick a section, add instructions, draft, edit, and
 // save to the student profile. Lives inside IEP Studio.
 export default function SectionDrafter({ student, sections = SECTIONS }) {
   const { toast } = useToast();

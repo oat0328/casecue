@@ -99,7 +99,7 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
         quantitative: form.quantitative, tags: form.tags, notes: form.qualitative,
       });
       set({ qualitative: res.data.narrative });
-      toast({ title: "AI-assisted draft added below — review before saving", description: "CaseCue drafts only from what you entered." });
+      toast({ title: "system-assisted draft added below — review before saving", description: "CaseCue drafts only from what you entered." });
     } catch (e) {
       toast({ title: "Could not draft narrative", description: e?.response?.data?.error || e.message, variant: "destructive" });
     } finally { setDrafting(false); }
@@ -283,7 +283,7 @@ export default function SessionForm({ mode = "quick", students, goals, defaultSt
             <textarea className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" rows={4}
               value={form.qualitative} onChange={(e) => set({ qualitative: e.target.value })}
               placeholder="Engagement, behavior, independence, prompting, accuracy, strategy effectiveness, strengths, difficulties, response to instruction, next instructional step…" />
-            <p className="text-xs text-muted-foreground mt-1">AI-assisted language is a draft from your entries — review and edit before saving.</p>
+            <p className="text-xs text-muted-foreground mt-1">system-assisted language is a draft from your entries — review and edit before saving.</p>
           </div>
 
           <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/40 p-4">

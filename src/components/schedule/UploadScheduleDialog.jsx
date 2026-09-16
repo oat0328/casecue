@@ -8,7 +8,7 @@ import ScheduleReview from "./ScheduleReview";
 
 const ACCEPT = ".pdf,.xlsx,.xls,.csv,.docx,.doc,.png,.jpg,.jpeg,.webp";
 
-// Upload Schedule → AI analysis → review → save. The teacher reviews every
+// Upload Schedule → Document analysis → review → save. The teacher reviews every
 // extraction before anything is written.
 export default function UploadScheduleDialog({ open, onOpenChange, students, onSaved }) {
   const { toast } = useToast();

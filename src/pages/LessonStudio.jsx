@@ -21,8 +21,8 @@ import { cn } from "@/lib/utils";
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
-// Lesson Studio — AI Assignment-to-Lesson-Plan generator: upload & analyze,
-// build & customize, review & export. All AI output is a draft the teacher
+// Lesson Studio — Assignment-to-Lesson-Plan generator: upload & analyze,
+// build & customize, review & export. All generated output is a draft the teacher
 // reviews, edits, and approves before anything is saved or exported.
 export default function LessonStudio() {
   const { user } = useAuth();
@@ -204,7 +204,7 @@ export default function LessonStudio() {
     <div>
       <PageHeader
         title="Lesson Studio"
-        subtitle="Turn any assignment into a complete, IEP-aligned lesson plan — upload and analyze, build and customize, then review and export. Every AI output is a draft you review before anything is saved."
+        subtitle="Turn any assignment into a complete, IEP-aligned lesson plan — upload and analyze, build and customize, then review and export. Every generated output is a draft you review before anything is saved."
         icon={BookOpen}
         actions={
           <div className="flex gap-2">
@@ -330,7 +330,7 @@ export default function LessonStudio() {
               <PlanEditor plan={plan} onChange={setPlan} verifiedAccommodations={verifiedAccommodations} />
               <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                <span><strong>Draft — Teacher Review Required.</strong> AI-generated content must be reviewed by the educator before use with students. CaseCue never guarantees IEP compliance.</span>
+                <span><strong>Draft — Teacher Review Required.</strong> system-assisted content must be reviewed by the educator before use with students. CaseCue never guarantees IEP compliance.</span>
               </div>
             </div>
           )}

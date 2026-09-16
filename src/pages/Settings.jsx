@@ -92,7 +92,7 @@ export default function Settings() {
 
   const saveAi = async () => {
     setSavingAi(true);
-    try { await base44.auth.updateMe({ ai_settings: aiSettings }); toast({ title: "AI settings saved" }); }
+    try { await base44.auth.updateMe({ ai_settings: aiSettings }); toast({ title: "processing settings saved" }); }
     catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
     finally { setSavingAi(false); }
   };
@@ -144,7 +144,7 @@ export default function Settings() {
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
           <TabsTrigger value="profile"><User className="h-4 w-4 mr-1.5" /> Profile</TabsTrigger>
           <TabsTrigger value="organization"><Building2 className="h-4 w-4 mr-1.5" /> Organization</TabsTrigger>
-          <TabsTrigger value="ai"><Sparkles className="h-4 w-4 mr-1.5" /> AI Settings</TabsTrigger>
+          <TabsTrigger value="ai"><Sparkles className="h-4 w-4 mr-1.5" /> Processing Settings</TabsTrigger>
           <TabsTrigger value="privacy"><Lock className="h-4 w-4 mr-1.5" /> Privacy</TabsTrigger>
           <TabsTrigger value="retention"><Archive className="h-4 w-4 mr-1.5" /> Data Retention</TabsTrigger>
           <TabsTrigger value="export"><Download className="h-4 w-4 mr-1.5" /> Data Export</TabsTrigger>
@@ -172,24 +172,24 @@ export default function Settings() {
         </Card></TabsContent>
 
         <TabsContent value="ai"><Card className="p-6 max-w-lg">
-          <h3 className="font-semibold mb-4">AI provider</h3>
+          <h3 className="font-semibold mb-4">processing provider</h3>
           <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" value={aiSettings.ai_provider} onChange={(e) => setAiSettings({ ...aiSettings, ai_provider: e.target.value })}>
             {["OpenAI", "Anthropic", "Gemini", "Disabled"].map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
           <div className="mt-5 flex items-center justify-between rounded-xl border border-border p-4">
-            <div><div className="font-medium text-sm">Minimum Necessary AI</div><div className="text-xs text-muted-foreground">Only send the minimum context needed to answer. On by default.</div></div>
+            <div><div className="font-medium text-sm">Minimum Necessary Processing</div><div className="text-xs text-muted-foreground">Only send the minimum context needed to answer. On by default.</div></div>
             <Switch checked={aiSettings.minimum_necessary} onCheckedChange={(v) => setAiSettings({ ...aiSettings, minimum_necessary: v })} />
           </div>
           <div className="mt-3 flex items-center justify-between rounded-xl border border-border p-4">
-            <div><div className="font-medium text-sm">Full Document AI</div><div className="text-xs text-muted-foreground">Off by default. Enable only if your organization has authorized it.</div></div>
+            <div><div className="font-medium text-sm">Full Document Processing</div><div className="text-xs text-muted-foreground">Off by default. Enable only if your organization has authorized it.</div></div>
             <Switch checked={aiSettings.full_document_ai} onCheckedChange={(v) => setAiSettings({ ...aiSettings, full_document_ai: v })} />
           </div>
           {aiSettings.full_document_ai && (
             <div className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-              Full-document AI processing may send the full selected document to the configured AI provider. Only enable this if your organization has authorized this processing.
+              Full-document automated processing may send the full selected document to the configured processing provider. Only enable this if your organization has authorized this processing.
             </div>
           )}
-          <Button onClick={saveAi} disabled={savingAi} className="brand-gradient text-white mt-5"><Save className="h-4 w-4 mr-1" /> {savingAi ? "Saving…" : "Save AI settings"}</Button>
+          <Button onClick={saveAi} disabled={savingAi} className="brand-gradient text-white mt-5"><Save className="h-4 w-4 mr-1" /> {savingAi ? "Saving…" : "Save processing settings"}</Button>
         </Card></TabsContent>
 
         <TabsContent value="privacy"><Card className="p-6 max-w-lg">

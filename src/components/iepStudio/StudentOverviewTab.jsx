@@ -94,7 +94,7 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
           <Card key={value} className="p-5">
             <div className="flex items-center gap-2 font-semibold mb-2"><Icon className="h-4 w-4 text-primary" />{label}</div>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {student[value] || "Not on file — generate it in the AI Summary or Section Drafter tabs, or upload documents and let CaseCue extract it."}
+              {student[value] || "Not on file — generate it in the Student Summary or Section Drafter tabs, or upload documents and let CaseCue extract it."}
             </p>
           </Card>
         ))}

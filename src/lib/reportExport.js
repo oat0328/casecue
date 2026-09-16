@@ -1,7 +1,7 @@
 import { base44 } from "@/api/base44Client";
 
 // Shared primitives for the reporting/export system used by Gradebook, Goal
-// Groups, Data Center, and Reports. All reports are data-derived (no AI) —
+// Groups, Data Center, and Reports. All reports are data-derived (data-derived) —
 // missing data is stated as missing, never invented.
 
 // ---- File downloads ----

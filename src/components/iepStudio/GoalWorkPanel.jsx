@@ -25,7 +25,7 @@ export default function GoalWorkPanel({ assignment, goal, student, onSave }) {
       <div>
         <h4 className="font-semibold">{a.activity_title || "Goal-aligned assignment"}</h4>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Skill focus: {a.skill_focus || "—"} · Source: AI Generated — aligned to the verified IEP goal.
+          Skill focus: {a.skill_focus || "—"} · Source: System Generated — aligned to the verified IEP goal.
         </p>
       </div>
 
@@ -33,7 +33,7 @@ export default function GoalWorkPanel({ assignment, goal, student, onSave }) {
         title={a.activity_title || "Goal-aligned assignment"}
         subtitle={`${student?.first_name || ""} ${student?.last_name || ""} — Goal: ${goal?.goal_area || "IEP goal"}`.trim()}
         filename={`Assignment-${student?.first_name || "Student"}-${goal?.goal_area || "Goal"}`}
-        banner="DRAFT — Educator Review Required. AI-generated materials aligned to the student's IEP goal."
+        banner="DRAFT — Educator Review Required. system-assisted materials aligned to the student's IEP goal."
         gated
         onSave={onSave}
         sections={sections}

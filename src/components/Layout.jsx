@@ -47,7 +47,7 @@ export default function Layout() {
       <div className="h-[72px] px-5 flex items-center border-b border-white/10">
         <Link to="/command-center" className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-sky-400 flex items-center justify-center shadow-lg shadow-blue-950/30"><Sparkles className="h-5 w-5"/></div>
-          <div><div className="text-[15px] font-black tracking-tight leading-tight">IEP Suite Studio AI™</div><div className="text-[9px] uppercase tracking-[.15em] text-slate-400 font-semibold">Special Education OS</div></div>
+          <div><div className="text-[15px] font-black tracking-tight leading-tight">IEP Suite Studio™</div><div className="text-[9px] uppercase tracking-[.15em] text-slate-400 font-semibold">Special Education OS</div></div>
         </Link>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">

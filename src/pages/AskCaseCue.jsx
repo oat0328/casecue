@@ -132,7 +132,7 @@ export default function AskCaseCue() {
                     {m.content}
                   </div>
                   {m.role === "assistant" && (
-                    <p className="text-[11px] text-muted-foreground mt-1 px-1">AI-generated draft. Educator and IEP-team review required.</p>
+                    <p className="text-[11px] text-muted-foreground mt-1 px-1">System-assisted draft. Educator and IEP-team review required.</p>
                   )}
                 </div>
               </div>

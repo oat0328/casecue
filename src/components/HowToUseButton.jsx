@@ -22,7 +22,7 @@ export default function HowToUseButton() {
         <div className="space-y-4 text-sm text-muted-foreground">
           <div>
             <p className="font-semibold text-foreground">Purpose</p>
-            <p>CaseCue is your SPED operating system: upload student records once, let AI analyze them, then draft IEPs, track goals, plan behavior supports, and prepare meetings — all from IEP Studio.</p>
+            <p>CaseCue is your SPED operating system: upload student records once, let the system analyze them, then draft IEPs, track goals, plan behavior supports, and prepare meetings — all from IEP Studio.</p>
           </div>
           <div>
             <p className="font-semibold text-foreground">Workflow</p>
@@ -38,7 +38,7 @@ export default function HowToUseButton() {
             <p className="font-semibold text-foreground">Best practices</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Start with the current IEP and latest evaluation.</li>
-              <li>Always review AI drafts — you and the IEP team approve every decision.</li>
+              <li>Always review generated drafts — you and the IEP team approve every decision.</li>
               <li>Log progress data weekly so graphs, reports, and readiness scores stay current.</li>
             </ul>
           </div>

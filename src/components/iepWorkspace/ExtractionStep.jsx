@@ -16,7 +16,7 @@ export default function ExtractionStep({ workspace, save, onDrafted }) {
   const errMsg = (e) => e?.response?.data?.error || e.message;
 
   const analyze = async () => {
-    if (analysis && !window.confirm("Documents haven't changed since the last extraction — re-analyzing spends AI credits. Continue?")) return;
+    if (analysis && !window.confirm("Documents haven't changed since the last extraction — re-analyzing spends processing credits. Continue?")) return;
     setBusy("analyze"); setError("");
     try {
       const res = await base44.functions.invoke("iepWorkspaceAnalyze", { workspace_id: workspace.id });

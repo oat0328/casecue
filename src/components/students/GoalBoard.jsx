@@ -32,7 +32,7 @@ function Sparkline({ points }) {
 
 // Visual goal board for a student: per-goal status (Goal Met / On Track /
 // Making Progress / Needs Intervention / At Risk) computed from progress data,
-// plus a one-click AI progress analysis.
+// plus a one-click progress analysis.
 export default function GoalBoard({ student, goals, progress }) {
   const { toast } = useToast();
   const [analysis, setAnalysis] = useState(null);
@@ -128,7 +128,7 @@ export default function GoalBoard({ student, goals, progress }) {
       <div className="mt-5">
         <Button onClick={runAnalysis} disabled={running} variant="outline" className="gap-2 border-primary/20 text-primary hover:bg-primary/5">
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          {running ? "Analyzing…" : "Run AI progress analysis"}
+          {running ? "Analyzing…" : "Run progress analysis"}
         </Button>
       </div>
 

@@ -41,7 +41,7 @@ export default function DocumentStep({ student, onContinue }) {
 
     // Duplicate-processing prevention
     if ((documents || []).some((d) => d.filename === file.name)) {
-      toast({ title: "Already uploaded", description: `"${file.name}" is already on file — duplicates are skipped so AI credits aren't re-spent.`, variant: "destructive" });
+      toast({ title: "Already uploaded", description: `"${file.name}" is already on file — duplicates are skipped so processing credits aren't re-spent.`, variant: "destructive" });
       e.target.value = "";
       return;
     }
