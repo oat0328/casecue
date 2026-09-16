@@ -1,4 +1,4 @@
-import React,{useMemo}from'react';
+import React,{useEffect,useMemo,useState}from'react';
 import{useNavigate}from'react-router-dom';
 import{Activity,AlertTriangle,ArrowRight,BookOpen,CalendarDays,CheckCircle2,Clock3,FileText,MessageCircle,PlayCircle,Sparkles,Target,Users}from'lucide-react';
 import{base44}from'@/api/base44Client';
@@ -9,7 +9,8 @@ import{useAuth}from'@/lib/AuthContext';
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const mins=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):-1};
 const fmt=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);if(!m)return v||'';const h=Number(m[1]);return`${h%12||12}:${m[2]} ${h>=12?'PM':'AM'}`};
-const iso=d=>d.toISOString().slice(0,10);
+const iso=d=>{const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`};
+const displayDate=v=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v||'')))return v||'—';const[y,m,d]=String(v).split('-');return`${m}/${d}/${y}`};
 const age=date=>date?Math.floor((Date.now()-new Date(`${date}T00:00:00`).getTime())/86400000):9999;
 const until=date=>date?Math.ceil((new Date(`${date}T00:00:00`).getTime()-new Date(new Date().setHours(0,0,0,0)).getTime())/86400000):null;
 const full=s=>`${s?.first_name||''} ${s?.last_name||''}`.replace(/\s+/g,' ').trim();
@@ -21,13 +22,15 @@ function Panel({title,kicker,icon:Icon,action,children,className=''}){return <se
 function Pill({children,tone='slate'}){const t={slate:'bg-slate-100 text-slate-700',blue:'bg-blue-50 text-blue-700',amber:'bg-amber-50 text-amber-800',red:'bg-red-50 text-red-700',green:'bg-emerald-50 text-emerald-700'}[tone];return <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${t}`}>{children}</span>}
 
 export default function CommandCenter(){
- const navigate=useNavigate(),{user}=useAuth(),now=new Date(),todayName=DAYS[now.getDay()],todayISO=iso(now),nowM=now.getHours()*60+now.getMinutes();
+ const navigate=useNavigate(),{user}=useAuth();
+ const[now,setNow]=useState(()=>new Date());
+ const todayName=DAYS[now.getDay()],todayISO=iso(now),nowM=now.getHours()*60+now.getMinutes();
  const{data:students}=useAsync(()=>base44.entities.Student.list('-updated_date',300),[]);
  const{data:goals}=useAsync(()=>base44.entities.Goal.list('-updated_date',700),[]);
  const{data:progress}=useAsync(()=>base44.entities.ProgressData.list('-date',1000),[]);
  const{data:sessions}=useAsync(()=>base44.entities.SessionRecord.list('-date',1000),[]);
  const{data:evidence}=useAsync(()=>base44.entities.StudentEvidence.list('-date',800),[]);
- const{data:schedule}=useAsync(()=>base44.entities.ScheduleEntry.list('-day',800),[]);
+ const{data:schedule,refetch:refetchSchedule}=useAsync(()=>base44.entities.ScheduleEntry.list('-day',800),[]);
  const{data:meetings}=useAsync(()=>base44.entities.Meeting.list('date',200),[]);
  const{data:tasks}=useAsync(()=>base44.entities.Task.list('due_date',300),[]);
  const{data:docs}=useAsync(()=>base44.entities.Document.list('-date_uploaded',500),[]);
@@ -36,13 +39,16 @@ export default function CommandCenter(){
  const{data:evaluations}=useAsync(()=>base44.entities.EvaluationRecord.list('due_date',300),[]);
  const{data:family}=useAsync(()=>base44.entities.FamilyRequest.list('-submitted_at',200),[]);
  const{data:lessons}=useAsync(()=>base44.entities.Lesson.list('-date',300),[]);
+ useEffect(()=>{const timer=setInterval(()=>{setNow(new Date());refetchSchedule();},60000);return()=>clearInterval(timer)},[refetchSchedule]);
  const roster=useMemo(()=>(students||[]).filter(s=>s.status==='active'&&s.roster_status!=='archived'),[students]);
  const sm=useMemo(()=>new Map(roster.map(s=>[s.id,s])),[roster]);
  const rosterIds=useMemo(()=>new Set(roster.map(s=>s.id)),[roster]);
  const scoped=x=>(x||[]).filter(r=>!r.student_id||rosterIds.has(r.student_id));
- const day=useMemo(()=>(schedule||[]).filter(e=>!e.archived&&e.day===todayName&&(e.student_ids||[]).every(id=>!id||rosterIds.has(id))).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||''))),[schedule,todayName,rosterIds]);
+ const day=useMemo(()=>(schedule||[]).filter(e=>!e.archived&&e.day===todayName).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||''))),[schedule,todayName]);
  const teaching=day.filter(isInstruction),live=day.find(e=>mins(e.start_time)<=nowM&&mins(e.end_time)>nowM),liveTeaching=live&&isInstruction(live)?live:null,next=teaching.find(e=>mins(e.start_time)>nowM),focus=liveTeaching||next||null;
- const focusStudents=(focus?.student_ids||[]).map(id=>sm.get(id)).filter(Boolean);
+ const visibleStudents=e=>(e?.student_ids||[]).map(id=>sm.get(id)).filter(Boolean);
+ const focusStudents=visibleStudents(focus);
+ const pullDetails=(focus?.student_pull_details||[]).filter(x=>!x.student_id||rosterIds.has(x.student_id));
  const focusGoals=(goals||[]).filter(g=>g.status==='active'&&focusStudents.some(s=>s.id===g.student_id));
  const focusAreas=[...new Set(focusGoals.map(g=>g.goal_area).filter(Boolean))].slice(0,4);
  const goalFreshness=focusStudents.map(s=>({student:s,last:latestDate(s.id,null,progress,sessions,evidence)}));
