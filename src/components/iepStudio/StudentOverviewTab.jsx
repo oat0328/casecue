@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Sparkles, GraduationCap, CalendarClock, Heart, Target, FileText, Wrench, Clock, Mic } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
+import { base44 } from "@/api/base44Client";
+import { useAsync } from "@/lib/useAsync";
 import ProfileReadiness from "@/components/iepStudio/ProfileReadiness";
 import ExportBar from "@/components/shared/ExportBar";
 import StudentBinder from "@/components/shared/StudentBinder";
@@ -38,6 +40,8 @@ const COPILOT_PROMPTS = [
 
 // Tab 1 — Student Overview: the verified record at a glance.
 export default function StudentOverviewTab({ student, onRunMeetingMode }) {
+  const { data: workspaces } = useAsync(() => base44.entities.IepWorkspace.filter({ student_id: student.id }, '-created_date', 1), [student?.id]);
+  const latestAnalysis = workspaces?.[0]?.analysis?.auto_extracted || null;
   return (
     <div className="space-y-6">
       <Card className="p-5 brand-gradient text-white flex flex-col sm:flex-row sm:items-center gap-4">
@@ -105,14 +109,14 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
         </Card>
       </div>
 
-      <ProfileReadiness student={student} />
+      <ProfileReadiness student={student} analysis={latestAnalysis} />
 
       <StudentBinder student={student} />
 
       <Card className="p-5 brand-gradient text-white">
         <div className="flex items-center gap-2 font-semibold mb-1"><Sparkles className="h-4 w-4" />CaseCue Copilot</div>
         <p className="text-sm text-white/85 mb-3">
-          Your AI case manager. Ask CaseCue Copilot to build an IEP, review an MDT, summarize records, create goals, generate SDI, draft amendments, analyze a BIP, or write meeting notes — it uses every uploaded document as context.
+          Your case workspace assistant. Ask CaseCue to build an IEP draft, review an MDT, summarize records, create goals, generate SDI, draft amendments, analyze a BIP, or write meeting notes — it uses the student's uploaded records as context.
         </p>
         <div className="flex flex-wrap gap-1.5 mb-4">
           {COPILOT_PROMPTS.map((t) => (
