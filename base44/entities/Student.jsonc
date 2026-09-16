@@ -84,6 +84,14 @@
       "type": "string",
       "title": "Accommodations"
     },
+    "supplementary_aids_services": {
+      "type": "string",
+      "title": "Supplementary Aids and Services"
+    },
+    "sdi": {
+      "type": "string",
+      "title": "Specially Designed Instruction"
+    },
     "services": {
       "type": "array",
       "items": {
