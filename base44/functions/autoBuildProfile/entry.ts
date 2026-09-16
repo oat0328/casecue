@@ -257,7 +257,9 @@ Return JSON matching the schema.`;
       eligibility: extracted.eligibility_category || '',
       strengths_found: listCount(extracted.strengths),
       needs_found: listCount(extracted.areas_of_need),
-      goals_found: Math.max(Array.isArray(extracted.goals) ? extracted.goals.length : 0, (existingGoals || []).length + goalsCreated),
+      // Report actual annual Goal records, not every benchmark/objective the extraction
+      // model may have mentioned. This keeps the snapshot aligned with the student's ledger.
+      goals_found: (existingGoals || []).length + goalsCreated,
       accommodations_found: listCount(extracted.accommodations),
       services_found: Array.isArray(extracted.services) ? extracted.services.length : 0,
       behavior_supports_found: !!extracted.behavior_information,
