@@ -14,7 +14,7 @@ import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
 import MobileQuickCapture from "@/components/MobileQuickCapture";
 
-const PRIMARY = ["/app","/students","/iep-studio","/session-tracker","/data-center","/progress-monitoring-day","/meetings","/lesson-studio","/reports"];
+const PRIMARY = ["/command-center","/app","/students","/iep-studio","/session-tracker","/data-center","/progress-monitoring-day","/meetings","/lesson-studio","/reports"];
 const SECONDARY = ["/meeting-navigator","/iep-review","/schedule","/sub-plans","/gradebook","/goal-groups","/progress-reports","/evidence-vault","/resource-hub","/practice-lab","/ask-casecue","/help","/configuration","/settings"];
 
 export default function Layout() {
@@ -45,9 +45,9 @@ export default function Layout() {
   const Sidebar = () => (
     <div className="flex h-full flex-col bg-[#08111f] text-white">
       <div className="h-[72px] px-5 flex items-center border-b border-white/10">
-        <Link to="/app" className="flex items-center gap-3">
+        <Link to="/command-center" className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-sky-400 flex items-center justify-center shadow-lg shadow-blue-950/30"><Sparkles className="h-5 w-5"/></div>
-          <div><div className="text-lg font-black tracking-tight">CaseCue</div><div className="text-[10px] uppercase tracking-[.18em] text-slate-400 font-semibold">Plan. Teach. Track. Prove.</div></div>
+          <div><div className="text-[15px] font-black tracking-tight leading-tight">IEP Suite Studio AI™</div><div className="text-[9px] uppercase tracking-[.15em] text-slate-400 font-semibold">Special Education OS</div></div>
         </Link>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
@@ -69,12 +69,12 @@ export default function Layout() {
       <div className="lg:pl-[272px] min-h-screen">
         <header className="sticky top-0 z-30 h-[72px] border-b border-slate-200/80 bg-white/90 backdrop-blur-xl px-4 sm:px-6 lg:px-8 flex items-center gap-3">
           <button aria-label="Open menu" className="lg:hidden p-2 rounded-lg hover:bg-slate-100" onClick={()=>setOpen(true)}><Menu className="h-5 w-5"/></button>
-          <button onClick={()=>navigate('/ask-casecue')} className="hidden md:flex items-center gap-2 h-10 w-full max-w-md rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 hover:border-blue-200 hover:bg-white transition-colors"><Search className="h-4 w-4"/><span>Ask CaseCue or search your workspace…</span></button>
+          <button onClick={()=>navigate('/ask-casecue')} className="hidden md:flex items-center gap-2 h-10 w-full max-w-md rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 hover:border-blue-200 hover:bg-white transition-colors"><Search className="h-4 w-4"/><span>Ask your Special Education workspace…</span></button>
           <div className="flex-1"/>
           <NotificationsBell/>
           <Button size="sm" className="hidden sm:flex bg-slate-950 hover:bg-slate-800 text-white" onClick={()=>navigate('/ask-casecue')}><Sparkles className="h-4 w-4 mr-2"/>Ask CaseCue</Button>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild><button className="flex items-center gap-2 rounded-xl border border-transparent px-1.5 py-1 hover:bg-slate-100"><Avatar className="h-9 w-9"><AvatarFallback className="bg-gradient-to-br from-blue-500 to-sky-400 text-white text-xs font-bold">{initials}</AvatarFallback></Avatar><div className="hidden sm:block text-left"><div className="max-w-[150px] truncate text-sm font-semibold text-slate-900">{user?.full_name || user?.email}</div><div className="text-[11px] text-slate-500">CaseCue workspace</div></div><ChevronDown className="h-4 w-4 text-slate-400"/></button></DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild><button className="flex items-center gap-2 rounded-xl border border-transparent px-1.5 py-1 hover:bg-slate-100"><Avatar className="h-9 w-9"><AvatarFallback className="bg-gradient-to-br from-blue-500 to-sky-400 text-white text-xs font-bold">{initials}</AvatarFallback></Avatar><div className="hidden sm:block text-left"><div className="max-w-[150px] truncate text-sm font-semibold text-slate-900">{user?.full_name || user?.email}</div><div className="text-[11px] text-slate-500">IEP Suite workspace</div></div><ChevronDown className="h-4 w-4 text-slate-400"/></button></DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60"><DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel><DropdownMenuSeparator/><DropdownMenuItem onClick={()=>navigate('/settings')}>Settings</DropdownMenuItem><DropdownMenuItem onClick={()=>navigate('/')}>Public website</DropdownMenuItem><DropdownMenuSeparator/><DropdownMenuItem onClick={handleLogout} className="text-rose-600 focus:text-rose-600"><LogOut className="h-4 w-4 mr-2"/>Sign out</DropdownMenuItem></DropdownMenuContent>
           </DropdownMenu>
         </header>
