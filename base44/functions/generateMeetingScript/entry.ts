@@ -149,6 +149,23 @@ Return JSON matching the schema.`;
     });
 
     const data = typeof result === 'object' ? result : JSON.parse(result);
+    // Refuse to present a partial page walk-through as complete.
+    const expectedPages = Array.isArray(pageSummarySource?.pages) ? pageSummarySource.pages.length : 0;
+    const generatedPages = Array.isArray(data.page_flow) ? data.page_flow.length : 0;
+    if (expectedPages && generatedPages !== expectedPages) {
+      return Response.json({ error: `Meeting facilitator generated ${generatedPages} of ${expectedPages} pages. Please regenerate; CaseCue will not label a partial walkthrough complete.` }, { status: 422 });
+    }
+    await base44.asServiceRole.entities.MeetingFacilitatorRun.create({
+      student_id: student.id,
+      meeting_id: meetings?.[0]?.id || '',
+      document_id: pageSummarySource?.document_id || '',
+      generated_at: new Date().toISOString(),
+      page_count: generatedPages,
+      opening: data.opening || '',
+      page_flow: data.page_flow || [],
+      closing: data.closing || '',
+      status: 'draft'
+    });
     return Response.json(data);
   } catch (error) {
     console.error('generateMeetingScript failed:', error);

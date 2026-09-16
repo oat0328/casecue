@@ -1,0 +1,46 @@
+{
+  "name": "MeetingFacilitatorRun",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string"
+    },
+    "meeting_id": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "page_count": {
+      "type": "number"
+    },
+    "opening": {
+      "type": "string"
+    },
+    "page_flow": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "closing": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "student_id",
+    "generated_at",
+    "page_flow"
+  ]
+}
