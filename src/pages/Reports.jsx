@@ -10,6 +10,7 @@ import { REPORT_DEFINITIONS } from "@/lib/caseReports";
 import { textSection, sheetFromTable, safeFilename } from "@/lib/reportExport";
 import { DATA_BANNER } from "@/components/shared/ReportBuilderPanel";
 import CaseloadProgressPacket from "@/components/reports/CaseloadProgressPacket";
+import { formatDate } from '@/lib/dateUtils';
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -40,11 +41,11 @@ export default function Reports() {
 
   const cards = [
     { label: "Caseload status", value: reports.total, sub: "active students", icon: Users, items: s.slice(0, 5).map((st) => `${st.first_name} ${st.last_name} — Grade ${st.grade || "?"}`) },
-    { label: "Upcoming IEPs (60 days)", value: reports.iepsDue.length, icon: CalendarClock, items: reports.iepsDue.map((st) => `${st.first_name} ${st.last_name} — ${st.annual_review_due}`) },
-    { label: "Reevaluations (90 days)", value: reports.reevalsDue.length, icon: FileWarning, items: reports.reevalsDue.map((st) => `${st.first_name} ${st.last_name} — ${st.reevaluation_due}`) },
+    { label: "Upcoming IEPs (60 days)", value: reports.iepsDue.length, icon: CalendarClock, items: reports.iepsDue.map((st) => `${st.first_name} ${st.last_name} — ${formatDate(st.annual_review_due)}`) },
+    { label: "Reevaluations (90 days)", value: reports.reevalsDue.length, icon: FileWarning, items: reports.reevalsDue.map((st) => `${st.first_name} ${st.last_name} — ${formatDate(st.reevaluation_due)}`) },
     { label: "Missing data (14 days)", value: reports.missingData.length, icon: AlertCircle, items: reports.missingData.map((st) => `${st.first_name} ${st.last_name}`) },
     { label: "Goals missing baseline", value: reports.goalsNoBaseline.length, icon: Target, items: reports.goalsNoBaseline.slice(0, 5).map((g) => g.goal_text?.slice(0, 60)) },
-    { label: "Upcoming meetings", value: reports.upcomingMeetings.length, icon: TrendingUp, items: reports.upcomingMeetings.slice(0, 5).map((m) => `${m.title} — ${m.date}`) },
+    { label: "Upcoming meetings", value: reports.upcomingMeetings.length, icon: TrendingUp, items: reports.upcomingMeetings.slice(0, 5).map((m) => `${m.title} — ${formatDate(m.date)}`) },
   ];
 
   const snapshotSections = useMemo(

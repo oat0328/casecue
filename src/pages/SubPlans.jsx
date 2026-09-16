@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import ExportBar from "@/components/shared/ExportBar";
 import AssignmentCenter from "@/components/subPlans/AssignmentCenter";
 import TodaysAssignmentPacket from "@/components/subPlans/TodaysAssignmentPacket";
+import { formatDate } from '@/lib/dateUtils';
 
 const PLAN_TYPES = [
   { value: "daily", label: "Daily Sub Plan" },
@@ -161,7 +162,7 @@ export default function SubPlans() {
       <h3 className="font-semibold mt-8 mb-3">Saved sub plans</h3>
       <div className="space-y-2">
         {(plans || []).map((p) => (
-          <Card key={p.id} className="p-4"><div className="flex justify-between"><div className="font-medium">{p.title}</div><span className="text-xs text-muted-foreground">{p.date}</span></div><div className="text-xs text-muted-foreground mt-0.5">{PLAN_TYPES.find((x) => x.value === p.plan_type)?.label}</div></Card>
+          <Card key={p.id} className="p-4"><div className="flex justify-between"><div className="font-medium">{p.title}</div><span className="text-xs text-muted-foreground">{formatDate(p.date)}</span></div><div className="text-xs text-muted-foreground mt-0.5">{PLAN_TYPES.find((x) => x.value === p.plan_type)?.label}</div></Card>
         ))}
         {(plans || []).length === 0 && <p className="text-muted-foreground text-sm">No saved sub plans yet.</p>}
       </div>

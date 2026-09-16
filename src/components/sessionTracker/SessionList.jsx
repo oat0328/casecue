@@ -1,6 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/cards";
 import { STATUS_LABEL } from "@/lib/sessionCalc";
+import { formatDate } from '@/lib/dateUtils';
 
 const STATUS_CHIP = {
   completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -24,7 +25,7 @@ export default function SessionList({ sessions, goals }) {
           <Card key={s.id} className="p-3 sm:p-4">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div className="min-w-0">
-                <div className="text-sm font-medium">{s.date} {s.start_time ? `· ${s.start_time}` : ""}</div>
+                <div className="text-sm font-medium">{formatDate(s.date)} {s.start_time ? `· ${s.start_time}` : ""}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">
                   {s.service_type?.replace(/_/g, " ")} · {s.delivery === "group" ? "Group" : "Individual"} · {s.setting === "push_in" ? "Push-in" : "Pull-out"}
                   {goal ? ` · Goal: ${goal.goal_area || "—"}` : ""}{s.activity ? ` · ${s.activity}` : ""}

@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { formatDate } from '@/lib/dateUtils';
 
 const DOC_TYPES = [
   "IEP", "Evaluation", "Eligibility Report", "Progress Report", "Assessment Report", "Report Card",
@@ -141,7 +142,7 @@ export default function DocumentStep({ student, onContinue }) {
                 <div className="h-9 w-9 rounded-lg brand-gradient-soft flex items-center justify-center shrink-0"><FileText className="h-4 w-4 text-primary" /></div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium truncate">{d.filename}</div>
-                  <div className="text-xs text-muted-foreground">{d.document_type} · uploaded {d.date_uploaded}{d.is_private ? " · private" : ""}</div>
+                  <div className="text-xs text-muted-foreground">{d.document_type} · uploaded {formatDate(d.date_uploaded)}{d.is_private ? " · private" : ""}</div>
                   {d.error_reason && <div className="text-xs text-rose-600 mt-0.5">{d.error_reason}</div>}
                 </div>
                 {processingId === d.id ? (
