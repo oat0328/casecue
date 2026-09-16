@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Card } from "@/components/ui/cards";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2, AlertTriangle, CalendarDays, Mail, Printer } from "lucide-react";
+import { CheckCircle2, AlertTriangle, CalendarDays } from "lucide-react";
 import ExportBar from "@/components/shared/ExportBar";
 
 const iso = (d) => d.toISOString().slice(0, 10);
