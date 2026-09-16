@@ -99,12 +99,35 @@ export default function MeetingCenterTab({ student, autoGenerate, onGenerated })
 
           <Card className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold">Full meeting script</h3>
+              <h3 className="font-semibold">Facilitator read-aloud flow</h3>
               <Button variant="outline" size="sm" onClick={() => { navigator.clipboard?.writeText(data.script || ""); toast({ title: "Copied" }); }}>
                 <Copy className="h-3.5 w-3.5 mr-1" /> Copy
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{data.script}</p>
+            {data.opening && (
+              <div className="mb-5 rounded-xl border bg-muted/30 p-4">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Opening</div>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{data.opening}</p>
+              </div>
+            )}
+            <div className="space-y-4">
+              {(data.page_flow || []).map((p, i) => (
+                <div key={`${p.page_number}-${i}`} className="rounded-xl border p-4">
+                  <div className="font-semibold text-sm">Page {p.page_number}{p.section_name ? ` — ${p.section_name}` : ""}</div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed mt-2">{p.say_this}</p>
+                  {(p.ask_team || []).length > 0 && <div className="mt-3 text-sm"><span className="font-medium">Pause and ask:</span> {p.ask_team.join(" · ")}</div>}
+                  {p.facilitator_note && <div className="mt-2 text-xs text-muted-foreground">Facilitator note: {p.facilitator_note}</div>}
+                  {p.source && <div className="mt-1 text-xs text-muted-foreground">Source: {p.source}</div>}
+                </div>
+              ))}
+            </div>
+            {data.closing && (
+              <div className="mt-5 rounded-xl border bg-muted/30 p-4">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Closing</div>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{data.closing}</p>
+              </div>
+            )}
+            {!(data.page_flow || []).length && <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{data.script}</p>}
           </Card>
 
           <div className="grid gap-4 md:grid-cols-2">
