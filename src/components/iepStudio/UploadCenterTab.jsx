@@ -286,8 +286,8 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
                 {profileResult.filled?.length > 0 && (
                   <p><strong className="text-foreground">Pre-filled:</strong> {profileResult.filled.join(", ")}</p>
                 )}
-                {profileResult.goals_created > 0 && (
-                  <p><strong className="text-foreground">Annual goal records created:</strong> {profileResult.goals_created} from documented annual goals. Benchmarks/objectives are not counted as separate annual goals.</p>
+                {(profileResult.snapshot?.goals_found || 0) > 0 && (
+                  <p><strong className="text-foreground">Annual goal candidates found:</strong> {profileResult.snapshot.goals_found}. They stay in the document analysis until you review/adopt them in the IEP Builder.</p>
                 )}
                 {profileResult.kept?.length > 0 && (
                   <p><strong className="text-foreground">Kept as-is:</strong> {profileResult.kept.join(", ")} (you already entered this).</p>
@@ -323,7 +323,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
               <SnapshotRow label="Behavior Information Found" value={profileResult.snapshot?.behavior_supports_found ? "Yes — documented" : "None found"} />
               <SnapshotRow label="Strengths Found" value={`${profileResult.snapshot?.strengths_found || 0} item(s)`} />
               <SnapshotRow label="Areas of Need Found" value={`${profileResult.snapshot?.needs_found || 0} item(s)`} />
-              <SnapshotRow label="Goals Found" value={`${profileResult.snapshot?.goals_found || 0} goal(s)`} />
+              <SnapshotRow label="Annual Goal Candidates in Documents" value={`${profileResult.snapshot?.goals_found || 0} candidate(s)`} />
               <SnapshotRow label="Accommodations Found" value={`${profileResult.snapshot?.accommodations_found || 0} item(s)`} />
               <SnapshotRow label="Services Found" value={`${profileResult.snapshot?.services_found || 0} service(s)`} />
               <SnapshotRow label="Missing Information" value={(profileResult.snapshot?.missing || []).length ? profileResult.snapshot.missing.join(", ") : "None — documents look complete"} />
