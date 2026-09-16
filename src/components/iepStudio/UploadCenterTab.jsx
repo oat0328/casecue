@@ -287,7 +287,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
                   <p><strong className="text-foreground">Pre-filled:</strong> {profileResult.filled.join(", ")}</p>
                 )}
                 {profileResult.goals_created > 0 && (
-                  <p><strong className="text-foreground">Goals added:</strong> {profileResult.goals_created} extracted from your documents.</p>
+                  <p><strong className="text-foreground">Annual goal records created:</strong> {profileResult.goals_created} from documented annual goals. Benchmarks/objectives are not counted as separate annual goals.</p>
                 )}
                 {profileResult.kept?.length > 0 && (
                   <p><strong className="text-foreground">Kept as-is:</strong> {profileResult.kept.join(", ")} (you already entered this).</p>
@@ -320,7 +320,7 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
             <h3 className="font-semibold mb-4">Student Snapshot — what CaseCue found</h3>
             <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
               <SnapshotRow label="Eligibility" value={profileResult.snapshot?.eligibility || "Not stated in documents"} />
-              <SnapshotRow label="Behavior Supports Found" value={profileResult.snapshot?.behavior_supports_found ? "Yes — documented" : "None found"} />
+              <SnapshotRow label="Behavior Information Found" value={profileResult.snapshot?.behavior_supports_found ? "Yes — documented" : "None found"} />
               <SnapshotRow label="Strengths Found" value={`${profileResult.snapshot?.strengths_found || 0} item(s)`} />
               <SnapshotRow label="Areas of Need Found" value={`${profileResult.snapshot?.needs_found || 0} item(s)`} />
               <SnapshotRow label="Goals Found" value={`${profileResult.snapshot?.goals_found || 0} goal(s)`} />
