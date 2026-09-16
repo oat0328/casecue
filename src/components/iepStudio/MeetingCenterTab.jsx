@@ -51,13 +51,13 @@ export default function MeetingCenterTab({ student, autoGenerate, onGenerated })
   return (
     <div className="space-y-6">
       <Card className="p-5">
-        <h3 className="font-semibold mb-1">IEP Meeting Command Center</h3>
+        <h3 className="font-semibold mb-1">Meeting Facilitator</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Generates a complete meeting packet and a full spoken script that walks through <strong>every page</strong> of {student.first_name}'s uploaded IEP, in order, in natural read-aloud language.
+          Your read-aloud meeting guide. It starts with a natural greeting, walks through <strong>every page</strong> of {student.first_name}'s IEP in order, explains the important details in easy words, gives you natural team questions, and closes without inventing decisions.
         </p>
         <div className="flex flex-wrap gap-2">
           <Button onClick={generate} disabled={loading} className="brand-gradient text-white">
-            {loading ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Reading every page…</> : <><Sparkles className="h-4 w-4 mr-1" /> Generate Meeting Packet & Script</>}
+            {loading ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Building facilitator flow…</> : <><Sparkles className="h-4 w-4 mr-1" /> Build My Meeting Flow</>}
           </Button>
           <Button asChild variant="outline">
             <Link to="/meeting-navigator"><ClipboardList className="h-4 w-4 mr-1.5" /> Meeting Navigator (in-meeting mode)</Link>
@@ -99,7 +99,7 @@ export default function MeetingCenterTab({ student, autoGenerate, onGenerated })
 
           <Card className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold">Facilitator read-aloud flow</h3>
+              <div><h3 className="font-semibold">Read this in the meeting</h3><p className="text-xs text-muted-foreground mt-0.5">Simple, humanized, page by page. Pause where the team needs to talk.</p></div>
               <Button variant="outline" size="sm" onClick={() => { navigator.clipboard?.writeText(data.script || ""); toast({ title: "Copied" }); }}>
                 <Copy className="h-3.5 w-3.5 mr-1" /> Copy
               </Button>
