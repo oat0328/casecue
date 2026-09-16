@@ -180,7 +180,12 @@ Return JSON matching the schema.`;
         source_document_id,
       })));
     }
-    return Response.json({ draft });
+    await base44.asServiceRole.entities.IepDraftReviewState.create({
+      student_id: workspace.student_id,
+      draft_artifact_id: artifact.id,
+      review_status: 'educator_review_required',
+    });
+    return Response.json({ draft, draft_artifact_id: artifact.id });
   } catch (error) {
     console.error('iepWorkspaceDraft failed:', error);
     return Response.json({ error: error.message }, { status: 500 });
