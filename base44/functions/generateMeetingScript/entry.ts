@@ -30,11 +30,28 @@ const SCHEMA = {
       },
       required: ['student_snapshot', 'eligibility', 'strengths', 'areas_of_need', 'present_levels', 'goals', 'services', 'accommodations', 'behavior_supports', 'parent_concerns', 'progress_summary', 'team_recommendations', 'questions_for_discussion']
     },
+    opening: { type: 'string' },
+    page_flow: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          page_number: { type: 'number' },
+          section_name: { type: 'string' },
+          say_this: { type: 'string' },
+          ask_team: { type: 'array', items: { type: 'string' } },
+          facilitator_note: { type: 'string' },
+          source: { type: 'string' }
+        },
+        required: ['page_number', 'section_name', 'say_this']
+      }
+    },
+    closing: { type: 'string' },
     script: { type: 'string' },
     talking_points: { type: 'array', items: { type: 'string' } },
     important_changes: { type: 'array', items: { type: 'string' } }
   },
-  required: ['packet', 'script', 'talking_points', 'important_changes']
+  required: ['packet', 'opening', 'page_flow', 'closing', 'script', 'talking_points', 'important_changes']
 };
 
 export default async function(req) {
@@ -55,9 +72,18 @@ export default async function(req) {
 
     const context = buildStudentContext(student, goals, progress);
 
-    const pageSummaries = workspace && workspace.page_summaries
-      ? JSON.stringify(workspace.page_summaries).slice(0, 20000)
-      : "No page-by-page IEP summary on file. Generate the script from the verified student record and IEP draft, and note that a page-level walkthrough requires uploading the current IEP and generating its page summary first.";
+    // Meeting facilitation must be driven by the actual current IEP page order.
+    // If a workspace page summary has not been generated yet, use the saved full-page
+    // extraction from the newest processed IEP rather than pretending a page flow exists.
+    const documents = await base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 50);
+    const currentIep = (documents || []).find((d) => d.extraction_status === 'processed' && /iep/i.test(`${d.document_type || ''} ${d.filename || ''}`));
+    const fallbackPages = currentIep?.processing_results?.pages || [];
+    const pageSummarySource = workspace?.page_summaries?.pages?.length
+      ? workspace.page_summaries
+      : (fallbackPages.length ? { document_id: currentIep.id, document_name: currentIep.filename, pages: fallbackPages } : null);
+    const pageSummaries = pageSummarySource
+      ? JSON.stringify(pageSummarySource).slice(0, 90000)
+      : "No page-by-page IEP evidence is available. Do not invent a page walkthrough; tell the educator to upload/process the current IEP first.";
 
     const currentDraft = workspace && workspace.draft
       ? JSON.stringify(workspace.draft).slice(0, 8000)
@@ -73,14 +99,34 @@ You are preparing the IEP Meeting Command Center materials for this student: a c
 
 PART 1 — MEETING PACKET. Fill every packet field using ONLY the verified context below. If a field has no verified information, write exactly what is missing (e.g., "No verified services on file") — never invent content.
 
-PART 2 — MEETING SCRIPT. Write a complete, natural-speaking script the case manager can read aloud to walk the team through the ENTIRE IEP:
-- Read the PAGE-BY-PAGE SUMMARY below in order, page by page. Do NOT skip any page or section.
-- For each page, speak in conversational language, e.g., "On this page we reviewed [Student]'s reading performance. Based on classroom assessments and progress monitoring, [Student] continues to demonstrate strengths in..."
-- Cover present levels, goals, services, accommodations, behavior supports, progress data, and any changes from the previous IEP.
-- End with next steps and an invitation for parent/team questions.
-- Be case-manager friendly: clear pacing cues, no jargon where parent-friendly wording works better.
+PART 2 — FACILITATOR SCRIPT. Act like an excellent, warm IEP case-manager FACILITATOR. Create a script that is easy to read aloud in a real meeting, not a legalistic summary.
+
+OPENING:
+- Start with a short natural greeting: "Good afternoon, everyone. Thank you for being here. My name is [case manager name if known], and I am [Student]'s special education teacher/case manager." If the facilitator's name/role is not verified, use a bracketed editable placeholder instead of guessing.
+- Thank the parent/guardian and team.
+- State the purpose of the meeting in one or two simple sentences based on the meeting type on file. Do not guess annual/MET/reevaluation if the meeting type is documented differently.
+- Invite introductions and parent input early.
+
+PAGE FLOW:
+- Walk through the CURRENT IEP from page 1 through the final page in exact order. Produce ONE page_flow item for EVERY source page, including procedural/signature/blank pages.
+- Never combine page ranges such as "pages 4-6." Say "Page 4", then "Page 5", then "Page 6" separately.
+- For every page provide: page_number, section_name, say_this, ask_team, facilitator_note, and source.
+- say_this must sound human and conversational, using short sentences and easy words while preserving all important facts, dates, scores, services, minutes, accommodations, goals, placement/LRE information, procedural information, and decisions actually documented on that page.
+- Do not read boilerplate word-for-word when a short parent-friendly explanation preserves its meaning. For procedural/legal pages, explain what the page is for in plain language and identify any action/signature documented.
+- If a page is blank or has no substantive content, say that briefly and move on; never fabricate content.
+- At natural decision points, pause and ask the parent/team a short question. Never answer for the parent or team.
+- Explain acronyms the first time in plain language (for example, LRE, SDI, ESY) without turning the meeting into a lecture.
+- Clearly distinguish CURRENT DOCUMENTED information from PROPOSED/DRAFT changes. Never present a CaseCue draft as already agreed to by the team.
+- Do not call a recommendation a team decision. Placement, services changes, ESY, eligibility changes, and other team decisions remain questions for the team unless the source IEP already documents the prior decision.
+
+CLOSING:
+- Recap the decisions actually made/recorded, unresolved items, and next steps without inventing agreement.
+- Ask whether the parent/guardian or team has any final questions or concerns.
+- End warmly and professionally.
+
+SCRIPT: concatenate the opening, each page in order with clear "Page X" transitions, and closing into one read-aloud script.
 - talking_points: 5-8 short bullets for quick reference during the meeting.
-- important_changes: anything that changed from the prior IEP (or "no prior IEP on file to compare").
+- important_changes: only changes supported by a comparison/source; otherwise say there is not enough verified prior/current evidence to identify changes.
 
 MEETING INFO:
 ${meetingInfo}
