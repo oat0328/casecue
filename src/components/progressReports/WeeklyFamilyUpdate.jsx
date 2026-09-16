@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Card } from "@/components/ui/cards";
 import { CheckCircle2, AlertTriangle, CalendarDays } from "lucide-react";
 import ExportBar from "@/components/shared/ExportBar";
+import { formatDate } from "@/lib/dateUtils";
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const dateOf = (r) => String(r?.date || r?.created_date || r?.updated_date || "").slice(0, 10);
@@ -54,14 +55,14 @@ export default function WeeklyFamilyUpdate({ student, goals = [], progress = [],
     </div>
     <div className="grid sm:grid-cols-3 gap-3 mt-5">
       <div className="rounded-xl bg-slate-50 p-4"><div className="text-xs text-slate-500">Data days this week</div><div className="text-2xl font-black mt-1">{report.evidenceDates.length}</div><div className="text-xs text-slate-500">Goal data, sessions, or gradebook work</div></div>
-      <div className="rounded-xl bg-slate-50 p-4"><div className="text-xs text-slate-500">Last update</div><div className="font-black mt-1">{report.last || 'None yet'}</div><div className="text-xs text-slate-500">Target: update every 1–2 school days</div></div>
+      <div className="rounded-xl bg-slate-50 p-4"><div className="text-xs text-slate-500">Last update</div><div className="font-black mt-1">{report.last ? formatDate(report.last) : 'None yet'}</div><div className="text-xs text-slate-500">Target: update every 1–2 school days</div></div>
       <div className="rounded-xl bg-slate-50 p-4"><div className="text-xs text-slate-500">Friday status</div><div className="font-black mt-1">{report.ready?'Review & send':'Not ready'}</div><div className="text-xs text-slate-500">Teacher review is required before family sharing</div></div>
     </div>
     {!report.ready && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"><b>What to do:</b> Upload or enter student work, IXL/progress data, or session notes today. The Friday summary rebuilds from the newest records.</div>}
     <div className="mt-5 space-y-3">{report.sections.slice(0,4).map(x=><div key={x.heading} className="rounded-xl border p-4"><div className="text-xs font-black uppercase tracking-wider text-blue-700">{x.heading}</div><div className="text-sm mt-1 text-slate-700">{x.body}</div></div>)}</div>
     <div className="mt-5 border-t pt-4">
       <div className="text-sm font-bold mb-2">Teacher-reviewed sharing</div>
-      <ExportBar title={title} subtitle={`${report.range.start} through ${report.range.end}`} filename={`Weekly-Family-Update-${student.first_name}-${student.last_name}-${report.range.end}`} sections={report.sections} gated />
+      <ExportBar title={title} subtitle={`${formatDate(report.range.start)} through ${formatDate(report.range.end)}`} filename={`Weekly-Family-Update-${student.first_name}-${student.last_name}-${report.range.end}`} sections={report.sections} gated />
       <p className="text-xs text-slate-500 mt-2">The system can prepare this automatically from recorded data, but it should not send to a parent until a teacher reviews and approves it.</p>
     </div>
   </Card>;
