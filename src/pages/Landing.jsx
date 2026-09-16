@@ -158,6 +158,14 @@ export default function Landing() {
         </div>
       </Section>
 
+      {/* A day in special education */}
+      <Section id="day-story" className="bg-white">
+        <div className="grid gap-10 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
+          <div className="lg:sticky lg:top-28"><div className="text-xs font-black uppercase tracking-[.2em] text-primary">We know your day</div><h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight">Your day should not feel this hard.</h2><p className="mt-4 text-muted-foreground leading-7">Every deadline matters. Every document matters. Every student matters. But the systems around the work should make the day clearer, not heavier.</p><div className="mt-6 rounded-3xl bg-[#07111f] p-6 text-white"><div className="text-sm font-black text-sky-300">What if tomorrow looked different?</div><p className="mt-2 text-sm leading-6 text-slate-300">Your schedule is visible. Student records are connected. Progress evidence is where it belongs. Meetings and deadlines are already in view.</p></div></div>
+          <div className="space-y-3">{[['7:00 AM','Checking emails'],['8:00 AM','Parent concern'],['9:00 AM','IEP meeting'],['10:30 AM','Searching for missing documentation'],['12:00 PM','Service tracking'],['2:00 PM','Compliance reminder'],['4:00 PM','Another meeting'],['5:00 PM','Still working'],['7:00 PM','Paperwork at home']].map(([time,work],i)=><div key={time} className="group flex gap-4 rounded-2xl border bg-slate-50 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-sm"><div className="w-20 shrink-0 text-sm font-black text-blue-700">{time}</div><div className="flex-1 font-bold text-slate-800">{work}</div><div className="text-xs font-semibold text-slate-400">{i<8?'Another thing to carry':'Work followed you home'}</div></div>)}</div>
+        </div>
+      </Section>
+
       {/* Problem */}
       <Section id="problem" className="bg-card">
         <div className="max-w-3xl mx-auto text-center">
@@ -259,6 +267,13 @@ export default function Landing() {
             </div>
           ))}
         </div>
+      </Section>
+
+      {/* Transformation */}
+      <Section id="transformation" className="bg-[#07111f] text-white">
+        <div className="text-center max-w-3xl mx-auto"><div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">The transformation</div><h2 className="mt-3 text-3xl sm:text-5xl font-black">From scattered work to one connected home.</h2></div>
+        <div className="mt-10 grid gap-5 md:grid-cols-2"><div className="rounded-[28px] border border-rose-300/10 bg-white/5 p-7"><div className="text-xs font-black uppercase tracking-wider text-rose-300">Before CaseCue</div><div className="mt-5 grid grid-cols-2 gap-3">{['Stress','Chaos','Searching','Disorganization','Missed visibility','Disconnected systems'].map(x=><div key={x} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm font-bold text-slate-300">{x}</div>)}</div></div><div className="rounded-[28px] border border-sky-300/20 bg-sky-400/10 p-7"><div className="text-xs font-black uppercase tracking-wider text-sky-300">With one connected home</div><div className="mt-5 grid grid-cols-2 gap-3">{['Clarity','Organization','Visibility','Confidence','Connected teams','Peace of mind'].map(x=><div key={x} className="rounded-xl border border-sky-200/10 bg-white/10 p-3 text-sm font-bold text-white">{x}</div>)}</div></div></div>
+        <div className="mt-8 text-center text-xl font-black">Less chaos. More student impact.</div>
       </Section>
 
       {/* Practice Lab */}
