@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { PlusCircle, Sparkles, Loader2 } from "lucide-react";
+import { PlusCircle, Sparkles, Loader2, ShieldCheck, FileWarning } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { computeGoalStatus } from "@/lib/goalStatus";
 import { Card } from "@/components/ui/cards";
@@ -32,6 +32,7 @@ const pctOf = (p) =>
 export default function GoalsProgressTab({ student }) {
   const [goals, setGoals] = useState(null);
   const [progress, setProgress] = useState([]);
+  const [sourceAudit, setSourceAudit] = useState({ documents: [], sessions: [], evidence: [] });
   const [work, setWork] = useState(null); // { goalId, data, loading }
   const chartRefs = useRef({});
   const { toast } = useToast();
@@ -64,9 +65,15 @@ export default function GoalsProgressTab({ student }) {
   const load = useCallback(async () => {
     try {
       const gs = await base44.entities.Goal.filter({ student_id: student.id });
-      const ps = await base44.entities.ProgressData.filter({ student_id: student.id }, 'date', 500);
+      const [ps, ds, ss, ev] = await Promise.all([
+        base44.entities.ProgressData.filter({ student_id: student.id }, 'date', 500),
+        base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 100),
+        base44.entities.SessionRecord.filter({ student_id: student.id }, '-date', 500),
+        base44.entities.WorkEvidence.filter({ student_id: student.id }, '-date', 500),
+      ]);
       setGoals(gs || []);
-      setProgress(ps || []);
+      setProgress((ps || []).filter(p=>p.record_status!=='duplicate'&&p.record_status!=='superseded'));
+      setSourceAudit({ documents: ds || [], sessions: ss || [], evidence: ev || [] });
     } catch {
       setGoals([]);
     }
@@ -84,14 +91,16 @@ export default function GoalsProgressTab({ student }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">Charts update automatically whenever progress data is entered.</p>
+        <p className="text-sm text-muted-foreground">Charts update automatically from active, non-duplicate progress records tied to each goal.</p>
         <Button asChild variant="outline" size="sm">
           <Link to="/data-center"><PlusCircle className="h-4 w-4 mr-1.5" /> Log progress data</Link>
         </Button>
       </div>
 
+      {(() => { const docs=sourceAudit.documents||[], sessions=sourceAudit.sessions||[], evidence=sourceAudit.evidence||[]; const linkedSessions=sessions.filter(x=>x.goal_id).length, linkedEvidence=evidence.filter(x=>x.goal_id).length; const first=docs[0]?.processing_results?.pages?.[0]; const hay=String(JSON.stringify(first||{})).toLowerCase(); const fn=String(student.first_name||'').trim().toLowerCase(); const ln=String(student.last_name||'').trim().toLowerCase().replace(/[^a-z]/g,'').slice(0,5); const mismatch=first&&first.section_name!=='File Error'&&(!hay.includes(fn)|| (ln&&!hay.replace(/[^a-z]/g,'').includes(ln))); const fileError=docs.some(d=>d.processing_results?.pages?.[0]?.section_name==='File Error'); const issues=[]; if(!docs.length)issues.push('No uploaded IEP/MDT/evaluation source is linked to this student.'); if(mismatch)issues.push('The uploaded document appears to contain a different student name. Do not rely on extracted goals until the source is corrected.'); if(fileError)issues.push('The source document has a processing/file-size error.'); if(!goals.length)issues.push('No Goal records are connected to this student.'); if(goals.length&&!progress.length)issues.push('Goals are present, but no formal progress points are connected yet.'); if(sessions.length&&!linkedSessions)issues.push(`${sessions.length} session records exist, but none are linked to a goal.`); if(evidence.length&&!linkedEvidence)issues.push(`${evidence.length} work samples exist, but none are linked to a goal.`); return <Card className={`p-4 mb-5 ${issues.length?'border-amber-200 bg-amber-50/30':'border-emerald-200 bg-emerald-50/30'}`}><div className="flex items-start gap-3"><ShieldCheck className={`h-5 w-5 mt-0.5 ${issues.length?'text-amber-700':'text-emerald-700'}`}/><div className="flex-1"><div className="font-black">Goal data audit</div><div className="grid grid-cols-5 gap-2 mt-3">{[['Docs',docs.length],['Goals',goals.length],['Progress',progress.length],['Sessions',sessions.length],['Work',evidence.length]].map(([l,v])=><div key={l} className="rounded-lg bg-white/80 border px-2 py-2 text-center"><div className="font-black">{v}</div><div className="text-[10px] text-slate-500">{l}</div></div>)}</div>{issues.length?<div className="mt-3 space-y-1">{issues.map((x,i)=><div key={i} className="text-xs text-amber-800 flex gap-1.5"><FileWarning className="h-3.5 w-3.5 shrink-0"/>{x}</div>)}</div>:<p className="text-xs font-semibold text-emerald-700 mt-3">Source document, goals, and live data are connected for this student.</p>}</div></div></Card> })()}
+
       {goals.length === 0 && (
-        <p className="text-muted-foreground text-sm">No goals on file yet — add goals from the student's 360 page or the IEP Builder draft.</p>
+        <p className="text-muted-foreground text-sm mb-4">No goals on file yet. The audit above shows whether the uploaded source contains usable data or needs review before goals are created.</p>
       )}
 
       <div className="space-y-4">
