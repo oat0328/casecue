@@ -237,8 +237,15 @@ Return JSON matching the schema.`;
       return true;
     });
 
-    // Pre-fill the student record — only where fields are empty, so teacher-
-    // entered data is never overwritten.
+    // Date fields are source-controlled by the uploaded CURRENT IEP/evaluation record.
+    // Unlike narrative fields, verified dates should replace stale Student 360 dates when
+    // a newer authoritative uploaded record explicitly documents them.
+    const currentIepDocs = processed.filter((d) => d.document_type === 'IEP' && ['current','final'].includes(d.iep_role));
+    const evaluationDocs = processed.filter((d) => ['Evaluation','Reevaluation','Eligibility Report','MDT Report','Psychological Report'].includes(d.document_type));
+    const dateSourceDocs = [...currentIepDocs, ...evaluationDocs];
+    const hasDateSource = dateSourceDocs.length > 0;
+
+    // Pre-fill narrative student fields only where empty; dates below use verified source replacement.
     const filled = [];
     const kept = [];
     const patch = {};
@@ -268,6 +275,24 @@ Return JSON matching the schema.`;
       if (JSON.stringify(existing) !== JSON.stringify(merged)) {
         patch.eligibility_categories = merged;
         filled.push('Eligibility / disability categories');
+      }
+    }
+    const isoDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v || '').trim()) ? String(v).trim() : '';
+    const verifiedDates = [
+      ['iep_date', 'IEP date'],
+      ['annual_review_due', 'Annual review due'],
+      ['reevaluation_due', 'Reevaluation due'],
+    ];
+    if (hasDateSource) {
+      for (const [field, label] of verifiedDates) {
+        const value = isoDate(extracted[field]);
+        if (!value) continue;
+        if (String(student[field] || '') !== value) {
+          patch[field] = value;
+          filled.push(label);
+        } else {
+          kept.push(label);
+        }
       }
     }
     if (Array.isArray(extracted.services) && extracted.services.length && !(student.services && student.services.length)) {
