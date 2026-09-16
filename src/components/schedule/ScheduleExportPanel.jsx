@@ -1,5 +1,7 @@
 import React from "react";
 import { useAuth } from "@/lib/AuthContext";
+import { base44 } from "@/api/base44Client";
+import { useAsync } from "@/lib/useAsync";
 import { Printer, FileSpreadsheet } from "lucide-react";
 import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
@@ -15,9 +17,12 @@ const PROMO = "Created with CaseCue · Special Education Workspace";
 export default function ScheduleExportPanel({ entries, students, timeFormat = "12h" }) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const teacherName = user?.full_name || "Teacher";
-  const teacherClass = user?.room || user?.classroom || user?.data?.room || user?.data?.classroom || "";
-  const printSubtitle = `${teacherName}${teacherClass ? ` · ${teacherClass}` : ""}`;
+  const { data: printPrefs } = useAsync(() => base44.entities.UserPrintPreference.list('-updated_date', 5), []);
+  const pref = (printPrefs || []).find(p => p.user_id === user?.id) || printPrefs?.[0] || {};
+  const teacherName = pref.teacher_name || user?.full_name || "Teacher";
+  const teacherTitle = pref.teacher_title || "Teacher";
+  const teacherClass = pref.classroom || "";
+  const printSubtitle = `${teacherName} · ${teacherTitle}${teacherClass ? ` · ${teacherClass}` : ""}`;
 
   const weekly = scheduleSections(entries, students, timeFormat);
   const caseload = caseloadSections(entries, students, timeFormat);
@@ -59,7 +64,7 @@ export default function ScheduleExportPanel({ entries, students, timeFormat = "1
         <div key={item.label} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-border pt-3 first:border-0 first:pt-0">
           <span className="text-sm font-medium">{item.label}</span>
           <ExportBar
-            title={item.title}
+            title={`${item.title} · ${teacherName}`}
             subtitle={printSubtitle}
             sections={item.sections}
             filename={item.filename}
