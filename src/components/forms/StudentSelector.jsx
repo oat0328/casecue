@@ -30,6 +30,9 @@ export default function StudentSelector({
   const autoId = useId();
   const selectId = id || `student-select-${autoId}`;
   const labelFn = nameOf || ((s) => `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Unnamed student");
+  const sortedStudents = [...(students || [])].sort((a, b) =>
+    labelFn(a).localeCompare(labelFn(b), undefined, { sensitivity: "base", numeric: true })
+  );
 
   return (
     <div className={cn("w-full max-w-[480px]", !noBottomSpace && "mb-5", wrapperClassName)}>
@@ -50,7 +53,7 @@ export default function StudentSelector({
         )}
       >
         <option value="">{placeholder}</option>
-        {(students || []).map((s) => (
+        {sortedStudents.map((s) => (
           <option key={s.id} value={s.id}>
             {labelFn(s)}
           </option>
