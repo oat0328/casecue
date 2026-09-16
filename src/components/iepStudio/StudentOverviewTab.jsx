@@ -41,7 +41,11 @@ const COPILOT_PROMPTS = [
 // Tab 1 — Student Overview: the verified record at a glance.
 export default function StudentOverviewTab({ student, onRunMeetingMode }) {
   const { data: workspaces } = useAsync(() => base44.entities.IepWorkspace.filter({ student_id: student.id }, '-created_date', 1), [student?.id]);
+  const { data: documents } = useAsync(() => base44.entities.Document.filter({ student_id: student.id }, '-date_uploaded', 100), [student?.id]);
+  const { data: evidence } = useAsync(() => base44.entities.StudentEvidence.filter({ student_id: student.id }, '-date', 100), [student?.id]);
   const latestAnalysis = workspaces?.[0]?.analysis?.auto_extracted || null;
+  const ieps = (documents || []).filter(d => d.document_type === 'IEP');
+  const supporting = (documents || []).filter(d => d.document_type !== 'IEP');
   return (
     <div className="space-y-6">
       <Card className="p-5 brand-gradient text-white flex flex-col sm:flex-row sm:items-center gap-4">
@@ -108,6 +112,16 @@ export default function StudentOverviewTab({ student, onRunMeetingMode }) {
           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{student.notes || "No notes on file."}</p>
         </Card>
       </div>
+
+      <Card className="p-5">
+        <div className="font-semibold mb-1">Student Record Timeline</div>
+        <p className="text-sm text-muted-foreground mb-4">Old IEPs, new drafts, final IEPs, MDT/evaluation records and classroom evidence stay connected to {student.first_name} instead of replacing one another.</p>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <div className="rounded-xl border p-4"><div className="text-2xl font-black">{ieps.length}</div><div className="text-sm font-medium">IEP version{ieps.length===1?'':'s'}</div><div className="text-xs text-muted-foreground mt-1">{ieps.map(d=>d.iep_role||'unclassified').join(' · ') || 'Upload an IEP to begin'}</div></div>
+          <div className="rounded-xl border p-4"><div className="text-2xl font-black">{supporting.length}</div><div className="text-sm font-medium">Supporting records</div><div className="text-xs text-muted-foreground mt-1">MDT, evaluations, progress, teacher/parent input and reports</div></div>
+          <div className="rounded-xl border p-4"><div className="text-2xl font-black">{(evidence||[]).length}</div><div className="text-sm font-medium">Evidence points</div><div className="text-xs text-muted-foreground mt-1">Assignments, IXL, sessions and progress data can feed future IEP writing</div></div>
+        </div>
+      </Card>
 
       <ProfileReadiness student={student} analysis={latestAnalysis} />
 
