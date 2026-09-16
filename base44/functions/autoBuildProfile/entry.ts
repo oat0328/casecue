@@ -25,7 +25,7 @@ const SCHEMA = {
     student_last_name: { type: 'string' },
     student_grade: { type: 'string' },
     eligibility_category: { type: 'string' },
-    eligibility_categories: { type: 'array', items: { type: 'string' }, maxItems: 10 },
+    eligibility_categories: { type: 'array', items: { type: 'string' }, maxItems: 50 },
     iep_date: { type: 'string' },
     annual_review_due: { type: 'string' },
     reevaluation_due: { type: 'string' },
@@ -110,7 +110,7 @@ STRICT EXTRACTION RULES:
 - This is NOT IEP-only. Source documents may be an IEP, MDT/MET 1/MET 2, evaluation, reevaluation, eligibility report, psychological report, 504, BIP/FBA, progress report, assessment, service-provider report, medical report, transition assessment, or another student record.
 - student_first_name, student_last_name, student_grade: extract only when explicitly documented in the uploaded records. These fields allow non-IEP records such as MDT/MET/evaluation documents to help build the student profile.
 - eligibility_category: return the primary explicitly documented IDEA disability/eligibility category when one is clearly identified.
-- eligibility_categories: return every explicitly documented disability/eligibility category found across the source records, de-duplicated, with a maximum of 10. Include categories such as Other Health Impairment only when the source actually identifies the student with that category; do not infer a disability from a diagnosis, symptom, medication, recommendation, or suspected condition.
+- eligibility_categories: return every explicitly documented disability/eligibility category found across the source records, de-duplicated. Preserve every explicitly documented eligibility/disability category; do not impose an arbitrary five- or ten-category cap. Include categories such as Other Health Impairment only when the source actually identifies the student with that category; do not infer a disability from a diagnosis, symptom, medication, recommendation, or suspected condition.
 - Search the ENTIRE source set for eligibility/disability information, especially eligibility/disability, student information, special education eligibility, evaluation/MDT/MET summary, and services pages. Accept an explicitly documented IDEA disability category even when the page does not use the exact label "Eligibility Category". Do not call eligibility missing merely because the exact phrase "eligibility category" is absent.
 - If a field has no information in any document, return an empty string (or empty array) and name the gap in data_gaps.
 - services: list each service exactly as documented (e.g. "Speech — 30 min/week").
@@ -178,7 +178,7 @@ Return JSON matching the schema.`;
     const recoveredCategories = eligibilityPatterns
       .filter(([, pattern]) => likelyEligibilityFacts.some((x) => pattern.test(x.fact)))
       .map(([label]) => label);
-    extracted.eligibility_categories = [...new Set([...(extracted.eligibility_categories || []), ...recoveredCategories])].filter(Boolean).slice(0, 10);
+    extracted.eligibility_categories = [...new Set([...(extracted.eligibility_categories || []), ...recoveredCategories])].filter(Boolean).slice(0, 50);
     if (!(extracted.eligibility_category || '').trim() && extracted.eligibility_categories.length) {
       extracted.eligibility_category = extracted.eligibility_categories[0];
       const [label, pattern] = eligibilityPatterns.find(([candidate]) => candidate === extracted.eligibility_category) || [];
@@ -267,7 +267,7 @@ Return JSON matching the schema.`;
     });
     if (Array.isArray(extracted.eligibility_categories) && extracted.eligibility_categories.length) {
       const existing = Array.isArray(student.eligibility_categories) ? student.eligibility_categories : [];
-      const merged = [...new Set([...existing, ...extracted.eligibility_categories])].filter(Boolean).slice(0, 10);
+      const merged = [...new Set([...existing, ...extracted.eligibility_categories])].filter(Boolean).slice(0, 50);
       if (JSON.stringify(existing) !== JSON.stringify(merged)) {
         patch.eligibility_categories = merged;
         filled.push('Eligibility / disability categories');
