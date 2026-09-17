@@ -46,7 +46,7 @@ const ORG_ENTITIES = [
   'Document', 'Meeting', 'Lesson', 'SubPlan', 'ScheduleEntry', 'SavedReport',
   'IEPReview', 'AIConversation', 'Task', 'IepWorkspace', 'SessionRecord', 'MeetingCheatSheet',
   'ParentResource', 'TransitionPlan', 'Modification', 'AccommodationLog', 'ResourceItem', 'EvaluationRecord', 'RetentionPolicy', 'WorkEvidence', 'InputRecord', 'FamilyRequest', 'InterventionPhase', 'SupportPlan', 'StateConfig', 'IntegrationConfig',
-  'StudentEvidence', 'TeachingMaterial', 'AccommodationShare', 'TeacherAccommodationBrief', 'IepCycle', 'IepDocumentVersion', 'AssignmentUse',
+  'StudentEvidence', 'TeachingMaterial', 'AccommodationShare', 'TeacherAccommodationBrief', 'IepCycle', 'IepDocumentVersion', 'AssignmentUse', 'BaselineAssessment',
 ];
 
 let cachedOrgId;
