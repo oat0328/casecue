@@ -24,6 +24,7 @@ import ParentSummaryTab from "@/components/iepStudio/ParentSummaryTab";
 import IEPReadyBridge from "@/components/iepStudio/IEPReadyBridge";
 import MetMdtBuilder from "@/components/iepStudio/MetMdtBuilder";
 import StateAwareIepFlow from "@/components/iepStudio/StateAwareIepFlow";
+import BaselineAssessmentStudio from "@/components/iepStudio/BaselineAssessmentStudio";
 
 const ACCOMMODATION_SDI_SECTIONS = [
   { key: "accommodations", label: "Accommodations" },
@@ -38,6 +39,7 @@ const TAB_TIPS = [
   ["summary", "CaseCue Summary", "CaseCue-generated summary of every uploaded document for educator review."],
   ["builder", "IEP Builder", "Evidence-first builder: source documents → page-level extraction → present levels → aligned goals → services/accommodations → review & export."],
   ["met-mdt", "MET / MDT Builder", "Turn processed MDT/MET/evaluation records into source-grounded MET 1 or MET 2 present levels, goal drafts, impact, accommodations/SDI, data gaps, and meeting talking points."],
+  ["baseline", "Baseline Assessment", "Generate an original educator-administered baseline, score the student's actual performance, then draft present levels and measurable goal options from verified results."],
   ["iep-ready", "IEP Ready", "Combine school/SIS context and CaseCue SPED evidence, trace sources, review the draft, and prepare an approved transfer back to the district system."],
   ["goals", "Goals & Progress", "Goals with live progress graphs — green on track, yellow monitor, red at risk."],
   ["accommodations", "Accommodations & SDI", "Draft and manage accommodations and specially designed instruction language."],
@@ -77,6 +79,7 @@ export default function IEPStudio() {
           <TabsContent value="summary" className="mt-6"><AiSummaryTab student={student} /></TabsContent>
           <TabsContent value="builder" className="mt-6"><WorkspacePipeline student={student} /></TabsContent>
           <TabsContent value="met-mdt" className="mt-6"><MetMdtBuilder student={student} /></TabsContent>
+          <TabsContent value="baseline" className="mt-6"><BaselineAssessmentStudio student={student} /></TabsContent>
           <TabsContent value="iep-ready" className="mt-6"><IEPReadyBridge student={student} /></TabsContent>
           <TabsContent value="goals" className="mt-6"><GoalsProgressTab student={student} /></TabsContent>
           <TabsContent value="accommodations" className="mt-6"><SectionDrafter student={student} sections={ACCOMMODATION_SDI_SECTIONS} /></TabsContent>
