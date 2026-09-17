@@ -26,7 +26,7 @@ export default function OrgSetup() {
 
   const hasOrg = user?.organization_id || user?.data?.organization_id;
   useEffect(() => {
-    if (hasOrg) navigate("/app", { replace: true });
+    if (hasOrg) navigate("/workspace-setup", { replace: true });
   }, [hasOrg, navigate]);
 
   const needsName = orgType === "school" || orgType === "district";
@@ -55,7 +55,7 @@ export default function OrgSetup() {
           ? `${res.data.migrated} existing records were moved into your secure workspace.`
           : "Your data is protected in its own isolated workspace.",
       });
-      window.location.href = "/app";
+      window.location.href = "/workspace-setup";
     } catch (e) {
       toast({ title: "Could not set up your workspace", description: e.message, variant: "destructive" });
       setSaving(false);
