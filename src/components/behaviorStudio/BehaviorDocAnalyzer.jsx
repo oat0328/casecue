@@ -71,7 +71,7 @@ export default function BehaviorDocAnalyzer({ students, analysisType }) {
       .catch(() => { if (alive) setDocs([]); })
       .finally(() => { if (alive) setLoadingDocs(false); });
     return () => { alive = false; };
-  }, [studentId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [studentId]);  
 
   const run = async () => {
     if (!docId) return;

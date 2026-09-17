@@ -50,7 +50,7 @@ export default function Reports() {
 
   const snapshotSections = useMemo(
     () => cards.map((c) => textSection(c.label, [`${c.value} total`, ...c.items.map(String)])),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [reports]
   );
   const caseloadRows = s.map((st) => [

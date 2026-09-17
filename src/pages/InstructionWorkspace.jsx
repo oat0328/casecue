@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { BookOpen, CalendarClock, ClipboardList, GraduationCap, Library, Archive } from 'lucide-react';
+import { BookOpen, CalendarClock, ClipboardList, Library, Archive } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { cn } from '@/lib/utils';
 const tabs=[['Schedule & Groups','/instruction/schedule',CalendarClock],['Lesson Studio','/instruction/lessons',BookOpen],['Sub Plans','/instruction/sub-plans',ClipboardList],['Resources','/instruction/resources',Library],['Library','/instruction/library',Archive]];

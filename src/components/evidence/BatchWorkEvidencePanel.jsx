@@ -1,5 +1,5 @@
 import React,{useMemo,useRef,useState} from 'react';
-import {UploadCloud,Loader2,CheckCircle2,AlertTriangle,History,FileStack,RotateCcw,Eye,FileText} from 'lucide-react';
+import {UploadCloud,Loader2,CheckCircle2,AlertTriangle,History,FileStack,Eye,FileText} from 'lucide-react';
 import {PDFDocument} from 'pdf-lib';
 import {base44} from '@/api/base44Client';
 import {useAsync} from '@/lib/useAsync';

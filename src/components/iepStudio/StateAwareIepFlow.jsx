@@ -1,7 +1,6 @@
 import React,{useMemo,useState}from'react';
-import{MapPinned,CheckCircle2,Circle,ArrowRight,FileSearch,ShieldCheck,Sparkles}from'lucide-react';
+import{MapPinned,CheckCircle2,Circle,ArrowRight,FileSearch,ShieldCheck}from'lucide-react';
 import{Card}from'@/components/ui/cards';
-import{Button}from'@/components/ui/button';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 

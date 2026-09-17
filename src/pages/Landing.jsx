@@ -1,7 +1,7 @@
 import React,{useState}from'react';
 import{Link}from'react-router-dom';
 import{motion}from'framer-motion';
-import{Sparkles,Menu,ArrowRight,PlayCircle,CheckCircle2,ShieldCheck,HeartHandshake,Users,FileText,CalendarDays,BarChart3,ClipboardCheck,FolderOpen,MessageCircle,Clock3,Layers3,Target,Brain,Heart,Home,ChevronRight}from'lucide-react';
+import{Sparkles,Menu,ArrowRight,PlayCircle,CheckCircle2,ShieldCheck,HeartHandshake,Users,Layers3,Target,Heart,Home}from'lucide-react';
 import{Button}from'@/components/ui/button';
 import{Accordion,AccordionContent,AccordionItem,AccordionTrigger}from'@/components/ui/accordion';
 import{useAuth}from'@/lib/AuthContext';
