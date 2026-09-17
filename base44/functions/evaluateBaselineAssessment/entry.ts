@@ -17,8 +17,10 @@ export default async function(req){
     const scored=Array.isArray(results.items)?results.items:[];
     if(!scored.length)return Response.json({error:'Enter and save scored item results before evaluating the baseline.'},{status:400});
     const itemIndex={}; for(const d of assessment.domains||[])for(const i of d.items||[])itemIndex[i.id]={...i,domain:d.domain};
-    const rows=scored.filter(r=>itemIndex[r.item_id]).map(r=>({item_id:r.item_id,domain:itemIndex[r.item_id].domain,skill:itemIndex[r.item_id].skill,prompt:itemIndex[r.item_id].prompt,max_points:Number(itemIndex[r.item_id].max_points||0),earned_points:Number(r.earned_points||0),teacher_note:String(r.teacher_note||'')}));
-    if(!rows.length)return Response.json({error:'No scored items matched this generated assessment.'},{status:400});
+    const rows=scored.filter(r=>itemIndex[r.item_id]).map(r=>{const max=Math.max(0,Number(itemIndex[r.item_id].max_points||0));const raw=Number(r.earned_points);const earned=Number.isFinite(raw)?Math.max(0,Math.min(max,raw)):NaN;return {item_id:r.item_id,domain:itemIndex[r.item_id].domain,skill:itemIndex[r.item_id].skill,prompt:itemIndex[r.item_id].prompt,max_points:max,earned_points:earned,teacher_note:String(r.teacher_note||'')};}).filter(r=>Number.isFinite(r.earned_points));
+    if(!rows.length)return Response.json({error:'No valid scored items matched this generated assessment.'},{status:400});
+    const totalExpected=Object.values(itemIndex).length;
+    if(rows.length!==totalExpected)return Response.json({error:`Complete all baseline items before evaluation. ${rows.length} of ${totalExpected} items are scored.`},{status:400});
     const totals={}; for(const r of rows){if(!totals[r.domain])totals[r.domain]={earned:0,possible:0};totals[r.domain].earned+=r.earned_points;totals[r.domain].possible+=r.max_points;}
     const deterministic=Object.entries(totals).map(([domain,t]:any)=>({domain,earned:t.earned,possible:t.possible,percentage:t.possible>0?Math.round((t.earned/t.possible)*1000)/10:0}));
     const [goals,progress,docs]=await Promise.all([
@@ -31,7 +33,8 @@ export default async function(req){
     const result=await base44.asServiceRole.integrations.Core.InvokeLLM({prompt,model:'automatic',response_json_schema:SCHEMA});
     const analysis=typeof result==='object'?result:JSON.parse(result);
     // Enforce deterministic scores after generation so AI cannot alter them.
-    analysis.domain_results=(analysis.domain_results||[]).map((d:any)=>{const t=deterministic.find((x:any)=>x.domain===d.domain);return t?{...d,earned:t.earned,possible:t.possible,percentage:t.percentage}:d;});
+    const byDomain=new Map((analysis.domain_results||[]).map((d:any)=>[d.domain,d]));
+    analysis.domain_results=deterministic.map((t:any)=>{const d:any=byDomain.get(t.domain)||{domain:t.domain,strengths:[],needs:[],present_level:'',educational_impact:'',data_limitations:['CaseCue did not return narrative detail for this domain; educator review is required.']};return {...d,domain:t.domain,earned:t.earned,possible:t.possible,percentage:t.percentage};});
     return Response.json({analysis,domain_totals:deterministic});
   }catch(error){console.error('evaluateBaselineAssessment failed',error);return Response.json({error:error.message||'Unable to evaluate baseline assessment.'},{status:500});}
 }
