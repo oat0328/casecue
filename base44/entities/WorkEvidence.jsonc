@@ -132,6 +132,18 @@
       ],
       "title": "Evidence Strength"
     },
+    "goal_aligned_earned": {
+      "type": "number",
+      "title": "Goal-Aligned Items Earned"
+    },
+    "goal_aligned_possible": {
+      "type": "number",
+      "title": "Goal-Aligned Items Possible"
+    },
+    "goal_aligned_percentage": {
+      "type": "number",
+      "title": "Goal-Aligned Percentage"
+    },
     "teacher_supports": {
       "type": "array",
       "items": {
