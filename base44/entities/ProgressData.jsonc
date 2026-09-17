@@ -73,6 +73,14 @@
       "default": "active",
       "title": "Record Status"
     },
+    "data_basis": {
+      "type": "string",
+      "enum": [
+        "goal_aligned_subset",
+        "overall_assignment_score"
+      ],
+      "title": "Data Basis"
+    },
     "duplicate_of_progress_id": {
       "type": "string",
       "title": "Duplicate Of Progress Data ID"
