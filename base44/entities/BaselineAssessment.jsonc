@@ -1,0 +1,103 @@
+{
+  "name": "BaselineAssessment",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "title": "Student ID"
+    },
+    "title": {
+      "type": "string",
+      "title": "Assessment Title"
+    },
+    "grade": {
+      "type": "string",
+      "title": "Grade"
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Domains"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready",
+        "completed",
+        "analyzed"
+      ],
+      "default": "draft",
+      "title": "Status"
+    },
+    "assessment": {
+      "type": "object",
+      "title": "Generated Assessment"
+    },
+    "results": {
+      "type": "object",
+      "title": "Teacher-Scored Results"
+    },
+    "analysis": {
+      "type": "object",
+      "title": "Baseline Analysis"
+    },
+    "administered_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Administered Date"
+    },
+    "organization_id": {
+      "type": "string",
+      "title": "Organization ID"
+    }
+  },
+  "required": [
+    "student_id",
+    "assessment"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.organization_id": "{{user.data.organization_id}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}
