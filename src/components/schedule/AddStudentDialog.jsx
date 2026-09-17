@@ -14,7 +14,7 @@ const CONF_STYLE = { high: "bg-emerald-100 text-emerald-700", medium: "bg-amber-
 // or create one, or ask AI for a placement recommendation. Teacher stays in control.
 export default function AddStudentDialog({ open, onOpenChange, students, entries, onSaved }) {
   const { toast } = useToast();
-  const [form, setForm] = useState({ student_id: "", group_mode: "existing", group_name: "", delivery: "pull-out", days: ["Monday"], start_time: "", end_time: "", service_minutes: "", teacher_classroom: "" });
+  const [form, setForm] = useState({ student_id: "", group_mode: "existing", group_name: "", new_group_name: "", delivery: "pull-out", days: ["Monday"], start_time: "", end_time: "", service_minutes: "", teacher_classroom: "" });
   const [recs, setRecs] = useState(null);
   const [loadingRecs, setLoadingRecs] = useState(false);
   const [saving, setSaving] = useState(false);
