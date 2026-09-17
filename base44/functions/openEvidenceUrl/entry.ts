@@ -13,8 +13,9 @@ const parseAbsolutePages=(label='')=>{
   return [];
 };
 
-async function repairMissingFile(base44:any,evidence:any){
-  const runs=await base44.asServiceRole.entities.SmartStackRun.list('-created_date',100);
+async function repairMissingFile(base44:any,evidence:any,organizationId:string){
+  if(!organizationId||String(evidence?.organization_id||'')!==organizationId)throw new Error('Evidence is outside your organization.');
+  const runs=await base44.asServiceRole.entities.SmartStackRun.filter({organization_id:organizationId},'-created_date',100);
   const fp=evidence?.analysis?.duplicate_fingerprint||evidence?.duplicate_fingerprint||'';
   let matchRun:any=null,matchResult:any=null;
   for(const run of runs||[]){
@@ -56,10 +57,13 @@ export default async function(req:any) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json();
     if (!body.evidence_id) return Response.json({ error: 'Evidence is required.' }, { status: 400 });
+    const organizationId=String(user.organization_id||user.data?.organization_id||'');
+    if(!organizationId)return Response.json({error:'Your account is not linked to an organization.'},{status:403});
     let evidence = await base44.entities.WorkEvidence.get(body.evidence_id);
     if (!evidence) return Response.json({ error: 'Evidence not found.' }, { status: 404 });
+    if(String(evidence.organization_id||'')!==organizationId)return Response.json({error:'Evidence not found.'},{status:404});
     let fileUri=evidence.file_url||'';
-    if(!fileUri)fileUri=await repairMissingFile(base44,evidence);
+    if(!fileUri)fileUri=await repairMissingFile(base44,evidence,organizationId);
     if (String(fileUri).startsWith('http')) return Response.json({ signed_url: fileUri, repaired:!evidence.file_url });
     const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({file_uri:fileUri,expires_in:3600});
     return Response.json({ signed_url, repaired:!evidence.file_url });
