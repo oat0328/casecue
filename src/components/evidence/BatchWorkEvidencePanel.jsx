@@ -15,6 +15,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const evidenceLabel=v=>({strong:'Strong Evidence',supporting:'Supporting Evidence',classroom_only:'Classroom Work Only',needs_review:'Needs Review'}[v]||'Needs Review');
 const isDuplicate=x=>!!x.duplicate_of_evidence_id||x.duplicate_status==='duplicate';
 const alignedScore=x=>{const rows=x.goal_aligned_items||[];const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?`${earned}/${possible} · ${Math.round(earned/possible*1000)/10}%`:''};
+const alignedTotals=x=>{const rows=x.goal_aligned_items||[];if(!rows.length)return null;const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?{earned,possible}:null};
+const isGoalDefensible=x=>['high','teacher_confirmed'].includes(x.goal_match_confidence)&&['strong','supporting'].includes(x.evidence_strength||'needs_review');
 
 export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved}){
  const {toast}=useToast();
@@ -91,18 +93,20 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved}){
      if(!organizationId)throw new Error('Your account is missing an organization. CaseCue did not save any student evidence.');
      for(const x of selected){
        const possible=Number(x.score_possible||0),earned=Number(x.score_earned||0),pct=possible>0?Math.round(earned/possible*1000)/10:0;
+       const aligned=alignedTotals(x),alignedPct=aligned?Math.round(aligned.earned/aligned.possible*1000)/10:0;
        const evidenceFileUri=x.evidence_file_uri||await makeEvidenceFile(x);
        let gradebookId='';
        if(possible>0){
          const g=await base44.entities.GradebookAssignment.create({student_id:x.student_id,goal_id:x.suggested_goal_id||'',title:x.detected_title||'SmartStack student work',course:x.subject||'',assignment_type:x.evidence_type||'assignment',score_earned:earned,score_possible:possible,notes:x.qualitative_notes||'',quantitative_note:possible>0?`${earned}/${possible} · ${(pct/100).toFixed(2)} (${pct}%)`:'',qualitative_note:x.session_qualitative_draft||x.qualitative_notes||x.teacher_observation_draft||'',file_url:evidenceFileUri,source_type:'resource_assignment',date:todayISO(),organization_id:organizationId});
          gradebookId=g.id;
        }
-       const evidencePayload={student_id:x.student_id,organization_id:organizationId,goal_id:x.suggested_goal_id||'',title:x.detected_title||'SmartStack student work',evidence_type:['assignment','worksheet','writing_sample','quiz','assessment','classwork','homework','probe','observation','other'].includes(x.evidence_type)?x.evidence_type:'worksheet',file_url:evidenceFileUri,date:todayISO(),source:'SmartGrade · Student Work Folder',score_earned:earned,score_possible:possible,percentage:pct,qualitative_notes:x.qualitative_notes||'',error_patterns:x.error_patterns||[],skills:x.skills||[],analysis:x,teacher_confirmed:true,gradebook_assignment_id:gradebookId,scan_run_id:runId||'',source_pages:x.source_pages||[],review_status:'approved',duplicate_fingerprint:x.duplicate_fingerprint||'',evidence_strength:x.evidence_strength||'needs_review',teacher_supports:x.teacher_supports||[]};
+       const evidencePayload={student_id:x.student_id,organization_id:organizationId,goal_id:x.suggested_goal_id||'',title:x.detected_title||'SmartStack student work',evidence_type:['assignment','worksheet','writing_sample','quiz','assessment','classwork','homework','probe','observation','other'].includes(x.evidence_type)?x.evidence_type:'worksheet',file_url:evidenceFileUri,date:todayISO(),source:'SmartGrade · Student Work Folder',score_earned:earned,score_possible:possible,percentage:pct,...(aligned?{goal_aligned_earned:aligned.earned,goal_aligned_possible:aligned.possible,goal_aligned_percentage:alignedPct}:{}),qualitative_notes:x.qualitative_notes||'',error_patterns:x.error_patterns||[],skills:x.skills||[],analysis:x,teacher_confirmed:true,gradebook_assignment_id:gradebookId,scan_run_id:runId||'',source_pages:x.source_pages||[],review_status:'approved',duplicate_fingerprint:x.duplicate_fingerprint||'',evidence_strength:x.evidence_strength||'needs_review',teacher_supports:x.teacher_supports||[]};
        let evidenceId=x.work_evidence_id||'';
        if(evidenceId)await base44.entities.WorkEvidence.update(evidenceId,evidencePayload);
        else{const ev=await base44.entities.WorkEvidence.create(evidencePayload);evidenceId=ev.id;}
-       if(possible>0&&x.suggested_goal_id&&['high','teacher_confirmed'].includes(x.goal_match_confidence)){
-         const pd=await base44.entities.ProgressData.create({student_id:x.student_id,goal_id:x.suggested_goal_id,date:todayISO(),correct:earned,total:possible,percentage:pct,decimal:pct/100,qualitative_notes:x.session_qualitative_draft||x.qualitative_notes||'',observation_notes:x.teacher_observation_draft||'',organization_id:organizationId,work_evidence_id:evidenceId,record_status:'active'});
+       if(possible>0&&x.suggested_goal_id&&isGoalDefensible(x)){
+         const progressEarned=aligned?.earned??earned,progressPossible=aligned?.possible??possible,progressPct=aligned?alignedPct:pct;
+         const pd=await base44.entities.ProgressData.create({student_id:x.student_id,goal_id:x.suggested_goal_id,date:todayISO(),correct:progressEarned,total:progressPossible,percentage:progressPct,decimal:progressPct/100,data_basis:aligned?'goal_aligned_subset':'overall_assignment_score',qualitative_notes:x.session_qualitative_draft||x.qualitative_notes||'',observation_notes:x.teacher_observation_draft||'',organization_id:organizationId,work_evidence_id:evidenceId,record_status:'active'});
          await base44.entities.WorkEvidence.update(evidenceId,{progress_data_id:pd.id});
        }
        saved++;
