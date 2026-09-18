@@ -29,6 +29,18 @@
         "type": "string"
       }
     },
+    "current_grade_percent": {
+      "type": "number"
+    },
+    "current_grade_letter": {
+      "type": "string"
+    },
+    "grade_subject": {
+      "type": "string"
+    },
+    "grade_updated_at": {
+      "type": "string"
+    },
     "active": {
       "type": "boolean",
       "default": true
