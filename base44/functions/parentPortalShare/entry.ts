@@ -4,6 +4,7 @@ const enc = new TextEncoder();
 function bytesToHex(bytes) { return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join(''); }
 async function sha256(value) { return bytesToHex(new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(value)))); }
 function randomToken() { const bytes = new Uint8Array(32); crypto.getRandomValues(bytes); return bytesToHex(bytes); }
+function randomAccessCode() { const bytes = new Uint32Array(1); crypto.getRandomValues(bytes); return String(bytes[0] % 1000000).padStart(6, '0'); }
 
 export default async function(req) {
   try {
@@ -20,7 +21,7 @@ export default async function(req) {
 
     if (action === 'list') {
       const shares = await base44.entities.ParentShare.filter({ organization_id: orgId }, '-created_date', 100);
-      return Response.json({ shares: (shares || []).map(({ token_hash, ...safe }) => safe) });
+      return Response.json({ shares: (shares || []).map(({ token_hash, access_code_hash, ...safe }) => safe) });
     }
 
     if (action === 'create') {
@@ -31,15 +32,17 @@ export default async function(req) {
       const allowed = Array.isArray(body.allowed_sections) ? body.allowed_sections.filter((x) => ['academic_snapshot','progress','goals','resources','upcoming_meetings'].includes(x)) : ['academic_snapshot','progress','goals','resources'];
       const token = randomToken();
       const tokenHash = await sha256(token);
+      const accessCode = randomAccessCode();
+      const accessCodeHash = await sha256(accessCode);
       const days = Math.max(1, Math.min(Number(body.expires_in_days) || 7, 90));
       const expires = new Date(Date.now() + days * 86400000).toISOString();
       const record = await base44.entities.ParentShare.create({
-        student_id: student.id, organization_id: orgId, label: body.label || 'Parent view', token_hash: tokenHash,
+        student_id: student.id, organization_id: orgId, label: body.label || 'Family view', token_hash: tokenHash, access_code_hash: accessCodeHash,
         allowed_sections: allowed, status: 'active', expires_at: expires, created_by_name: user.full_name || user.email || 'CaseCue educator',
-        access_count: 0, include_last_name: !!body.include_last_name,
+        access_count: 0, failed_attempt_count: 0, include_last_name: !!body.include_last_name,
       });
       await base44.asServiceRole.entities.AuditLog.create({ action: 'parent_share_created', entity_type: 'ParentShare', entity_id: record.id, details: `Read-only parent share created for student ${student.id} by ${user.email}` });
-      return Response.json({ share: { id: record.id, expires_at: expires, allowed_sections: allowed }, token });
+      return Response.json({ share: { id: record.id, expires_at: expires, allowed_sections: allowed }, token, access_code: accessCode });
     }
 
     if (action === 'revoke') {
