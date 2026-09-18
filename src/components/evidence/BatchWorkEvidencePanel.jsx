@@ -22,6 +22,10 @@ const hasSupportedScore=x=>Number(x.score_possible)>0&&Number.isFinite(Number(x.
 const canApprove=x=>!!x.student_id&&!isDuplicate(x)&&hasSupportedScore(x)&&!['not_scored','low'].includes(String(x.scoring_confidence||'').toLowerCase());
 const pageGroups=pages=>{const nums=[...new Set((pages||[]).map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);const groups=[];for(const n of nums){const g=groups[groups.length-1];if(!g||n!==g[g.length-1]+1)groups.push([n]);else g.push(n);}return groups;};
 const looksMixedAssignment=x=>{const s=String([x.detected_title,x.subject,...(x.skills||[])].join(' ')).toLowerCase();const math=/multiplication|division|fraction|decimal|math|number|algebra|geometry/.test(s),writing=/writing|narrative|opinion|argument|story|sentence|paragraph/.test(s),reading=/reading|fluency|comprehension|vocabulary|phonics/.test(s);return (math&&writing)||(math&&reading)||(writing&&reading)||String(x.detected_title||'').includes('/');};
+const cleanText=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\bsvg\b/gi,' ').replace(/\s+/g,' ').trim();
+const subjectKind=x=>{const s=String([x.subject,x.detected_title,...(x.skills||[])].join(' ')).toLowerCase();if(/writing|narrative|opinion|argument|story|sentence|paragraph/.test(s))return'writing';if(/math|multiplication|division|fraction|decimal|number|algebra|geometry/.test(s))return'math';if(/reading|fluency|comprehension|phonics|vocabulary/.test(s))return'reading';return'other';};
+const reviewReason=x=>{if(isDuplicate(x))return'duplicate';if(!x.student_id)return'identity';if(!hasSupportedScore(x)||['not_scored','low'].includes(String(x.scoring_confidence||'').toLowerCase()))return'grade';if(subjectKind(x)==='writing'&&x.scoring_confidence!=='high')return'writing';return'ready';};
+const identityPct=x=>Number(x.identity_match_score||({'high':95,'medium':85,'low':65,'teacher_confirmed':100}[x.student_match_confidence]||0));
 
 export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=false}){
  const {toast}=useToast();
@@ -37,13 +41,15 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=
  const [progress,setProgress]=useState(null);
  const [runId,setRunId]=useState('');
  const [regradingKey,setRegradingKey]=useState('');
+ const [reviewFilter,setReviewFilter]=useState('all');
+ const [confirming,setConfirming]=useState(false);
  const {data:runs,refetch:refetchRuns}=useAsync(()=>base44.entities.SmartStackRun.list('-created_date',30),[]);
  const sortedStudents=useMemo(()=>[...students].sort((a,b)=>`${a.last_name||''},${a.first_name||''}`.localeCompare(`${b.last_name||''},${b.first_name||''}`,undefined,{sensitivity:'base'})),[students]);
  const studentName=id=>{const s=students.find(x=>x.id===id);return s?`${s.first_name} ${s.last_name}`:'Unmatched student'};
  const openEvidence=async x=>{try{if(x.work_evidence_id){const r=await base44.functions.invoke('openEvidenceUrl',{evidence_id:x.work_evidence_id});const u=r?.data?.signed_url||r?.signed_url;if(u){window.open(u,'_blank','noopener,noreferrer');return}}if(x.evidence_file_uri){const r=await base44.functions.invoke('openPrivateFileUrl',{file_uri:x.evidence_file_uri});const s=r?.data||r;if(s?.signed_url){window.open(s.signed_url,'_blank','noopener,noreferrer');return}}if(file){const u=URL.createObjectURL(file);window.open(u,'_blank','noopener,noreferrer');setTimeout(()=>URL.revokeObjectURL(u),60000);return}throw new Error('No viewable assignment file is attached to this review item.')}catch(e){toast({title:'Could not open assignment',description:e?.response?.data?.error||e.message,variant:'destructive'})}};
  const goalName=id=>{const g=goals.find(x=>x.id===id);return g?`${g.goal_area||'Goal'} — ${(g.goal_text||'').slice(0,100)}`:'No goal match'};
  const openIep=async studentId=>{try{if(!studentId)throw new Error('Choose the student first.');const docs=await base44.entities.Document.filter({student_id:studentId},'-updated_date',100);const d=(docs||[]).find(v=>/iep/i.test(String(v.document_type||v.type||v.title||'')));if(!d)throw new Error('No IEP is currently linked to this student.');const r=await base44.functions.invoke('openDocumentUrl',{document_id:d.id});const u=r?.data?.signed_url||r?.signed_url;if(!u)throw new Error('CaseCue could not securely open the IEP.');window.open(u,'_blank','noopener,noreferrer')}catch(e){toast({title:'Could not open IEP',description:e?.response?.data?.error||e.message,variant:'destructive'})}};
- const choose=f=>{if(!f)return;if(!/pdf|image/i.test(f.type)&&!/[.](pdf|png|jpe?g|webp)$/i.test(f.name)){toast({title:'Use a PDF or scanned image',variant:'destructive'});return;}setFile(f);setItems([]);setFileUri('');setRunId('');setProgress(null)};
+ const choose=f=>{if(!f)return;if(!/pdf|image/i.test(f.type)&&!/[.](pdf|png|jpe?g|webp)$/i.test(f.name)){toast({title:'Use a PDF or scanned image',variant:'destructive'});return;}setFile(f);setItems([]);setFileUri('');setRunId('');setProgress(null);setReviewFilter('all')};
  const removeUpload=()=>{setFile(null);setFileUri('');setItems([]);setRunId('');setProgress(null);if(inputRef.current)inputRef.current.value='';toast({title:'Upload removed',description:'The stack was cleared from this grading session.'})};
  const prepareStack=async f=>{
    if(!/\.pdf$/i.test(f.name))return{src:null,total:1,chunks:[{start:1,end:1,total:1}]};
