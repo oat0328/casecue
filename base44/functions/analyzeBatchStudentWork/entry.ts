@@ -24,7 +24,6 @@ export default async function(req){
   const answerKey=String(body.answer_key||'').slice(0,12000),rubric=String(body.rubric||'').slice(0,12000),directions=String(body.teacher_directions||'').slice(0,6000);
   const scrubUnmatched=(x:any)=>{
     if(x.student_id)return;
-    x.student_name='';
     x.suggested_goal_id='';
     x.goal_match_confidence='none';
     x.goal_alignment='Student identity must be confirmed before IEP goal matching.';
