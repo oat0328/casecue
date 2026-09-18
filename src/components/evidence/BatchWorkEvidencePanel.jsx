@@ -17,7 +17,7 @@ const evidenceLabel=v=>({strong:'Strong Evidence',supporting:'Supporting Evidenc
 const isDuplicate=x=>!!x.duplicate_of_evidence_id||x.duplicate_status==='duplicate';
 const alignedScore=x=>{const rows=x.goal_aligned_items||[];const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?`${earned}/${possible} · ${Math.round(earned/possible*1000)/10}%`:''};
 const alignedTotals=x=>{const rows=x.goal_aligned_items||[];if(!rows.length)return null;const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?{earned,possible}:null};
-const isGoalDefensible=x=>['high','teacher_confirmed'].includes(x.goal_match_confidence)&&['strong','supporting'].includes(x.evidence_strength||'needs_review');
+const isGoalDefensible=x=>x.goal_match_confidence==='teacher_confirmed'||(x.goal_match_confidence==='high'&&['strong','supporting'].includes(x.evidence_strength||'needs_review'));
 
 export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved}){
  const {toast}=useToast();
