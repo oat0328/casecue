@@ -10,6 +10,7 @@ import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {useToast} from '@/components/ui/use-toast';
 import {todayISO} from '@/lib/dateUtils';
+import BatchReviewQueue from '@/components/evidence/BatchReviewQueue';
 
 const CHUNK_PAGES=25;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
