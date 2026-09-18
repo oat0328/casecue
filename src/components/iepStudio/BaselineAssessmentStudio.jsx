@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { ClipboardCheck, Sparkles, Printer, Save, BarChart3, Target, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 
