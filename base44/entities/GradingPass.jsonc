@@ -1,0 +1,67 @@
+{
+  "name": "GradingPass",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "grading_run_id": {
+      "type": "string"
+    },
+    "pass_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "verification"
+      ]
+    },
+    "earned_points": {
+      "type": "number"
+    },
+    "possible_points": {
+      "type": "number"
+    },
+    "percentage": {
+      "type": "number"
+    },
+    "questions_detected": {
+      "type": "number"
+    },
+    "deterministic_items": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed",
+        "needs_review"
+      ]
+    },
+    "result": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "organization_id",
+    "grading_run_id",
+    "pass_type"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}

@@ -93,6 +93,28 @@
     "source_type": {
       "type": "string",
       "title": "Grade Source"
+    },
+    "grading_run_id": {
+      "type": "string",
+      "title": "Smart Grader Run ID"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "needs_teacher_review",
+        "teacher_confirmed",
+        "not_run"
+      ],
+      "title": "Verification Status"
+    },
+    "approved_by": {
+      "type": "string",
+      "title": "Approved By"
+    },
+    "approved_at": {
+      "type": "string",
+      "title": "Approved At"
     }
   },
   "required": [
