@@ -51,19 +51,13 @@
       "data.para_user_id": "{{user.id}}"
     },
     "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "data.para_user_id": "{{user.id}}"
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "data.para_user_id": "{{user.id}}"
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "data.para_user_id": "{{user.id}}"
     }
   }
 }
