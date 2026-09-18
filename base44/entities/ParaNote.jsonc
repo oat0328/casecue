@@ -1,0 +1,89 @@
+{
+  "name": "ParaNote",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string"
+    },
+    "context": {
+      "type": "string",
+      "enum": [
+        "classroom",
+        "assessment",
+        "transition",
+        "lunch_recess",
+        "behavior",
+        "academic_support",
+        "other"
+      ]
+    },
+    "activity": {
+      "type": "string"
+    },
+    "objective_observation": {
+      "type": "string"
+    },
+    "support_level": {
+      "type": "string",
+      "enum": [
+        "independent",
+        "visual_prompt",
+        "verbal_prompt",
+        "model",
+        "gestural_prompt",
+        "partial_physical",
+        "physical_assistance",
+        "other"
+      ]
+    },
+    "frequency": {
+      "type": "number"
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "student_response": {
+      "type": "string"
+    },
+    "follow_up": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "complete"
+      ],
+      "default": "complete"
+    }
+  },
+  "required": [
+    "student_id",
+    "date",
+    "objective_observation"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
