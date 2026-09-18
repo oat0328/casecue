@@ -36,6 +36,14 @@
     "source_assignment_id": {
       "type": "string"
     },
+    "source_kind": {
+      "type": "string",
+      "enum": [
+        "school_assignment",
+        "para_added"
+      ],
+      "default": "school_assignment"
+    },
     "updated_at": {
       "type": "string"
     }
@@ -49,19 +57,13 @@
       "data.para_user_id": "{{user.id}}"
     },
     "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "data.para_user_id": "{{user.id}}"
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "data.para_user_id": "{{user.id}}"
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "data.para_user_id": "{{user.id}}"
     }
   }
 }
