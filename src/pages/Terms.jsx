@@ -40,9 +40,9 @@ export default function Terms() {
   return (
     <LegalShell title="Terms of Service" updated="September 2026">
       <p>
-        These Terms of Service ("Terms") govern your use of CaseCue, a web application for special
-        education caseload management, system-assisted IEP drafting support, and progress monitoring
-        (the "Service"). By creating an account or using the Service, you agree to these Terms.
+        These Terms of Service ("Terms") govern your use of CaseCue, an educator workflow platform with
+        role-specific tools for planning, grading, documentation, student support, progress monitoring,
+        and specialized education workflows (the "Service"). By creating an account or using the Service, you agree to these Terms.
       </p>
 
       <Section heading="1. Your account">
@@ -50,11 +50,11 @@ export default function Terms() {
       </Section>
 
       <Section heading="2. Subscription and billing">
-        <p>CaseCue is offered on a subscription basis. New accounts start with a 14-day free trial. Unless canceled, your subscription automatically renews at the then-current rate (currently $19.99/month for Para, Substitute, and PE workspaces and $29.99/month for other individual workspaces). You may cancel at any time; cancellation stops future charges, and you retain access until the end of the paid period. Prices may change with reasonable advance notice.</p>
+        <p>CaseCue is offered on a subscription basis. New accounts may receive a 14-day free trial. Current individual pricing is $19.99/month for Para, Substitute, and PE and $29.99/month for participating professional workspaces. Some workspaces may remain in private beta and may not be offered for paid access until they are ready. You may cancel at any time; cancellation stops future charges, and you retain access until the end of the paid period. Prices may change with reasonable advance notice.</p>
       </Section>
 
       <Section heading="3. Authorization and student data">
-        <p>You are solely responsible for ensuring that you are authorized by your school, district, or educational organization — and permitted under applicable law, including FERPA and state student-privacy law — to enter, store, and process any student information you provide through the Service. You confirm this authorization in the app before uploading student data.</p>
+        <p>You are responsible for ensuring that your school, district, or educational organization authorizes your use of the Service with identifiable student information and that your use is permitted under applicable law and policy. CaseCue displays authorization/privacy notices in designated student-record workflows, but those notices do not replace school or district approval.</p>
       </Section>
 
       <Section heading="4. system-assisted content">
