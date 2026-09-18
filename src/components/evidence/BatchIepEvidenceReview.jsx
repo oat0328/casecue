@@ -4,7 +4,8 @@ import{Card}from'@/components/ui/cards';
 import{Button}from'@/components/ui/button';
 
 export default function BatchIepEvidenceReview({items=[],goals=[],update,onFileScores,onFileGoals,saving=false}){
- const eligible=items.filter(x=>(x.iep_candidates||[]).length>0);
+ const approved=items.filter(x=>x.approved);
+ const eligible=approved.filter(x=>(x.iep_candidates||[]).length>0);
  const selected=eligible.filter(x=>x.iep_selected_goal_id).length;
  const goalName=id=>{const g=goals.find(v=>v.id===id);return g?((g.goal_area||'Goal')+' — '+String(g.goal_text||'').slice(0,150)):'Goal'};
  return<div className='space-y-4'>
@@ -30,7 +31,7 @@ export default function BatchIepEvidenceReview({items=[],goals=[],update,onFileS
   })}
 
   <Card className='p-5'>
-   <div className='flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between'><div><div className='text-[10px] font-black uppercase tracking-[.18em] text-blue-700'>Final Filing</div><h3 className='text-xl font-black'>{items.length} approved grade{items.length===1?'':'s'} · {selected} selected for goal evidence</h3><p className='text-sm text-slate-500'>You can file every grade without IEP evidence, or file the selected work samples as progress evidence at the same time.</p></div><div className='flex flex-wrap gap-2'><Button disabled={saving} onClick={onFileScores} className='bg-slate-950 text-white'><ShieldCheck className='mr-1 h-4 w-4'/>File Grades Only</Button><Button disabled={saving||!selected} onClick={onFileGoals} className='bg-emerald-700 text-white'><Target className='mr-1 h-4 w-4'/>File + Selected Goal Evidence ({selected})</Button></div></div>
+   <div className='flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between'><div><div className='text-[10px] font-black uppercase tracking-[.18em] text-blue-700'>Final Filing</div><h3 className='text-xl font-black'>{approved.length} approved grade{approved.length===1?'':'s'} · {selected} selected for goal evidence</h3><p className='text-sm text-slate-500'>You can file every grade without IEP evidence, or file the selected work samples as progress evidence at the same time.</p></div><div className='flex flex-wrap gap-2'><Button disabled={saving} onClick={onFileScores} className='bg-slate-950 text-white'><ShieldCheck className='mr-1 h-4 w-4'/>File Grades Only</Button><Button disabled={saving||!selected} onClick={onFileGoals} className='bg-emerald-700 text-white'><Target className='mr-1 h-4 w-4'/>File + Selected Goal Evidence ({selected})</Button></div></div>
   </Card>
  </div>;
 }
