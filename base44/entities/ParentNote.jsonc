@@ -1,0 +1,61 @@
+{
+  "name": "ParentNote",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "note_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "school",
+        "assessment",
+        "meeting",
+        "teacher_contact",
+        "medical",
+        "behavior",
+        "other"
+      ]
+    },
+    "child_name": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "next_steps": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "organization_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "body"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
