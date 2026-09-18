@@ -127,7 +127,9 @@ export default async function(req) {
     const discrepancies = comparePassRows(firstRows, verifiedRows);
     const sameTotal = firstEarned === verifiedEarned && firstPossible === verifiedPossible;
     const sameCount = firstRows.length === verifiedRows.length;
-    const verifiedStatus = sameTotal && sameCount && discrepancies.length === 0 ? 'verified' : 'needs_teacher_review';
+    const hasReviewRows=[...firstRows,...verifiedRows].some((row:any)=>['needs_review','unreadable'].includes(String(row.status||'')));
+    const noScorableProblems=verifiedPossible<=0;
+    const verifiedStatus = sameTotal && sameCount && discrepancies.length === 0 && !hasReviewRows && !noScorableProblems ? 'verified' : 'needs_teacher_review';
     const analysis = { ...verified };
     analysis.verification = {
       status: verifiedStatus,
@@ -143,7 +145,8 @@ export default async function(req) {
       ];
     }
     if (analysis.score_possible > 0) analysis.percentage = Math.round((Number(analysis.score_earned || 0) / Number(analysis.score_possible)) * 1000) / 10;
-    else analysis.percentage = 0;
+    else {analysis.percentage = null;analysis.scoring_confidence='not_scored';analysis.cautions=[...(analysis.cautions||[]),'NO_FINALIZED_SCORABLE_PROBLEMS: Grade not available; this is not a 0% student score.'];}
+    analysis.authoritative_score={earned:Number(analysis.score_earned||0),possible:Number(analysis.score_possible||0),percentage:analysis.score_possible>0?analysis.percentage:null,source:'finalized_problem_records',reconciled:analysis.score_possible>0};
     for(const d of discrepancies){
       const allowed=['problem_text','student_answer','expected_answer','score','question_count','total_points'];
       await base44.asServiceRole.entities.VerificationDiscrepancy.create({organization_id:organizationId,grading_run_id:gradingRunId,problem_number:String(d.item||''),discrepancy_type:allowed.includes(d.type)?d.type:'score',pass_1_value:String(d.pass_1_value??''),pass_2_value:String(d.pass_2_value??''),resolution_status:'unresolved',created_at:new Date().toISOString()});
