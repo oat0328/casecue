@@ -20,6 +20,7 @@ export default function Onboarding() {
   const { user, checkUserAuth } = useAuth();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [schoolApproved, setSchoolApproved] = useState(false);
   const [form, setForm] = useState({ full_name: "", role: "", school: "", state: "", grades: [], caseload: "" });
 
   useEffect(() => {
@@ -195,22 +196,26 @@ export default function Onboarding() {
           <div>
             <h2 className="text-xl font-bold">You're all set!</h2>
             <p className="text-sm text-muted-foreground mt-1 mb-5">
-              How would you like to start? You can always add real students later — we'll never ask for student information outside the app.
+              Start safely with fictional demo data, or use identifiable student information only if your school, district, or organization has authorized CaseCue for that purpose.
             </p>
             <div className="grid sm:grid-cols-2 gap-4">
-              <button onClick={() => choose("real")} disabled={saving}
-                className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5 text-left hover:border-primary transition-colors disabled:opacity-50">
-                <UserPlus className="h-6 w-6 text-primary mb-3" />
-                <div className="font-semibold">Add My First Student</div>
-                <p className="text-sm text-muted-foreground mt-1">Start with your real caseload in the secure student form.</p>
-              </button>
               <button onClick={() => choose("demo")} disabled={saving}
-                className="rounded-2xl border-2 border-border p-5 text-left hover:border-primary/50 transition-colors disabled:opacity-50">
+                className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5 text-left hover:border-primary transition-colors disabled:opacity-50">
                 {saving ? <Loader2 className="h-6 w-6 text-primary mb-3 animate-spin" /> : <FlaskConical className="h-6 w-6 text-primary mb-3" />}
                 <div className="font-semibold">Explore With Fictional Demo Data</div>
-                <p className="text-sm text-muted-foreground mt-1">Ten clearly-labeled fictional students to safely try every feature.</p>
+                <p className="text-sm text-muted-foreground mt-1">Ten clearly labeled fictional students. No school approval is needed to explore a fictional demo.</p>
+              </button>
+              <button onClick={() => schoolApproved && choose("real")} disabled={saving || !schoolApproved}
+                className="rounded-2xl border-2 border-border p-5 text-left hover:border-primary/50 transition-colors disabled:opacity-50">
+                <UserPlus className="h-6 w-6 text-primary mb-3" />
+                <div className="font-semibold">Use School-Approved Student Data</div>
+                <p className="text-sm text-muted-foreground mt-1">Available after you confirm your organization has authorized CaseCue for identifiable student information.</p>
               </button>
             </div>
+            <label className="mt-5 flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4 text-sm">
+              <input type="checkbox" className="mt-1" checked={schoolApproved} onChange={(e) => setSchoolApproved(e.target.checked)} />
+              <span><strong>I confirm my school, district, or organization has authorized CaseCue for identifiable student information.</strong><span className="mt-1 block text-xs leading-5 text-muted-foreground">This confirmation does not replace your organization&apos;s approval process. If you are unsure, use the fictional demo instead.</span></span>
+            </label>
           </div>
         )}
 
