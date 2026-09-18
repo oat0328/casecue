@@ -114,7 +114,7 @@ export function answersEquivalent(studentRaw,correctValue,tolerance=1e-6){
 }
 
 export function gradeDeterministicRows(rows=[]){
-  let deterministicCount=0,earned=0,possible=0,reviewCount=0;
+  let deterministicCount=0,reviewCount=0;
   const graded=(Array.isArray(rows)?rows:[]).map((row,index)=>{
     const problem=String(row.problem_text||row.problem||row.expression||row.question||'').trim();
     const existingPossible=Number(row.possible||row.point_value||0);
@@ -129,7 +129,6 @@ export function gradeDeterministicRows(rows=[]){
     const blank=!response;
     const correct=!blank&&answersEquivalent(response,solved);
     const e=correct?p:0;
-    earned+=e; possible+=p;
     return {
       ...row,
       item:row.item||row.label||String(index+1),
@@ -143,7 +142,10 @@ export function gradeDeterministicRows(rows=[]){
       note:blank?'No visible student response.':correct?'Deterministic solver verified the response.':'Deterministic solver found a different correct answer.'
     };
   });
-  return {rows:graded,deterministicCount,earned,possible,percentage:possible>0?Math.round(earned/possible*1000)/10:0,reviewCount};
+  const finalized=graded.filter(row=>{const status=String(row.status||'').toLowerCase();return Number(row.possible)>0&&Number.isFinite(Number(row.earned))&&!['needs_review','unreadable'].includes(status);});
+  const earned=finalized.reduce((n,row)=>n+Number(row.earned||0),0);
+  const possible=finalized.reduce((n,row)=>n+Number(row.possible||0),0);
+  return {rows:graded,deterministicCount,earned,possible,percentage:possible>0?Math.round(earned/possible*1000)/10:0,reviewCount,finalizedCount:finalized.length};
 }
 
 export function comparePassRows(pass1=[],pass2=[]){
