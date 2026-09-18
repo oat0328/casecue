@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { DAYS, DELIVERY_LABEL } from "@/lib/scheduleUtils";
 
 // Edit a single schedule entry (group block): name, time, minutes, students.
-export default function EditEntryDialog({ entry, students, onClose, onSaved }) {
+export default function EditEntryDialog({ entry, students, onClose, onSaved, entityName='ScheduleEntry' }) {
   const { toast } = useToast();
   const [form, setForm] = useState(() => ({
     group_name: entry?.group_name || "",
@@ -33,7 +33,7 @@ export default function EditEntryDialog({ entry, students, onClose, onSaved }) {
   const save = async () => {
     setSaving(true);
     try {
-      await base44.entities.ScheduleEntry.update(entry.id, { ...form, service_minutes: parseFloat(form.service_minutes) || 0 });
+      await base44.entities[entityName].update(entry.id, { ...form, service_minutes: parseFloat(form.service_minutes) || 0 });
       toast({ title: "Schedule entry updated" });
       onSaved?.();
       onClose();
