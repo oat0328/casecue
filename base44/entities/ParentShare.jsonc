@@ -23,6 +23,7 @@
       "items": {
         "type": "string",
         "enum": [
+          "academic_snapshot",
           "progress",
           "goals",
           "resources",
