@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet, Eye, FileText, TrendingUp, Users, ClipboardCheck } from "lucide-react";
+import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet, Eye, FileText, TrendingUp, Users, ClipboardCheck, FolderOpen } from "lucide-react";
 import readXlsxFile from "read-excel-file";
 import { base44 } from "@/api/base44Client";
 import { useAsync } from "@/lib/useAsync";
