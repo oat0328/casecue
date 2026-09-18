@@ -1,0 +1,67 @@
+{
+  "name": "ParaAssignment",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "para_user_id": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "support_summary": {
+      "type": "string"
+    },
+    "approved_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assigned_by": {
+      "type": "string"
+    },
+    "assigned_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "para_user_id",
+    "student_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.para_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
