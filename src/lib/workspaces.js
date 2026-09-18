@@ -4,12 +4,12 @@ export const WORKSPACES = {
   psych: { key:'psych', name:'CaseCue Psych', short:'Psych', description:'Evaluations, testing, observations, reports and timelines.' },
   speech: { key:'speech', name:'CaseCue Speech', short:'Speech', description:'Caseload, groups, sessions, trials, goals and progress.' },
   ot: { key:'ot', name:'CaseCue OT', short:'OT', description:'Caseload, sessions, assessments, goals and functional progress.' },
-  para: { key:'para', name:'CaseCue Para', short:'Para', description:'Daily assignments, supports, prompting, observations and quick data.' },
+  para: { key:'para', name:'CaseCue Para', short:'Para', description:'Pull-in, pull-out and self-contained support, grades, baseline capture, work grading, observations and quick data.' },
   nurse: { key:'nurse', name:'CaseCue Nurse', short:'Nurse', description:'Student visits, medications, screenings, care plans and follow-up.' },
-  substitute: { key:'substitute', name:'CaseCue Substitute', short:'Sub', description:'Daily plans, schedules, attendance, approved supports and teacher handoff.' },
-  pe: { key:'pe', name:'CaseCue PE', short:'PE', description:'PE schedules, games, exercise ideas, activity plans and class notes.' },
+  substitute: { key:'substitute', name:'CaseCue Substitute', short:'Sub', description:'Daily and permanent sub schedules, lesson planning, grading, attendance, approved supports and teacher handoff.' },
+  pe: { key:'pe', name:'CaseCue PE', short:'PE', description:'PE schedules, game and exercise generation, activity plans, grading and class notes.' },
 };
-export const workspaceKeys=Object.keys(WORKSPACES);
+export const workspaceKeys=Object.keys(WORKSPACES).sort((a,b)=>WORKSPACES[a].short.localeCompare(WORKSPACES[b].short));
 export function getUserWorkspaces(user){
   const raw=user?.workspaces||user?.data?.workspaces;
   if(Array.isArray(raw)&&raw.length) return raw.filter(k=>WORKSPACES[k]);
