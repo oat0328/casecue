@@ -154,6 +154,20 @@
     "progress_data_id": {
       "type": "string",
       "title": "Linked Progress Data ID"
+    },
+    "grading_run_id": {
+      "type": "string",
+      "title": "Smart Grader Run ID"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "needs_teacher_review",
+        "teacher_confirmed",
+        "not_run"
+      ],
+      "title": "Verification Status"
     }
   },
   "required": [
