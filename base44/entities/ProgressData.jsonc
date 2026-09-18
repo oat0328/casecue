@@ -84,6 +84,10 @@
     "duplicate_of_progress_id": {
       "type": "string",
       "title": "Duplicate Of Progress Data ID"
+    },
+    "grading_run_id": {
+      "type": "string",
+      "title": "Smart Grader Run ID"
     }
   },
   "required": [
