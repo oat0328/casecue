@@ -14,6 +14,9 @@ export default async function(req) {
     const action = body.action || 'list';
     const orgId = user?.data?.organization_id;
     if (!orgId) return Response.json({ error: 'Organization is required.' }, { status: 400 });
+    const workspaces = Array.isArray(user?.workspaces) ? user.workspaces : (Array.isArray(user?.data?.workspaces) ? user.data.workspaces : []);
+    const canManageFamilyShares = user?.role === 'admin' || workspaces.includes('sped');
+    if (!canManageFamilyShares) return Response.json({ error: 'Family sharing is limited to authorized SPED or administrator accounts.' }, { status: 403 });
 
     if (action === 'list') {
       const shares = await base44.entities.ParentShare.filter({ organization_id: orgId }, '-created_date', 100);
@@ -28,7 +31,7 @@ export default async function(req) {
       const allowed = Array.isArray(body.allowed_sections) ? body.allowed_sections.filter((x) => ['academic_snapshot','progress','goals','resources','upcoming_meetings'].includes(x)) : ['academic_snapshot','progress','goals','resources'];
       const token = randomToken();
       const tokenHash = await sha256(token);
-      const days = Math.max(1, Math.min(Number(body.expires_in_days) || 30, 90));
+      const days = Math.max(1, Math.min(Number(body.expires_in_days) || 7, 90));
       const expires = new Date(Date.now() + days * 86400000).toISOString();
       const record = await base44.entities.ParentShare.create({
         student_id: student.id, organization_id: orgId, label: body.label || 'Parent view', token_hash: tokenHash,
