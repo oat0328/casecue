@@ -46,7 +46,7 @@ export default function Trust() {
             <p>• Encryption of data in transit between your device and our servers.</p>
             <p>• Row-level access controls that isolate your records from every other user&apos;s records.</p>
             <p>• Organization-level isolation for teams, districts, and schools.</p>
-            <p>• Audit logging of sensitive actions, including document processing, subscription changes, administrative actions, and document exports (print, PDF, DOCX, Excel, CSV, email, and share).</p>
+            <p>• Audit logging is used for sensitive workflows such as document processing, subscription changes, administrative actions, parent sharing, and supported export flows.</p>
             <p>No system is perfectly secure. If a security incident affecting your data ever occurs, we will notify you as required by law.</p>
           </Section>
 
@@ -54,7 +54,7 @@ export default function Trust() {
             <p>
               CaseCue is designed around FERPA-oriented privacy practices: you only upload records
               you are authorized to access, records are isolated per educator and per organization,
-              and every upload surface displays a Protected Student Information notice before you
+              and designated student-record upload workflows display a Protected Student Information notice before you
               upload. We do not claim FERPA certification, and we never market CaseCue as
               &quot;compliant&quot; — compliance decisions belong to your district, not to us.
             </p>
@@ -70,8 +70,8 @@ export default function Trust() {
             <p>Only you (and, if you belong to one, your organization&apos;s members) can see your students&apos; records. Another CaseCue user — even another teacher at the same school using a different account — cannot read, edit, or delete your data. These rules are enforced at the database level on every read, create, update, and delete.</p>
           </Section>
 
-          <Section heading="Role-based access">
-            <p>Within an organization, access follows roles: platform and organization administrators can manage members, billing, and audit logs; regular users work with their own and their organization&apos;s student records. Sensitive entities — audit logs, subscriptions, access codes, and billing data — are restricted to administrators.</p>
+          <Section heading="Access controls">
+            <p>CaseCue uses organization separation, workspace controls, and database rules to restrict access. Administrator-only entities such as audit logs, subscriptions, access codes, and billing data are separately restricted. Assignment-level, minimum-necessary student access is being strengthened before broad school and district rollout.</p>
           </Section>
 
           <Section heading="Audit logs">
