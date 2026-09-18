@@ -22,6 +22,14 @@ assert.equal(graded.percentage,50);
 assert.equal(graded.rows[1].correct_answer,'56');
 assert.equal(graded.rows[3].status,'blank');
 
+const mixed=gradeDeterministicRows([
+ {item:'1',problem_text:'7 × 8',student_response:'56',earned:0,possible:1},
+ {item:'2',problem_text:'Solve the word problem',student_response:'276',correct_answer:'276',earned:1,possible:1,status:'correct'}
+]);
+assert.equal(mixed.earned,2);
+assert.equal(mixed.possible,2);
+assert.equal(mixed.percentage,100);
+
 const d=comparePassRows(graded.rows,[...graded.rows.slice(0,1),{...graded.rows[1],student_response:'56'},...graded.rows.slice(2)]);
 assert.ok(d.some(x=>x.type==='student_answer'));
 
