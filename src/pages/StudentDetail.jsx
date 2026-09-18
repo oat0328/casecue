@@ -23,6 +23,7 @@ import AccommodationLogPanel from "@/components/students/AccommodationLogPanel";
 import TransitionPanel from "@/components/students/TransitionPanel";
 import EvaluationPanel from "@/components/students/EvaluationPanel";
 import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
+import StudentWorkFolder from "@/components/students/StudentWorkFolder";
 import InputRecordsPanel from "@/components/students/InputRecordsPanel";
 import SupportPlansPanel from "@/components/students/SupportPlansPanel";
 import StudentNotesPanel from "@/components/notes/StudentNotesPanel";
@@ -243,6 +244,7 @@ export default function StudentDetail() {
           <TabsTrigger value="accommodations-log"><Accessibility className="h-4 w-4 mr-1.5" /> Accommodation Log</TabsTrigger>
           <TabsTrigger value="transition"><Compass className="h-4 w-4 mr-1.5" /> Transition</TabsTrigger>
           <TabsTrigger value="evaluations"><FileSearch className="h-4 w-4 mr-1.5" /> Evaluations</TabsTrigger>
+          <TabsTrigger value="work-grades"><FolderOpen className="h-4 w-4 mr-1.5" /> Work & Grades</TabsTrigger>
           <TabsTrigger value="evidence"><Archive className="h-4 w-4 mr-1.5" /> Evidence Vault</TabsTrigger>
           <TabsTrigger value="timeline"><History className="h-4 w-4 mr-1.5" /> Timeline</TabsTrigger>
           <TabsTrigger value="input"><UsersRound className="h-4 w-4 mr-1.5" /> Team Input</TabsTrigger>
@@ -433,6 +435,7 @@ export default function StudentDetail() {
         <TabsContent value="accommodations-log"><AccommodationLogPanel student={student} /></TabsContent>
         <TabsContent value="transition"><TransitionPanel student={student} /></TabsContent>
         <TabsContent value="evaluations"><EvaluationPanel student={student} /></TabsContent>
+        <TabsContent value="work-grades"><StudentWorkFolder student={student} goals={goals||[]} /></TabsContent>
         <TabsContent value="evidence"><WorkEvidencePanel fixedStudentId={student.id} students={[student]} goals={goals||[]} /></TabsContent>
         <TabsContent value="timeline">
           <Card className="p-6">
