@@ -15,8 +15,7 @@ import StudentSelector from "@/components/forms/StudentSelector";
 import GradebookCharts from "@/components/gradebook/GradebookCharts";
 import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
 import { GRADEBOOK_REPORT_DEFINITIONS } from "@/lib/gradebookReporting";
-import WorkEvidencePanel from "@/components/evidence/WorkEvidencePanel";
-import BatchWorkEvidencePanel from "@/components/evidence/BatchWorkEvidencePanel";
+import SmartGraderV2 from "@/components/gradebook/SmartGraderV2";
 
 const emptyForm = () => ({ student_id: "", goal_id: "", title: "", course: "", gen_ed_teacher: "", assignment_type: "", term: "", score_earned: "", score_possible: "", current_grade_percent: "", current_grade_letter: "", missing_assignment: false, accommodations_provided: "unknown", notes: "", date: new Date().toISOString().slice(0,10) });
 const clean = (v) => String(v ?? "").trim();
@@ -126,10 +125,11 @@ export default function Gradebook() {
   const workLinked=(assignments||[]).filter(a=>a.file_url||a.work_evidence_id).length;
 
   return <div>
-    <PageHeader title="Gradebook" subtitle="Upload a worksheet, review what CaseCue read, fix the score or goal if needed, and save the final grade with the original work attached." icon={GraduationCap} />
+    <PageHeader title="Gradebook" subtitle="Smart Grader V2: load one assignment or a whole batch, review only what needs attention, then file the final work to each student." icon={GraduationCap} />
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6"><Card className="p-5 bg-gradient-to-br from-slate-950 to-slate-800 text-white"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-slate-300">Average grade</div><div className="text-3xl font-black mt-1">{avgGrade}%</div></div><TrendingUp className="h-7 w-7 text-sky-300"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Students with grades</div><div className="text-3xl font-black mt-1">{studentsWithGrades}</div></div><Users className="h-7 w-7 text-blue-600"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Assignments</div><div className="text-3xl font-black mt-1">{(assignments||[]).length}</div></div><ClipboardCheck className="h-7 w-7 text-emerald-600"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Work attached</div><div className="text-3xl font-black mt-1">{workLinked}</div></div><FileText className="h-7 w-7 text-violet-600"/></div></Card></div>
-    <Tabs defaultValue="upload">
-      <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="upload">Easy Grader</TabsTrigger><TabsTrigger value="stack">Batch Paper Grader</TabsTrigger><TabsTrigger value="assignments">Saved Grades</TabsTrigger><TabsTrigger value="import">School Grade Import</TabsTrigger><TabsTrigger value="charts">Data & Trends</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
+    <Tabs defaultValue="smart">
+      <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="smart">Smart Grader</TabsTrigger><TabsTrigger value="assignments">Saved Grades</TabsTrigger><TabsTrigger value="import">School Grade Import</TabsTrigger><TabsTrigger value="charts">Data & Trends</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
+      <TabsContent value="smart"><SmartGraderV2 students={students||[]} goals={goals||[]} onSaved={refetch}/></TabsContent>
       <TabsContent value="assignments">
         <Card className="p-6 mb-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary"/> Add Gen Ed grade</h3>
@@ -162,8 +162,6 @@ export default function Gradebook() {
           <p className="text-xs text-muted-foreground mt-5">Recognized columns include Student, Subject/Course, Teacher, Assignment, Points Earned, Points Possible, Current Grade, Letter Grade, Missing, Accommodations, Quarter/Term, Date, and Notes.</p>
         </Card>
       </TabsContent>
-      <TabsContent value="stack"><BatchWorkEvidencePanel students={students||[]} goals={goals||[]} onSaved={refetch}/></TabsContent>
-      <TabsContent value="upload"><WorkEvidencePanel students={students||[]} goals={goals||[]}/></TabsContent>
       <TabsContent value="charts"><GradebookCharts assignments={assignments||[]} sessions={sessions||[]} students={students||[]} goals={goals||[]}/></TabsContent>
       <TabsContent value="reports"><ReportBuilderPanel definitions={GRADEBOOK_REPORT_DEFINITIONS} data={{students:students||[],goals:goals||[],assignments:assignments||[],sessions:sessions||[]}} heading="Gradebook Reports"/></TabsContent>
     </Tabs>
