@@ -6,6 +6,7 @@ export const WORKSPACES = {
   ot: { key:'ot', name:'CaseCue OT', short:'OT', description:'Caseload, sessions, assessments, goals and functional progress.' },
   para: { key:'para', name:'CaseCue Para', short:'Para', description:'Daily assignments, supports, prompting, observations and quick data.' },
   nurse: { key:'nurse', name:'CaseCue Nurse', short:'Nurse', description:'Student visits, medications, screenings, care plans and follow-up.' },
+  parent: { key:'parent', name:'CaseCue Parent', short:'Parent', description:'Private family notes, school meetings, assessments, contacts and next steps.' },
 };
 export const workspaceKeys=Object.keys(WORKSPACES);
 export function getUserWorkspaces(user){
