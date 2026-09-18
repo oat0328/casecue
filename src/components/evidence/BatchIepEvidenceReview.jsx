@@ -1,5 +1,5 @@
 import React from'react';
-import{Target,ShieldCheck,FileText,CheckCircle2}from'lucide-react';
+import{Target,ShieldCheck}from'lucide-react';
 import{Card}from'@/components/ui/cards';
 import{Button}from'@/components/ui/button';
 
