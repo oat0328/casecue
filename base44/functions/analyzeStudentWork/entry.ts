@@ -55,13 +55,43 @@ export default async function(req) {
 
     const prompt = `${CASECUE_SYSTEM_PROMPT}\n\nYou are analyzing ONE student's uploaded work sample for a special education teacher. Read every visible page carefully.\n\nSTUDENT: ${student.first_name} ${student.last_name}, grade ${student.grade || 'not entered'}\nGOAL (if selected): ${goal ? `${goal.goal_area || 'Goal'} — ${goal.goal_text || ''}` : 'No goal selected'}\nTEACHER-PROVIDED POSSIBLE POINTS: ${possiblePoints || 'not provided'}\nANSWER KEY (optional): ${answerKey || 'not provided'}\nRUBRIC (optional): ${rubric || 'not provided'}\nTEACHER DIRECTIONS (optional): ${teacherDirections || 'not provided'}\n\nRULES:\n1. Never invent an answer key, rubric, score, or student response.\n2. Read the worksheet item by item. For every clearly visible question/problem/task that can be identified, add a question_breakdown row with the visible item label/number, student response, correct answer only when supportable, earned/possible points, status, and a short note. If an item cannot be read, include it with status "needs_review" rather than silently dropping it. If the work is objectively scorable from visible responses plus a provided or clearly embedded answer key, calculate score_earned, score_possible, and percentage from the supported item rows.\n3. If scoring is subjective or an answer key/rubric is missing, set scoring_confidence to low or not_scored and use 0 for unsupported score fields rather than guessing. The teacher can correct or manually score the work in CaseCue. Explain what the teacher must confirm in scoring_basis/cautions.\n4. teacher_observation_draft must be a short evidence-based observation from what is actually visible in the work, not a diagnosis or conclusion.\n5. goal_alignment should say how the observed task aligns to the selected goal, or "No goal selected".\n6. Flag illegible/cropped/missing pages, skipped visible items, ambiguous responses, or conflicting marks in cautions. Do not assume a checkmark, circle, handwriting mark, or crossed-out response means correct unless the evidence is clear.\n7. The teacher must review and can override student, goal, title, item scores, total score, and notes before anything is saved to Gradebook or progress monitoring.\n\nReturn JSON matching the schema.`;
 
-    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    const firstResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       file_urls: [fileUrl],
       response_json_schema: SCHEMA,
       model: 'automatic'
     });
-    const analysis = typeof result === 'object' ? result : JSON.parse(result);
+    const first = typeof firstResult === 'object' ? firstResult : JSON.parse(firstResult);
+
+    const verifyPrompt = `${CASECUE_SYSTEM_PROMPT}\n\nYou are the SECOND-PASS verification grader. Independently inspect the SAME uploaded worksheet. Do not trust the first pass just because it exists.\n\nSTUDENT: ${student.first_name} ${student.last_name}, grade ${student.grade || 'not entered'}\nSELECTED GOAL: ${goal ? `${goal.goal_area || 'Goal'} — ${goal.goal_text || ''}` : 'No goal selected'}\nTEACHER POSSIBLE POINTS: ${possiblePoints || 'not provided'}\nANSWER KEY: ${answerKey || 'not provided'}\nRUBRIC: ${rubric || 'not provided'}\nTEACHER DIRECTIONS: ${teacherDirections || 'not provided'}\n\nFIRST PASS FOR COMPARISON ONLY:\n${JSON.stringify(first)}\n\nVERIFY EVERY VISIBLE ITEM YOURSELF. Re-read the original file and rebuild question_breakdown independently. Correct any first-pass error you can prove from the worksheet. Never preserve a first-pass answer merely to agree. Flag unclear/cropped/illegible items as needs_review. For objective work, recompute totals from verified item rows. For subjective work without an adequate rubric, do not invent points. Return JSON matching the same schema.`;
+
+    const verifyResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: verifyPrompt,
+      file_urls: [fileUrl],
+      response_json_schema: SCHEMA,
+      model: 'automatic'
+    });
+    const verified = typeof verifyResult === 'object' ? verifyResult : JSON.parse(verifyResult);
+
+    const firstEarned = Number(first.score_earned || 0), firstPossible = Number(first.score_possible || 0);
+    const verifiedEarned = Number(verified.score_earned || 0), verifiedPossible = Number(verified.score_possible || 0);
+    const firstRows = Array.isArray(first.question_breakdown) ? first.question_breakdown : [];
+    const verifiedRows = Array.isArray(verified.question_breakdown) ? verified.question_breakdown : [];
+    const sameTotal = firstEarned === verifiedEarned && firstPossible === verifiedPossible;
+    const sameCount = firstRows.length === verifiedRows.length;
+    const analysis = { ...verified };
+    analysis.verification = {
+      status: sameTotal && sameCount ? 'verified' : 'needs_teacher_review',
+      first_pass: { earned: firstEarned, possible: firstPossible, items: firstRows.length },
+      second_pass: { earned: verifiedEarned, possible: verifiedPossible, items: verifiedRows.length }
+    };
+    if (!sameTotal || !sameCount) {
+      analysis.scoring_confidence = 'low';
+      analysis.cautions = [
+        ...(analysis.cautions || []),
+        `Two-pass grading disagreed. First pass: ${firstEarned}/${firstPossible} across ${firstRows.length} item(s). Verification pass: ${verifiedEarned}/${verifiedPossible} across ${verifiedRows.length} item(s). Teacher review is required before saving.`
+      ];
+    }
     if (analysis.score_possible > 0) analysis.percentage = Math.round((Number(analysis.score_earned || 0) / Number(analysis.score_possible)) * 1000) / 10;
     else analysis.percentage = 0;
     return Response.json({ analysis });
