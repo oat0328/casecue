@@ -18,13 +18,29 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
     const token = String(body.token || '').trim();
+    const accessCode = String(body.access_code || '').trim();
     if (!token || token.length < 40) return Response.json({ error: 'Invalid or expired link.' }, { status: 404 });
     const hash = await sha256(token);
     const svc = base44.asServiceRole;
     const shares = await svc.entities.ParentShare.filter({ token_hash: hash }, '-created_date', 1);
     const share = (shares || [])[0];
     if (!share || share.status !== 'active' || !share.expires_at || new Date(share.expires_at) <= new Date()) {
-      return Response.json({ error: 'This parent link is invalid, expired, or has been revoked.' }, { status: 404 });
+      return Response.json({ error: 'This family link is invalid, expired, or has been revoked.' }, { status: 404 });
+    }
+    if (share.locked_until && new Date(share.locked_until) > new Date()) {
+      return Response.json({ error: 'Too many incorrect access-code attempts. Try again later.' }, { status: 429 });
+    }
+    if (share.access_code_hash) {
+      if (!/^\d{6}$/.test(accessCode)) return Response.json({ error: 'Enter the 6-digit family access code.' }, { status: 401 });
+      const codeHash = await sha256(accessCode);
+      if (codeHash !== share.access_code_hash) {
+        const fails = Number(share.failed_attempt_count || 0) + 1;
+        const patch:any = { failed_attempt_count:fails };
+        if (fails >= 5) patch.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+        await svc.entities.ParentShare.update(share.id, patch);
+        return Response.json({ error: fails >= 5 ? 'Too many incorrect access-code attempts. Try again in 15 minutes.' : 'That access code is not correct.' }, { status: 401 });
+      }
+      if (share.failed_attempt_count || share.locked_until) await svc.entities.ParentShare.update(share.id,{failed_attempt_count:0,locked_until:null});
     }
     const student = await svc.entities.Student.get(share.student_id);
     if (!student || student.organization_id !== share.organization_id) return Response.json({ error: 'Shared view is unavailable.' }, { status: 404 });
