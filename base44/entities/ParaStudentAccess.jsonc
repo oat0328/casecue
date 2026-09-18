@@ -1,0 +1,67 @@
+{
+  "name": "ParaStudentAccess",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "para_user_id": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "grade": {
+      "type": "string"
+    },
+    "support_summary": {
+      "type": "string"
+    },
+    "approved_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "source_assignment_id": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "para_user_id",
+    "student_id"
+  ],
+  "rls": {
+    "read": {
+      "data.para_user_id": "{{user.id}}"
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
