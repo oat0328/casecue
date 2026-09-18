@@ -205,6 +205,10 @@ export default function Register() {
         </div>
       )}
 
+      <div className="mb-5 rounded-xl border border-border bg-muted/40 p-3 text-xs leading-5 text-muted-foreground">
+        <strong className="text-foreground">Exploring CaseCue?</strong> Use demo or de-identified information unless your school, district, or organization has authorized CaseCue for identifiable student data. <Link to="/trust" className="font-medium text-primary hover:underline">Learn more</Link>.
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
