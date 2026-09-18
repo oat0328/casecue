@@ -147,7 +147,29 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=
  const selectedGoalCount=items.filter(x=>x.approved&&canApprove(x)&&x.suggested_goal_id&&isGoalDefensible(x)).length;
  return <div className='space-y-5'>
   <Card className='p-6'><div className='flex flex-wrap items-start justify-between gap-3'><div><h3 className='text-xl font-black'>{v2?'Batch Grader':'SmartStack Grader'}</h3><p className='text-sm text-slate-600 mt-1'>{v2?'Drop one mixed class packet. CaseCue separates the work, grades what it can verify, and sends only the questionable items to review.':'Drop one mixed stack of student work. CaseCue processes large PDFs in 25-page groups, keeps a saved scan history, and sends every detected item to a teacher review queue.'}</p></div><div className='rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-800'>Large packet ready · processed in chunks</div></div>{v2?<details className='mt-4 rounded-xl border bg-slate-50 p-3'><summary className='cursor-pointer text-sm font-bold text-slate-700'>Optional answer key or rubric</summary><div className='grid md:grid-cols-2 gap-4 mt-4'><div><Label>Answer key</Label><Textarea rows={3} value={answerKey} onChange={e=>setAnswerKey(e.target.value)} placeholder='Optional for objective math'/></div><div><Label>Rubric</Label><Textarea rows={3} value={rubric} onChange={e=>setRubric(e.target.value)} placeholder='Use for writing or subjective work'/></div></div></details>:<div className='grid md:grid-cols-2 gap-4 mt-5'><div><Label>Answer key (recommended)</Label><Textarea rows={3} value={answerKey} onChange={e=>setAnswerKey(e.target.value)} placeholder='Paste answer key or scoring rules'/></div><div><Label>Rubric (for writing/subjective work)</Label><Textarea rows={3} value={rubric} onChange={e=>setRubric(e.target.value)} placeholder='Paste rubric if needed'/></div></div>}<div className={`mt-5 rounded-2xl border-2 border-dashed p-8 text-center ${drag?'border-blue-600 bg-blue-50':'border-slate-200'}`} onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);choose(e.dataTransfer.files?.[0])}}><UploadCloud className='h-10 w-10 mx-auto text-blue-700'/><div className='font-bold mt-2'>{file?file.name:'Drop the class packet here'}</div><div className='text-xs text-slate-500 mt-1'>{v2?'PDF, photo, or scan. One mixed packet can contain work from many students.':'Large PDFs are split automatically so a long scanner packet does not disappear after one AI request.'}</div><input ref={inputRef} className='hidden' type='file' accept='.pdf,.png,.jpg,.jpeg,.webp' onChange={e=>choose(e.target.files?.[0])}/><div className='mt-4 flex flex-wrap justify-center gap-2'><Button variant='outline' onClick={()=>inputRef.current?.click()}>{file?'Replace file':'Choose file'}</Button>{file&&<Button variant='outline' className='border-rose-200 text-rose-700 hover:bg-rose-50' onClick={removeUpload}><Trash2 className='mr-1 h-4 w-4'/>Remove upload</Button>}</div></div><Button className='mt-4 w-full bg-blue-700 text-white sm:w-auto' disabled={!file||busy} onClick={analyze}>{busy?<Loader2 className='h-4 w-4 mr-2 animate-spin'/>:<UploadCloud className='h-4 w-4 mr-2'/>}{busy?'Loading and grading batch…':v2?'Load & Grade Batch':'Run SmartStack'}</Button>{progress&&<div className='mt-4 rounded-2xl border bg-slate-50 p-4'><div className='flex items-center justify-between text-sm font-bold'><span>{progress.stage}</span><span>{progress.totalPages?`${progress.pages}/${progress.totalPages} pages`:''}</span></div><div className='mt-2 h-2 overflow-hidden rounded-full bg-slate-200'><div className='h-full bg-blue-600 transition-all' style={{width:`${progress.totalPages?Math.min(100,(progress.pages/progress.totalPages)*100):0}%`}}/></div><p className='mt-2 text-xs text-slate-500'>{v2?'You can leave the screen and reopen the saved run from Batch History.':'You can always reopen this scan from Scan History.'}</p></div>}</Card>
-__BATCH_REVIEW_QUEUE__
+  {items.length>0&&<BatchReviewQueue
+   items={items}
+   students={students}
+   goals={goals}
+   stats={stats}
+   reviewFilter={reviewFilter}
+   setReviewFilter={setReviewFilter}
+   confirming={confirming}
+   confirmProbableMatches={confirmProbableMatches}
+   approveAllReady={approveAllReady}
+   update={update}
+   confirmStudent={confirmStudent}
+   openEvidence={openEvidence}
+   regradeItem={regradeItem}
+   regradingKey={regradingKey}
+   openIep={openIep}
+   goalName={goalName}
+   selectedCount={selectedCount}
+   selectedGoalCount={selectedGoalCount}
+   saving={saving}
+   onFileScores={()=>save(false)}
+   onFileGoals={()=>save(true)}
+  />}
   <Card className='p-6'><div className='flex items-center gap-2'><History className='h-5 w-5 text-blue-700'/><h3 className='font-black text-lg'>{v2?'Batch History':'Scan History'}</h3></div><p className='mt-1 text-sm text-slate-500'>Every SmartStack run stays here, including failed or partially processed stacks, so you can see what happened after scanning.</p><div className='mt-4 space-y-2'>{(runs||[]).map(r=><button key={r.id} onClick={()=>openRun(r)} className='flex w-full items-center gap-3 rounded-xl border p-3 text-left hover:bg-slate-50'><div className='grid h-9 w-9 place-items-center rounded-xl bg-blue-50 text-blue-700'><FileStack className='h-4 w-4'/></div><div className='min-w-0 flex-1'><div className='truncate text-sm font-bold'>{r.filename}</div><div className='text-xs text-slate-500'>{r.page_count||0} pages · {r.detected_items||0} detected · {r.new_items??'—'} new · {r.duplicate_items??'—'} duplicates · {r.approved_items||0} filed</div>{r.error_message&&<div className='mt-1 truncate text-xs text-amber-700'>{r.error_message}</div>}</div><span className={`rounded-full px-2 py-1 text-[10px] font-black uppercase ${r.status==='completed'?'bg-emerald-50 text-emerald-700':r.status==='failed'?'bg-red-50 text-red-700':'bg-blue-50 text-blue-700'}`}>{r.status}</span></button>)}{!(runs||[]).length&&<div className='rounded-xl border border-dashed p-6 text-center text-sm text-slate-500'>No SmartStack scans saved yet.</div>}</div></Card>
  </div>;
 }
