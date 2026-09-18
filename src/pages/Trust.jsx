@@ -60,6 +60,12 @@ export default function Trust() {
             </p>
           </Section>
 
+          <Section heading="School approval and identifiable student data">
+            <p>Educators can explore CaseCue with demo or de-identified information. Before entering personally identifiable student information, users should follow their school, district, or organization&apos;s approval process for third-party software.</p>
+            <p>CaseCue is developing school-approval resources, vendor documentation, organization controls, and administrator workflows. These tools are not represented as school or district approval, and requesting access does not activate or imply authorization.</p>
+            <p><a href="mailto:contact@getcasecue.com?subject=CaseCue%20School%20Access%20Request" className="text-primary hover:underline">Request school access or vendor information</a>.</p>
+          </Section>
+
           <Section heading="Row-level privacy & organization isolation">
             <p>Only you (and, if you belong to one, your organization&apos;s members) can see your students&apos; records. Another CaseCue user — even another teacher at the same school using a different account — cannot read, edit, or delete your data. These rules are enforced at the database level on every read, create, update, and delete.</p>
           </Section>
