@@ -20,7 +20,13 @@ export default async function(req){
     if(share.access_code_hash){
       if(!/^\d{6}$/.test(accessCode))return Response.json({error:'Enter the 6-digit family access code.'},{status:401});
       const codeHash=await sha256(accessCode);
-      if(codeHash!==share.access_code_hash)return Response.json({error:'That access code is not correct.'},{status:401});
+      if(codeHash!==share.access_code_hash){
+        const fails=Number(share.failed_attempt_count||0)+1;const patch:any={failed_attempt_count:fails};
+        if(fails>=5)patch.locked_until=new Date(Date.now()+15*60*1000).toISOString();
+        await svc.entities.ParentShare.update(share.id,patch);
+        return Response.json({error:fails>=5?'Too many incorrect access-code attempts. Try again in 15 minutes.':'That access code is not correct.'},{status:401});
+      }
+      if(share.failed_attempt_count||share.locked_until)await svc.entities.ParentShare.update(share.id,{failed_attempt_count:0,locked_until:null});
     }
     if(requestType!=='acknowledgment'&&!message)return Response.json({error:'Enter a message before sending.'},{status:400});
     const rec=await svc.entities.FamilyRequest.create({student_id:share.student_id,organization_id:share.organization_id,parent_share_id:share.id,request_type:requestType,message:requestType==='acknowledgment'?(message||'Family acknowledged reviewing the shared CaseCue Family View.'):message,status:'new',submitted_at:new Date().toISOString()});
