@@ -18,6 +18,10 @@
       "type": "string",
       "title": "Hashed Share Token"
     },
+    "access_code_hash": {
+      "type": "string",
+      "title": "Hashed Family Access Code"
+    },
     "allowed_sections": {
       "type": "array",
       "items": {
@@ -57,6 +61,15 @@
       "type": "number",
       "default": 0,
       "title": "Access Count"
+    },
+    "failed_attempt_count": {
+      "type": "number",
+      "default": 0,
+      "title": "Failed Access Attempts"
+    },
+    "locked_until": {
+      "type": "string",
+      "title": "Locked Until"
     },
     "include_last_name": {
       "type": "boolean",
