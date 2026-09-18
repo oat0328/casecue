@@ -50,7 +50,7 @@ export default function Terms() {
       </Section>
 
       <Section heading="2. Subscription and billing">
-        <p>CaseCue is offered on a subscription basis. New accounts may receive a 14-day free trial. Current individual pricing is $19.99/month for Para, Substitute, and PE and $29.99/month for participating professional workspaces. Some workspaces may remain in private beta and may not be offered for paid access until they are ready. You may cancel at any time; cancellation stops future charges, and you retain access until the end of the paid period. Prices may change with reasonable advance notice.</p>
+        <p>CaseCue is offered on a subscription basis. New accounts may receive a 14-day free trial. During the current beta, the Founding Educator plan is $29.99/month for the individual workspaces offered publicly. Some workspaces remain in private beta and are not offered for paid access yet. You may cancel at any time; cancellation stops future charges, and you retain access according to the applicable billing period. Prices and future workspace-specific plans may change with reasonable advance notice.</p>
       </Section>
 
       <Section heading="3. Authorization and student data">
