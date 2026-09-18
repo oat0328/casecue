@@ -1,12 +1,11 @@
 import React,{useMemo,useRef,useState} from 'react';
-import {UploadCloud,Loader2,CheckCircle2,AlertTriangle,History,FileStack,Eye,FileText,RefreshCw,Trash2} from 'lucide-react';
+import {UploadCloud,Loader2,History,FileStack,Trash2} from 'lucide-react';
 import {PDFDocument} from 'pdf-lib';
 import {base44} from '@/api/base44Client';
 import {useAsync} from '@/lib/useAsync';
 import {Card} from '@/components/ui/cards';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
-import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {useToast} from '@/components/ui/use-toast';
 import {todayISO} from '@/lib/dateUtils';
@@ -14,9 +13,7 @@ import BatchReviewQueue from '@/components/evidence/BatchReviewQueue';
 
 const CHUNK_PAGES=25;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const evidenceLabel=v=>({strong:'Strong Evidence',supporting:'Supporting Evidence',classroom_only:'Classroom Work Only',needs_review:'Needs Review'}[v]||'Needs Review');
 const isDuplicate=x=>!!x.duplicate_of_evidence_id||x.duplicate_status==='duplicate';
-const alignedScore=x=>{const rows=x.goal_aligned_items||[];const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?`${earned}/${possible} · ${Math.round(earned/possible*1000)/10}%`:''};
 const alignedTotals=x=>{const rows=x.goal_aligned_items||[];if(!rows.length)return null;const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?{earned,possible}:null};
 const isGoalDefensible=x=>x.goal_match_confidence==='teacher_confirmed'||(x.goal_match_confidence==='high'&&['strong','supporting'].includes(x.evidence_strength||'needs_review'));
 const hasSupportedScore=x=>Number(x.score_possible)>0&&Number.isFinite(Number(x.score_earned));
@@ -26,7 +23,6 @@ const looksMixedAssignment=x=>{const s=String([x.detected_title,x.subject,...(x.
 const cleanText=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\bsvg\b/gi,' ').replace(/\s+/g,' ').trim();
 const subjectKind=x=>{const s=String([x.subject,x.detected_title,...(x.skills||[])].join(' ')).toLowerCase();if(/writing|narrative|opinion|argument|story|sentence|paragraph/.test(s))return'writing';if(/math|multiplication|division|fraction|decimal|number|algebra|geometry/.test(s))return'math';if(/reading|fluency|comprehension|phonics|vocabulary/.test(s))return'reading';return'other';};
 const reviewReason=x=>{if(isDuplicate(x))return'duplicate';if(!x.student_id)return'identity';if(!hasSupportedScore(x)||['not_scored','low'].includes(String(x.scoring_confidence||'').toLowerCase()))return'grade';if(subjectKind(x)==='writing'&&x.scoring_confidence!=='high')return'writing';return'ready';};
-const identityPct=x=>Number(x.identity_match_score||({'high':95,'medium':85,'low':65,'teacher_confirmed':100}[x.student_match_confidence]||0));
 
 export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=false}){
  const {toast}=useToast();
