@@ -28,9 +28,9 @@ export default function Testimonials() {
             </div>
             <span className="text-xl font-bold">CaseCue</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Loved by special education teachers</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Feedback from early CaseCue educators</h1>
           <p className="mt-3 text-white/85 max-w-2xl">
-            Real reviews from the educators who use CaseCue every day to manage caseloads, draft IEPs, and track progress.
+            CaseCue is still in beta. We only publish educator feedback after the educator has chosen to share it publicly.
           </p>
           {avg && (
             <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-2">
@@ -45,8 +45,8 @@ export default function Testimonials() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         {reviews.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-lg font-medium">Reviews are coming soon.</p>
-            <p className="text-muted-foreground mt-2 text-sm">CaseCue teachers are just getting started — check back soon for verified reviews.</p>
+            <p className="text-lg font-medium">We&apos;re collecting feedback from our first educators.</p>
+            <p className="text-muted-foreground mt-2 text-sm">No placeholder praise and no made-up testimonials. Approved educator feedback will appear here as the beta grows.</p>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
@@ -59,15 +59,15 @@ export default function Testimonials() {
                 </div>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">"{r.body}"</p>
                 <div className="mt-4 text-sm font-medium">{r.display_name || "Verified CaseCue educator"}</div>
-                <div className="text-xs text-muted-foreground">CaseCue user{r.milestone ? ` · ${r.milestone}` : ""}</div>
+                <div className="text-xs text-muted-foreground">CaseCue educator{r.milestone ? ` · ${r.milestone}` : ""}</div>
               </div>
             ))}
           </div>
         )}
 
         <div className="mt-14 rounded-2xl brand-gradient-soft border border-border p-8 text-center">
-          <h2 className="text-xl font-bold">Ready to spend less time on paperwork?</h2>
-          <p className="text-muted-foreground mt-2 text-sm">Join the special education teachers running their caseload on CaseCue.</p>
+          <h2 className="text-xl font-bold">Want to help shape CaseCue?</h2>
+          <p className="text-muted-foreground mt-2 text-sm">Start a trial, use demo or de-identified information, and tell us where the workflow still gets in your way.</p>
           <Link to="/" className="inline-flex items-center gap-2 rounded-full brand-gradient text-white px-6 py-3 text-sm font-semibold mt-5">
             Get started with CaseCue
           </Link>
