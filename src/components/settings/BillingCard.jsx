@@ -120,7 +120,7 @@ export default function BillingCard() {
   return (
     <Card className="p-6 max-w-lg">
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="text-sm font-semibold text-primary">Founding Teacher</div>
+        <div className="text-sm font-semibold text-primary">Founding Educator</div>
         {user?.data?.founding_member && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">★ Founding Member</span>}
         {user?.data?.beta_tester && <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Beta Tester</span>}
       </div>
@@ -129,7 +129,7 @@ export default function BillingCard() {
       {plan === "founding_teacher" ? (
         <>
           <div className="mt-4 rounded-xl bg-muted p-4 text-sm space-y-1">
-            <p className="flex items-center gap-1.5"><Check className="h-4 w-4 text-emerald-600" /> Your Founding Teacher subscription is active.</p>
+            <p className="flex items-center gap-1.5"><Check className="h-4 w-4 text-emerald-600" /> Your Founding Educator subscription is active.</p>
             {autoRenewOff ? (
               <p className="text-amber-700">Auto-renew is off — your access continues until the end of the period you've paid for, then your subscription ends automatically.</p>
             ) : (
@@ -147,7 +147,7 @@ export default function BillingCard() {
         </>
       ) : (
         <div className="mt-4 rounded-xl bg-muted p-4 text-sm">
-          {plan === "free" && "Your subscription has ended. Resubscribe anytime to restore full Founding Teacher access."}
+          {plan === "free" && "Your subscription has ended. Resubscribe anytime to restore full Founding Educator access."}
           {plan === "trial" && "You're on the 14-day free trial. Start your subscription now to keep full access when the trial ends — your first 14 days as a subscriber are free."}
         </div>
       )}
