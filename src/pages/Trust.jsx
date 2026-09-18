@@ -67,7 +67,7 @@ export default function Trust() {
           </Section>
 
           <Section heading="Row-level privacy & organization isolation">
-            <p>Only you (and, if you belong to one, your organization&apos;s members) can see your students&apos; records. Another CaseCue user — even another teacher at the same school using a different account — cannot read, edit, or delete your data. These rules are enforced at the database level on every read, create, update, and delete.</p>
+            <p>CaseCue separates records between organizations at the database level. Users outside your organization cannot access your organization&apos;s student records through normal application access. Within an organization, some student entities are currently organization-scoped; assignment-level access is being tightened before broad school and district rollout.</p>
           </Section>
 
           <Section heading="Access controls">
