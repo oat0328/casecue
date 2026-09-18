@@ -47,8 +47,8 @@ export default function Privacy() {
 
       <Section heading="1. Information we collect">
         <p><strong>Account information:</strong> your name, email address, and authentication details.</p>
-        <p><strong>Data you enter:</strong> student records, IEP content, progress data, documents, meetings, lessons, and notes that you choose to store in the Service.</p>
-        <p><strong>Usage information:</strong> basic analytics about how features are used, which help us improve the Service.</p>
+        <p><strong>Data you enter:</strong> information you choose to store in CaseCue, which may include student records, IEP content, progress data, documents, meetings, lessons, and notes when your organization authorizes that use.</p>
+        <p><strong>Usage information:</strong> basic product and security information about how the Service is used, which helps us operate, protect, and improve CaseCue.</p>
       </Section>
 
       <Section heading="2. How we use information">
@@ -56,15 +56,15 @@ export default function Privacy() {
       </Section>
 
       <Section heading="3. Student data and FERPA-oriented practices">
-        <p>Student information you enter is stored so you can manage your caseload. Each teacher's records are isolated from other users' records through row-level access controls — other CaseCue users cannot see your students. You confirm you are authorized by your school, district, or organization to process this data. If your school directs you to stop using the Service, you can export or request deletion of your data at any time from Settings.</p>
+        <p>CaseCue separates records between organizations at the database level. Within an organization, access depends on the workspace and data rules in use; assignment-level minimum-necessary access is still being strengthened before broad school and district deployment. Identifiable student information should be entered only when your school, district, or organization has authorized CaseCue for that purpose.</p>
       </Section>
 
-      <Section heading="4. automated processing">
-        <p>When you use assisted features (Ask CaseCue, IEP Studio drafting, IEP Review), the minimum necessary student context is sent to our processing provider to generate a response. generated output is a draft for educator review. Full-document automated processing is off by default and only enabled by you.</p>
+      <Section heading="4. Assisted processing">
+        <p>When you choose an assisted feature such as Ask CaseCue, IEP drafting, document extraction, or review, CaseCue sends the information needed for that request to the processing services used to provide the feature. Generated output is a draft for educator review and should not be treated as a legal, eligibility, placement, or compliance decision.</p>
       </Section>
 
       <Section heading="5. Sharing with processors">
-        <p>We share data only with service providers that help us run the Service: a payment processor (for billing) and an processing provider (for assisted features). These providers process data on our behalf and cannot use it for their own purposes.</p>
+        <p>We use service providers to operate CaseCue, including hosting/platform infrastructure, payment processing, and assisted-processing services. Student information should be disclosed to a subprocessor only as needed to provide the authorized service and subject to applicable contractual and privacy requirements. A current vendor/subprocessor packet is available to schools and districts on request.</p>
       </Section>
 
       <Section heading="6. Security">
@@ -72,7 +72,7 @@ export default function Privacy() {
       </Section>
 
       <Section heading="7. Data retention">
-        <p>We retain your data while your account is active. You can export your data at any time from Settings, and you can request deletion of your data at any time from Settings or by contacting support.</p>
+        <p>We retain data only for the period needed to provide the authorized service or meet applicable legal and contractual requirements. Schools and authorized users can request export, correction, or deletion. For Nevada school-service-provider use, CaseCue's operational policy is to honor an authorized deletion request within the time required by Nevada law, including the 30-day maximum that may apply to pupil PII under NRS 388.292.</p>
       </Section>
 
       <Section heading="8. Children's privacy">
@@ -80,7 +80,7 @@ export default function Privacy() {
       </Section>
 
       <Section heading="9. Your rights and contact">
-        <p>Depending on your location, you may have rights to access, correct, export, or delete your personal information. You can exercise these from Settings (Data Export and Data Deletion) or by contacting us at <a href="mailto:contact@getcasecue.com" className="text-primary hover:underline">contact@getcasecue.com</a>.</p>
+        <p>Depending on your location and role, you may have rights to access, correct, export, or delete information. Parents and eligible students should normally work through their school for education-record requests. Schools and authorized CaseCue users can contact <a href="mailto:contact@getcasecue.com" className="text-primary hover:underline">contact@getcasecue.com</a> for vendor, correction, export, deletion, or security requests.</p>
       </Section>
     </LegalShell>
   );
