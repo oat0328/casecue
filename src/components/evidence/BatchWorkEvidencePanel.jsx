@@ -18,6 +18,8 @@ const isDuplicate=x=>!!x.duplicate_of_evidence_id||x.duplicate_status==='duplica
 const alignedScore=x=>{const rows=x.goal_aligned_items||[];const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?`${earned}/${possible} · ${Math.round(earned/possible*1000)/10}%`:''};
 const alignedTotals=x=>{const rows=x.goal_aligned_items||[];if(!rows.length)return null;const possible=rows.reduce((n,r)=>n+Number(r.possible||0),0),earned=rows.reduce((n,r)=>n+Number(r.earned||0),0);return possible>0?{earned,possible}:null};
 const isGoalDefensible=x=>x.goal_match_confidence==='teacher_confirmed'||(x.goal_match_confidence==='high'&&['strong','supporting'].includes(x.evidence_strength||'needs_review'));
+const hasSupportedScore=x=>Number(x.score_possible)>0&&Number.isFinite(Number(x.score_earned));
+const canApprove=x=>!!x.student_id&&!isDuplicate(x)&&hasSupportedScore(x)&&!['not_scored','low'].includes(String(x.scoring_confidence||'').toLowerCase());
 
 export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved}){
  const {toast}=useToast();
@@ -88,8 +90,8 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved}){
  const makeEvidenceFile=async x=>{if(!file||!/\.pdf$/i.test(file.name)||!(x.source_pages||[]).length)return'';try{const src=await PDFDocument.load(await file.arrayBuffer(),{ignoreEncryption:true});const indexes=[...new Set(x.source_pages.map(n=>Number(n)-1).filter(n=>Number.isInteger(n)&&n>=0&&n<src.getPageCount()))];if(!indexes.length)return'';const out=await PDFDocument.create();const pages=await out.copyPages(src,indexes);pages.forEach(p=>out.addPage(p));const bytes=await out.save({useObjectStreams:true});const evidenceFile=new File([bytes],`student-work-${Date.now()}.pdf`,{type:'application/pdf'});const uploaded=await base44.integrations.Core.UploadPrivateFile({file:evidenceFile});return uploaded.file_uri||'';}catch{return'';}};
  const openRun=r=>{setRunId(r.id);setItems((r.results||[]).map((x,i)=>({...x,_key:x._key||`${r.id}-${i}`})));setFileUri(r.file_uri||'');setFile(null);setProgress(r.page_count?{stage:r.status==='completed'?'Completed':'Saved scan',done:r.completed_chunks||0,total:r.chunk_count||0,pages:r.processed_pages||0,totalPages:r.page_count||0}:null)};
  const save=async()=>{
-   const selected=items.filter(x=>x.approved&&x.student_id&&!isDuplicate(x));
-   if(!selected.length)return toast({title:'Approve at least one matched assignment first',variant:'destructive'});
+   const selected=items.filter(x=>x.approved&&canApprove(x));
+   if(!selected.length)return toast({title:'Nothing is ready to file',description:'Match the student and confirm a supported score before approving.',variant:'destructive'});
    setSaving(true);let saved=0;
    try{
      const user=await base44.auth.me();
