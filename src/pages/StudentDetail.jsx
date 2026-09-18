@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Users, Plus, Trash2, Target, BarChart3, FolderOpen, UsersRound, StickyNote, Save, Sparkles, Loader2, Download, ShieldCheck, Clock3, Wrench, Accessibility, Compass, FileSearch, Archive, History, FileText } from "lucide-react";
 import { exportIepPdf } from "@/lib/pdfExport";
 import ExportGate from "@/components/shared/ExportGate";
@@ -48,6 +48,7 @@ const ELIGIBILITY_OPTIONS = [
 export default function StudentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { data: student, setData: setStudent, refetch } = useAsync(() => base44.entities.Student.get(id), [id]);
   const { data: goals, refetch: refetchGoals } = useAsync(() => base44.entities.Goal.filter({ student_id: id }, '-updated_date', 100), [id]);
@@ -233,7 +234,7 @@ export default function StudentDetail() {
         </div>
       </section>
 
-      <Tabs defaultValue="overview">
+      <Tabs defaultValue={searchParams.get("tab")==="work-grades"?"work-grades":"overview"}>
         <TabsList className="w-full justify-start overflow-x-auto mb-6 flex-wrap h-auto">
           <TabsTrigger value="overview"><Users className="h-4 w-4 mr-1.5" /> Overview</TabsTrigger>
           <TabsTrigger value="goals"><Target className="h-4 w-4 mr-1.5" /> Goals</TabsTrigger>
