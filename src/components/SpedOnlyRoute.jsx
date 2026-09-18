@@ -1,0 +1,1 @@
+import React from'react';import{Navigate,Outlet}from'react-router-dom';import{useAuth}from'@/lib/AuthContext';import{getActiveWorkspace,workspaceHome}from'@/lib/workspaces';export default function SpedOnlyRoute(){const{user}=useAuth(),w=getActiveWorkspace(user);return w==='sped'?<Outlet/>:<Navigate to={workspaceHome(w)} replace/>}
