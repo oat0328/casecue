@@ -79,7 +79,7 @@ export default function EditEntryDialog({ entry, students, onClose, onSaved, ent
           </div>
         </div>
         <DialogFooter className="mt-4">
-          <Button variant="destructive" onClick={async()=>{if(!window.confirm('Delete this schedule block?'))return;setSaving(true);try{await base44.entities[entityName].delete(entry.id);toast({title:'Schedule block deleted'});onSaved?.();onClose()}catch(e){toast({title:'Could not delete',description:e.message,variant:'destructive'})}finally{setSaving(false)}}><Trash2 className="mr-1 h-4 w-4"/>Delete</Button><Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="destructive" onClick={async()=>{if(!window.confirm('Delete this schedule block?'))return;setSaving(true);try{await base44.entities[entityName].delete(entry.id);toast({title:'Schedule block deleted'});onSaved?.();onClose()}catch(e){toast({title:'Could not delete',description:e.message,variant:'destructive'})}finally{setSaving(false)}}}><Trash2 className="mr-1 h-4 w-4"/>Delete</Button><Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={save} disabled={saving} className="brand-gradient text-white">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pencil className="h-4 w-4" />} Save changes
           </Button>
