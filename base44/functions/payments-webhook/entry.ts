@@ -154,6 +154,13 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
   }
   if (grantUserId) {
     await db.entities.User.update(grantUserId, { plan: "founding_teacher" });
+    const buyerUser = await db.entities.User.get(grantUserId);
+    const orgId = buyerUser?.organization_id || buyerUser?.data?.organization_id;
+    if (orgId) {
+      const subs = await db.entities.Subscription.filter({ organization_id: orgId }, '-created_date', 1);
+      const sub = (subs || [])[0];
+      if (sub) await db.entities.Subscription.update(sub.id, { status:'active', monthly_price:Number(purchase.amount || 29.99), trial_end:null });
+    }
     console.log("payments-webhook: granted founding_teacher", { userId: grantUserId, checkoutId });
   } else {
     // Anonymous buyer with no matching user account yet. User records cannot be created here
@@ -219,6 +226,13 @@ async function handleSubscriptionEnded(db: any, eventData: any): Promise<Respons
   }
   if (revokeUserId) {
     await db.entities.User.update(revokeUserId, { plan: "free" });
+    const buyerUser = await db.entities.User.get(revokeUserId);
+    const orgId = buyerUser?.organization_id || buyerUser?.data?.organization_id;
+    if (orgId) {
+      const subs = await db.entities.Subscription.filter({ organization_id: orgId }, '-created_date', 1);
+      const sub = (subs || [])[0];
+      if (sub) await db.entities.Subscription.update(sub.id, { status:'canceled' });
+    }
     console.log("payments-webhook: revoked plan", { userId: revokeUserId, subscriptionId });
   }
   // ===== END APP-SPECIFIC =====
