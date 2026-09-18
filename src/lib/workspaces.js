@@ -6,6 +6,8 @@ export const WORKSPACES = {
   ot: { key:'ot', name:'CaseCue OT', short:'OT', description:'Caseload, sessions, assessments, goals and functional progress.' },
   para: { key:'para', name:'CaseCue Para', short:'Para', description:'Daily assignments, supports, prompting, observations and quick data.' },
   nurse: { key:'nurse', name:'CaseCue Nurse', short:'Nurse', description:'Student visits, medications, screenings, care plans and follow-up.' },
+  substitute: { key:'substitute', name:'CaseCue Substitute', short:'Sub', description:'Daily plans, schedules, attendance, approved supports and teacher handoff.' },
+  pe: { key:'pe', name:'CaseCue PE', short:'PE', description:'PE schedules, games, exercise ideas, activity plans and class notes.' },
 };
 export const workspaceKeys=Object.keys(WORKSPACES);
 export function getUserWorkspaces(user){
