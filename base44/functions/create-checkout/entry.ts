@@ -81,10 +81,10 @@ Deno.serve(async (req: Request) => {
     // below is authoritative and cannot be tampered with from the browser.
     const PLANS: Record<string, { name: string; price: string; title: string; description: string }> = {
       "founding-teacher": {
-        name: "CaseCue Founding Teacher",
+        name: "CaseCue Founding Educator",
         price: "29.99",
-        title: "CaseCue Founding Teacher",
-        description: "Full CaseCue access. 14-day free trial, then $29.99/month. Cancel anytime.",
+        title: "CaseCue Founding Educator",
+        description: "CaseCue public-beta educator access. 14-day free trial, then $29.99/month. Cancel anytime.",
       },
     };
     const plan = PLANS[productId];
@@ -116,8 +116,8 @@ Deno.serve(async (req: Request) => {
 
     const price = finalPrice.toFixed(2);
     const description = promo
-      ? `Full CaseCue access. ${billingNote} Billed $${price}/month. Cancel anytime.`
-      : `Full CaseCue access. 14-day free trial, then $${price}/month. Cancel anytime.`;
+      ? `CaseCue public-beta educator access. ${billingNote} Billed $${price}/month. Cancel anytime.`
+      : `CaseCue public-beta educator access. 14-day free trial, then $${price}/month. Cancel anytime.`;
     // Monthly auto-renewing subscription; the free-trial period depends on the applied promo.
     const subscriptionInfo = {
       subscriptionSettings: {
