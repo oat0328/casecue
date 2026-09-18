@@ -26,7 +26,7 @@ export default function BatchDecisionQueue({items=[],students=[],update,confirmS
  const handled=Math.max(0,Math.round((1-decisions.length/Math.max(totalArtifacts,decisions.length||1))*100));
  const current=decisions[Math.min(cursor,Math.max(0,decisions.length-1))];
  const studentName=id=>{const s=students.find(v=>v.id===id);return s?(s.first_name+' '+s.last_name):''};
- const next=()=>setCursor(v=>Math.min(v+1,Math.max(0,decisions.length-1)));
+ const next=()=>setCursor(0);
 
  if(!decisions.length)return<Card className='overflow-hidden'>
   <div className='bg-emerald-950 p-6 text-white'><div className='text-[10px] font-black uppercase tracking-[.2em] text-emerald-300'>Batch Ready</div><h3 className='mt-1 text-2xl font-black'>No decisions left.</h3><p className='mt-2 text-sm text-emerald-100'>CaseCue graded what it could and you resolved the exceptions. Approve the grades, then CaseCue will check active IEP goals.</p></div>
