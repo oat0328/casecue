@@ -44,7 +44,7 @@ export default function Trust() {
           <Section heading="Security overview">
             <p>Every account and record in CaseCue is protected by:</p>
             <p>• Encryption of data in transit between your device and our servers.</p>
-            <p>• Row-level access controls that isolate your records from every other user&apos;s records.</p>
+            <p>• Database access rules and organization boundaries that separate one organization&apos;s records from another&apos;s.</p>
             <p>• Organization-level isolation for teams, districts, and schools.</p>
             <p>• Audit logging is used for sensitive workflows such as document processing, subscription changes, administrative actions, parent sharing, and supported export flows.</p>
             <p>No system is perfectly secure. If a security incident affecting your data ever occurs, we will notify you as required by law.</p>
@@ -52,10 +52,7 @@ export default function Trust() {
 
           <Section heading="FERPA-aware design (not a certification)">
             <p>
-              CaseCue is designed around FERPA-oriented privacy practices: you only upload records
-              you are authorized to access, records are isolated per educator and per organization,
-              and designated student-record upload workflows display a Protected Student Information notice before you
-              upload. We do not claim FERPA certification, and we never market CaseCue as
+              CaseCue is designed around FERPA-oriented privacy practices: identifiable student records should be used only with school or district authorization, organizations are separated at the database level, and designated student-record upload workflows display a Protected Student Information notice before you upload. We do not claim FERPA certification, and we never market CaseCue as
               &quot;compliant&quot; — compliance decisions belong to your district, not to us.
             </p>
           </Section>
@@ -75,14 +72,14 @@ export default function Trust() {
           </Section>
 
           <Section heading="Audit logs">
-            <p>Sensitive actions are recorded in a tamper-restricted audit log visible only to administrators. Logged actions include logins, document uploads and processing, exports and shares, subscription and billing changes, and administrative actions.</p>
+            <p>Sensitive workflows are written to administrator-restricted audit records. Current logging includes account events, document-processing actions, family sharing, subscription and billing changes, and supported export/admin workflows. Audit coverage is being expanded as the beta grows.</p>
           </Section>
 
           <Section heading="Assisted-processing safeguards & the human review model">
             <p>Every assisted feature in CaseCue follows one rule: CaseCue assists, educators decide, students come first. Concretely:</p>
             <p>• generated drafts are always labeled as drafts requiring educator review — they are never presented as final, compliant, or certified.</p>
             <p>• The system never invents student facts. When information is missing or conflicting, CaseCue says so instead of guessing.</p>
-            <p>• Extracted data shows its source — which document, which page, and a confidence rating — so you can verify everything.</p>
+            <p>• Where source-aware extraction is available, CaseCue keeps source context so educators can verify what the system used instead of treating generated text as ground truth.</p>
             <p>• The system never makes eligibility or placement decisions, and never replaces the IEP team&apos;s judgment.</p>
             <p>• Exporting system-assisted content requires an explicit acknowledgement that the content is system-generated and human review is required.</p>
           </Section>
@@ -92,7 +89,7 @@ export default function Trust() {
           </Section>
 
           <Section heading="Data export & deletion">
-            <p>You can export your data at any time from Settings, and you can request deletion of your data at any time from Settings or by contacting us. Leaving CaseCue does not lock your records away from you.</p>
+            <p>Authorized users can export supported records and request deletion or correction. For Nevada school-service-provider use, CaseCue is being aligned to the state requirement to delete pupil PII within the applicable statutory window after an authorized request and to provide breach notice without unreasonable delay.</p>
           </Section>
 
           <Section heading="What CaseCue never does">
