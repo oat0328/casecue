@@ -6,13 +6,14 @@ import{Link}from'react-router-dom';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{useAuth}from'@/lib/AuthContext';
+import{userDisplayName}from'@/lib/userIdentity';
 import{PremiumBarChart,PremiumDonutChart}from'@/components/shared/PremiumAnalytics';
 import AnalyticsPdfButton from'@/components/shared/AnalyticsPdfButton';
 
 const bank={K:['Animal Adventure','Color Cone Chase','Freeze & Balance'],1:['Locomotor Quest','Beanbag Balance Relay','Mirror Moves'],2:['Shuttle Challenge','Throw & Catch Islands','Fitness Bingo'],3:['Cone Capture','Agility Quest','Target Toss'],4:['End-Zone Dash','Fitness Stations','Cooperative Challenge'],5:['Modified Handball','Circuit Challenge','Strategy Relay'],6:['Basketball Skill Quest','Interval Challenge','Ultimate Passing'],7:['Small-Sided Soccer','Agility Tournament','Strength Circuit'],8:['Volleyball Stations','Team Tournament','Conditioning Challenge']};
 
 export default function PEHome(){
- const{user}=useAuth();
+ const{user}=useAuth();const staffName=userDisplayName(user,'PE staff');
  const[grade,setGrade]=useState('6'),[minutes,setMinutes]=useState('45'),[focus,setFocus]=useState('Fitness'),[equipment,setEquipment]=useState('cones, balls'),[plan,setPlan]=useState(null);
  const{data:attendance}=useAsync(()=>user?.id?base44.entities.AttendanceRecord.filter({user_id:user.id,workspace:'pe'},'-date',1000):Promise.resolve([]),[user?.id]);
  const{data:notes}=useAsync(()=>base44.entities.WorkspaceNote.filter({workspace:'pe'},'-date',500),[]);
@@ -24,7 +25,7 @@ export default function PEHome(){
   <section className='rounded-[30px] bg-slate-950 p-8 text-white'><div className='text-xs font-black uppercase tracking-[.2em] text-sky-300'>CaseCue PE</div><h1 className='mt-3 text-3xl font-black'>Run the class. See the participation pattern.</h1><p className='mt-2 text-slate-300'>Grade + time + focus + equipment → a ready-to-run class, with shared attendance, notes, schedule, grading, and real data views.</p></section>
 
   <div className="grid gap-3 sm:grid-cols-3"><div className="rounded-2xl border bg-white p-5"><Users className="h-5 w-5 text-blue-600"/><div className="mt-3 text-3xl font-black">{new Set((attendance||[]).map(x=>x.student_id)).size}</div><div className="text-xs text-slate-500">Students with attendance data</div></div><div className="rounded-2xl border bg-white p-5"><ClipboardCheck className="h-5 w-5 text-emerald-600"/><div className="mt-3 text-3xl font-black">{(notes||[]).length}</div><div className="text-xs text-slate-500">Class notes</div></div><div className="rounded-2xl border bg-white p-5"><CalendarClock className="h-5 w-5 text-violet-600"/><div className="mt-3 text-3xl font-black">{(schedule||[]).filter(x=>!x.archived).length}</div><div className="text-xs text-slate-500">Schedule blocks</div></div></div>
-  <div className="flex justify-end"><AnalyticsPdfButton title="CaseCue PE Analytics" subtitle={user?.full_name||user?.email||'PE staff'} filename="casecue-pe-analytics" metrics={[{label:'Students marked',value:new Set((attendance||[]).map(x=>x.student_id)).size},{label:'Attendance records',value:(attendance||[]).length},{label:'Class notes',value:(notes||[]).length},{label:'Schedule blocks',value:(schedule||[]).filter(x=>!x.archived).length}]} charts={[{type:'bar',title:'PE Attendance by Day',subtitle:'Present marks captured in the PE workspace.',data:attendanceByDay,series:[{key:'present',label:'Present'}]},{type:'donut',title:'Attendance Status Mix',subtitle:'Saved PE attendance statuses.',data:statusData}]} notes={['PE analytics are generated from saved CaseCue records only.']}/></div>
+  <div className="flex justify-end"><AnalyticsPdfButton title="CaseCue PE Analytics" subtitle={staffName} filename="casecue-pe-analytics" metrics={[{label:'Students marked',value:new Set((attendance||[]).map(x=>x.student_id)).size},{label:'Attendance records',value:(attendance||[]).length},{label:'Class notes',value:(notes||[]).length},{label:'Schedule blocks',value:(schedule||[]).filter(x=>!x.archived).length}]} charts={[{type:'bar',title:'PE Attendance by Day',subtitle:'Present marks captured in the PE workspace.',data:attendanceByDay,series:[{key:'present',label:'Present'}]},{type:'donut',title:'Attendance Status Mix',subtitle:'Saved PE attendance statuses.',data:statusData}]} notes={['PE analytics are generated from saved CaseCue records only.']}/></div>
   <div className="grid gap-4 lg:grid-cols-2"><PremiumBarChart title="PE Attendance by Day" subtitle="Real saved attendance marks from the PE workspace." data={attendanceByDay} dataKey="present" badge="Present"/><PremiumDonutChart title="Attendance Status Mix" subtitle="Present, absent, tardy, excused, and left-early records." data={statusData} centerLabel={(attendance||[]).length}/></div>
 
   <div className='grid gap-5 lg:grid-cols-[1.2fr_.8fr]'>
