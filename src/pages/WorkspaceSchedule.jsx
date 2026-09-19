@@ -5,7 +5,7 @@ import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{useAuth}from'@/lib/AuthContext';
 import{useToast}from'@/components/ui/use-toast';
-import{WORKSPACES}from'@/lib/workspaces';
+import{WORKSPACES,getActiveWorkspace,getUserWorkspaces,workspaceHome}from'@/lib/workspaces';
 import PageHeader from'@/components/PageHeader';
 import{Button}from'@/components/ui/button';
 import{Card}from'@/components/ui/cards';
@@ -29,7 +29,6 @@ const COPY={
 export default function WorkspaceSchedule({workspaceKey:workspaceProp}){
  const params=useParams(),workspaceKey=workspaceProp||params.workspace;
  const{user}=useAuth(),{toast}=useToast();
- if(workspaceKey==='sped')return <Navigate to='/instruction/schedule' replace/>;
  const para=workspaceKey==='para';
  const entityName=para?'ParaScheduleBlock':'ScheduleEntry';
  const{data:rawStudents}=useAsync(()=>para?base44.entities.ParaStudentAccess.list('-last_name',500):base44.entities.Student.list('-last_name',500),[workspaceKey]);
@@ -40,6 +39,7 @@ export default function WorkspaceSchedule({workspaceKey:workspaceProp}){
  const[dialog,setDialog]=useState(null),[editing,setEditing]=useState(null);
  const meta=WORKSPACES[workspaceKey]||{short:'Workspace'};
  const[title,subtitle]=COPY[workspaceKey]||['Schedule',`${meta.short} schedule in one weekly view.`];
+ const allowed=getUserWorkspaces(user),activeWorkspace=getActiveWorkspace(user);
 
  const remove=async entry=>{try{await base44.entities[entityName].delete(entry.id);await refetch();toast({title:'Schedule block deleted'})}catch(e){toast({title:'Delete failed',description:e.message,variant:'destructive'})}};
  const clear=async()=>{
@@ -51,6 +51,8 @@ export default function WorkspaceSchedule({workspaceKey:workspaceProp}){
   }catch(e){toast({title:'Could not clear schedule',description:e.message,variant:'destructive'})}
  };
 
+ if(workspaceKey==='sped')return <Navigate to='/instruction/schedule' replace/>;
+ if(!WORKSPACES[workspaceKey]||!allowed.includes(workspaceKey))return <Navigate to={workspaceHome(activeWorkspace)} replace/>;
  return <div className='space-y-6'>
   <PageHeader title={title} subtitle={subtitle} icon={CalendarClock} actions={<>
    {para&&<Button onClick={()=>setDialog('upload')} variant='outline'><Upload className='h-4 w-4'/>Upload Schedule</Button>}
