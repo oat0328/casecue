@@ -27,12 +27,13 @@ export default function ParaBaseline(){
  const[packet,setPacket]=useState(null);
  const meStudent=assigned.find(s=>s.student_id===studentId)||null;
 
+ const useRecord=rec=>{setCurrent(rec||null);const saved=rec?.analysis||{};setResult(saved.grading||null);setPacket(saved.teacher_packet||null)};
  const loadRecords=async(id=studentId,select='')=>{
-  if(!id){setRecords([]);setCurrent(null);return;}
+  if(!id){setRecords([]);useRecord(null);return;}
   const rows=await base44.entities.BaselineAssessment.filter({student_id:id},'-created_date',50);
   setRecords(rows||[]);
   const pick=(rows||[]).find(x=>x.id===select)||(rows||[])[0]||null;
-  setCurrent(pick);
+  useRecord(pick);
  };
  const chooseStudent=async id=>{setStudentId(id);setFile(null);setResult(null);setPacket(null);await loadRecords(id)};
 
@@ -142,7 +143,7 @@ export default function ParaBaseline(){
      <div className="mt-4 flex flex-wrap gap-2">{DOMAINS.map(d=><button key={d} onClick={()=>toggle(d)} className={"rounded-full border px-3 py-2 text-xs font-bold "+(domains.includes(d)?'border-blue-600 bg-blue-50 text-blue-800':'bg-white text-slate-600')}>{domains.includes(d)?'✓ ':''}{d}</button>)}</div>
      <div className="mt-4 flex flex-wrap items-end gap-3"><div><div className="text-xs font-black">Items per area</div><Input className="mt-1 w-28" type="number" min="3" max="10" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><Button onClick={generate} disabled={busy||!studentId}>{busy?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<ClipboardCheck className="mr-2 h-4 w-4"/>}Create Baseline</Button></div>
     </Card>
-    {records.length>0&&<Card className="p-4"><div className="text-sm font-black">Saved baselines</div><select className="mt-2 w-full rounded-lg border p-2 text-sm" value={current?.id||''} onChange={e=>setCurrent(records.find(r=>r.id===e.target.value)||null)}>{records.map(r=><option key={r.id} value={r.id}>{r.title} · {r.administered_date||'No date'} · {r.status}</option>)}</select></Card>}
+    {records.length>0&&<Card className="p-4"><div className="text-sm font-black">Saved baselines</div><select className="mt-2 w-full rounded-lg border p-2 text-sm" value={current?.id||''} onChange={e=>useRecord(records.find(r=>r.id===e.target.value)||null)}>{records.map(r=><option key={r.id} value={r.id}>{r.title} · {r.administered_date||'No date'} · {r.status}</option>)}</select></Card>}
     {current?.assessment&&<Card className="p-6 baseline-print-area">
      <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Ready to administer</div><h2 className="text-2xl font-black">{current.title}</h2><div className="text-xs text-slate-500">{full(meStudent)} · Grade {meStudent?.grade||'—'}</div></div><Button variant="outline" onClick={()=>window.print()}><Printer className="mr-2 h-4 w-4"/>Print</Button></div>
      <p className="mt-4 text-sm">{current.assessment.directions}</p>
