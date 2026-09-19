@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useState}from'react';
 import{CalendarDays,Clock3,TimerReset}from'lucide-react';
 import{base44}from'@/api/base44Client';
+import WorkspaceTimer from'@/components/shared/WorkspaceTimer';
 import{useAsync}from'@/lib/useAsync';
 
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -39,7 +40,8 @@ export default function WorkspaceNowBar({workspaceKey}){
        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[.14em] text-blue-700">{current?<><TimerReset className="h-3.5 w-3.5"/>Now</>:<><CalendarDays className="h-3.5 w-3.5"/>Next</>}</div>
        <div className="mt-1 truncate text-sm font-black text-slate-950">{focus.group_name||focus.className||'Scheduled block'}</div>
        <div className="text-xs text-slate-500">{fmt(focus.start_time)}{focus.end_time?`–${fmt(focus.end_time)}`:''}{!current&&focus.start_time?` · starts in ${remaining(focus.start_time,now)}`:''}</div>
-     </div>:<div className="text-sm text-slate-500"><b className="text-slate-800">Today:</b> No schedule is loaded for this workspace yet.</div>}
+     </div>:<div className="min-w-0 flex-1 text-sm text-slate-500"><b className="text-slate-800">Today:</b> No schedule is loaded for this workspace yet.</div>}
+     <WorkspaceTimer workspaceKey={workspaceKey} compact/>
    </div>
  </div>;
 }
