@@ -31,7 +31,7 @@ export default function CommandCenter(){
  const{data:progress}=useAsync(()=>base44.entities.ProgressData.list('-date',1000),[]);
  const{data:sessions}=useAsync(()=>base44.entities.SessionRecord.list('-date',1000),[]);
  const{data:evidence}=useAsync(()=>base44.entities.StudentEvidence.list('-date',800),[]);
- const{data:schedule,refetch:refetchSchedule}=useAsync(()=>base44.entities.ScheduleEntry.list('-day',800),[]);
+ const{data:rawSchedule,refetch:refetchSchedule}=useAsync(()=>base44.entities.ScheduleEntry.list('-day',800),[]);const schedule=(rawSchedule||[]).filter(e=>(e.workspace||'sped')==='sped');
  const{data:meetings}=useAsync(()=>base44.entities.Meeting.list('date',200),[]);
  const{data:tasks}=useAsync(()=>base44.entities.Task.list('due_date',300),[]);
  const{data:docs}=useAsync(()=>base44.entities.Document.list('-date_uploaded',500),[]);
