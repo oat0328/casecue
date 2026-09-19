@@ -10,11 +10,11 @@ import ExportBar from "@/components/shared/ExportBar";
 import { exportXlsx } from "@/lib/xlsxExport";
 import { scheduleSections, caseloadSections, rosterSections, scheduleRows, SCHEDULE_HEADERS, byGroup, studentName, DELIVERY_LABEL, formatScheduleTime, sortStudentsAlpha, sortStudentIdsAlpha } from "@/lib/scheduleUtils";
 
-const PROMO = "Created with CaseCue · Special Education Workspace";
+const workspaceLabel=k=>({sped:'SPED',gen_ed:'Gen Ed',para:'Para',speech:'Speech',ot:'OT',nurse:'Nurse',psych:'Psych',substitute:'Substitute',pe:'PE'}[k]||'Workspace');
 
 // Print & Export: weekly schedule, caseload schedule, and group rosters in
 // Print / PDF / DOCX / Email / Share, plus a full Excel workbook.
-export default function ScheduleExportPanel({ entries, students, timeFormat = "12h" }) {
+export default function ScheduleExportPanel({ entries, students, timeFormat = "12h", workspaceKey = "sped" }) {
   const { toast } = useToast();
   const { user } = useAuth();
   const { data: printPrefs } = useAsync(() => base44.entities.UserPrintPreference.list('-updated_date', 5), []);
@@ -22,7 +22,8 @@ export default function ScheduleExportPanel({ entries, students, timeFormat = "1
   const teacherName = pref.teacher_name || user?.full_name || "Teacher";
   const teacherTitle = pref.teacher_title || "Teacher";
   const teacherClass = pref.classroom || "";
-  const printSubtitle = `${teacherName} · ${teacherTitle}${teacherClass ? ` · ${teacherClass}` : ""}`;
+  const printSubtitle = `${teacherName} · ${teacherTitle}${teacherClass ? ` · ${teacherClass}` : ""} · CaseCue ${workspaceLabel(workspaceKey)}`;
+  const promo = `CaseCue · ${workspaceLabel(workspaceKey)} Workspace · Print-ready working schedule`;
 
   const weekly = scheduleSections(entries, students, timeFormat);
   const caseload = caseloadSections(entries, students, timeFormat);
@@ -67,7 +68,7 @@ export default function ScheduleExportPanel({ entries, students, timeFormat = "1
             subtitle={printSubtitle}
             sections={item.sections}
             filename={item.filename}
-            banner={PROMO}
+            banner={promo}
           />
         </div>
       ))}
