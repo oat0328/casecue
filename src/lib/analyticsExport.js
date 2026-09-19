@@ -1,6 +1,6 @@
 import jsPDF from'jspdf';
 
-const safe=v=>String(v??'').replace(/[\u0000-\u001f]/g,' ').replace(/[^\x20-\x7E]/g,' ');
+const safe=v=>String(v??'').replace(/•/g,'-').replace(/[–—]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[\u0000-\u0009\u000B\u000C\u000E-\u001f]/g,' ').replace(/[^\x0A\x0D\x20-\x7E]/g,' ');
 const name=v=>String(v||'casecue-analytics').replace(/[^a-z0-9-_]+/gi,'-').replace(/^-+|-+$/g,'')||'casecue-analytics';
 const COLORS=[[37,99,235],[124,58,237],[5,150,105],[217,119,6],[225,29,72],[8,145,178]];
 
@@ -10,13 +10,15 @@ export function exportAnalyticsPdf({title='CaseCue Analytics',subtitle='',filena
  const pageFooter=()=>{};
  const ensure=h=>{if(y+h>H-55){doc.addPage();y=M}};
 
- doc.setFillColor(7,16,31);doc.roundedRect(M,y,CW,86,14,14,'F');
+ const titleLines=doc.splitTextToSize(safe(title),CW-165).slice(0,3),subtitleLines=subtitle?doc.splitTextToSize(safe(subtitle),CW-165).slice(0,2):[];
+ const headerHeight=44+(titleLines.length*17)+(subtitleLines.length?6+(subtitleLines.length*10):0)+14;
+ doc.setFillColor(7,16,31);doc.roundedRect(M,y,CW,headerHeight,14,14,'F');
  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(125,211,252);doc.text('CASECUE INTELLIGENCE',M+16,y+19);
- doc.setFontSize(19);doc.setTextColor(255,255,255);doc.text(doc.splitTextToSize(safe(title),CW-160),M+16,y+43);
- doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(203,213,225);if(subtitle)doc.text(doc.splitTextToSize(safe(subtitle),CW-160),M+16,y+67);
+ doc.setFontSize(titleLines.length>1?16:19);doc.setTextColor(255,255,255);doc.text(titleLines,M+16,y+43,{lineHeightFactor:1.05});
+ const subtitleY=y+43+(titleLines.length*17)+5;doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(203,213,225);if(subtitleLines.length)doc.text(subtitleLines,M+16,subtitleY,{lineHeightFactor:1.05});
  const printed=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
- doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text('PRINTED',W-M-70,y+22);doc.setFont('helvetica','normal');doc.setTextColor(203,213,225);doc.text(printed,W-M-70,y+37);
- y+=103;
+ doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(255,255,255);doc.text('PRINTED',W-M-70,y+22);doc.setFont('helvetica','normal');doc.setTextColor(203,213,225);doc.text(printed,W-M-70,y+37);
+ y+=headerHeight+17;
 
  if(metrics.length){
   const cols=Math.min(4,metrics.length),gap=8,w=(CW-gap*(cols-1))/cols;
@@ -45,9 +47,9 @@ export function exportAnalyticsPdf({title='CaseCue Analytics',subtitle='',filena
  };
  charts.forEach((c,index)=>{ensure(235);doc.setDrawColor(226,232,240);doc.roundedRect(M,y,CW,Math.min(225,H-y-60),12,12,'S');const top=y+12;y=top;drawTitle(c,index);if(c.type==='line')drawLine(c);else if(c.type==='donut')drawDonutAsBars(c);else drawBar(c);y+=12});
 
- for(const section of sections||[]){const body=safe(section?.body||'');if(!body)continue;ensure(70);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(15,23,42);doc.text(safe(section.heading||'Summary'),M,y+12);y+=22;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(51,65,85);const lines=doc.splitTextToSize(body,CW);for(const line of lines){ensure(14);doc.text(line,M,y);y+=12}y+=10;}
+ for(const section of sections||[]){const body=safe(section?.body||'');if(!body.trim())continue;ensure(70);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(15,23,42);doc.text(safe(section.heading||'Summary'),M,y+12);y+=22;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(51,65,85);const lines=body.split(/\r?\n/).flatMap(row=>row.trim()?doc.splitTextToSize(row,CW):['']);for(const line of lines){ensure(14);doc.text(line,M,y);y+=12}y+=10;}
 
- if(notes.length){ensure(70);doc.setFillColor(239,246,255);doc.setDrawColor(191,219,254);const text=notes.map(n=>`• ${safe(n)}`).join('\n');const lines=doc.splitTextToSize(text,CW-22);doc.roundedRect(M,y,CW,lines.length*11+24,10,10,'FD');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(30,64,175);doc.text('REVIEW NOTES',M+11,y+14);doc.setFont('helvetica','normal');doc.setTextColor(51,65,85);doc.text(lines,M+11,y+29)}
+ if(notes.length){ensure(70);doc.setFillColor(239,246,255);doc.setDrawColor(191,219,254);const text=notes.map(n=>`- ${safe(n)}`).join('\n');const lines=doc.splitTextToSize(text,CW-22);doc.roundedRect(M,y,CW,lines.length*11+24,10,10,'FD');doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(30,64,175);doc.text('REVIEW NOTES',M+11,y+14);doc.setFont('helvetica','normal');doc.setTextColor(51,65,85);doc.text(lines,M+11,y+29)}
 
  const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setDrawColor(226,232,240);doc.line(M,H-31,W-M,H-31);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(100,116,139);doc.text('CaseCue · getcasecue.com',M,H-18);doc.text(`Printed ${printed} · Page ${p} of ${pages}`,W-M,H-18,{align:'right'})}
  doc.save(`${name(filename)}.pdf`);
