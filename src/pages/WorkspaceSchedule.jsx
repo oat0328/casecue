@@ -1,8 +1,10 @@
 import React,{useMemo,useState}from'react';
+import{Navigate,useParams}from'react-router-dom';
 import{CalendarClock,Plus,Trash2,Upload}from'lucide-react';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{useAuth}from'@/lib/AuthContext';
+import{useToast}from'@/components/ui/use-toast';
 import{WORKSPACES}from'@/lib/workspaces';
 import PageHeader from'@/components/PageHeader';
 import{Button}from'@/components/ui/button';
@@ -24,8 +26,10 @@ const COPY={
  pe:['PE Schedule','PE classes, grades, locations, and activity blocks in one weekly view.'],
 };
 
-export default function WorkspaceSchedule({workspaceKey}){
- const{user}=useAuth(),{toast}=require('@/components/ui/use-toast').useToast();
+export default function WorkspaceSchedule({workspaceKey:workspaceProp}){
+ const params=useParams(),workspaceKey=workspaceProp||params.workspace;
+ const{user}=useAuth(),{toast}=useToast();
+ if(workspaceKey==='sped')return <Navigate to='/instruction/schedule' replace/>;
  const para=workspaceKey==='para';
  const entityName=para?'ParaScheduleBlock':'ScheduleEntry';
  const{data:rawStudents}=useAsync(()=>para?base44.entities.ParaStudentAccess.list('-last_name',500):base44.entities.Student.list('-last_name',500),[workspaceKey]);
