@@ -1,5 +1,6 @@
 import React,{useMemo,useState}from'react';
 import{useLocation}from'react-router-dom';
+import{workspaceFromPath,workspaceUsesIepGradeLinking}from'@/lib/workspaceCapabilities';
 import{Layers3,UserRound,ArrowRight,UploadCloud,ScanSearch,CheckCircle2,FolderCheck,ShieldCheck,ListChecks}from'lucide-react';
 import{Card}from'@/components/ui/cards';
 import BatchWorkEvidencePanel from'@/components/evidence/BatchWorkEvidencePanel';
@@ -9,9 +10,12 @@ export default function SmartGraderV2({students=[],goals=[],onSaved}){
  const location=useLocation();
  const[mode,setMode]=useState('guided');
  const context=useMemo(()=>{
-   if(location.pathname.includes('/w/substitute/'))return{label:'CaseCue Substitute',title:'Grade today’s work without the extra steps.',desc:'Load the class stack, review anything CaseCue could not verify, then save the finished work for the teacher.',goals:[]};
-   if(location.pathname.includes('/w/gen_ed/'))return{label:'CaseCue Gen Ed',title:'Grade the class. Review the exceptions. Move on.',desc:'Upload one paper or a whole class stack. CaseCue reads, solves objective work, verifies the grade, and keeps you in control.',goals};
-   return{label:'Smart Grader V2',title:'Drop the papers. CaseCue handles the first pass.',desc:'Batch or single-student grading with deterministic math, independent verification, teacher approval, and automatic student filing.',goals};
+   const workspaceKey=workspaceFromPath(location.pathname,'sped'),goalLinking=workspaceUsesIepGradeLinking(workspaceKey);
+   if(workspaceKey==='substitute')return{workspaceKey,label:'CaseCue Substitute',title:'Grade today’s work without the extra steps.',desc:'Load the class stack, review anything CaseCue could not verify, then save the finished work for the teacher.',goals:[]};
+   if(workspaceKey==='gen_ed')return{workspaceKey,label:'CaseCue Gen Ed',title:'Grade the class. Review the exceptions. Move on.',desc:'Upload one paper or a whole class stack. CaseCue reads, solves objective work, verifies the grade, and keeps you in control.',goals};
+   if(workspaceKey==='para')return{workspaceKey,label:'CaseCue Para',title:'Grade assigned student work. Verify it. Send clean evidence forward.',desc:'Use the same CaseCue grading engine with only the students available to this Para workspace. Formal IEP goal decisions stay with the authorized educational team.',goals:[]};
+   if(workspaceKey==='pe')return{workspaceKey,label:'CaseCue PE',title:'Grade PE work with the same CaseCue workflow.',desc:'Score written or performance-related class work, review the result, and keep the record attached to the student without turning the PE workspace into an IEP authoring tool.',goals:[]};
+   return{workspaceKey,label:'Smart Grader V2',title:'Drop the papers. CaseCue handles the first pass.',desc:'Batch or single-student grading with deterministic math, independent verification, teacher approval, and automatic student filing.',goals:goalLinking?goals:[]};
  },[location.pathname,goals]);
 
  return <div className="space-y-5">
@@ -52,7 +56,7 @@ export default function SmartGraderV2({students=[],goals=[],onSaved}){
      :<BatchWorkEvidencePanel key={mode} students={students} goals={context.goals} onSaved={onSaved} v2 batchMode={mode}/>} 
 
    <div className="flex items-center justify-center gap-2 pb-2 text-xs text-slate-400">
-     <CheckCircle2 className="h-3.5 w-3.5"/><span>Smart Grader V2 · Separate → Resolve → Grade → Approve → IEP Match → File</span><ArrowRight className="h-3.5 w-3.5"/>
+     <CheckCircle2 className="h-3.5 w-3.5"/><span>Smart Grader V2 · Separate → Resolve → Grade → Approve{context.goals.length?' → IEP Match':''} → File</span><ArrowRight className="h-3.5 w-3.5"/>
    </div>
  </div>;
 }
