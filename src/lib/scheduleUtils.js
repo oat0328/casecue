@@ -4,7 +4,7 @@
 import { compareStudentsByName, sortStudentsByName, sortStudentIdsByName } from '@/lib/studentSort';
 
 export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-export const DELIVERY_LABEL = { "pull-out": "Pull-Out", "push-in": "Push-In", consultation: "Consultation" };
+export const DELIVERY_LABEL = { "pull-out": "Pull-Out", "push-in": "Push-In", consultation: "Consultation", class: "Class / Period", session: "Session", support: "Student Support", other: "Other" };
 
 export const timeToMin = (t) => {
   if (!t || !String(t).includes(":")) return null;
