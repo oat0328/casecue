@@ -33,7 +33,7 @@ export default function WorkspaceNotes({workspaceKey:prop}){
  const students=useMemo(()=>para?(rawStudents||[]).filter(x=>x.active!==false).map(x=>({...x,id:x.student_id})):(rawStudents||[]).filter(x=>x.roster_status!=='archived'&&x.status!=='exited'),[para,rawStudents]);
  const{data:notes,refetch}=useAsync(()=>base44.entities.WorkspaceNote.filter({workspace:workspaceKey},'-date',500),[workspaceKey]);
  const[f,setF]=useState({student_id:'',title:'',body:'',category:'general',setting:'',support_level:'Not applicable',date:today()});
- const[busy,setBusy]=useState(false),[aiBusy,setAiBusy]=useState(false),[attachment,setAttachment]=useState(''),[filename,setFilename]=useState(''),[search,setSearch]=useState('');
+ const[busy,setBusy]=useState(false),[aiBusy,setAiBusy]=useState(false),[aiCleaned,setAiCleaned]=useState(false),[attachment,setAttachment]=useState(''),[filename,setFilename]=useState(''),[search,setSearch]=useState('');
  const set=(k,v)=>setF(x=>({...x,[k]:v}));
  const name=id=>full(students.find(s=>s.id===id));
  const clean=async()=>{
@@ -43,7 +43,7 @@ export default function WorkspaceNotes({workspaceKey:prop}){
    const q=`Clean up this ${meta.short} educator/staff note. Preserve every fact, number, date, direct quote, uncertainty, and action. Do not diagnose, add facts, infer motives, or turn observations into conclusions. Make it concise, objective, professional, and easy for another school staff member to understand. Return only the cleaned note. SOURCE NOTE: ${f.body}`;
    const r=await base44.functions.invoke('askCaseCue',{question:q,history:[],mode:'general'});
    const text=r?.data?.answer||r?.answer;if(!text)throw new Error('No cleaned note returned.');
-   setF(x=>({...x,body:text}));toast({title:'Note cleaned up',description:'Review it before saving.'});
+   setF(x=>({...x,body:text}));setAiCleaned(true);toast({title:'Note cleaned up',description:'Review it before saving.'});
   }catch(e){toast({title:'CaseCue cleanup unavailable',description:e?.response?.data?.error||e.message,variant:'destructive'})}
   finally{setAiBusy(false)}
  };
@@ -66,8 +66,8 @@ export default function WorkspaceNotes({workspaceKey:prop}){
   if(!f.body.trim())return toast({title:'Add a note first'});
   setBusy(true);
   try{
-   await base44.entities.WorkspaceNote.create({...f,organization_id:user?.organization_id||user?.data?.organization_id||'',user_id:user.id,workspace:workspaceKey,attachment_url:attachment,original_filename:filename,ai_cleaned:aiBusy===false&&false,updated_at:new Date().toISOString()});
-   setF({student_id:'',title:'',body:'',category:'general',setting:'',support_level:'Not applicable',date:today()});setAttachment('');setFilename('');await refetch();toast({title:'Note saved'});
+   await base44.entities.WorkspaceNote.create({...f,organization_id:user?.organization_id||user?.data?.organization_id||'',user_id:user.id,workspace:workspaceKey,attachment_url:attachment,original_filename:filename,ai_cleaned:aiCleaned,updated_at:new Date().toISOString()});
+   setF({student_id:'',title:'',body:'',category:'general',setting:'',support_level:'Not applicable',date:today()});setAiCleaned(false);setAttachment('');setFilename('');await refetch();toast({title:'Note saved'});
   }catch(e){toast({title:'Could not save note',description:e.message,variant:'destructive'})}
   finally{setBusy(false)}
  };
@@ -89,7 +89,7 @@ export default function WorkspaceNotes({workspaceKey:prop}){
      <div><div className="text-xs font-black text-slate-500">Setting</div><select className="mt-1 w-full rounded-lg border p-2 text-sm" value={f.setting} onChange={e=>set('setting',e.target.value)}><option value="">Not specified</option>{SETTINGS.map(x=><option key={x}>{x}</option>)}</select></div>
      <div className="sm:col-span-2"><div className="text-xs font-black text-slate-500">Support / prompting</div><select className="mt-1 w-full rounded-lg border p-2 text-sm" value={f.support_level} onChange={e=>set('support_level',e.target.value)}>{SUPPORTS.map(x=><option key={x}>{x}</option>)}</select></div>
      <div className="sm:col-span-2"><Input placeholder="Title (optional)" value={f.title} onChange={e=>set('title',e.target.value)}/></div>
-     <div className="sm:col-span-2"><Textarea rows={8} placeholder="Type what happened. Stick to observable facts, data, support provided, and student response." value={f.body} onChange={e=>set('body',e.target.value)}/></div>
+     <div className="sm:col-span-2"><Textarea rows={8} placeholder="Type what happened. Stick to observable facts, data, support provided, and student response." value={f.body} onChange={e=>{set('body',e.target.value);setAiCleaned(false)}}/></div>
     </div>
     <div className="mt-3 flex flex-wrap gap-2"><Button type="button" variant="outline" onClick={clean} disabled={aiBusy||!f.body.trim()}><Sparkles className="mr-2 h-4 w-4"/>{aiBusy?'Cleaning…':'Clean Up with CaseCue'}</Button><Button type="button" variant="outline" onClick={()=>fileRef.current?.click()} disabled={busy}><Paperclip className="mr-2 h-4 w-4"/>Attach File</Button><input ref={fileRef} type="file" className="hidden" accept=".pdf,.doc,.docx,.txt,.rtf,image/*" onChange={e=>{ingest(e.target.files?.[0]);e.target.value=''}}/></div>
     <div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();ingest(e.dataTransfer.files?.[0])}} className="mt-3 rounded-xl border-2 border-dashed p-4 text-center text-sm text-slate-500"><FileUp className="mx-auto h-5 w-5 text-blue-700"/><div className="mt-1 font-semibold">{filename||'Drop a worksheet, behavior sheet, assessment note, photo, or PDF here'}</div></div>
