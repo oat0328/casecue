@@ -7,14 +7,21 @@ const GOAL={type:'object',properties:{
  objectives:{type:'array',items:{type:'string'}},rationale:{type:'string'},confidence:{type:'string',enum:['high','medium','low']}
 },required:['goal_area','goal_text','baseline','target','condition','criterion','measurement_method','progress_monitoring_method','objectives','rationale','confidence']};
 
+const SUPPORT={type:'object',properties:{
+ support:{type:'string'},evidence:{type:'string'},when_helpful:{type:'string'},rationale:{type:'string'},
+ category:{type:'string',enum:['presentation','response','setting','timing_scheduling','instructional_support','organization','other']},
+ confidence:{type:'string',enum:['high','medium','low']}
+},required:['support','evidence','when_helpful','rationale','category','confidence']};
+
 const SCHEMA={type:'object',properties:{
  overall_summary:{type:'string'},score_summary:{type:'string'},
  strengths:{type:'array',items:{type:'string'}},needs:{type:'array',items:{type:'string'}},
  present_levels_draft:{type:'string'},goal_drafts:{type:'array',items:GOAL},
  progress_monitoring_recommendations:{type:'array',items:{type:'string'}},
  accommodation_observations:{type:'array',items:{type:'string'}},
+ support_recommendations:{type:'array',items:SUPPORT},
  teacher_handoff:{type:'string'},cautions:{type:'array',items:{type:'string'}}
-},required:['overall_summary','score_summary','strengths','needs','present_levels_draft','goal_drafts','progress_monitoring_recommendations','accommodation_observations','teacher_handoff','cautions']};
+},required:['overall_summary','score_summary','strengths','needs','present_levels_draft','goal_drafts','progress_monitoring_recommendations','accommodation_observations','support_recommendations','teacher_handoff','cautions']};
 
 export default async function(req){
  try{
@@ -55,8 +62,12 @@ STRICT RULES:
 - Do not invent baseline numbers. Baseline language must come from the supplied score/item evidence.
 - Progress-monitoring recommendations should state practical probes/data methods, not legal service requirements.
 - Approved supports are context for whether supports were available; do not claim an accommodation was actually used unless the supplied assessment analysis says so.
-- If the evidence is too narrow to support a goal, say what additional data the teacher should collect instead of forcing a goal.
-- teacher_handoff should read like a Para handing a completed assessment package to the case manager: what was administered, score, key strengths/needs, and what drafts are included.
+- Build support_recommendations only when the scored work gives a defensible reason to consider a support. These are SUPPORT / ACCOMMODATION CONSIDERATIONS FOR EDUCATOR OR IEP-TEAM REVIEW, not adopted accommodations and not automatic IEP changes.
+- For each support recommendation include: support, the exact assessment evidence that triggered it, when_helpful, rationale, category, and confidence. Prefer practical classroom supports such as chunking directions, visual checklists, reduced-copying demands, extended processing time, graphic organizers, or response supports only when the observed error pattern actually supports them.
+- Never recommend a support merely because it is commonly used for a disability category; there is no diagnosis-based shortcut here.
+- accommodation_observations should be a short plain-language legacy summary of the same evidence for older saved packets.
+- If the evidence is too narrow to support a goal or accommodation consideration, say what additional data the teacher should collect instead of forcing one.
+- teacher_handoff should read like a Para handing a completed assessment package to the case manager: what was administered, score, key strengths/needs, and what drafts are included, including support/accommodation considerations when present.
 - Everything is DRAFT FOR EDUCATOR REVIEW.
 
 EVIDENCE:
