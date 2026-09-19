@@ -39,7 +39,7 @@ export const WORKSPACE_TOOLS = {
       ['My Students & Grades','/w/para/students',Users],
       ['Grade Student Work','/w/para/grade',ScanLine],
       ['Baseline Scanner','/w/para/baseline',FileText],
-      ['Understand IEP','/w/para/iep-guide',FileText],
+      ['Student Support Guide','/w/para/iep-guide',FileText],
       ['My Notes','/w/para/notes',StickyNote],
     ],
   },
