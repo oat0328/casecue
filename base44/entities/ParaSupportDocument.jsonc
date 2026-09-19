@@ -1,0 +1,152 @@
+{
+  "name": "ParaSupportDocument",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "para_user_id": {
+      "type": "string"
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "IEP",
+        "BIP",
+        "504",
+        "Health Plan",
+        "Medical Report",
+        "FBA",
+        "Evaluation",
+        "Other"
+      ]
+    },
+    "filename": {
+      "type": "string"
+    },
+    "file_uri": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "uploaded",
+        "processing",
+        "ready",
+        "failed"
+      ],
+      "default": "uploaded"
+    },
+    "eligibility_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "documented_disability_or_condition": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "educational_impact": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "accommodations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "behavior_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "communication_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "health_safety_alerts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "emergency_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "services_and_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "testing_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "what_to_do": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "what_to_avoid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "plain_language_summary": {
+      "type": "string"
+    },
+    "source_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "para_user_id",
+    "student_id",
+    "filename",
+    "file_uri",
+    "document_type"
+  ],
+  "rls": {
+    "read": {
+      "data.para_user_id": "{{user.id}}"
+    },
+    "create": {
+      "data.para_user_id": "{{user.id}}"
+    },
+    "update": {
+      "data.para_user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.para_user_id": "{{user.id}}"
+    }
+  }
+}
