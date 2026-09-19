@@ -19,6 +19,7 @@ import { DEMO_LABEL, loadDemoCaseload, deleteDemoCaseload } from "@/lib/demoData
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
 import BillingCard from "@/components/settings/BillingCard";
+import { userDisplayName } from "@/lib/userIdentity";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -75,7 +76,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (user) {
-      setProfileName(user.full_name || "");
+      setProfileName(userDisplayName(user, ""));
       const d = user.data || {};
       if (d.ai_settings) setAiSettings(d.ai_settings);
       setAcknowledged(!!d.privacy_acknowledged);
@@ -90,7 +91,7 @@ export default function Settings() {
 
   const saveProfile = async () => {
     setSavingProfile(true);
-    try { await base44.auth.updateMe({ full_name: profileName }); await checkUserAuth(); toast({ title: "Profile saved" }); }
+    try { const cleanName=profileName.trim(); await base44.auth.updateMe({ full_name: cleanName, profile_display_name: cleanName }); await checkUserAuth(); toast({ title: "Profile saved" }); }
     catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
     finally { setSavingProfile(false); }
   };
