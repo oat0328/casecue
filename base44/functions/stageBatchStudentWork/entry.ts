@@ -62,8 +62,17 @@ export default async function(req){
   const expectedTitle=clean(body.expected_assignment_title||'');
   const expectedSubject=clean(body.expected_subject||'');
   const mode=body.mode==='guided'?'guided':'mixed';
+  const workspace=String(body.workspace||'sped');
   const signed=await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({file_uri:fileUri,expires_in:900});
-  const students=await base44.asServiceRole.entities.Student.filter({organization_id:organizationId},'-updated_date',500);
+  let students=await base44.asServiceRole.entities.Student.filter({organization_id:organizationId},'-updated_date',500);
+  if(workspace==='para'){
+   const access=await base44.asServiceRole.entities.ParaStudentAccess.filter({organization_id:organizationId,para_user_id:user.id,active:true},'-updated_at',500);
+   const allowed=new Set((access||[]).map(x=>String(x.student_id||'')).filter(id=>id&&!id.startsWith('para_')));
+   students=(students||[]).filter(s=>allowed.has(String(s.id)));
+  }else if(Array.isArray(body.allowed_student_ids)&&body.allowed_student_ids.length){
+   const requested=new Set(body.allowed_student_ids.map(String));
+   students=(students||[]).filter(s=>requested.has(String(s.id)));
+  }
   const roster=students.map(s=>({id:s.id,name:clean((s.first_name||'')+' '+(s.last_name||'')),first_name:s.first_name||'',last_name:s.last_name||'',grade:s.grade||''}));
   const prompt=[
    CASECUE_SYSTEM_PROMPT,
