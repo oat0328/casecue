@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MessageSquare, Loader2, Star } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { getActiveWorkspace } from "@/lib/workspaces";
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const TYPES = [
 export default function FloatingFeedbackButton() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const activeWorkspace = getActiveWorkspace(user);
   const [open, setOpen] = useState(false);
   const [milestone, setMilestone] = useState("");
   const [type, setType] = useState("review");
@@ -38,10 +40,10 @@ export default function FloatingFeedbackButton() {
     if (!user?.id) return;
     const check = async () => {
       try {
-        const [docs, workspaces] = await Promise.all([
+        const [docs, workspaces] = activeWorkspace==='sped' ? await Promise.all([
           base44.entities.Document.filter({ created_by_id: user.id }),
           base44.entities.IepWorkspace.filter({ created_by_id: user.id }),
-        ]);
+        ]) : [[],[]];
         const iepCount = (workspaces || []).filter((w) => ["draft", "review", "exported"].includes(w.status)).length;
         const docCount = (docs || []).length;
         const daysActive = user.created_date
@@ -63,7 +65,7 @@ export default function FloatingFeedbackButton() {
       } catch { /* milestone check is best-effort only */ }
     };
     check();
-  }, [user?.id]);
+  }, [user?.id, activeWorkspace]);
 
   const reset = () => {
     setType("review"); setRating(0); setWouldRecommend(""); setTitle("");
