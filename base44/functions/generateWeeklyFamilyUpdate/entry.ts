@@ -1,7 +1,7 @@
 import{createClientFromRequest}from'npm:@base44/sdk@0.8.44';
 
 const between=(d,a,b)=>{const x=String(d||'').slice(0,10);return !!x&&x>=a&&x<=b};
-const pctRow=r=>Number(r?.score_possible)>0?Math.round((Number(r.score_earned||0)/Number(r.score_possible))*1000)/10:(Number.isFinite(Number(r?.current_grade_percent))?Number(r.current_grade_percent):null);
+const scorePct=r=>Number(r?.score_possible)>0?Math.round((Number(r.score_earned||0)/Number(r.score_possible))*1000)/10:null;
 const avg=xs=>{const a=xs.map(Number).filter(Number.isFinite);return a.length?Math.round((a.reduce((n,x)=>n+x,0)/a.length)*10)/10:null};
 const mins=s=>Number(s?.delivered_minutes??s?.duration_minutes??0)||0;
 const clean=v=>String(v??'').replace(/\s+/g,' ').trim();
@@ -45,7 +45,7 @@ export default async function(req){
   const latestByCourse={};
   for(const r of usableGrades){
    const course=clean(r.course||r.assignment_type||'Classroom');
-   if(!latestByCourse[course]&&pctRow(r)!=null&&r.current_grade_percent!=null)latestByCourse[course]=r;
+   if(!latestByCourse[course]&&Number.isFinite(Number(r.current_grade_percent)))latestByCourse[course]=r;
   }
   const courseGrades=Object.entries(latestByCourse).map(([course,r])=>({course,percentage:Number(r.current_grade_percent),letter:clean(r.current_grade_letter||''),date:String(r.date||'').slice(0,10),teacher:clean(r.gen_ed_teacher||'')})).sort((a,b)=>a.course.localeCompare(b.course));
 
@@ -54,7 +54,7 @@ export default async function(req){
   const weeklyAverage=possible>0?Math.round((earned/possible)*1000)/10:null,progressAverage=avg(weeklyProgress.map(r=>r.percentage));
   const goalById=new Map((goalRows||[]).map(g=>[g.id,g]));
 
-  const gradeTrend=weeklyGrades.map(r=>({name:String(r.date||'').slice(5)+(r.title?' · '+clean(r.title).slice(0,22):''),date:String(r.date||'').slice(0,10),title:clean(r.title||'Assignment'),course:clean(r.course||'Classroom'),percentage:pctRow(r)})).filter(x=>x.percentage!=null).sort((a,b)=>a.date.localeCompare(b.date));
+  const gradeTrend=scoredWeekly.map(r=>({name:String(r.date||'').slice(5)+(r.title?' · '+clean(r.title).slice(0,22):''),date:String(r.date||'').slice(0,10),title:clean(r.title||'Assignment'),course:clean(r.course||'Classroom'),percentage:scorePct(r)})).filter(x=>x.percentage!=null).sort((a,b)=>a.date.localeCompare(b.date));
   const currentCourseChart=courseGrades.map(x=>({name:x.course,percentage:x.percentage}));
   const progressTrend=weeklyProgress.map(r=>({name:String(r.date||'').slice(5),date:String(r.date||'').slice(0,10),percentage:Number(r.percentage),goal:clean(goalById.get(r.goal_id)?.goal_area||'Learning goal')})).filter(x=>Number.isFinite(x.percentage)).sort((a,b)=>a.date.localeCompare(b.date));
 
@@ -62,7 +62,7 @@ export default async function(req){
   const supportMinutes=weeklyPara.reduce((n,r)=>n+Number(r.duration_minutes||0),0),sessionMinutes=weeklySessions.reduce((n,r)=>n+mins(r),0);
   const metrics={latest_course_grades:courseGrades,weekly_assignment_average:weeklyAverage,graded_assignments:scoredWeekly.length,missing_assignments:weeklyGrades.filter(r=>r.missing_assignment).length,progress_average:progressAverage,progress_points:weeklyProgress.length,attendance,support_notes:weeklyPara.length,support_minutes:supportMinutes,sessions:weeklySessions.length,session_minutes:sessionMinutes};
 
-  const assignmentLines=weeklyGrades.slice(0,30).map(r=>`- ${String(r.date||'').slice(0,10)} | ${clean(r.course||'Classroom')} | ${clean(r.title||'Assignment')} | ${pctRow(r)==null?'no percentage recorded':pctRow(r)+'%'}${r.missing_assignment?' | marked missing':''}`).join('\n')||'- No graded assignment records in this week.';
+  const assignmentLines=weeklyGrades.slice(0,30).map(r=>`- ${String(r.date||'').slice(0,10)} | ${clean(r.course||'Classroom')} | ${clean(r.title||'Assignment')} | ${scorePct(r)==null?'no assignment-score percentage recorded':scorePct(r)+'%'}${r.missing_assignment?' | marked missing':''}`).join('\n')||'- No graded assignment records in this week.';
   const currentGradeLines=courseGrades.map(g=>`- ${g.course}: ${g.percentage}%${g.letter?' ('+g.letter+')':''}, latest recorded ${g.date||'date not recorded'}`).join('\n')||'- No current course-grade percentages are recorded.';
   const progressLines=weeklyProgress.slice(0,30).map(r=>`- ${String(r.date||'').slice(0,10)} | ${clean(goalById.get(r.goal_id)?.goal_area||'Learning goal')} | ${r.percentage==null?'no percentage':r.percentage+'%'} | prompting ${clean(r.prompting_level||r.support_level||'not recorded')}`).join('\n')||'- No progress-monitoring percentage was recorded this week.';
   const paraLines=weeklyPara.slice(0,20).map(r=>`- ${String(r.date||'').slice(0,10)} | ${clean(r.activity||r.context||'support')} | ${clean(r.objective_observation||'')} | support ${clean(r.support_level||'not recorded')}`).join('\n')||'- No Para support observations were recorded this week.';
