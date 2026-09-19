@@ -70,6 +70,8 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
  const conflicts=useMemo(()=>overlapChecks.filter(c=>!c.same_slot),[overlapChecks]);
  const multiServiceReviews=useMemo(()=>overlapChecks.filter(c=>c.same_slot),[overlapChecks]);
  const matchedIds=useMemo(()=>new Set(groups.filter(g=>g.included).flatMap(resolveIds)),[groups]);
+ const activeRoster=useMemo(()=>roster.filter(s=>s.roster_status!=='archived'&&s.status!=='exited'),[roster]);
+ const missingRoster=useMemo(()=>unresolved.length?[]:activeRoster.filter(s=>!matchedIds.has(s.id)),[activeRoster,matchedIds,unresolved.length]);
 
  const slotStats=useMemo(()=>{
   const slots=new Map();
@@ -174,6 +176,12 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   {!hasSourceDetails&&<div className='rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900'>
    <b>Gen Ed source schedules were not included.</b>
    <div className='mt-1 text-xs leading-5 text-sky-800'>That is okay for importing this SPED schedule. Pull-from class, teacher, and class-window details are intentionally hidden until a source-class schedule is added.</div>
+  </div>}
+
+  {unresolved.length===0&&missingRoster.length>0&&<div className='rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900'>
+   <b>{missingRoster.length} active roster student{missingRoster.length===1?' is':'s are'} not represented in this uploaded schedule.</b>
+   <div className='mt-1 text-xs leading-5 text-amber-800'>This does not automatically mean the schedule is wrong. Verify whether the source file intentionally omits the student or whether another schedule file should be uploaded before saving.</div>
+   <div className='mt-2 flex flex-wrap gap-1.5'>{missingRoster.map(s=><span key={s.id} className='rounded-full border border-amber-300 bg-white px-2.5 py-1 text-xs font-bold'>{rosterName(s)}</span>)}</div>
   </div>}
 
   {unresolved.length>0&&<Card className='p-5 border-amber-300 bg-amber-50/40'>
