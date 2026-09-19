@@ -12,7 +12,7 @@ const CONF_STYLE = { high: "bg-emerald-100 text-emerald-700", medium: "bg-amber-
 
 // New Student Workflow: add a student to the schedule — pick an existing group
 // or create one, or ask AI for a placement recommendation. Teacher stays in control.
-export default function AddStudentDialog({ open, onOpenChange, students, entries, onSaved }) {
+export default function AddStudentDialog({ open, onOpenChange, students, entries, onSaved, workspaceKey='sped' }) {
   const { toast } = useToast();
   const [form, setForm] = useState({ student_id: "", group_mode: "existing", group_name: "", new_group_name: "", delivery: "pull-out", days: ["Monday"], start_time: "", end_time: "", service_minutes: "", teacher_classroom: "" });
   const [recs, setRecs] = useState(null);
@@ -70,6 +70,7 @@ export default function AddStudentDialog({ open, onOpenChange, students, entries
           service_minutes: minutes,
           teacher_classroom: form.teacher_classroom,
           student_ids: [form.student_id],
+          workspace: workspaceKey,
         }))
       );
       toast({ title: "Student added to schedule" });
