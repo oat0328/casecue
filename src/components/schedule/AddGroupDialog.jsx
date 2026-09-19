@@ -13,7 +13,8 @@ const EMPTY = { group_name: "", delivery: "pull-out", days: ["Monday"], start_ti
 // Add Group Manually: one form, multiple days — creates one entry per day.
 export default function AddGroupDialog({ open, onOpenChange, students, onSaved, workspaceKey='sped', entityName='ScheduleEntry', ownerUserId='' }) {
   const { toast } = useToast();
-  const [form, setForm] = useState(EMPTY);
+  const freshForm = () => ({ ...EMPTY, delivery: workspaceKey==='sped' ? 'pull-out' : 'class' });
+  const [form, setForm] = useState(freshForm);
   const [saving, setSaving] = useState(false);
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
@@ -43,7 +44,7 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved, 
         }));
       await base44.entities[entityName].bulkCreate(rows);
       toast({ title: "Group added", description: `${form.group_name} scheduled for ${form.days.length} day(s).` });
-      setForm(EMPTY);
+      setForm(freshForm());
       onSaved?.();
       onOpenChange(false);
     } catch (e) {
@@ -64,7 +65,7 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved, 
           <div><Label>Group name</Label><Input value={form.group_name} onChange={(e) => set("group_name", e.target.value)} className="mt-1" placeholder="e.g. Reading Group A" /></div>
           <div><Label>Delivery</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.delivery} onChange={(e) => set("delivery", e.target.value)}>
-              {Object.entries(DELIVERY_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {Object.entries(DELIVERY_LABEL).filter(([v])=>workspaceKey==='sped'?['pull-out','push-in','consultation'].includes(v):['class','session','support','other'].includes(v)).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
           <div><Label>Start time</Label><Input type="time" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} className="mt-1" /></div>
