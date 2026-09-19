@@ -1,4 +1,4 @@
-import { CalendarClock, ScanLine, BookOpen, Users, FileText, StickyNote, Activity, HeartPulse, Brain, GraduationCap } from 'lucide-react';
+import { CalendarClock, ScanLine, BookOpen, Users, FileText, StickyNote, Activity, HeartPulse, Brain, GraduationCap, UserCheck } from 'lucide-react';
 
 /**
  * Central CaseCue workspace capability registry.
@@ -13,6 +13,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Today','/app',GraduationCap],
       ['Schedule','/instruction/schedule',CalendarClock],
+      ['Attendance','/attendance',UserCheck],
       ['Gradebook','/gradebook',ScanLine],
     ],
   },
@@ -21,6 +22,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Today','/w/gen_ed',GraduationCap],
       ['Schedule','/w/gen_ed/schedule',CalendarClock],
+      ['Attendance','/w/gen_ed/attendance',UserCheck],
       ['Lessons','/instruction/lessons',BookOpen],
       ['Super Grader','/w/gen_ed/grade',ScanLine],
       ['Groups & Reteach','/w/gen_ed/groups',Users],
@@ -33,6 +35,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Today & Capture','/w/para',GraduationCap],
       ['Schedule','/w/para/schedule',CalendarClock],
+      ['Attendance','/w/para/attendance',UserCheck],
       ['My Students & Grades','/w/para/students',Users],
       ['Grade Student Work','/w/para/grade',ScanLine],
       ['Baseline Scanner','/w/para/baseline',FileText],
@@ -45,6 +48,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Today & Sessions','/w/speech',GraduationCap],
       ['Schedule','/w/speech/schedule',CalendarClock],
+      ['Attendance','/w/speech/attendance',UserCheck],
       ['IEP & Speech Input','/w/speech/iep',FileText],
     ],
   },
@@ -53,6 +57,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['OT Sessions','/w/ot',Activity],
       ['Schedule','/w/ot/schedule',CalendarClock],
+      ['Attendance','/w/ot/attendance',UserCheck],
     ],
   },
   nurse: {
@@ -60,6 +65,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Nurse Today','/w/nurse',HeartPulse],
       ['Schedule','/w/nurse/schedule',CalendarClock],
+      ['Attendance','/w/nurse/attendance',UserCheck],
     ],
   },
   psych: {
@@ -67,6 +73,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Psych Workspace','/w/psych',Brain],
       ['Schedule','/w/psych/schedule',CalendarClock],
+      ['Attendance','/w/psych/attendance',UserCheck],
     ],
   },
   substitute: {
@@ -74,6 +81,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['Substitute Day','/w/substitute',GraduationCap],
       ['Schedule','/w/substitute/schedule',CalendarClock],
+      ['Attendance','/w/substitute/attendance',UserCheck],
       ['Lesson Planner','/w/substitute/lesson',BookOpen],
       ['Gradebook','/w/substitute/grade',ScanLine],
     ],
@@ -83,6 +91,7 @@ export const WORKSPACE_TOOLS = {
     nav: [
       ['PE Planner','/w/pe',GraduationCap],
       ['Schedule','/w/pe/schedule',CalendarClock],
+      ['Attendance','/w/pe/attendance',UserCheck],
       ['Lesson Planner','/w/pe/lesson',BookOpen],
       ['Gradebook','/w/pe/grade',ScanLine],
     ],
@@ -99,6 +108,7 @@ export function workspaceToolPath(key, tool) {
     schedule: ['Schedule'],
     gradebook: ['Gradebook','Super Grader','Grade Student Work'],
     lessons: ['Lessons','Lesson Planner'],
+    attendance: ['Attendance'],
   };
   const labels = aliases[tool] || [];
   const row = nav.find(([label]) => labels.includes(label));
