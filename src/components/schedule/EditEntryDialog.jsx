@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { DAYS, DELIVERY_LABEL } from "@/lib/scheduleUtils";
 
 // Edit a single schedule entry (group block): name, time, minutes, students.
-export default function EditEntryDialog({ entry, students, onClose, onSaved, entityName='ScheduleEntry' }) {
+export default function EditEntryDialog({ entry, students, onClose, onSaved, entityName='ScheduleEntry', workspaceKey='sped' }) {
   const { toast } = useToast();
   const [form, setForm] = useState(() => ({
     group_name: entry?.group_name || "",
@@ -53,9 +53,9 @@ export default function EditEntryDialog({ entry, students, onClose, onSaved, ent
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-4">
           <div><Label>Group name</Label><Input value={form.group_name} onChange={(e) => set("group_name", e.target.value)} className="mt-1" /></div>
-          <div><Label>Delivery</Label>
+          <div><Label>{workspaceKey==='sped'?'Delivery':'Block type'}</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.delivery} onChange={(e) => set("delivery", e.target.value)}>
-              {Object.entries(DELIVERY_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {Object.entries(DELIVERY_LABEL).filter(([v])=>workspaceKey==='sped'?['pull-out','push-in','consultation'].includes(v):workspaceKey==='para'?['pull-out','push-in','consultation','support'].includes(v):['class','session','support','other'].includes(v)).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
           <div><Label>Day</Label>
