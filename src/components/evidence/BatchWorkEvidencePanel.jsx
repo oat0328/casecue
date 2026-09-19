@@ -25,6 +25,7 @@ const looksMixed=x=>{const s=String([x.detected_title,x.subject,...(x.skills||[]
 const fingerprintFor=x=>[x.student_id||'',cleanText(x.detected_title).toLowerCase(),(x.source_pages||[]).join('-'),Number(x.score_possible||0)].join('|');
 
 export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=false,batchMode='guided',workspaceKey='sped'}){
+ const isPara=workspaceKey==='para';
  const {toast}=useToast();
  const inputRef=useRef(null);
  const [file,setFile]=useState(null);
@@ -152,21 +153,21 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=
    if(!organizationId)throw new Error('Your account is missing an organization.');
    for(const x of selected){
     const possible=Number(x.score_possible||0),earned=Number(x.score_earned||0),pct=possible>0?Math.round(earned/possible*1000)/10:0;
-    const goalId=includeGoalEvidence?String(x.iep_selected_goal_id||''):'';
-    const chosen=(x.iep_candidates||[]).find(c=>c.goal_id===goalId);
+    const goalId=isPara?'':includeGoalEvidence?String(x.iep_selected_goal_id||''):'';
+    const chosen=isPara?null:(x.iep_candidates||[]).find(c=>c.goal_id===goalId);
     const evidenceFileUri=x.evidence_file_uri||'';
-    const verificationStatus=x.verification?.status==='verified'&&x.scoring_confidence==='high'?'verified':'teacher_confirmed';
+    const verificationStatus=isPara?'needs_teacher_review':x.verification?.status==='verified'&&x.scoring_confidence==='high'?'verified':'teacher_confirmed';
     const fingerprint=fingerprintFor(x);
     const existing=x.student_id?await base44.entities.WorkEvidence.filter({student_id:x.student_id,duplicate_fingerprint:fingerprint},'-created_date',1):[];
     if(existing?.length){if(x.artifact_id)await base44.entities.WorkArtifact.update(x.artifact_id,{status:'duplicate',work_evidence_id:existing[0].id,updated_at:new Date().toISOString()});continue;}
-    const grade=await base44.entities.GradebookAssignment.create({student_id:x.student_id,goal_id:goalId,title:cleanText(x.detected_title)||'Student work',course:x.subject||'',assignment_type:x.evidence_type||'assignment',score_earned:earned,score_possible:possible,notes:x.qualitative_notes||'',quantitative_note:earned+'/'+possible+' · '+(pct/100).toFixed(2)+' ('+pct+'%)',qualitative_note:x.qualitative_notes||x.teacher_observation_draft||'',file_url:evidenceFileUri,source_type:v2?'smart_grader_v2_teacher_assisted':'resource_assignment',date:todayISO(),organization_id:organizationId,verification_status:verificationStatus,approved_by:user.id,approved_at:new Date().toISOString()});
-    const ev=await base44.entities.WorkEvidence.create({student_id:x.student_id,organization_id:organizationId,goal_id:goalId,title:cleanText(x.detected_title)||'Student work',evidence_type:['assignment','worksheet','writing_sample','quiz','assessment','classwork','homework','probe','observation','other'].includes(x.evidence_type)?x.evidence_type:'worksheet',file_url:evidenceFileUri,date:todayISO(),source:'Smart Grader V2 · Teacher-Assisted Batch',score_earned:earned,score_possible:possible,percentage:pct,verification_status:verificationStatus,qualitative_notes:x.qualitative_notes||'',error_patterns:x.error_patterns||[],skills:x.skills||[],analysis:{...x,post_approval_goal_match:chosen||null},teacher_confirmed:true,gradebook_assignment_id:grade.id,scan_run_id:runId||'',source_pages:x.source_pages||[],review_status:'approved',duplicate_fingerprint:fingerprint,evidence_strength:chosen?.evidence_strength||'classroom_only',teacher_supports:x.teacher_supports||[]});
+    const grade=await base44.entities.GradebookAssignment.create({student_id:x.student_id,goal_id:goalId,title:cleanText(x.detected_title)||'Student work',course:x.subject||'',assignment_type:x.evidence_type||'assignment',score_earned:earned,score_possible:possible,notes:x.qualitative_notes||'',quantitative_note:earned+'/'+possible+' · '+(pct/100).toFixed(2)+' ('+pct+'%)',qualitative_note:x.qualitative_notes||x.teacher_observation_draft||'',file_url:evidenceFileUri,source_type:isPara?'para_smart_grader_submission':v2?'smart_grader_v2_teacher_assisted':'resource_assignment',date:todayISO(),organization_id:organizationId,verification_status:verificationStatus,approved_by:isPara?'':user.id,approved_at:isPara?'':new Date().toISOString()});
+    const ev=await base44.entities.WorkEvidence.create({student_id:x.student_id,organization_id:organizationId,goal_id:goalId,title:cleanText(x.detected_title)||'Student work',evidence_type:['assignment','worksheet','writing_sample','quiz','assessment','classwork','homework','probe','observation','other'].includes(x.evidence_type)?x.evidence_type:'worksheet',file_url:evidenceFileUri,date:todayISO(),source:isPara?'CaseCue Para Batch Submission':'Smart Grader V2 · Teacher-Assisted Batch',score_earned:earned,score_possible:possible,percentage:pct,verification_status:verificationStatus,qualitative_notes:x.qualitative_notes||'',error_patterns:x.error_patterns||[],skills:x.skills||[],analysis:{...x,post_approval_goal_match:chosen||null,submitted_from_workspace:workspaceKey},teacher_confirmed:!isPara,gradebook_assignment_id:grade.id,scan_run_id:runId||'',source_pages:x.source_pages||[],review_status:isPara?'needs_review':'approved',duplicate_fingerprint:fingerprint,evidence_strength:isPara?'needs_review':chosen?.evidence_strength||'classroom_only',teacher_supports:x.teacher_supports||[]});
     await base44.entities.GradebookAssignment.update(grade.id,{work_evidence_id:ev.id});
-    if(goalId&&chosen&&['strong','supporting'].includes(chosen.evidence_strength)){
+    if(!isPara&&goalId&&chosen&&['strong','supporting'].includes(chosen.evidence_strength)){
      const pd=await base44.entities.ProgressData.create({student_id:x.student_id,goal_id:goalId,date:todayISO(),correct:earned,total:possible,percentage:pct,decimal:pct/100,data_basis:'overall_assignment_score',qualitative_notes:x.qualitative_notes||'',observation_notes:x.teacher_observation_draft||'',organization_id:organizationId,work_evidence_id:ev.id,record_status:'active'});
      await base44.entities.WorkEvidence.update(ev.id,{progress_data_id:pd.id});
     }
-    if(x.artifact_id)await base44.entities.WorkArtifact.update(x.artifact_id,{student_id:x.student_id,identity_status:'teacher_confirmed',status:'approved',work_evidence_id:ev.id,score_earned:earned,score_possible:possible,percentage:pct,updated_at:new Date().toISOString()});
+    if(x.artifact_id)await base44.entities.WorkArtifact.update(x.artifact_id,{student_id:x.student_id,identity_status:isPara?'confirmed':'teacher_confirmed',status:isPara?'review':'approved',work_evidence_id:ev.id,score_earned:earned,score_possible:possible,percentage:pct,updated_at:new Date().toISOString()});
     saved++;
    }
    if(runId)await base44.entities.SmartStackRun.update(runId,{status:'completed',approved_items:saved,results:items,completed_at:new Date().toISOString()});
