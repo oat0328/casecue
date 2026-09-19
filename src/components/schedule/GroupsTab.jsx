@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/cards";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
-import { byGroup, studentName, DELIVERY_LABEL } from "@/lib/scheduleUtils";
+import { byGroup, studentName, DELIVERY_LABEL, sortStudentIdsAlpha } from "@/lib/scheduleUtils";
 import GroupActionDialog from "./GroupActionDialog";
 import GroupStudentsDialog from "./GroupStudentsDialog";
 
@@ -115,7 +115,7 @@ export default function GroupsTab({ entries, students, onRefresh }) {
               </div>
 
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {[...g.studentIds].map((id) => (
+                {sortStudentIdsAlpha([...g.studentIds], students).map((id) => (
                   <span
                     key={id}
                     draggable
