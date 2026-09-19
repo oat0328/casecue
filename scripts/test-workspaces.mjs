@@ -96,9 +96,13 @@ ok('Weekly family update nav exists for all three roles',caps.includes("'/weekly
 ok('Weekly family generator enforces Para assignment',weeklyGenerator.includes('ParaStudentAccess.filter')&&weeklyGenerator.includes('not assigned to your Para account'),'weekly family Para assignment guard missing');
 ok('Weekly family math separates course grade and assignment score',weeklyGenerator.includes('scorePct')&&weeklyGenerator.includes('weekly_assignment_average')&&weeklyGenerator.includes('latest_course_grades'),'weekly grade math separation missing');
 ok('Weekly family AI forbids invented scores and diagnoses',weeklyGenerator.includes('Never invent grades')&&weeklyGenerator.includes('Do not mention disability'),'weekly family grounding rules missing');
+ok('Weekly family no-data mode skips AI conclusions',weeklyGenerator.includes('if(!hasMeaningfulData)')&&weeklyGenerator.includes('strengths:[],focus_areas:[],next_steps:[]')&&weeklyGenerator.includes('intentionally skipped AI strengths'),'weekly family no-data hallucination guard missing');
+ok('Weekly family forbids treating missing records as student traits',weeklyGenerator.includes('NEVER turn missing records into a student strength')&&weeklyGenerator.includes('attendance stability'),'weekly family missing-data rule missing');
 ok('Weekly family page includes real graphs and editable message',weeklyFamily.includes('PremiumLineChart')&&weeklyFamily.includes('PremiumBarChart')&&weeklyFamily.includes('family_message')&&weeklyFamily.includes('Weekly PDF + Graphs'),'weekly family UI incomplete');
 ok('Weekly family history stores immutable data snapshots',weeklySchema.includes('chart_data')&&weeklySchema.includes('metrics')&&weeklySchema.includes('source_counts')&&weeklyFamily.includes('Weekly Update History'),'weekly family snapshot/history missing');
 ok('Analytics PDF can include narrative sections',analyticsExport.includes('sections=[]')&&analyticsExport.includes("section.heading||'Summary'"),'analytics narrative sections missing');
+ok('Analytics PDF header adapts to wrapped titles',analyticsExport.includes('headerHeight')&&analyticsExport.includes('titleLines.length>1?16:19'),'analytics PDF adaptive header missing');
+ok('Analytics PDF preserves report line breaks and bullets',analyticsExport.includes("replace(/•/g,'-')")&&analyticsExport.includes("split(/\\r?\\n/)"),'analytics PDF text formatting regression');
 
 ok('Speech IEP queries selected student docs',speechIep.includes("Document.filter({student_id:form.student_id}")&&!speechIep.includes('Document.list('),'Speech IEP must not pre-load every org document');
 
