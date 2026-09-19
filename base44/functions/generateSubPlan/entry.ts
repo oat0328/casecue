@@ -20,7 +20,7 @@ export default async function(req) {
 
     const students = await base44.entities.Student.list('-updated_date', 100);
     const lessons = await base44.entities.Lesson.list('-updated_date', 20);
-    const schedule = await base44.entities.ScheduleEntry.list('day', 50);
+    const schedule = (await base44.entities.ScheduleEntry.list('day', 100)).filter((e) => (e.workspace || 'sped') === 'sped');
     const goals = await base44.entities.Goal.list('-updated_date', 200);
     // Teacher uploads may not be propagated to every runtime yet — degrade to
     // "no uploads" instead of failing the whole plan.
