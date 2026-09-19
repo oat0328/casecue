@@ -5,7 +5,7 @@ const PULL={
   type:'object',
   properties:{
     name:{type:'string'},student_id:{type:'string'},match_type:{type:'string'},confidence:{type:'string'},
-    source_subject:{type:'string'},source_teacher:{type:'string'},source_room:{type:'string'},source_period:{type:'string'},
+    probable_student_id:{type:'string'},probable_student_name:{type:'string'},source_subject:{type:'string'},source_teacher:{type:'string'},source_room:{type:'string'},source_period:{type:'string'},
     class_start_time:{type:'string'},class_end_time:{type:'string'},pull_start_time:{type:'string'},pull_end_time:{type:'string'},
     pull_rule:{type:'string'},source_confidence:{type:'string'}
   },
@@ -131,8 +131,10 @@ const flexibleMatch=(label,students)=>{
 
 const makeStudent=(name,students)=>{
   const hit=flexibleMatch(name,students);
-  if(!hit)return{name:String(name||'').trim(),student_id:'',match_type:'unmatched',confidence:'none',source_subject:'',source_teacher:'',source_room:'',source_period:'',class_start_time:'',class_end_time:'',pull_start_time:'',pull_end_time:'',pull_rule:'',source_confidence:''};
-  return{name:`${hit.student.first_name||''} ${hit.student.last_name||''}`.trim(),student_id:hit.student.id,match_type:hit.match_type,confidence:hit.confidence,source_subject:'',source_teacher:'',source_room:'',source_period:'',class_start_time:'',class_end_time:'',pull_start_time:'',pull_end_time:'',pull_rule:'',source_confidence:''};
+  if(!hit)return{name:String(name||'').trim(),student_id:'',probable_student_id:'',probable_student_name:'',match_type:'unmatched',confidence:'none',source_subject:'',source_teacher:'',source_room:'',source_period:'',class_start_time:'',class_end_time:'',pull_start_time:'',pull_end_time:'',pull_rule:'',source_confidence:''};
+  const rosterName=`${hit.student.first_name||''} ${hit.student.last_name||''}`.trim();
+  if(hit.match_type==='probable')return{name:String(name||'').trim(),student_id:'',probable_student_id:hit.student.id,probable_student_name:rosterName,match_type:'probable',confidence:hit.confidence,source_subject:'',source_teacher:'',source_room:'',source_period:'',class_start_time:'',class_end_time:'',pull_start_time:'',pull_end_time:'',pull_rule:'',source_confidence:''};
+  return{name:rosterName,student_id:hit.student.id,probable_student_id:'',probable_student_name:'',match_type:'exact',confidence:'high',source_subject:'',source_teacher:'',source_room:'',source_period:'',class_start_time:'',class_end_time:'',pull_start_time:'',pull_end_time:'',pull_rule:'',source_confidence:''};
 };
 
 const parseCellGroups=(text,{day,period,start_time,end_time,students})=>{
