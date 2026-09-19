@@ -109,56 +109,118 @@ const pdfSafe = (t) => String(t == null ? "" : t)
 export function exportDocPdf({ title, subtitle, sections, banner, filename }) {
   logExportAction("pdf", title);
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const PAGE_W = 595;
   const PAGE_H = 842;
-  const M = 48;
-  const CW = 595 - M * 2;
-
+  const M = 42;
+  const CW = PAGE_W - M * 2;
+  const printed = new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" });
   let y = M;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(60, 40, 120);
-  const titleLines = doc.splitTextToSize(pdfSafe(title), CW);
-  titleLines.forEach((ln) => { doc.text(ln, M, y + 12); y += 20; });
-  y += 14;
-  doc.setTextColor(40, 40, 40);
 
-  const write = (text, size = 11, bold = false, color = [40, 40, 40], gap = 6) => {
-    doc.setFont("helvetica", bold ? "bold" : "normal");
-    doc.setFontSize(size);
-    doc.setTextColor(...color);
-    const lines = doc.splitTextToSize(pdfSafe(text ?? "—"), CW);
-    for (const line of lines) {
-      if (y > PAGE_H - 60) { doc.addPage(); y = M; }
-      doc.text(line, M, y);
-      y += size * 1.35;
-    }
-    y += gap;
+  const newPage = () => { doc.addPage(); y = M; };
+  const ensure = (height) => { if (y + height > PAGE_H - 62) newPage(); };
+
+  doc.setFillColor(7, 16, 31);
+  doc.roundedRect(M, M, CW, 92, 12, 12, "F");
+  doc.setTextColor(125, 211, 252);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.text("CASECUE", M + 16, M + 18);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  const titleLines = doc.splitTextToSize(pdfSafe(title), CW - 150);
+  doc.text(titleLines, M + 16, M + 42);
+  if (subtitle) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(203, 213, 225);
+    const sub = doc.splitTextToSize(pdfSafe(subtitle), CW - 150);
+    doc.text(sub, M + 16, M + 69);
+  }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.text("PRINTED", M + CW - 78, M + 24);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(203, 213, 225);
+  doc.text(pdfSafe(printed), M + CW - 78, M + 39);
+  y = M + 110;
+
+  const drawSectionHeading = (heading, index) => {
+    ensure(34);
+    doc.setFillColor(234, 245, 255);
+    doc.roundedRect(M, y, 28, 24, 7, 7, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(7, 89, 133);
+    doc.text(String(index + 1).padStart(2, "0"), M + 8, y + 15);
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    const h = doc.splitTextToSize(pdfSafe(heading || "Details"), CW - 42);
+    doc.text(h, M + 38, y + 15);
+    y += Math.max(32, h.length * 13 + 10);
   };
 
-  if (subtitle) write(subtitle, 10, false, [110, 110, 110], 12);
-
-  for (const s of sections || []) {
-    if (y > PAGE_H - 90) { doc.addPage(); y = M; }
-    write(s.heading, 12, true, [109, 40, 217], 3);
-    if (s.image && s.imageWidth && s.imageHeight) {
-      let imgW = CW;
-      let imgH = CW * (s.imageHeight / s.imageWidth);
-      const maxH = PAGE_H - M * 2 - 40;
-      if (imgH > maxH) { imgH = maxH; imgW = imgH * (s.imageWidth / s.imageHeight); }
-      if (y + imgH > PAGE_H - 60) { doc.addPage(); y = M; }
-      try { doc.addImage(s.image, "PNG", M, y, imgW, imgH); y += imgH + 8; } catch { /* skip unreadable image */ }
+  const writeBody = (body) => {
+    if (!body) return;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(51, 65, 85);
+    const lines = doc.splitTextToSize(pdfSafe(body), CW - 8);
+    for (const line of lines) {
+      if (y > PAGE_H - 72) {
+        newPage();
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text("CaseCue · continued", M, y);
+        y += 16;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9.5);
+        doc.setTextColor(51, 65, 85);
+      }
+      doc.text(line || " ", M + 4, y);
+      y += 13.5;
     }
-    if (s.body) write(s.body, 11, false, [40, 40, 40], 10);
-  }
+    y += 8;
+  };
 
-  const footer = banner || DEFAULT_BANNER;
+  (sections || []).forEach((s, index) => {
+    drawSectionHeading(s.heading, index);
+    if (s.image && s.imageWidth && s.imageHeight) {
+      let imgW = CW - 8;
+      let imgH = imgW * (s.imageHeight / s.imageWidth);
+      const maxH = PAGE_H - M * 2 - 80;
+      if (imgH > maxH) { imgH = maxH; imgW = imgH * (s.imageWidth / s.imageHeight); }
+      ensure(imgH + 16);
+      try { doc.addImage(s.image, "PNG", M + 4, y, imgW, imgH); y += imgH + 10; } catch { /* skip unreadable image */ }
+    }
+    writeBody(s.body);
+    doc.setDrawColor(226, 232, 240);
+    doc.line(M, y, M + CW, y);
+    y += 12;
+  });
+
+  const reviewText = pdfSafe(banner || DEFAULT_BANNER);
+  const reviewLines = doc.splitTextToSize(reviewText, CW - 24);
+  ensure(reviewLines.length * 11 + 28);
+  doc.setFillColor(239, 246, 255);
+  doc.setDrawColor(191, 219, 254);
+  doc.roundedRect(M, y, CW, reviewLines.length * 11 + 20, 8, 8, "FD");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(30, 64, 175);
+  doc.text(reviewLines, M + 12, y + 14);
+
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-    doc.setTextColor(130, 130, 130);
-    doc.text(pdfSafe(footer), M, PAGE_H - 24);
+    doc.setDrawColor(226, 232, 240);
+    doc.line(M, PAGE_H - 35, PAGE_W - M, PAGE_H - 35);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text("CaseCue · getcasecue.com", M, PAGE_H - 21);
+    doc.text(`Printed ${pdfSafe(printed)} · Page ${p} of ${pages}`, PAGE_W - M, PAGE_H - 21, { align: "right" });
   }
 
   doc.save(`${safeName(filename)}.pdf`);
