@@ -23,6 +23,25 @@ export const studentName = (students, id) => {
   return s ? `${s.first_name} ${s.last_name}`.trim() : "Unknown student";
 };
 
+export const compareStudentsAlpha = (a, b) => {
+  const last = String(a?.last_name || '').trim().localeCompare(String(b?.last_name || '').trim(), undefined, { sensitivity: 'base' });
+  if (last) return last;
+  return String(a?.first_name || '').trim().localeCompare(String(b?.first_name || '').trim(), undefined, { sensitivity: 'base' });
+};
+
+export const sortStudentsAlpha = (students) => [...(students || [])].sort(compareStudentsAlpha);
+
+export const sortStudentIdsAlpha = (ids, students) => {
+  const byId = new Map((students || []).map((s) => [s.id, s]));
+  return [...(ids || [])].sort((a, b) => {
+    const sa = byId.get(a), sb = byId.get(b);
+    if (sa && sb) return compareStudentsAlpha(sa, sb);
+    if (sa) return -1;
+    if (sb) return 1;
+    return String(a).localeCompare(String(b));
+  });
+};
+
 export const normalizeDay = (day) =>
   DAYS.find((d) => d.toLowerCase() === String(day || "").toLowerCase()) || "Monday";
 
@@ -115,7 +134,7 @@ export function scheduleSections(entries, students, timeFormat = "12h") {
       body: list
         .map(
           (e) =>
-            `${e.group_name} — ${formatScheduleTime(e.start_time, timeFormat)} to ${formatScheduleTime(e.end_time, timeFormat)} (${DELIVERY_LABEL[e.delivery] || e.delivery}, ${e.service_minutes || 0} min)${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}\nStudents: ${(e.student_ids || []).map((id) => studentName(students, id)).join(", ") || "None"}${e.notes ? `\nNotes: ${e.notes}` : ""}`
+            `${e.group_name} — ${formatScheduleTime(e.start_time, timeFormat)} to ${formatScheduleTime(e.end_time, timeFormat)} (${DELIVERY_LABEL[e.delivery] || e.delivery}, ${e.service_minutes || 0} min)${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}\nStudents: ${sortStudentIdsAlpha(e.student_ids || [], students).map((id) => studentName(students, id)).join(", ") || "None"}${e.notes ? `\nNotes: ${e.notes}` : ""}`
         )
         .join("\n\n"),
     };
@@ -124,8 +143,7 @@ export function scheduleSections(entries, students, timeFormat = "12h") {
 
 export function caseloadSections(entries, students, timeFormat = "12h") {
   const scheduled = scheduledMinutes(entries);
-  return (students || [])
-    .filter((s) => s.status !== "exited")
+  return sortStudentsAlpha((students || []).filter((s) => s.status !== "exited"))
     .map((s) => {
       const list = (entries || []).filter((e) => !e.archived && (e.student_ids || []).includes(s.id));
       const conflicts = findConflicts(list).filter((c) => !c.same_slot).length;
@@ -148,7 +166,7 @@ export function rosterSections(entries, students, timeFormat = "12h") {
       g.entries
         .map((e) => `${e.day} ${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)} — ${DELIVERY_LABEL[e.delivery] || e.delivery}${e.teacher_classroom ? ` — ${e.teacher_classroom}` : ""}`)
         .join("\n") +
-      `\nStudents (${g.studentIds.size}): ${[...g.studentIds].map((id) => studentName(students, id)).join(", ") || "None"}`,
+      `\nStudents (${g.studentIds.size}): ${sortStudentIdsAlpha([...g.studentIds], students).map((id) => studentName(students, id)).join(", ") || "None"}`,
   }));
 }
 
@@ -163,7 +181,7 @@ export function scheduleRows(entries, students, timeFormat = "12h") {
       formatScheduleTime(e.end_time, timeFormat),
       e.service_minutes || 0,
       e.teacher_classroom || "",
-      (e.student_ids || []).map((id) => studentName(students, id)).join(", "),
+      sortStudentIdsAlpha(e.student_ids || [], students).map((id) => studentName(students, id)).join(", "),
       e.notes || "",
     ]);
 }
