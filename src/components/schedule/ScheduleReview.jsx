@@ -66,7 +66,9 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   end_time:g.end_time,
   student_ids:resolveIds(g)
  })),[groups]);
- const conflicts=useMemo(()=>findConflicts(preview),[preview]);
+ const overlapChecks=useMemo(()=>findConflicts(preview),[preview]);
+ const conflicts=useMemo(()=>overlapChecks.filter(c=>!c.same_slot),[overlapChecks]);
+ const multiServiceReviews=useMemo(()=>overlapChecks.filter(c=>c.same_slot),[overlapChecks]);
  const matchedIds=useMemo(()=>new Set(groups.filter(g=>g.included).flatMap(resolveIds)),[groups]);
 
  const slotStats=useMemo(()=>{
@@ -266,7 +268,8 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
    </div>
   </div>
 
-  {conflicts.length>0&&<div className='rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900'><b>{conflicts.length} overlapping service conflict{conflicts.length===1?'':'s'} detected in the current review.</b><div className='mt-3 space-y-2'>{conflicts.map((c,i)=><div key={i} className='rounded-lg border border-rose-200 bg-white px-3 py-2'><div className='font-bold'>{(c.student_ids||[]).map(id=>rosterName(rosterById[id])||'Student').join(', ')}</div><div className='mt-1 text-xs'>{c.a.day} · {c.a.group_name} {c.a.start_time}–{c.a.end_time} overlaps {c.b.group_name} {c.b.start_time}–{c.b.end_time}</div><div className='mt-1 text-[11px] text-rose-700'>Review the source schedule before changing either block. CaseCue is identifying the overlap, not deciding which service should move.</div></div>)}</div>{unresolved.length>0&&<div className='mt-2 text-xs text-rose-700'>Conflict count may increase after remaining roster names are confirmed.</div>}</div>}
+  {multiServiceReviews.length>0&&<div className='rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900'><b>{multiServiceReviews.length} same-slot multi-service assignment{multiServiceReviews.length===1?'':'s'} to review.</b><div className='mt-1 text-xs text-amber-800'>These are not counted as scheduling conflicts because the start and end times are identical. They may represent one session addressing more than one instructional area.</div><div className='mt-3 space-y-2'>{multiServiceReviews.map((c,i)=><div key={i} className='rounded-lg border border-amber-200 bg-white px-3 py-2'><div className='font-bold'>{(c.student_ids||[]).map(id=>rosterName(rosterById[id])||'Student').join(', ')}</div><div className='mt-1 text-xs'>{c.a.day} · {c.a.group_name} + {c.b.group_name} · {c.a.start_time}–{c.a.end_time}</div><div className='mt-1 text-[11px] text-amber-700'>Confirm that this is intentionally one shared service period or multi-area instructional session.</div></div>)}</div></div>}
+  {conflicts.length>0&&<div className='rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900'><b>{conflicts.length} true overlapping service conflict{conflicts.length===1?'':'s'} detected in the current review.</b><div className='mt-3 space-y-2'>{conflicts.map((c,i)=><div key={i} className='rounded-lg border border-rose-200 bg-white px-3 py-2'><div className='font-bold'>{(c.student_ids||[]).map(id=>rosterName(rosterById[id])||'Student').join(', ')}</div><div className='mt-1 text-xs'>{c.a.day} · {c.a.group_name} {c.a.start_time}–{c.a.end_time} overlaps {c.b.group_name} {c.b.start_time}–{c.b.end_time}</div><div className='mt-1 text-[11px] text-rose-700'>Review the source schedule before changing either block. CaseCue is identifying the overlap, not deciding which service should move.</div></div>)}</div>{unresolved.length>0&&<div className='mt-2 text-xs text-rose-700'>Conflict count may increase after remaining roster names are confirmed.</div>}</div>}
 
   <div className='flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'>
    <Button variant='outline' onClick={onCancel}>Cancel</Button>
