@@ -60,7 +60,9 @@ export default async function(req){
 
   const attendance={present:weeklyAttendance.filter(x=>x.status==='present').length,absent:weeklyAttendance.filter(x=>x.status==='absent').length,tardy:weeklyAttendance.filter(x=>x.status==='tardy').length,excused:weeklyAttendance.filter(x=>x.status==='excused').length,left_early:weeklyAttendance.filter(x=>x.status==='left_early').length};
   const supportMinutes=weeklyPara.reduce((n,r)=>n+Number(r.duration_minutes||0),0),sessionMinutes=weeklySessions.reduce((n,r)=>n+mins(r),0);
-  const metrics={latest_course_grades:courseGrades,weekly_assignment_average:weeklyAverage,graded_assignments:scoredWeekly.length,missing_assignments:weeklyGrades.filter(r=>r.missing_assignment).length,progress_average:progressAverage,progress_points:weeklyProgress.length,attendance,support_notes:weeklyPara.length,support_minutes:supportMinutes,sessions:weeklySessions.length,session_minutes:sessionMinutes};
+  const sourceCounts={grade_records:weeklyGrades.length,progress_records:weeklyProgress.length,attendance_records:weeklyAttendance.length,para_notes:weeklyPara.length,session_records:weeklySessions.length};
+  const hasMeaningfulData=courseGrades.length>0||Object.values(sourceCounts).some(v=>Number(v)>0);
+  const metrics={latest_course_grades:courseGrades,weekly_assignment_average:weeklyAverage,graded_assignments:scoredWeekly.length,missing_assignments:weeklyGrades.filter(r=>r.missing_assignment).length,progress_average:progressAverage,progress_points:weeklyProgress.length,attendance,support_notes:weeklyPara.length,support_minutes:supportMinutes,sessions:weeklySessions.length,session_minutes:sessionMinutes,has_meaningful_data:hasMeaningfulData,data_coverage:{has_course_grades:courseGrades.length>0,has_weekly_grades:weeklyGrades.length>0,has_progress:weeklyProgress.length>0,has_attendance:weeklyAttendance.length>0,has_para_notes:weeklyPara.length>0,has_sessions:weeklySessions.length>0}};
 
   const assignmentLines=weeklyGrades.slice(0,30).map(r=>`- ${String(r.date||'').slice(0,10)} | ${clean(r.course||'Classroom')} | ${clean(r.title||'Assignment')} | ${scorePct(r)==null?'no assignment-score percentage recorded':scorePct(r)+'%'}${r.missing_assignment?' | marked missing':''}`).join('\n')||'- No graded assignment records in this week.';
   const currentGradeLines=courseGrades.map(g=>`- ${g.course}: ${g.percentage}%${g.letter?' ('+g.letter+')':''}, latest recorded ${g.date||'date not recorded'}`).join('\n')||'- No current course-grade percentages are recorded.';
@@ -109,7 +111,7 @@ Average of recorded percentage points: ${progressAverage==null?'not available':p
 ${progressLines}
 
 ATTENDANCE RECORDED BY THIS USER/WORKSPACE
-Present ${attendance.present}, absent ${attendance.absent}, tardy ${attendance.tardy}, excused ${attendance.excused}, left early ${attendance.left_early}.
+${weeklyAttendance.length?`Present ${attendance.present}, absent ${attendance.absent}, tardy ${attendance.tardy}, excused ${attendance.excused}, left early ${attendance.left_early}.`:'NO ATTENDANCE RECORDS WERE AVAILABLE FOR THIS WEEK. Do not describe attendance, punctuality, or attendance patterns.'}
 
 SUPPORT / SESSION DATA
 Para observations: ${weeklyPara.length}; Para support minutes: ${supportMinutes}
@@ -126,10 +128,21 @@ next_steps: array of supported next steps
 data_notes: array of important missing-data/interpretation notes for the educator, not the family.`;
 
   const schema={type:'object',properties:{subject_line:{type:'string'},family_message:{type:'string'},strengths:{type:'array',items:{type:'string'}},focus_areas:{type:'array',items:{type:'string'}},next_steps:{type:'array',items:{type:'string'}},data_notes:{type:'array',items:{type:'string'}}},required:['subject_line','family_message','strengths','focus_areas','next_steps','data_notes']};
-  const ai=await base44.asServiceRole.integrations.Core.InvokeLLM({prompt,response_json_schema:schema,model:'automatic'});
-  const generated=typeof ai==='object'?ai:JSON.parse(ai),now=new Date().toISOString();
+  let generated;
+  if(!hasMeaningfulData){
+   const first=clean(student.first_name)||'your student';
+   generated={
+    subject_line:`Weekly data check-in for ${first}`,
+    family_message:`Hello,\n\nFor ${weekStart} through ${weekEnd}, CaseCue does not yet have enough recorded information to create a meaningful weekly progress update for ${first}. No current course-grade percentage, graded assignment result, learning-goal data point, attendance record, support observation, or service/session record was available in this workspace for the reporting period.\n\nRather than guess or fill in missing information, this draft is intentionally limited. Please add or verify the week’s records, or choose a week with documented data, before sending a progress summary to the family.`,
+    strengths:[],focus_areas:[],next_steps:[],
+    data_notes:['No reportable CaseCue data was available for this student/week.','CaseCue intentionally skipped AI strengths, focus areas, and next steps rather than infer unsupported information.']
+   };
+  }else{
+   const ai=await base44.asServiceRole.integrations.Core.InvokeLLM({prompt,response_json_schema:schema,model:'automatic'});
+   generated=typeof ai==='object'?ai:JSON.parse(ai);
+  }
+  const now=new Date().toISOString();
   const chartData={grade_trend:gradeTrend,current_course_grades:currentCourseChart,progress_trend:progressTrend};
-  const sourceCounts={grade_records:weeklyGrades.length,progress_records:weeklyProgress.length,attendance_records:weeklyAttendance.length,para_notes:weeklyPara.length,session_records:weeklySessions.length};
 
   const rec=await base44.entities.WeeklyFamilyUpdate.create({
    organization_id:org,user_id:user.id,workspace,student_id:studentId,student_name:`${clean(student.first_name)} ${clean(student.last_name)}`.trim(),
