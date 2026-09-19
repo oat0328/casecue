@@ -1,5 +1,6 @@
 import { createClient } from '@base44/sdk';
 import { appParams } from '@/lib/app-params';
+import { compareStudentsByName } from '@/lib/studentSort';
 
 const { appId, token, functionsVersion, appBaseUrl } = appParams;
 
@@ -16,18 +17,10 @@ export const base44 = createClient({
 // Enforce this once at the shared client so every page, tab, dropdown,
 // selector, schedule, gradebook, report, and workflow receives students
 // in the same predictable alphabetical order.
-const compareStudents = (a = {}, b = {}) => {
-  const last = String(a.last_name || '').trim().localeCompare(String(b.last_name || '').trim(), undefined, { sensitivity: 'base', numeric: true });
-  if (last !== 0) return last;
-  const first = String(a.first_name || '').trim().localeCompare(String(b.first_name || '').trim(), undefined, { sensitivity: 'base', numeric: true });
-  if (first !== 0) return first;
-  return String(a.student_id || a.id || '').localeCompare(String(b.student_id || b.id || ''), undefined, { sensitivity: 'base', numeric: true });
-};
-
 const sortStudentResult = (result) => {
-  if (Array.isArray(result)) return [...result].sort(compareStudents);
-  if (result && Array.isArray(result.data)) return { ...result, data: [...result.data].sort(compareStudents) };
-  if (result && Array.isArray(result.items)) return { ...result, items: [...result.items].sort(compareStudents) };
+  if (Array.isArray(result)) return [...result].sort(compareStudentsByName);
+  if (result && Array.isArray(result.data)) return { ...result, data: [...result.data].sort(compareStudentsByName) };
+  if (result && Array.isArray(result.items)) return { ...result, items: [...result.items].sort(compareStudentsByName) };
   return result;
 };
 
