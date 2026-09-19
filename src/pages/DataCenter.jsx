@@ -17,6 +17,8 @@ import { DATA_CENTER_DEFINITIONS } from "@/lib/caseReports";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid
 } from "recharts";
+import { PremiumLineChart, PremiumDonutChart } from "@/components/shared/PremiumAnalytics";
+import AnalyticsPdfButton from "@/components/shared/AnalyticsPdfButton";
 
 export default function DataCenter() {
   const { toast } = useToast();
@@ -58,6 +60,22 @@ export default function DataCenter() {
 
   const chartFor = (sid) => (progress || []).filter((p) => p.student_id === sid && p.record_status !== 'duplicate' && p.record_status !== 'superseded' && p.percentage != null).map((p) => ({ date: p.date, percentage: p.percentage }));
   const studentsWithTrends = (students || []).filter((s) => chartFor(s.id).length >= 2);
+  const caseloadTrend = useMemo(() => {
+    const map = {};
+    [...(progress || [])].filter(p=>p.record_status!=='duplicate'&&p.record_status!=='superseded'&&Number.isFinite(Number(p.percentage))).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).slice(-120).forEach(p=>{
+      const key=String(p.date||'').slice(5)||'No date';
+      map[key] ||= {name:key,total:0,count:0};
+      map[key].total += Number(p.percentage||0); map[key].count += 1;
+    });
+    return Object.values(map).map(x=>({name:x.name,average:Math.round((x.total/x.count)*10)/10})).slice(-14);
+  }, [progress]);
+  const promptDistribution = useMemo(() => {
+    const counts={};
+    for(const p of progress||[]){if(p.record_status==='duplicate'||p.record_status==='superseded')continue;const k=String(p.prompting_level||'not recorded').replaceAll('_',' ');counts[k]=(counts[k]||0)+1;}
+    return Object.entries(counts).map(([name,value])=>({name,value}));
+  }, [progress]);
+  const activeGoalCount=(goals||[]).filter(g=>g.status!=='met').length;
+  const activeStudentCount=(students||[]).filter(s=>s.roster_status!=='archived'&&s.status!=='exited').length;
   const norm = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const docMatchesStudent = (d, s) => {
     const firstPage = d?.processing_results?.pages?.[0];
@@ -88,6 +106,15 @@ export default function DataCenter() {
   return (
     <div>
       <PageHeader title="Data Center" subtitle="Track progress monitoring across your caseload. Correct/total, percentages, decimals, prompting levels, and observation notes." icon={BarChart3} />
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="overflow-hidden bg-gradient-to-br from-slate-950 to-blue-950 p-5 text-white"><div className="text-[10px] font-black uppercase tracking-[.16em] text-sky-300">Active caseload</div><div className="mt-2 text-3xl font-black">{activeStudentCount}</div><div className="mt-1 text-xs text-slate-300">students in current SPED data</div></Card>
+        <Card className="p-5"><div className="text-[10px] font-black uppercase tracking-[.16em] text-slate-500">Active goals</div><div className="mt-2 text-3xl font-black">{activeGoalCount}</div><div className="mt-1 text-xs text-slate-500">goal records not marked met</div></Card>
+        <Card className="p-5"><div className="text-[10px] font-black uppercase tracking-[.16em] text-slate-500">Progress points</div><div className="mt-2 text-3xl font-black">{(progress||[]).filter(p=>p.record_status!=='duplicate'&&p.record_status!=='superseded').length}</div><div className="mt-1 text-xs text-slate-500">verified/current data rows</div></Card>
+        <Card className="p-5"><div className="text-[10px] font-black uppercase tracking-[.16em] text-slate-500">Session records</div><div className="mt-2 text-3xl font-black">{(sessions||[]).length}</div><div className="mt-1 text-xs text-slate-500">saved service/session records</div></Card>
+      </div>
+      <div className="mb-4 flex justify-end"><AnalyticsPdfButton title="CaseCue SPED Progress Analytics" subtitle="Caseload progress-monitoring snapshot" filename="casecue-sped-progress-analytics" metrics={[{label:'Active students',value:activeStudentCount},{label:'Active goals',value:activeGoalCount},{label:'Progress points',value:(progress||[]).filter(p=>p.record_status!=='duplicate'&&p.record_status!=='superseded').length},{label:'Sessions',value:(sessions||[]).length}]} charts={[{type:'line',title:'Caseload Progress Trend',subtitle:'Average percentage across recorded progress-monitoring data.',data:caseloadTrend,series:[{key:'average',label:'Average %'}]},{type:'donut',title:'Prompting / Support Distribution',subtitle:'Prompting levels recorded with progress data.',data:promptDistribution}]} notes={['These charts summarize saved CaseCue progress-monitoring records and do not independently determine IEP mastery or educational decisions.']}/></div>
+      <div className="mb-6 grid gap-4 lg:grid-cols-2"><PremiumLineChart title="Caseload Progress Trend" subtitle="Average percentage across recent saved progress-monitoring data." data={caseloadTrend} keys={[{key:'average',label:'Average %',color:'#2563eb'}]} area/><PremiumDonutChart title="Prompting / Support Distribution" subtitle="Prompt levels documented with SPED progress-monitoring records." data={promptDistribution} centerLabel={(progress||[]).filter(p=>p.record_status!=='duplicate'&&p.record_status!=='superseded').length}/></div>
 
       <Tabs defaultValue="log">
         <TabsList className="mb-4">
