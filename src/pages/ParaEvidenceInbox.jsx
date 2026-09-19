@@ -1,5 +1,5 @@
 import React,{useMemo,useState}from'react';
-import{Inbox,CheckCircle2,RotateCcw,UserRound,Clock3,Users,ShieldCheck,Settings2}from'lucide-react';
+import{Inbox,CheckCircle2,RotateCcw,UserRound,Clock3,Users,ShieldCheck,Settings2,ClipboardCheck,Target}from'lucide-react';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{Button}from'@/components/ui/button';
@@ -22,6 +22,10 @@ export default function ParaEvidenceInbox(){
  const{data:accountResponse}=useAsync(()=>base44.functions.invoke('listParaAccounts',{}),[]);
  const{data:assignments,refetch:refetchAssignments}=useAsync(()=>base44.entities.ParaAssignment.list('-assigned_at',500),[]);
  const paraAccounts=accountResponse?.data?.accounts||accountResponse?.accounts||[];
+ const baselineIds=useMemo(()=>[...new Set((notes||[]).map(n=>n.baseline_assessment_id).filter(Boolean))],[notes]);
+ const baselineKey=baselineIds.join('|');
+ const{data:baselineRows}=useAsync(()=>baselineIds.length?Promise.all(baselineIds.map(id=>base44.entities.BaselineAssessment.filter({id},'-created_date',1))).then(rows=>rows.flat()):Promise.resolve([]),[baselineKey]);
+ const baselineById=useMemo(()=>Object.fromEntries((baselineRows||[]).map(r=>[r.id,r])),[baselineRows]);
  const sortedStudents=useMemo(()=>sortStudentsByName(students||[]),[students]);
  const name=id=>{const s=(students||[]).find(x=>x.id===id);return s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student'};
 
@@ -71,15 +75,16 @@ export default function ParaEvidenceInbox(){
   }catch(e){toast({title:'Could not review observation',description:e.message,variant:'destructive'})}
  };
 
- const EvidenceCard=({n})=><div className="rounded-2xl border bg-white p-5 shadow-sm">
+ const EvidenceCard=({n})=>{const baseline=n.baseline_assessment_id?baselineById[n.baseline_assessment_id]:null,packet=baseline?.analysis?.teacher_packet||null,grading=baseline?.analysis?.grading||null;return <div className="rounded-2xl border bg-white p-5 shadow-sm">
   <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2 font-black"><UserRound className="h-4 w-4 text-blue-600"/>{name(n.student_id)}</div><div className="mt-1 text-xs text-slate-500">{n.date} {n.time||''} · {(n.context||'').replaceAll('_',' ')} · {(n.support_level||'').replaceAll('_',' ')}</div></div><span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">{n.review_status==='submitted'?'Needs review':n.review_status==='reviewed'?'Reviewed':'Returned'}</span></div>
   <div className="mt-4 rounded-xl bg-slate-50 p-4"><div className="text-[10px] font-black uppercase tracking-wider text-slate-500">Objective observation</div><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{n.objective_observation}</p></div>
   {n.activity&&<div className="mt-3 text-sm"><b>Activity:</b> {n.activity}</div>}
   {(n.frequency!=null||n.duration_minutes!=null)&&<div className="mt-2 text-sm"><b>Data:</b>{n.frequency!=null?' Count '+n.frequency:''}{n.duration_minutes!=null?' · '+n.duration_minutes+' min':''}</div>}
   {n.student_response&&<div className="mt-2 text-sm"><b>Student response:</b> {n.student_response}</div>}
   {n.follow_up&&<div className="mt-2 text-sm"><b>Para follow-up:</b> {n.follow_up}</div>}
+  {packet&&<div className="mt-4 overflow-hidden rounded-2xl border border-blue-200"><div className="bg-slate-950 p-4 text-white"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-sky-300"><ClipboardCheck className="h-4 w-4"/>Baseline Assessment Package</div><div className="mt-2 text-2xl font-black">{packet.score_summary||((grading?.score_earned??'—')+'/'+(grading?.score_possible??'—'))}</div><p className="mt-2 text-sm text-slate-300">{packet.teacher_handoff||packet.overall_summary}</p></div><div className="space-y-4 p-4"><div className="grid gap-3 md:grid-cols-2"><div className="rounded-xl bg-emerald-50 p-3"><div className="text-xs font-black text-emerald-800">Strengths</div><div className="mt-1 text-sm">{(packet.strengths||[]).join(' · ')||'None listed'}</div></div><div className="rounded-xl bg-amber-50 p-3"><div className="text-xs font-black text-amber-800">Needs</div><div className="mt-1 text-sm">{(packet.needs||[]).join(' · ')||'None listed'}</div></div></div><div className="rounded-xl border p-4"><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Present Levels Draft</div><div className="mt-2 whitespace-pre-wrap text-sm leading-6">{packet.present_levels_draft||'No present-level draft returned.'}</div></div>{(packet.goal_drafts||[]).length>0&&<div className="rounded-xl border p-4"><div className="flex items-center gap-2 font-black"><Target className="h-4 w-4 text-blue-700"/>Goal & Objective Drafts</div><div className="mt-3 space-y-3">{packet.goal_drafts.map((g,i)=><div key={i} className="rounded-xl bg-slate-50 p-3"><div className="font-black text-sm">{g.goal_area||'Goal draft'}</div><p className="mt-1 text-sm">{g.goal_text}</p>{(g.objectives||[]).length>0&&<div className="mt-2 text-xs"><b>Objectives:</b>{g.objectives.map((o,j)=><div key={j} className="mt-1">{j+1}. {o}</div>)}</div>}<div className="mt-2 text-xs text-slate-500"><b>Baseline:</b> {g.baseline||'—'} · <b>Target:</b> {g.target||g.criterion||'—'}</div></div>)}</div></div>}{(packet.progress_monitoring_recommendations||[]).length>0&&<div className="rounded-xl bg-blue-50 p-3 text-sm"><b>Next data / progress monitoring:</b><div className="mt-1">{packet.progress_monitoring_recommendations.join(' · ')}</div></div>}<div className="text-[11px] font-semibold text-slate-500">Draft for educator/IEP-team review. Reviewing this Para submission does not automatically place the draft language into an IEP.</div></div></div>}
   {n.review_status==='submitted'?<div className="mt-4"><Input placeholder="Optional review note to Para…" value={reviewNotes[n.id]||''} onChange={e=>setReviewNotes({...reviewNotes,[n.id]:e.target.value})}/><div className="mt-3 flex flex-wrap gap-2"><Button onClick={()=>review(n,'reviewed')} className="bg-emerald-700 hover:bg-emerald-800"><CheckCircle2 className="mr-2 h-4 w-4"/>Accept as Reviewed Evidence</Button><Button variant="outline" onClick={()=>review(n,'returned')}><RotateCcw className="mr-2 h-4 w-4"/>Return for Follow-up</Button></div></div>:n.review_note&&<div className="mt-4 rounded-xl border p-3 text-sm"><b>Review note:</b> {n.review_note}</div>}
- </div>;
+ </div>};
 
  return <div className="space-y-6">
   <section className="rounded-2xl border bg-white p-6 shadow-sm">
