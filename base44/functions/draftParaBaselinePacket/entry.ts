@@ -8,16 +8,12 @@ const GOAL={type:'object',properties:{
 },required:['goal_area','goal_text','baseline','target','condition','criterion','measurement_method','progress_monitoring_method','objectives','rationale','confidence']};
 
 const SCHEMA={type:'object',properties:{
- overall_summary:{type:'string'},
- score_summary:{type:'string'},
- strengths:{type:'array',items:{type:'string'}},
- needs:{type:'array',items:{type:'string'}},
- present_levels_draft:{type:'string'},
- goal_drafts:{type:'array',items:GOAL},
+ overall_summary:{type:'string'},score_summary:{type:'string'},
+ strengths:{type:'array',items:{type:'string'}},needs:{type:'array',items:{type:'string'}},
+ present_levels_draft:{type:'string'},goal_drafts:{type:'array',items:GOAL},
  progress_monitoring_recommendations:{type:'array',items:{type:'string'}},
  accommodation_observations:{type:'array',items:{type:'string'}},
- teacher_handoff:{type:'string'},
- cautions:{type:'array',items:{type:'string'}}
+ teacher_handoff:{type:'string'},cautions:{type:'array',items:{type:'string'}}
 },required:['overall_summary','score_summary','strengths','needs','present_levels_draft','goal_drafts','progress_monitoring_recommendations','accommodation_observations','teacher_handoff','cautions']};
 
 export default async function(req){
@@ -38,25 +34,20 @@ export default async function(req){
    assessment_template:assessment?{title:assessment.title||'',grade:assessment.grade||'',domains:assessment.domains||[]}:null,
    scored_result:{
     title:analysis.detected_title||assessment?.title||'Baseline assessment',
-    earned,possible,percentage,
-    subject:analysis.subject||'',
-    skills:analysis.skills||[],
-    question_breakdown:analysis.question_breakdown||[],
-    rubric_breakdown:analysis.rubric_breakdown||[],
-    strengths_observed:analysis.strengths_observed||[],
-    error_patterns:analysis.error_patterns||[],
-    qualitative_notes:analysis.qualitative_notes||'',
-    cautions:analysis.cautions||[]
+    earned,possible,percentage,subject:analysis.subject||'',skills:analysis.skills||[],
+    question_breakdown:analysis.question_breakdown||[],rubric_breakdown:analysis.rubric_breakdown||[],
+    strengths_observed:analysis.strengths_observed||[],error_patterns:analysis.error_patterns||[],
+    qualitative_notes:analysis.qualitative_notes||'',cautions:analysis.cautions||[]
    }
   };
 
-  const prompt=\`\${CASECUE_SYSTEM_PROMPT}
+  const prompt=`${CASECUE_SYSTEM_PROMPT}
 
 You are CaseCue's Para-to-Teacher Baseline Handoff Engine. A paraprofessional administered or collected a completed instructional baseline and CaseCue has already scored it. Build a concise teacher-ready DRAFT packet from the supplied evidence only.
 
 STRICT RULES:
 - Treat the scored assessment facts as evidence, not as an IEP decision.
-- Preserve the score exactly: \${earned}/\${possible} (\${percentage}%).
+- Preserve the score exactly: ${earned}/${possible} (${percentage}%).
 - Do not diagnose, determine eligibility, recommend placement, prescribe service minutes, or claim a disability caused a weakness.
 - Present levels must name the assessment and measurable performance, describe observed strengths/needs, and stay within what this one assessment supports.
 - Goal drafts are suggestions for educator/IEP-team review only. Create them only where the scored baseline supports a measurable starting point and a clear instructional need.
@@ -69,13 +60,13 @@ STRICT RULES:
 - Everything is DRAFT FOR EDUCATOR REVIEW.
 
 EVIDENCE:
-\${JSON.stringify(evidence).slice(0,140000)}
+${JSON.stringify(evidence).slice(0,140000)}
 
-Return JSON matching the schema.\`;
+Return JSON matching the schema.`;
 
   const result=await base44.asServiceRole.integrations.Core.InvokeLLM({prompt,model:'automatic',response_json_schema:SCHEMA});
   const packet=typeof result==='object'?result:JSON.parse(result);
-  packet.score_summary=\`\${earned}/\${possible} (\${percentage}%)\`;
+  packet.score_summary=`${earned}/${possible} (${percentage}%)`;
   packet.review_status='draft_for_educator_review';
   return Response.json({packet});
  }catch(error){console.error('draftParaBaselinePacket failed',error);return Response.json({error:error?.message||'Unable to build the teacher baseline packet.'},{status:500})}
