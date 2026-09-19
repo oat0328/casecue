@@ -58,7 +58,7 @@ export function findConflicts(entries) {
       if (as == null || ae == null || bs == null || be == null) continue;
       if (as >= be || bs >= ae) continue;
       const shared = (a.student_ids || []).filter((id) => (b.student_ids || []).includes(id));
-      if (shared.length) out.push({ a, b, student_ids: shared });
+      if (shared.length) out.push({ a, b, student_ids: shared, same_slot: a.start_time === b.start_time && a.end_time === b.end_time });
     }
   }
   return out;
@@ -128,7 +128,7 @@ export function caseloadSections(entries, students, timeFormat = "12h") {
     .filter((s) => s.status !== "exited")
     .map((s) => {
       const list = (entries || []).filter((e) => !e.archived && (e.student_ids || []).includes(s.id));
-      const conflicts = findConflicts(list).length;
+      const conflicts = findConflicts(list).filter((c) => !c.same_slot).length;
       return {
         heading: `${s.first_name} ${s.last_name}${s.grade ? ` (Grade ${s.grade})` : ""}`,
         body:
