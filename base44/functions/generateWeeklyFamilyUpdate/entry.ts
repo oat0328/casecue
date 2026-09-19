@@ -5,6 +5,7 @@ const scorePct=r=>Number(r?.score_possible)>0?Math.round((Number(r.score_earned|
 const avg=xs=>{const a=xs.map(Number).filter(Number.isFinite);return a.length?Math.round((a.reduce((n,x)=>n+x,0)/a.length)*10)/10:null};
 const mins=s=>Number(s?.delivered_minutes??s?.duration_minutes??0)||0;
 const clean=v=>String(v??'').replace(/\s+/g,' ').trim();
+const fmt=d=>{const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[2]}/${m[3]}/${m[1]}`:String(d||'')};
 
 export default async function(req){
  try{
@@ -83,6 +84,9 @@ STRICT RULES:
 - Use exact percentages when present.
 - Clearly distinguish "latest recorded course grade" from "weekly assignment average."
 - If data is missing, say no new data was recorded rather than guessing.
+- NEVER turn missing records into a student strength, weakness, trend, behavior conclusion, attendance conclusion, or recommendation.
+- If a source category has zero records, do not reference that category in strengths, focus_areas, or next_steps. In family_message you may only state that no new data was recorded for that category.
+- Do not describe engagement, participation, effort, behavior, attendance stability, punctuality, independence, improvement, decline, mastery, or work habits unless the supplied records explicitly support that statement.
 - Do not mention disability, eligibility category, diagnosis, medical condition, or confidential IEP detail in this routine weekly update.
 - Translate progress monitoring into family-friendly language such as "learning-goal check" when possible.
 - Do not declare mastery or failure of an IEP goal from these records alone.
@@ -133,7 +137,7 @@ data_notes: array of important missing-data/interpretation notes for the educato
    const first=clean(student.first_name)||'your student';
    generated={
     subject_line:`Weekly data check-in for ${first}`,
-    family_message:`Hello,\n\nFor ${weekStart} through ${weekEnd}, CaseCue does not yet have enough recorded information to create a meaningful weekly progress update for ${first}. No current course-grade percentage, graded assignment result, learning-goal data point, attendance record, support observation, or service/session record was available in this workspace for the reporting period.\n\nRather than guess or fill in missing information, this draft is intentionally limited. Please add or verify the week’s records, or choose a week with documented data, before sending a progress summary to the family.`,
+    family_message:`Hello,\n\nFor ${fmt(weekStart)} through ${fmt(weekEnd)}, CaseCue does not yet have enough recorded information to create a meaningful weekly progress update for ${first}. No current course-grade percentage, graded assignment result, learning-goal data point, attendance record, support observation, or service/session record was available in this workspace for the reporting period.\n\nRather than guess or fill in missing information, this draft is intentionally limited. Please add or verify the week’s records, or choose a week with documented data, before sending a progress summary to the family.`,
     strengths:[],focus_areas:[],next_steps:[],
     data_notes:['No reportable CaseCue data was available for this student/week.','CaseCue intentionally skipped AI strengths, focus areas, and next steps rather than infer unsupported information.']
    };
