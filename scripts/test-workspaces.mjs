@@ -16,6 +16,8 @@ const ot=read('src/pages/OTHome.jsx');
 const nurse=read('src/pages/NurseHome.jsx');
 const speech=read('src/pages/SpeechHome.jsx');
 const speechIep=read('src/pages/SpeechIEP.jsx');
+const paraBaselinePrint=read('src/lib/paraBaselinePrint.js');
+const paraBaselineDraft=read('base44/functions/draftParaBaselinePacket/entry.ts');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
 for(const key of concreteHomes){
@@ -42,7 +44,10 @@ ok('Nurse persists NurseRecord',nurse.includes("entities.NurseRecord.create"),'N
 ok('Speech persists SpeechSession',speech.includes("entities.SpeechSession.create"),'Speech session persistence missing');
 
 ok('Para baseline supports drop',paraBaseline.includes('onDrop=')&&paraBaseline.includes('chooseFile'),'baseline drop zone missing');
-ok('Para baseline uses branded document print',paraBaseline.includes("printDoc(")&&!paraBaseline.includes('window.print()'),'raw browser print still present');
+ok('Para baseline student sheet uses branded document print',paraBaseline.includes("printDoc(")&&!paraBaseline.includes('window.print()'),'raw browser print still present');
+ok('Para teacher packet uses premium dedicated print',paraBaseline.includes('printParaBaselinePacket')&&paraBaselinePrint.includes('Baseline Teacher Packet'),'premium baseline packet print missing');
+ok('Para teacher packet includes accommodation considerations',paraBaseline.includes('Supports & Accommodation Considerations')&&paraBaselineDraft.includes('support_recommendations'),'assessment-linked support section missing');
+ok('Para packet can rebuild without rescanning',paraBaseline.includes('rebuildPacket')&&paraBaseline.includes('Rebuild Packet'),'packet rebuild path missing');
 ok('Workspace notes supports AI cleanup',workspaceNotes.includes("askCaseCue")&&workspaceNotes.includes('Clean Up with CaseCue'),'AI note cleanup missing');
 ok('Workspace notes supports drag/drop attachments',workspaceNotes.includes('onDrop=')&&workspaceNotes.includes('UploadPrivateFile'),'note drop attachment missing');
 ok('Workspace notes supports premium exports',workspaceNotes.includes('ExportBar'),'note export bar missing');
@@ -53,6 +58,11 @@ ok('Schedule export no hardcoded SPED promo',!scheduleExport.includes('Created w
 ok('Print HTML carries CaseCue footer',docExport.includes('CaseCue · getcasecue.com'),'premium footer missing');
 
 ok('Speech IEP queries selected student docs',speechIep.includes("Document.filter({student_id:form.student_id}")&&!speechIep.includes('Document.list('),'Speech IEP must not pre-load every org document');
+
+for(const entity of ['IepDraftArtifact','IepDraftSourceLink','IepDraftReviewState']){
+ const schema=read('base44/entities/'+entity+'.jsonc');
+ ok(entity+' is organization scoped',schema.includes('organization_id')&&schema.includes('"rls"')&&schema.includes('{{user.data.organization_id}}'),'IEP helper entity is not organization scoped');
+}
 
 const prohibitedVisible=['Smart Grader V2 · Separate → Resolve → Grade → Submit for Teacher Review'];
 for(const text of prohibitedVisible)ok('Para hides developer grader wording',!paraBaseline.includes(text)&&!read('src/components/gradebook/SmartGraderV2.jsx').includes(text),'developer-facing grader wording visible');
