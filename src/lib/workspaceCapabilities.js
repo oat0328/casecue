@@ -15,6 +15,7 @@ export const WORKSPACE_TOOLS = {
       ['Schedule','/instruction/schedule',CalendarClock],
       ['Attendance','/attendance',UserCheck],
       ['Gradebook','/gradebook',ScanLine],
+      ['Weekly Family Update','/weekly-contact',StickyNote],
     ],
   },
   gen_ed: {
@@ -27,6 +28,7 @@ export const WORKSPACE_TOOLS = {
       ['Super Grader','/w/gen_ed/grade',ScanLine],
       ['Groups & Reteach','/w/gen_ed/groups',Users],
       ['IEP & Accommodations','/w/gen_ed/iep-access',FileText],
+      ['Weekly Family Update','/w/gen_ed/weekly-contact',StickyNote],
       ['Parent Contact','/w/gen_ed/contact',StickyNote],
     ],
   },
@@ -40,6 +42,7 @@ export const WORKSPACE_TOOLS = {
       ['Student Work','/w/para/grade',ScanLine],
       ['Assessments','/w/para/baseline',FileText],
       ['Student Supports','/w/para/iep-guide',FileText],
+      ['Weekly Family Update','/w/para/weekly-contact',StickyNote],
       ['My Notes','/w/para/notes',StickyNote],
     ],
   },
