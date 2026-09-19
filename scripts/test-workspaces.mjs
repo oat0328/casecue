@@ -18,6 +18,9 @@ const speech=read('src/pages/SpeechHome.jsx');
 const speechIep=read('src/pages/SpeechIEP.jsx');
 const paraBaselinePrint=read('src/lib/paraBaselinePrint.js');
 const paraBaselineDraft=read('base44/functions/draftParaBaselinePacket/entry.ts');
+const studentNotes=read('src/components/notes/StudentNotesPanel.jsx');
+const quickNote=read('src/components/notes/QuickNoteDialog.jsx');
+const exportBar=read('src/components/shared/ExportBar.jsx');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
 for(const key of concreteHomes){
@@ -51,11 +54,16 @@ ok('Para packet can rebuild without rescanning',paraBaseline.includes('rebuildPa
 ok('Workspace notes supports AI cleanup',workspaceNotes.includes("askCaseCue")&&workspaceNotes.includes('Clean Up with CaseCue'),'AI note cleanup missing');
 ok('Workspace notes supports drag/drop attachments',workspaceNotes.includes('onDrop=')&&workspaceNotes.includes('UploadPrivateFile'),'note drop attachment missing');
 ok('Workspace notes supports premium exports',workspaceNotes.includes('ExportBar'),'note export bar missing');
+ok('Shared workspace notes can edit saved notes',workspaceNotes.includes('editingId')&&workspaceNotes.includes('WorkspaceNote.update')&&workspaceNotes.includes('Edit note'),'shared note editing missing');
+ok('SPED student notes can edit saved notes',studentNotes.includes('editingNote')&&quickNote.includes('StudentNote.update')&&quickNote.includes('Edit Student Note'),'SPED student note editing missing');
+ok('SPED student notes use shared export bar',studentNotes.includes('ExportBar'),'SPED notes are not using shared export behavior');
 ok('Shared workspace timer mounted',nowBar.includes('WorkspaceTimer'),'shared timer missing');
 
 ok('Schedule export is role-aware',scheduleExport.includes('workspaceKey')&&scheduleExport.includes('workspaceLabel'),'schedule export not role-aware');
 ok('Schedule export no hardcoded SPED promo',!scheduleExport.includes('Created with CaseCue · Special Education Workspace'),'hardcoded SPED export branding returned');
 ok('Print HTML carries CaseCue footer',docExport.includes('CaseCue · getcasecue.com'),'premium footer missing');
+ok('Print header is simplified',!docExport.includes('CaseCue Record')&&!docExport.includes('page-number')&&docExport.includes('Printed'),'old decorative print badge or Page 0 logic returned');
+ok('Direct PDF is first-class export',exportBar.includes('Download PDF')&&docExport.includes('Page ${p} of ${pages}'),'direct premium PDF export missing');
 
 ok('Speech IEP queries selected student docs',speechIep.includes("Document.filter({student_id:form.student_id}")&&!speechIep.includes('Document.list('),'Speech IEP must not pre-load every org document');
 
