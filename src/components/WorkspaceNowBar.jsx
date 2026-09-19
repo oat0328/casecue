@@ -7,7 +7,6 @@ const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const mins=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):-1};
 const fmt=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);if(!m)return v||'';const h=Number(m[1]);return`${h%12||12}:${m[2]} ${h>=12?'PM':'AM'}`};
 const remaining=(time,now)=>{const target=mins(time)*60,cur=now.getHours()*3600+now.getMinutes()*60+now.getSeconds(),diff=Math.max(0,target-cur);const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;return h>0?`${h}h ${m}m`:`${m}m ${String(s).padStart(2,'0')}s`};
-const normalize=(x,workspaceKey)=>workspaceKey==='pe'?{...x,start_time:x.time,end_time:'',group_name:x.className||`Grade ${x.grade||''}`}:workspaceKey==='substitute'?{...x,start_time:x.time,end_time:x.end,group_name:x.className||'Class'}:x;
 
 export default function WorkspaceNowBar({workspaceKey}){
  const[now,setNow]=useState(()=>new Date());
@@ -15,18 +14,12 @@ export default function WorkspaceNowBar({workspaceKey}){
  const dayName=DAYS[now.getDay()],nowM=now.getHours()*60+now.getMinutes();
 
  const{data:paraSchedule}=useAsync(()=>workspaceKey==='para'?base44.entities.ParaScheduleBlock.list('start_time',250):Promise.resolve([]),[workspaceKey]);
- const{data:sharedSchedule}=useAsync(()=>['gen_ed','speech','ot','nurse','psych'].includes(workspaceKey)?base44.entities.ScheduleEntry.list('start_time',500):Promise.resolve([]),[workspaceKey]);
+ const{data:sharedSchedule}=useAsync(()=>workspaceKey!=='para'?base44.entities.ScheduleEntry.list('start_time',800):Promise.resolve([]),[workspaceKey]);
 
  const rows=useMemo(()=>{
-   if(workspaceKey==='para')return paraSchedule||[];
-   if(workspaceKey==='pe'){
-     try{return JSON.parse(localStorage.getItem('casecue-pe-schedule')||'[]').map(x=>normalize(x,workspaceKey))}catch{return[]}
-   }
-   if(workspaceKey==='substitute'){
-     try{return JSON.parse(localStorage.getItem('casecue-sub-schedule')||'[]').map(x=>normalize(x,workspaceKey))}catch{return[]}
-   }
-   return sharedSchedule||[];
- },[workspaceKey,paraSchedule,sharedSchedule,now.getMinutes()]);
+   if(workspaceKey==='para')return (paraSchedule||[]).filter(x=>x.active!==false);
+   return (sharedSchedule||[]).filter(x=>(x.workspace||'sped')===workspaceKey);
+ },[workspaceKey,paraSchedule,sharedSchedule]);
 
  const today=rows.filter(x=>!x.archived&&String(x.day||dayName).toLowerCase()===dayName.toLowerCase()).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||'')));
  const current=today.find(x=>mins(x.start_time)<=nowM&&mins(x.end_time)>nowM)||null;
