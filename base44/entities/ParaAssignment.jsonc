@@ -27,6 +27,9 @@
     "assigned_by": {
       "type": "string"
     },
+    "case_manager_user_id": {
+      "type": "string"
+    },
     "assigned_at": {
       "type": "string"
     }
@@ -40,6 +43,9 @@
       "$or": [
         {
           "data.para_user_id": "{{user.id}}"
+        },
+        {
+          "data.case_manager_user_id": "{{user.id}}"
         },
         {
           "user_condition": {
