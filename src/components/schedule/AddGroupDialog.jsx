@@ -63,7 +63,7 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved, 
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-4">
           <div><Label>Group name</Label><Input value={form.group_name} onChange={(e) => set("group_name", e.target.value)} className="mt-1" placeholder="e.g. Reading Group A" /></div>
-          <div><Label>Delivery</Label>
+          <div><Label>{workspaceKey==='sped'?'Delivery':'Block type'}</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.delivery} onChange={(e) => set("delivery", e.target.value)}>
               {Object.entries(DELIVERY_LABEL).filter(([v])=>workspaceKey==='sped'?['pull-out','push-in','consultation'].includes(v):['class','session','support','other'].includes(v)).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
