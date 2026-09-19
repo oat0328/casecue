@@ -88,6 +88,9 @@
     "para_user_id": {
       "type": "string"
     },
+    "reviewer_user_id": {
+      "type": "string"
+    },
     "version": {
       "type": "number",
       "default": 1
@@ -112,6 +115,9 @@
           "data.para_user_id": "{{user.id}}"
         },
         {
+          "data.reviewer_user_id": "{{user.id}}"
+        },
+        {
           "user_condition": {
             "role": "admin"
           }
@@ -125,6 +131,9 @@
       "$or": [
         {
           "data.para_user_id": "{{user.id}}"
+        },
+        {
+          "data.reviewer_user_id": "{{user.id}}"
         },
         {
           "user_condition": {
