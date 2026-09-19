@@ -2,6 +2,9 @@
   "name": "IepDraftArtifact",
   "type": "object",
   "properties": {
+    "organization_id": {
+      "type": "string"
+    },
     "student_id": {
       "type": "string"
     },
