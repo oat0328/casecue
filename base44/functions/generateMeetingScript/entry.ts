@@ -59,6 +59,8 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const organizationId = String(user?.organization_id || user?.data?.organization_id || '');
+    if (!organizationId) return Response.json({ error: 'Your account is missing an organization.' }, { status: 400 });
 
     const body = await req.json().catch(() => ({}));
     if (!body.student_id) return Response.json({ error: 'A student is required.' }, { status: 400 });
@@ -173,6 +175,7 @@ Return JSON matching the schema.`;
       return Response.json({ error: `Meeting facilitator generated ${generatedPages} of ${expectedPages} pages. Please regenerate; CaseCue will not label a partial walkthrough complete.` }, { status: 422 });
     }
     await base44.asServiceRole.entities.MeetingFacilitatorRun.create({
+      organization_id: organizationId,
       student_id: student.id,
       meeting_id: meetings?.[0]?.id || '',
       document_id: pageSummarySource?.document_id || '',
