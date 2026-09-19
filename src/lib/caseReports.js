@@ -3,6 +3,7 @@
 // recorded data, and missing data is stated as missing.
 
 import { textSection, tableSection, sheetFromTable, safeFilename } from "@/lib/reportExport";
+import { sortStudentsByName } from "@/lib/studentSort";
 
 export function studentName(s) {
   return s ? `${s.first_name} ${s.last_name}` : "—";
@@ -103,7 +104,7 @@ export function buildStudentDataReport({ student, goals = [], progress = [], ses
 // ============ Caseload Report ============
 
 export function buildCaseloadDataReport({ students = [], goals = [], progress = [], sessions = [], assignments = [] }) {
-  const rows = students.map((st) => {
+  const rows = sortStudentsByName(students).map((st) => {
     const sp = byDate(progress.filter((p) => p.student_id === st.id));
     const ss = sessions.filter((s) => sessionHasStudent(s, st.id));
     const sa = assignments.filter((a) => a.student_id === st.id);
@@ -121,7 +122,7 @@ export function buildCaseloadDataReport({ students = [], goals = [], progress = 
     ];
   });
 
-  const master = students.map((st) => [
+  const master = sortStudentsByName(students).map((st) => [
     studentName(st),
     st.grade || "—",
     st.eligibility_category || "—",
@@ -160,7 +161,7 @@ export function buildCaseloadDataReport({ students = [], goals = [], progress = 
 // ============ Progress Monitoring Report ============
 
 export function buildProgressMonitoringReport({ students = [], goals = [], progress = [] }) {
-  const rows = students.map((st) => {
+  const rows = sortStudentsByName(students).map((st) => {
     const sp = byDate(progress.filter((p) => p.student_id === st.id));
     if (!sp.length) return [studentName(st), 0, "—", "—", "—", "—", "No data recorded"];
     const first = sp[0];
@@ -219,7 +220,7 @@ export function buildProgressMonitoringReport({ students = [], goals = [], progr
 
 export function buildServiceDeliveryReport({ students = [], sessions = [], schedule = [] }) {
   const activeSchedule = (schedule || []).filter((e) => !e.archived);
-  const rows = students.map((st) => {
+  const rows = sortStudentsByName(students).map((st) => {
     const scheduled = activeSchedule
       .filter((e) => (e.student_ids || []).includes(st.id))
       .reduce((n, e) => n + (e.service_minutes || 0), 0);
