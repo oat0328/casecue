@@ -1,6 +1,7 @@
 // Shared logic for Instruction & Schedule: grouping, minutes, conflicts, and
 // export builders. Pure functions — used by the Schedule page, group
 // management, the minutes panel, and the export panel.
+import { compareStudentsByName, sortStudentsByName, sortStudentIdsByName } from '@/lib/studentSort';
 
 export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 export const DELIVERY_LABEL = { "pull-out": "Pull-Out", "push-in": "Push-In", consultation: "Consultation" };
@@ -23,24 +24,9 @@ export const studentName = (students, id) => {
   return s ? `${s.first_name} ${s.last_name}`.trim() : "Unknown student";
 };
 
-export const compareStudentsAlpha = (a, b) => {
-  const last = String(a?.last_name || '').trim().localeCompare(String(b?.last_name || '').trim(), undefined, { sensitivity: 'base' });
-  if (last) return last;
-  return String(a?.first_name || '').trim().localeCompare(String(b?.first_name || '').trim(), undefined, { sensitivity: 'base' });
-};
-
-export const sortStudentsAlpha = (students) => [...(students || [])].sort(compareStudentsAlpha);
-
-export const sortStudentIdsAlpha = (ids, students) => {
-  const byId = new Map((students || []).map((s) => [s.id, s]));
-  return [...(ids || [])].sort((a, b) => {
-    const sa = byId.get(a), sb = byId.get(b);
-    if (sa && sb) return compareStudentsAlpha(sa, sb);
-    if (sa) return -1;
-    if (sb) return 1;
-    return String(a).localeCompare(String(b));
-  });
-};
+export const compareStudentsAlpha = compareStudentsByName;
+export const sortStudentsAlpha = sortStudentsByName;
+export const sortStudentIdsAlpha = sortStudentIdsByName;
 
 export const normalizeDay = (day) =>
   DAYS.find((d) => d.toLowerCase() === String(day || "").toLowerCase()) || "Monday";
