@@ -17,6 +17,9 @@ const iso=d=>{const x=new Date(d),o=x.getTimezoneOffset();return new Date(x.getT
 const schoolWeek=(offset=0)=>{const d=new Date();const weekday=(d.getDay()+6)%7;d.setDate(d.getDate()-weekday+(offset*7));const start=iso(d),f=new Date(d);f.setDate(f.getDate()+4);return{start,end:iso(f)}};
 const full=s=>s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student';
 const roleName=w=>w==='para'?'Para':w==='gen_ed'?'Gen Ed':'SPED';
+const fmtDate=d=>{if(!d)return'';const x=new Date(d+'T12:00:00');return Number.isNaN(x.getTime())?d:x.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})};
+const hasEvidence=u=>{if(!u)return false;if(typeof u.metrics?.has_meaningful_data==='boolean')return u.metrics.has_meaningful_data;const c=Array.isArray(u.metrics?.latest_course_grades)?u.metrics.latest_course_grades.length:0,s=u.source_counts||{};return c>0||['grade_records','progress_records','attendance_records','para_notes','session_records'].some(k=>Number(s[k]||0)>0)};
+const noDataMessage=u=>{const first=String(u?.student_name||'the student').split(/\s+/)[0]||'the student';return `Hello,\n\nFor ${fmtDate(u?.week_start)} through ${fmtDate(u?.week_end)}, CaseCue does not yet have enough recorded information to create a meaningful weekly progress update for ${first}. No current course-grade percentage, graded assignment result, learning-goal data point, attendance record, support observation, or service/session record was available in this workspace for the reporting period.\n\nRather than guess or fill in missing information, this draft is intentionally limited. Please add or verify the week’s records, or choose a week with documented data, before sending a progress summary to the family.`};
 
 export default function WeeklyFamilyUpdate(){
  const{user}=useAuth(),{toast}=useToast(),routeLocation=useLocation();
@@ -42,7 +45,7 @@ export default function WeeklyFamilyUpdate(){
   finally{setBusy(false)}
  };
 
- const openSaved=u=>{setCurrent(u);setStudentId(u.student_id||'');setWeekStart(u.week_start||weekStart);setWeekEnd(u.week_end||weekEnd);setMessage(u.family_message||'');setSubject(u.subject_line||'');window.scrollTo({top:0,behavior:'smooth'})};
+ const openSaved=u=>{const covered=hasEvidence(u),safe=covered?u:{...u,strengths:[],focus_areas:[],next_steps:[],metrics:{...(u.metrics||{}),has_meaningful_data:false},data_notes:[...new Set([...(u.data_notes||[]),'No reportable CaseCue data was available for this student/week.','Older no-data narrative is suppressed to prevent unsupported family-facing statements.'])]};setCurrent(safe);setStudentId(u.student_id||'');setWeekStart(u.week_start||weekStart);setWeekEnd(u.week_end||weekEnd);setMessage(covered?(u.family_message||''):noDataMessage(u));setSubject(covered?(u.subject_line||''):`Weekly data check-in for ${String(u.student_name||'Student').split(/\s+/)[0]}`);window.scrollTo({top:0,behavior:'smooth'})};
  const save=async(status)=>{
   if(!current)return;
   try{
@@ -55,7 +58,7 @@ export default function WeeklyFamilyUpdate(){
  const email=()=>{window.location.href='mailto:?subject='+encodeURIComponent(subject||'Weekly student update')+'&body='+encodeURIComponent(message)};
  const setWeek=offset=>{const w=schoolWeek(offset);setWeekStart(w.start);setWeekEnd(w.end)};
 
- const m=current?.metrics||{},charts=current?.chart_data||{};
+ const m=current?.metrics||{},charts=current?.chart_data||{},covered=hasEvidence(current),counts=current?.source_counts||{};
  const courseGrades=Array.isArray(m.latest_course_grades)?m.latest_course_grades:[];
  const gradeTrend=Array.isArray(charts.grade_trend)?charts.grade_trend:[];
  const courseChart=Array.isArray(charts.current_course_grades)?charts.current_course_grades:[];
@@ -63,18 +66,18 @@ export default function WeeklyFamilyUpdate(){
  const attendance=m.attendance||{};
  const attendanceChart=[['Present',attendance.present],['Absent',attendance.absent],['Tardy',attendance.tardy],['Excused',attendance.excused],['Left early',attendance.left_early]].map(([name,value])=>({name,value:Number(value||0)}));
  const metricRows=current?[
-  {label:'Weekly work average',value:m.weekly_assignment_average==null?'—':m.weekly_assignment_average+'%',detail:m.graded_assignments+' graded assignment'+(m.graded_assignments===1?'':'s')},
-  {label:'Learning-goal average',value:m.progress_average==null?'—':m.progress_average+'%',detail:m.progress_points+' recorded data point'+(m.progress_points===1?'':'s')},
-  {label:'Missing work',value:String(m.missing_assignments||0),detail:'recorded this week'},
-  {label:workspace==='para'?'Para support minutes':'Session minutes',value:String(workspace==='para'?(m.support_minutes||0):(m.session_minutes||0)),detail:workspace==='para'?(m.support_notes||0)+' support note(s)':(m.sessions||0)+' session(s)'}
+  {label:'Weekly work average',value:m.weekly_assignment_average==null?'N/A':m.weekly_assignment_average+'%',detail:Number(m.graded_assignments)>0?m.graded_assignments+' graded assignment'+(m.graded_assignments===1?'':'s'):'No graded work recorded'},
+  {label:'Learning-goal average',value:m.progress_average==null?'N/A':m.progress_average+'%',detail:Number(m.progress_points)>0?m.progress_points+' recorded data point'+(m.progress_points===1?'':'s'):'No learning-goal data recorded'},
+  {label:'Missing work',value:Number(counts.grade_records)>0?String(m.missing_assignments||0):'N/A',detail:Number(counts.grade_records)>0?'recorded this week':'No weekly grade records'},
+  {label:workspace==='para'?'Para support minutes':'Session minutes',value:workspace==='para'?(Number(counts.para_notes)>0?String(m.support_minutes||0):'N/A'):(Number(counts.session_records)>0?String(m.session_minutes||0):'N/A'),detail:workspace==='para'?(Number(counts.para_notes)>0?(m.support_notes||0)+' support note(s)':'No Para observations recorded'):(Number(counts.session_records)>0?(m.sessions||0)+' session(s)':'No sessions recorded')}
  ]:[];
 
  const pdfCharts=[];
  if(courseChart.length)pdfCharts.push({type:'bar',title:'Latest Recorded Course Grades',subtitle:'Current grade percentages stored in CaseCue.',data:courseChart,series:[{key:'percentage',label:'Grade %'}]});
  if(gradeTrend.length)pdfCharts.push({type:'line',title:'This Week’s Assignment Scores',subtitle:'Verified assignment percentages for the selected week.',data:gradeTrend,series:[{key:'percentage',label:'Assignment %'}]});
  if(progressTrend.length)pdfCharts.push({type:'line',title:'This Week’s Learning-Goal Checks',subtitle:'Recorded progress-monitoring percentages for the selected week.',data:progressTrend,series:[{key:'percentage',label:'Progress %'}]});
- const pdfSections=current?[{heading:'Family Message',body:message},{heading:'Strengths',body:(current.strengths||[]).map(x=>'• '+x).join('\n')},{heading:'Current Focus',body:(current.focus_areas||[]).map(x=>'• '+x).join('\n')},{heading:'Next Steps',body:(current.next_steps||[]).map(x=>'• '+x).join('\n')}]:[];
- const pdfNotes=current?[...(current.data_notes||[]),workspace==='para'?'Para-generated draft: educator/case-manager review is required before family distribution.':'Educator review is required before family distribution.']:[];
+ const pdfSections=current?[{heading:covered?'Family Message':'Data Coverage Notice',body:message},...(covered?[{heading:'Strengths',body:(current.strengths||[]).map(x=>'• '+x).join('\n')},{heading:'Current Focus',body:(current.focus_areas||[]).map(x=>'• '+x).join('\n')},{heading:'Next Steps',body:(current.next_steps||[]).map(x=>'• '+x).join('\n')}]:[])]:[];
+ const pdfNotes=current?[...(current.data_notes||[]),!covered?'AI strengths/focus/next-step narrative was intentionally skipped because the record did not contain enough reportable data.':workspace==='para'?'Para-generated draft: educator/case-manager review is required before family distribution.':'Educator review is required before family distribution.']:[];
  const filename=current?'casecue-'+workspace+'-'+String(current.student_name||'student').replace(/[^a-z0-9]+/gi,'-')+'-'+current.week_start+'-weekly-update':'casecue-weekly-family-update';
 
  return <div className="space-y-6">
@@ -111,7 +114,7 @@ export default function WeeklyFamilyUpdate(){
    </div>
 
    <Card className="overflow-hidden">
-    <div className="border-b bg-slate-50 p-6"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><div className="text-xs font-black uppercase tracking-[.16em] text-blue-700">AI-generated draft · grounded in saved CaseCue data</div><h2 className="mt-1 text-2xl font-black">{current.student_name} · {current.week_start} to {current.week_end}</h2></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>save()}><Save className="mr-2 h-4 w-4"/>Save Edits</Button><Button variant="outline" onClick={()=>save('ready')}><CheckCircle2 className="mr-2 h-4 w-4"/>{workspace==='para'?'Ready for Educator Review':'Mark Ready'}</Button><AnalyticsPdfButton label="Weekly PDF + Graphs" title={'CaseCue Weekly Family Update · '+current.student_name} subtitle={current.week_start+' through '+current.week_end+' · '+roleName(workspace)} filename={filename} metrics={metricRows} charts={pdfCharts} sections={pdfSections} notes={pdfNotes}/></div></div></div>
+    <div className="border-b bg-slate-50 p-6"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><div className="text-xs font-black uppercase tracking-[.16em] text-blue-700">AI-generated draft · grounded in saved CaseCue data</div><h2 className="mt-1 text-2xl font-black">{current.student_name} · {current.week_start} to {current.week_end}</h2></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>save()}><Save className="mr-2 h-4 w-4"/>Save Edits</Button><Button variant="outline" onClick={()=>save('ready')}><CheckCircle2 className="mr-2 h-4 w-4"/>{workspace==='para'?'Ready for Educator Review':'Mark Ready'}</Button><AnalyticsPdfButton label="Weekly PDF + Graphs" title="CaseCue Weekly Family Update" subtitle={current.student_name+' · '+fmtDate(current.week_start)+' - '+fmtDate(current.week_end)+' · '+roleName(workspace)} filename={filename} metrics={metricRows} charts={pdfCharts} sections={pdfSections} notes={pdfNotes}/></div></div></div>
     <div className="space-y-4 p-6">
      <div><label className="text-sm font-black">Subject line</label><Input value={subject} onChange={e=>setSubject(e.target.value)}/></div>
      <div><label className="text-sm font-black">Family message</label><textarea className="mt-1 min-h-[320px] w-full rounded-2xl border p-4 text-sm leading-7" value={message} onChange={e=>setMessage(e.target.value)}/><div className="mt-2 text-xs text-slate-500">Edit anything before sharing. The numbers above remain the saved data snapshot for this weekly record.</div></div>
