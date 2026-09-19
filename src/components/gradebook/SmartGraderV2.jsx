@@ -48,15 +48,15 @@ export default function SmartGraderV2({students=[],goals=[],onSaved}){
    </div>
 
    <Card className="border-blue-100 bg-gradient-to-r from-blue-50 to-white p-4">
-     <div className="flex items-start gap-3 text-sm"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-blue-700"/><div><b>Nothing becomes official until you approve it.</b><span className="text-slate-600"> CaseCue can read and verify the work, but the teacher-approved result is what gets filed in Gradebook and the student’s Work & Grades folder.</span></div></div>
+     <div className="flex items-start gap-3 text-sm"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-blue-700"/><div><b>{context.workspaceKey==='para'?'Para submissions stay pending until an authorized educator reviews them.':'Nothing becomes official until you approve it.'}</b><span className="text-slate-600"> {context.workspaceKey==='para'?'CaseCue can read and score the work, but the Para workspace cannot create teacher-approved evidence or IEP progress.':'CaseCue can read and verify the work, but the teacher-approved result is what gets filed in Gradebook and the student’s Work & Grades folder.'}</span></div></div>
    </Card>
 
    {mode==='single'
-     ?<WorkEvidencePanel students={students} goals={context.goals} compact v2/>
+     ?<WorkEvidencePanel students={students} goals={context.goals} compact v2 workspaceKey={context.workspaceKey}/>
      :<BatchWorkEvidencePanel key={mode} students={students} goals={context.goals} onSaved={onSaved} v2 batchMode={mode} workspaceKey={context.workspaceKey}/>} 
 
    <div className="flex items-center justify-center gap-2 pb-2 text-xs text-slate-400">
-     <CheckCircle2 className="h-3.5 w-3.5"/><span>Smart Grader V2 · Separate → Resolve → Grade → Approve{context.goals.length?' → IEP Match':''} → File</span><ArrowRight className="h-3.5 w-3.5"/>
+     <CheckCircle2 className="h-3.5 w-3.5"/><span>Smart Grader V2 · Separate → Resolve → Grade → {context.workspaceKey==='para'?'Submit for Teacher Review':'Approve'}{context.goals.length?' → IEP Match':''} → File</span><ArrowRight className="h-3.5 w-3.5"/>
    </div>
  </div>;
 }
