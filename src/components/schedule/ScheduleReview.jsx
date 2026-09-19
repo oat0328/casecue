@@ -29,6 +29,14 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   const key=canon(name);
   setGroups(prev=>prev.map(g=>({...g,assignments:{...g.assignments,[key]:id}})));
  };
+ const confirmAllSuggested=()=>{
+  const pairs=unresolved.flatMap(item=>item.probableIds.length===1?[[item.key,item.probableIds[0]]]:[]);
+  if(!pairs.length)return;
+  setGroups(prev=>prev.map(g=>({
+   ...g,
+   assignments:{...g.assignments,...Object.fromEntries(pairs)}
+  })));
+ };
  const toggle=gi=>setGroups(prev=>prev.map((g,i)=>i===gi?{...g,included:!g.included}:g));
 
  const unresolved=useMemo(()=>{
@@ -92,8 +100,8 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
  },[groups,blocked]);
 
  const stats=[
-  ['Groups',groups.filter(g=>g.included).length],
-  ['Students',matchedIds.size],
+  ['Subject blocks',groups.filter(g=>g.included).length],
+  ['Confirmed students',matchedIds.size],
   ['Names to confirm',unresolved.length],
   ['Instructional slots',slotStats.count],
   ['Unique weekly min',slotStats.minutes],
@@ -167,8 +175,9 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   </div>}
 
   {unresolved.length>0&&<Card className='p-5 border-amber-300 bg-amber-50/40'>
-   <div className='flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between'>
+   <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
     <div><div className='text-xs font-black uppercase tracking-[.15em] text-amber-700'>Resolve roster names first</div><h3 className='mt-1 text-lg font-black'>{unresolved.length} name{unresolved.length===1?'':'s'} need confirmation</h3><p className='mt-1 text-sm text-slate-600'>Confirm each source name once. The choice applies everywhere that same name appears, including capitalization variants such as “Adonis Rose” and “Adonis rose.”</p></div>
+    {unresolved.length>0&&unresolved.every(item=>item.probableIds.length===1)&&<Button type='button' variant='outline' onClick={confirmAllSuggested} className='shrink-0 border-amber-300 bg-white text-amber-900'>Confirm all {unresolved.length} suggested matches</Button>}
    </div>
    <div className='mt-4 grid gap-3 md:grid-cols-2'>
     {unresolved.map(item=>{
@@ -257,7 +266,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
    </div>
   </div>
 
-  {conflicts.length>0&&<div className='rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900'><b>{conflicts.length} overlapping service conflict{conflicts.length===1?'':'s'} detected in the current review.</b></div>}
+  {conflicts.length>0&&<div className='rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900'><b>{conflicts.length} overlapping service conflict{conflicts.length===1?'':'s'} detected in the current review.</b><div className='mt-3 space-y-2'>{conflicts.map((c,i)=><div key={i} className='rounded-lg border border-rose-200 bg-white px-3 py-2'><div className='font-bold'>{(c.student_ids||[]).map(id=>rosterName(rosterById[id])||'Student').join(', ')}</div><div className='mt-1 text-xs'>{c.a.day} · {c.a.group_name} {c.a.start_time}–{c.a.end_time} overlaps {c.b.group_name} {c.b.start_time}–{c.b.end_time}</div><div className='mt-1 text-[11px] text-rose-700'>Review the source schedule before changing either block. CaseCue is identifying the overlap, not deciding which service should move.</div></div>)}</div>{unresolved.length>0&&<div className='mt-2 text-xs text-rose-700'>Conflict count may increase after remaining roster names are confirmed.</div>}</div>}
 
   <div className='flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'>
    <Button variant='outline' onClick={onCancel}>Cancel</Button>
