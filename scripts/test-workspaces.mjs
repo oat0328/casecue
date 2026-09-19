@@ -32,6 +32,9 @@ const subHome=read('src/pages/SubstituteHome.jsx');
 const genEdHome=read('src/pages/GenEdHome.jsx');
 const paraHome=read('src/pages/ParaHome.jsx');
 const spedDataCenter=read('src/pages/DataCenter.jsx');
+const weeklyFamily=read('src/pages/WeeklyFamilyUpdate.jsx');
+const weeklyGenerator=read('base44/functions/generateWeeklyFamilyUpdate/entry.ts');
+const weeklySchema=read('base44/entities/WeeklyFamilyUpdate.jsonc');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
 for(const key of concreteHomes){
@@ -42,11 +45,12 @@ for(const generic of ['/w/:workspace/schedule','/w/:workspace/attendance','/w/:w
 }
 
 const requiredNav=[
- '/w/para/schedule','/w/para/attendance','/w/para/students','/w/para/grade','/w/para/baseline','/w/para/iep-guide','/w/para/notes',
+ '/w/para/schedule','/w/para/attendance','/w/para/students','/w/para/grade','/w/para/baseline','/w/para/iep-guide','/w/para/weekly-contact','/w/para/notes',
  '/w/speech/schedule','/w/speech/attendance','/w/speech/iep','/w/speech/notes',
  '/w/ot/schedule','/w/ot/attendance','/w/ot/notes',
  '/w/substitute/schedule','/w/substitute/attendance','/w/substitute/lesson','/w/substitute/grade','/w/substitute/notes',
- '/w/pe/schedule','/w/pe/attendance','/w/pe/lesson','/w/pe/grade','/w/pe/notes'
+ '/w/pe/schedule','/w/pe/attendance','/w/pe/lesson','/w/pe/grade','/w/pe/notes',
+ '/w/gen_ed/weekly-contact'
 ];
 for(const path of requiredNav)ok('nav registered '+path,caps.includes("'"+path+"'")||caps.includes('"'+path+'"'),'missing workspace nav path');
 
@@ -84,6 +88,14 @@ ok('Analytics PDF draws graph data',analyticsExport.includes('drawBar')&&analyti
 for(const [role,text] of [['Para',paraHome],['Speech',speechHome],['OT',otHome],['PE',peHome],['Substitute',subHome],['Gen Ed',genEdHome]])ok(role+' dashboard uses premium analytics',text.includes('Premium')&&text.includes('AnalyticsPdfButton'),role+' analytics not wired');
 ok('SPED Data Center uses shared premium analytics',spedDataCenter.includes('PremiumLineChart')&&spedDataCenter.includes('PremiumDonutChart')&&spedDataCenter.includes('AnalyticsPdfButton'),'SPED premium analytics not wired');
 ok('Para avoids raw browser prompts and handwritten print pages',!paraHome.includes('window.prompt(')&&!paraHome.includes('window.print(')&&paraHome.includes('AddGroupDialog')&&paraHome.includes('ExportBar'),'Para raw prompt/print regression returned');
+ok('Weekly family update routes exist for SPED Gen Ed and Para',app.includes('path="/weekly-contact"')&&app.includes('path="/w/gen_ed/weekly-contact"')&&app.includes('path="/w/para/weekly-contact"'),'weekly family routes missing');
+ok('Weekly family update nav exists for all three roles',caps.includes("'/weekly-contact'")&&caps.includes("'/w/gen_ed/weekly-contact'")&&caps.includes("'/w/para/weekly-contact'"),'weekly family nav missing');
+ok('Weekly family generator enforces Para assignment',weeklyGenerator.includes('ParaStudentAccess.filter')&&weeklyGenerator.includes('not assigned to your Para account'),'weekly family Para assignment guard missing');
+ok('Weekly family math separates course grade and assignment score',weeklyGenerator.includes('scorePct')&&weeklyGenerator.includes('weekly_assignment_average')&&weeklyGenerator.includes('latest_course_grades'),'weekly grade math separation missing');
+ok('Weekly family AI forbids invented scores and diagnoses',weeklyGenerator.includes('Never invent grades')&&weeklyGenerator.includes('Do not mention disability'),'weekly family grounding rules missing');
+ok('Weekly family page includes real graphs and editable message',weeklyFamily.includes('PremiumLineChart')&&weeklyFamily.includes('PremiumBarChart')&&weeklyFamily.includes('family_message')&&weeklyFamily.includes('Weekly PDF + Graphs'),'weekly family UI incomplete');
+ok('Weekly family history stores immutable data snapshots',weeklySchema.includes('chart_data')&&weeklySchema.includes('metrics')&&weeklySchema.includes('source_counts')&&weeklyFamily.includes('Weekly Update History'),'weekly family snapshot/history missing');
+ok('Analytics PDF can include narrative sections',analyticsExport.includes('sections=[]')&&analyticsExport.includes("section.heading||'Summary'"),'analytics narrative sections missing');
 
 ok('Speech IEP queries selected student docs',speechIep.includes("Document.filter({student_id:form.student_id}")&&!speechIep.includes('Document.list('),'Speech IEP must not pre-load every org document');
 
