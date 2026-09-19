@@ -21,6 +21,44 @@
     "organization_id": {
       "type": "string",
       "description": "The organization (tenant) this user belongs to"
+    },
+    "workspaces": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "sped",
+          "gen_ed",
+          "psych",
+          "speech",
+          "ot",
+          "para",
+          "nurse",
+          "substitute",
+          "pe"
+        ]
+      },
+      "description": "Workspace entitlements granted to this account"
+    },
+    "active_workspace": {
+      "type": "string",
+      "enum": [
+        "sped",
+        "gen_ed",
+        "psych",
+        "speech",
+        "ot",
+        "para",
+        "nurse",
+        "substitute",
+        "pe"
+      ],
+      "description": "Workspace currently selected for this account"
+    },
+    "multi_workspace_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when the subscription/admin assignment explicitly grants more than one workspace"
     }
   },
   "required": [
