@@ -1,7 +1,7 @@
 import{createClientFromRequest}from'npm:@base44/sdk@0.8.44';
 
 const between=(d,a,b)=>{const x=String(d||'').slice(0,10);return !!x&&x>=a&&x<=b};
-const pctRow=r=>Number.isFinite(Number(r?.current_grade_percent))?Number(r.current_grade_percent):(Number(r?.score_possible)>0?Math.round((Number(r.score_earned||0)/Number(r.score_possible))*1000)/10:null);
+const pctRow=r=>Number(r?.score_possible)>0?Math.round((Number(r.score_earned||0)/Number(r.score_possible))*1000)/10:(Number.isFinite(Number(r?.current_grade_percent))?Number(r.current_grade_percent):null);
 const avg=xs=>{const a=xs.map(Number).filter(Number.isFinite);return a.length?Math.round((a.reduce((n,x)=>n+x,0)/a.length)*10)/10:null};
 const mins=s=>Number(s?.delivered_minutes??s?.duration_minutes??0)||0;
 const clean=v=>String(v??'').replace(/\s+/g,' ').trim();
