@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { LESSON_HEADER_FIELDS, LESSON_GROUPS, SPECIAL_ACCOMMODATION_KEY } from "@/lib/lessonPlanSchema";
+import { sortStudentIdsByName } from "@/lib/studentSort";
 
 // Lesson plan exports: polished PDF (jsPDF), Word-compatible DOCX (HTML-based),
 // and clean printing. One HTML builder feeds both DOCX and print.
@@ -9,7 +10,7 @@ const esc = (t) => String(t == null ? "" : t)
   .replace(/\n/g, "<br>");
 
 function studentNames(lesson, students) {
-  return (lesson.student_ids || [])
+  return sortStudentIdsByName(lesson.student_ids || [], students || [])
     .map((id) => { const s = (students || []).find((x) => x.id === id); return s ? `${s.first_name} ${s.last_name}` : null; })
     .filter(Boolean);
 }
