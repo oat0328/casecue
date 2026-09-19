@@ -3,6 +3,7 @@
 
 import { textSection, tableSection, sheetFromTable, safeFilename } from "@/lib/reportExport";
 import { studentName } from "@/lib/caseReports";
+import { sortStudentsByName } from "@/lib/studentSort";
 
 const byDate = (arr) => (arr || []).slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 const round1 = (n) => Math.round(n * 10) / 10;
@@ -44,7 +45,7 @@ export function buildGroupSummaryReport({ groups = [], students = [], goals = []
   });
 
   const rosterRows = groups.flatMap((g) =>
-    g.students.map((s) => [g.goal_area, `${s.first_name} ${s.last_name}`, s.grade || "—"])
+    sortStudentsByName(g.students || []).map((s) => [g.goal_area, `${s.first_name} ${s.last_name}`, s.grade || "—"])
   );
   const sessionRows = byDate(sessions).map((s) => [
     s.date,
@@ -65,7 +66,7 @@ export function buildGroupSummaryReport({ groups = [], students = [], goals = []
       ]),
       tableSection("Group Summary", ["Goal Group", "Students", "Goals", "Sessions", "Total Minutes", "Avg Min/Session"], summaryRows),
       ...groups.map((g) =>
-        textSection(`${g.goal_area} — Students`, g.students.map((s) => `${s.first_name} ${s.last_name}${s.grade ? ` (Grade ${s.grade})` : ""}`))
+        textSection(`${g.goal_area} — Students`, sortStudentsByName(g.students || []).map((s) => `${s.first_name} ${s.last_name}${s.grade ? ` (Grade ${s.grade})` : ""}`))
       ),
     ],
     sheets: [
@@ -83,18 +84,19 @@ export function buildGroupSummaryReport({ groups = [], students = [], goals = []
 export function buildGroupReport({ group, students = [], goals = [], progress = [], sessions = [] }) {
   const area = group.goal_area;
   const groupSessions = byDate(sessions.filter((s) => s.goal_area === area));
-  const memberIds = new Set(group.students.map((s) => s.id));
+  const groupStudents = sortStudentsByName(group.students || []);
+  const memberIds = new Set(groupStudents.map((s) => s.id));
   const areaGoals = goals.filter((g) => g.goal_area === area && memberIds.has(g.student_id));
   const areaGoalIds = new Set(areaGoals.map((g) => g.id));
 
   const totalMinutes = groupSessions.reduce((n, s) => n + (s.minutes || 0), 0);
 
   const goalRows = areaGoals.map((g) => {
-    const st = group.students.find((x) => x.id === g.student_id);
+    const st = groupStudents.find((x) => x.id === g.student_id);
     return [studentName(st), (g.goal_text || "").slice(0, 60), g.baseline || "—", g.target || "—", g.status || "active"];
   });
 
-  const attendanceRows = group.students.map((s) => {
+  const attendanceRows = groupStudents.map((s) => {
     const mine = groupSessions.filter((x) => (x.student_ids || []).includes(s.id));
     return [
       studentName(s),
@@ -104,7 +106,7 @@ export function buildGroupReport({ group, students = [], goals = [], progress = 
     ];
   });
 
-  const growthRows = group.students.map((s) => {
+  const growthRows = groupStudents.map((s) => {
     const pts = byDate(progress.filter((p) => p.student_id === s.id && (p.goal_id ? areaGoalIds.has(p.goal_id) : false)));
     if (!pts.length) return [studentName(s), "No progress data recorded for this goal area"];
     const first = pts[0];
@@ -134,7 +136,7 @@ export function buildGroupReport({ group, students = [], goals = [], progress = 
         `Goals addressed: ${areaGoals.length} (${activeCount} active, ${metCount} met)`,
         `Sessions logged: ${groupSessions.length} · ${totalMinutes} total minutes`,
       ]),
-      textSection("Students in Group", group.students.map((s) => `${s.first_name} ${s.last_name}${s.grade ? ` (Grade ${s.grade})` : ""}`)),
+      textSection("Students in Group", groupStudents.map((s) => `${s.first_name} ${s.last_name}${s.grade ? ` (Grade ${s.grade})` : ""}`)),
       goalRows.length
         ? tableSection("Goals Addressed", ["Student", "Goal", "Baseline", "Target", "Status"], goalRows)
         : textSection("Goals Addressed", "No goals recorded in this area yet."),
@@ -149,7 +151,7 @@ export function buildGroupReport({ group, students = [], goals = [], progress = 
         : textSection("Sessions", "No sessions logged for this group yet."),
     ],
     sheets: [
-      sheetFromTable("Roster", ["Student", "Grade"], group.students.map((s) => [studentName(s), s.grade || "—"])),
+      sheetFromTable("Roster", ["Student", "Grade"], groupStudents.map((s) => [studentName(s), s.grade || "—"])),
       sheetFromTable("Goals", ["Student", "Goal", "Baseline", "Target", "Status"], goalRows),
       sheetFromTable("Attendance", ["Student", "Sessions", "Minutes", "Avg Min/Session"], attendanceRows),
       sheetFromTable("Growth", ["Student", "First %", "Latest %", "Change"], growthRows.filter((r) => r.length === 4)),
