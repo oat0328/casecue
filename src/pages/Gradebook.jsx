@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { GraduationCap, Plus, Trash2, UploadCloud, Download, FileSpreadsheet, Eye, FileText, TrendingUp, Users, ClipboardCheck, FolderOpen } from "lucide-react";
 import readXlsxFile from "read-excel-file";
 import { base44 } from "@/api/base44Client";
@@ -16,6 +16,8 @@ import GradebookCharts from "@/components/gradebook/GradebookCharts";
 import ReportBuilderPanel from "@/components/shared/ReportBuilderPanel";
 import { GRADEBOOK_REPORT_DEFINITIONS } from "@/lib/gradebookReporting";
 import SmartGraderV2 from "@/components/gradebook/SmartGraderV2";
+import { sortStudentsByName } from "@/lib/studentSort";
+import { workspaceFromPath, workspaceUsesIepGradeLinking } from "@/lib/workspaceCapabilities";
 
 const emptyForm = () => ({ student_id: "", goal_id: "", title: "", course: "", gen_ed_teacher: "", assignment_type: "", term: "", score_earned: "", score_possible: "", current_grade_percent: "", current_grade_letter: "", missing_assignment: false, accommodations_provided: "unknown", notes: "", date: new Date().toISOString().slice(0,10) });
 const clean = (v) => String(v ?? "").trim();
@@ -24,20 +26,34 @@ const csvCell = (v) => `"${String(v ?? "").replaceAll('"','""')}"`;
 
 export default function Gradebook() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const workspaceKey = workspaceFromPath(location.pathname, 'sped');
+  const canLinkIep = workspaceUsesIepGradeLinking(workspaceKey);
   const { toast } = useToast();
   const fileRef = useRef(null);
   const { data: rawStudents } = useAsync(() => base44.entities.Student.list('-last_name', 500), []);
-  const students = useMemo(() => [...(rawStudents || [])].sort((a,b)=>`${a.last_name||''},${a.first_name||''}`.localeCompare(`${b.last_name||''},${b.first_name||''}`,undefined,{sensitivity:'base'})), [rawStudents]);
-  const { data: goals } = useAsync(() => base44.entities.Goal.list('-updated_date', 300), []);
-  const { data: assignments, refetch } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 500), []);
-  const { data: sessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 1000), []);
-  const { data: documents } = useAsync(() => base44.entities.Document.list('-updated_date', 1000), []);
+  const { data: paraAccess } = useAsync(() => workspaceKey==='para' ? base44.entities.ParaStudentAccess.list('-last_name',500) : Promise.resolve([]), [workspaceKey]);
+  const students = useMemo(() => {
+    const roster=rawStudents||[];
+    if(workspaceKey!=='para')return sortStudentsByName(roster);
+    const allowed=new Set((paraAccess||[]).filter(x=>x.active!==false&&!String(x.student_id||'').startsWith('para_')).map(x=>x.student_id));
+    return sortStudentsByName(roster.filter(s=>allowed.has(s.id)));
+  }, [rawStudents,paraAccess,workspaceKey]);
+  const studentIds = useMemo(() => new Set(students.map(s=>s.id)), [students]);
+  const { data: rawGoals } = useAsync(() => canLinkIep ? base44.entities.Goal.list('-updated_date', 300) : Promise.resolve([]), [canLinkIep]);
+  const goals = useMemo(() => (rawGoals||[]).filter(g=>studentIds.has(g.student_id)), [rawGoals,studentIds]);
+  const { data: rawAssignments, refetch } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 500), []);
+  const assignments = useMemo(() => workspaceKey==='para' ? (rawAssignments||[]).filter(a=>studentIds.has(a.student_id)) : (rawAssignments||[]), [rawAssignments,studentIds,workspaceKey]);
+  const { data: rawSessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 1000), []);
+  const sessions = useMemo(() => workspaceKey==='para' ? (rawSessions||[]).filter(s=>studentIds.has(s.student_id)) : (rawSessions||[]), [rawSessions,studentIds,workspaceKey]);
+  const { data: rawDocuments } = useAsync(() => canLinkIep ? base44.entities.Document.list('-updated_date', 1000) : Promise.resolve([]), [canLinkIep]);
+  const documents = useMemo(() => (rawDocuments||[]).filter(d=>studentIds.has(d.student_id)), [rawDocuments,studentIds]);
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [importing, setImporting] = useState(false);
 
-  const goalsForStudent = (goals || []).filter((g) => g.student_id === form.student_id);
+  const goalsForStudent = canLinkIep ? (goals || []).filter((g) => g.student_id === form.student_id) : [];
   const studentName = (id) => { const s = (students || []).find((x) => x.id === id); return s ? `${s.first_name} ${s.last_name}` : "—"; };
   const pct = (a) => a.score_possible > 0 ? Math.round((a.score_earned / a.score_possible) * 1000) / 10 : 0;
 
@@ -117,7 +133,7 @@ export default function Gradebook() {
 
   const remove = async (id) => { await base44.entities.GradebookAssignment.delete(id); refetch(); };
   const openAssignment = async (a) => { try { let uri=a.file_url; if(!uri&&a.work_evidence_id){const ev=await base44.entities.WorkEvidence.filter({id:a.work_evidence_id},'-created_date',1);uri=ev?.[0]?.file_url;} if(!uri)throw new Error('No assignment image/PDF is linked to this grade yet.'); const r=await base44.functions.invoke('openPrivateFileUrl',{file_uri:uri});const s=r?.data||r;if(!s?.signed_url)throw new Error('Could not create a private viewing link.'); window.open(s.signed_url,'_blank','noopener,noreferrer'); } catch(e){toast({title:'Could not open assignment',description:e.message,variant:'destructive'})} };
-  const iepForStudent=(studentId)=>(documents||[]).find(d=>d.student_id===studentId&&/iep/i.test(String(d.document_type||d.type||d.title||'')));
+  const iepForStudent=(studentId)=>canLinkIep?(documents||[]).find(d=>d.student_id===studentId&&/iep/i.test(String(d.document_type||d.type||d.title||''))):null;
   const openIep=async(studentId)=>{try{const d=iepForStudent(studentId);if(!d)throw new Error('No IEP document is currently linked to this student.');const r=await base44.functions.invoke('openDocumentUrl',{document_id:d.id});const s=r?.data||r;if(!s?.signed_url)throw new Error('Could not create an IEP viewing link.');window.open(s.signed_url,'_blank','noopener,noreferrer')}catch(e){toast({title:'Could not open IEP',description:e.message,variant:'destructive'})}};
   const gradeRows=(assignments||[]).filter(a=>a.current_grade_percent!=null||Number(a.score_possible)>0);
   const avgGrade=gradeRows.length?Math.round(gradeRows.reduce((sum,a)=>sum+Number(a.current_grade_percent!=null?a.current_grade_percent:pct(a)),0)/gradeRows.length):0;
@@ -146,7 +162,7 @@ export default function Gradebook() {
             <div><Label>Letter Grade</Label><Input value={form.current_grade_letter} onChange={e=>setForm({...form,current_grade_letter:e.target.value})}/></div>
             <div><Label>Date</Label><Input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
             <div><Label>Accommodations?</Label><select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" value={form.accommodations_provided} onChange={e=>setForm({...form,accommodations_provided:e.target.value})}><option value="unknown">Unknown</option><option value="yes">Yes</option><option value="no">No</option></select></div>
-            <div><Label>Link to IEP goal</Label><select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" value={form.goal_id} onChange={e=>setForm({...form,goal_id:e.target.value})}><option value="">—</option>{goalsForStudent.map(g=><option key={g.id} value={g.id}>{g.goal_area||"Goal"}</option>)}</select></div>
+            {canLinkIep&&<div><Label>Link to IEP goal</Label><select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" value={form.goal_id} onChange={e=>setForm({...form,goal_id:e.target.value})}><option value="">—</option>{goalsForStudent.map(g=><option key={g.id} value={g.id}>{g.goal_area||"Goal"}</option>)}</select></div>}
             <label className="flex items-center gap-2 text-sm mt-6"><input type="checkbox" checked={form.missing_assignment} onChange={e=>setForm({...form,missing_assignment:e.target.checked})}/> Missing assignment</label>
             <div className="sm:col-span-2"><Label>Notes</Label><Input value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></div>
           </div>
