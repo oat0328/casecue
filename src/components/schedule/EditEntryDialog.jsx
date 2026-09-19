@@ -55,7 +55,7 @@ export default function EditEntryDialog({ entry, students, onClose, onSaved, ent
           <div><Label>Group name</Label><Input value={form.group_name} onChange={(e) => set("group_name", e.target.value)} className="mt-1" /></div>
           <div><Label>{workspaceKey==='sped'?'Delivery':'Block type'}</Label>
             <select className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm mt-1" value={form.delivery} onChange={(e) => set("delivery", e.target.value)}>
-              {Object.entries(DELIVERY_LABEL).filter(([v])=>workspaceKey==='sped'?['pull-out','push-in','consultation'].includes(v):workspaceKey==='para'?['pull-out','push-in','consultation','support'].includes(v):['class','session','support','other'].includes(v)).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {Object.entries(DELIVERY_LABEL).filter(([v])=>workspaceKey==='sped'?['pull-out','push-in','consultation'].includes(v):workspaceKey==='para'?['class','support','pull-out','push-in','consultation','session','other'].includes(v):['class','session','support','other'].includes(v)).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </div>
           <div><Label>Day</Label>
@@ -63,7 +63,7 @@ export default function EditEntryDialog({ entry, students, onClose, onSaved, ent
               {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
-          <div><Label>Service minutes</Label><Input type="number" value={form.service_minutes} onChange={(e) => set("service_minutes", e.target.value)} className="mt-1" /></div>
+          <div><Label>{workspaceKey==='para'?'Minutes':'Service minutes'}</Label><Input type="number" value={form.service_minutes} onChange={(e) => set("service_minutes", e.target.value)} className="mt-1" /></div>
           <div><Label>Start time</Label><Input type="time" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} className="mt-1" /></div>
           <div><Label>End time</Label><Input type="time" value={form.end_time} onChange={(e) => set("end_time", e.target.value)} className="mt-1" /></div>
           <div className="sm:col-span-2"><Label>Teacher / classroom</Label><Input value={form.teacher_classroom} onChange={(e) => set("teacher_classroom", e.target.value)} className="mt-1" /></div>
