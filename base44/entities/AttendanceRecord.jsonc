@@ -1,0 +1,104 @@
+{
+  "name": "AttendanceRecord",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "workspace": {
+      "type": "string",
+      "enum": [
+        "sped",
+        "gen_ed",
+        "psych",
+        "speech",
+        "ot",
+        "para",
+        "nurse",
+        "substitute",
+        "pe"
+      ]
+    },
+    "student_id": {
+      "type": "string"
+    },
+    "student_name_snapshot": {
+      "type": "string"
+    },
+    "grade_snapshot": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "present",
+        "absent",
+        "tardy",
+        "excused",
+        "left_early"
+      ]
+    },
+    "minutes_late": {
+      "type": "number",
+      "default": 0
+    },
+    "note": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "schedule_block"
+      ],
+      "default": "daily"
+    },
+    "schedule_entry_id": {
+      "type": "string"
+    },
+    "schedule_label": {
+      "type": "string"
+    },
+    "schedule_start_time": {
+      "type": "string"
+    },
+    "schedule_end_time": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "organization_id",
+    "user_id",
+    "workspace",
+    "student_id",
+    "date",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}
