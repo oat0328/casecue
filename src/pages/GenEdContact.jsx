@@ -18,19 +18,20 @@ export default function GenEdContact(){
  const{data:students}=useAsync(()=>base44.entities.Student.list('-last_name',500),[]);
  const{data:notes,refetch}=useAsync(()=>base44.entities.WorkspaceNote.filter({workspace:'gen_ed'},'-date',300),[]);
  const empty=()=>({student_id:'',reason:'progress update',strength:'',concern:'',next:'',teacher:user?.full_name||'',date:today()});
- const[f,setF]=useState(empty),[editingId,setEditingId]=useState('');
+ const[f,setF]=useState(empty),[editingId,setEditingId]=useState(''),[editingBody,setEditingBody]=useState('');
  const savingName=f.teacher||user?.full_name||user?.email||'Teacher';
  const student=(students||[]).find(s=>s.id===f.student_id);
  const studentName=student?full(student):'your student';
- let message='Hello,\n\nI wanted to share a quick '+f.reason+' for '+studentName+'. ';
- if(f.strength)message+='One positive I want to highlight is '+f.strength+'. ';
- if(f.concern)message+='I also wanted to make you aware that '+f.concern+'. ';
- if(f.next)message+='Our next step will be '+f.next+'. ';
- message+='\n\nPlease feel free to reach out if you have any questions. I appreciate your partnership.\n\n'+savingName;
+ let generated='Hello,\n\nI wanted to share a quick '+f.reason+' for '+studentName+'. ';
+ if(f.strength)generated+='One positive I want to highlight is '+f.strength+'. ';
+ if(f.concern)generated+='I also wanted to make you aware that '+f.concern+'. ';
+ if(f.next)generated+='Our next step will be '+f.next+'. ';
+ generated+='\n\nPlease feel free to reach out if you have any questions. I appreciate your partnership.\n\n'+savingName;
+ const message=editingId?editingBody:generated;
 
  const copy=async()=>{await navigator.clipboard.writeText(message);toast({title:'Parent message copied'})};
- const reset=()=>{setF(empty());setEditingId('')};
- const edit=n=>{setEditingId(n.id);setF({student_id:n.student_id||'',reason:String(n.title||'Family contact').replace(/^Family contact · /,''),strength:'',concern:n.body||'',next:'',teacher:user?.full_name||'',date:n.date||today()});window.scrollTo({top:0,behavior:'smooth'})};
+ const reset=()=>{setF(empty());setEditingId('');setEditingBody('')};
+ const edit=n=>{setEditingId(n.id);setEditingBody(n.body||'');setF({student_id:n.student_id||'',reason:String(n.title||'Family contact').replace(/^Family contact · /,''),strength:'',concern:'',next:'',teacher:user?.full_name||'',date:n.date||today()});window.scrollTo({top:0,behavior:'smooth'})};
  const save=async()=>{
   if(!f.student_id)return toast({title:'Choose the student first',variant:'destructive'});
   try{
@@ -51,10 +52,7 @@ export default function GenEdContact(){
     <div className="flex items-center justify-between"><h2 className="font-black">{editingId?'Edit Contact Record':'New Parent Contact'}</h2>{editingId&&<Button size="sm" variant="ghost" onClick={reset}><X className="mr-1 h-4 w-4"/>Cancel Edit</Button>}</div>
     <div><label className="text-sm font-black">Student</label><select className="mt-1 w-full rounded-lg border p-2 text-sm" value={f.student_id} onChange={e=>setF({...f,student_id:e.target.value})}><option value="">Choose student…</option>{(students||[]).map(s=><option key={s.id} value={s.id}>{s.last_name}, {s.first_name}</option>)}</select></div>
     <div className="grid gap-3 sm:grid-cols-2"><div><label className="text-sm font-black">Date</label><Input type="date" value={f.date} onChange={e=>setF({...f,date:e.target.value})}/></div><div><label className="text-sm font-black">Reason</label><Input value={f.reason} onChange={e=>setF({...f,reason:e.target.value})}/></div></div>
-    <div><label className="text-sm font-black">Strength / positive</label><Input value={f.strength} onChange={e=>setF({...f,strength:e.target.value})}/></div>
-    <div><label className="text-sm font-black">Concern or update</label><textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={f.concern} onChange={e=>setF({...f,concern:e.target.value})}/></div>
-    <div><label className="text-sm font-black">Next step</label><Input value={f.next} onChange={e=>setF({...f,next:e.target.value})}/></div>
-    <div><label className="text-sm font-black">Your name</label><Input value={f.teacher} onChange={e=>setF({...f,teacher:e.target.value})}/></div>
+    {editingId?<div><label className="text-sm font-black">Saved message</label><textarea className="min-h-56 w-full rounded-xl border p-3 text-sm leading-6" value={editingBody} onChange={e=>setEditingBody(e.target.value)}/><p className="mt-1 text-xs text-slate-500">Edit the exact communication that was saved. The original record ID stays the same.</p></div>:<><div><label className="text-sm font-black">Strength / positive</label><Input value={f.strength} onChange={e=>setF({...f,strength:e.target.value})}/></div><div><label className="text-sm font-black">Concern or update</label><textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={f.concern} onChange={e=>setF({...f,concern:e.target.value})}/></div><div><label className="text-sm font-black">Next step</label><Input value={f.next} onChange={e=>setF({...f,next:e.target.value})}/></div><div><label className="text-sm font-black">Your name</label><Input value={f.teacher} onChange={e=>setF({...f,teacher:e.target.value})}/></div></>}
    </Card>
    <Card className="p-6"><div className="mb-3 flex items-center gap-2 font-black"><MessageSquare className="h-4 w-4"/>Preview</div><div className="min-h-72 whitespace-pre-wrap rounded-2xl bg-slate-50 p-5 text-sm leading-7">{message}</div><div className="mt-4 flex flex-wrap gap-2"><Button onClick={copy}><Copy className="mr-2 h-4 w-4"/>Copy</Button><Button variant="outline" onClick={()=>location.href='mailto:?subject='+encodeURIComponent('Classroom update for '+studentName)+'&body='+encodeURIComponent(message)}><Mail className="mr-2 h-4 w-4"/>Email</Button><Button variant="outline" onClick={save}><Save className="mr-2 h-4 w-4"/>{editingId?'Update Contact':'Save Contact Record'}</Button></div></Card>
   </div>
