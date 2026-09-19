@@ -1,8 +1,9 @@
-import { LayoutDashboard, Users, BookOpen, FileEdit, BarChart3, MessagesSquare, FileBarChart, MessageCircle, Settings, Plug, ShieldCheck, TicketPercent, Crown, ScanLine, StickyNote, TimerReset } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, FileEdit, BarChart3, MessagesSquare, FileBarChart, MessageCircle, Settings, Plug, ShieldCheck, TicketPercent, Crown, ScanLine, StickyNote, TimerReset, UserCheck } from 'lucide-react';
 export const navItems=[
  {label:'Command Center',path:'/app',icon:LayoutDashboard},
  {label:'Students',path:'/students',icon:Users},
  {label:'Instruction',path:'/instruction',icon:BookOpen},
+ {label:'Attendance',path:'/attendance',icon:UserCheck},
  {label:'Gradebook',path:'/gradebook',icon:ScanLine},
  {label:'Goals & Progress',path:'/progress',icon:BarChart3},
  {label:'Session Tracker',path:'/progress/sessions',icon:TimerReset},
