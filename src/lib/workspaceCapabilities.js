@@ -108,3 +108,10 @@ export function workspaceToolPath(key, tool) {
 export function workspaceHasTool(key, tool) {
   return Boolean(workspaceToolPath(key, tool));
 }
+
+export function workspaceFromPath(pathname='', fallback='sped') {
+  const match=String(pathname).match(/^\/w\/([^/]+)/);
+  return match?.[1] || fallback;
+}
+
+export const workspaceUsesIepGradeLinking = (key) => ['sped','gen_ed'].includes(key);
