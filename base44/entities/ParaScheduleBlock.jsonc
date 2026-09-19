@@ -29,6 +29,15 @@
     "delivery": {
       "type": "string"
     },
+    "service_minutes": {
+      "type": "number"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
     "student_ids": {
       "type": "array",
       "items": {
