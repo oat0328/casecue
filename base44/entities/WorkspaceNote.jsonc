@@ -12,6 +12,8 @@
       "type": "string",
       "enum": [
         "para",
+        "speech",
+        "ot",
         "substitute",
         "pe"
       ]
@@ -32,6 +34,41 @@
     "pinned": {
       "type": "boolean",
       "default": false
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "general",
+        "behavior",
+        "assessment",
+        "academic_support",
+        "push_in",
+        "pull_out",
+        "session",
+        "communication",
+        "handoff",
+        "incident",
+        "other"
+      ]
+    },
+    "setting": {
+      "type": "string"
+    },
+    "support_level": {
+      "type": "string"
+    },
+    "attachment_url": {
+      "type": "string"
+    },
+    "original_filename": {
+      "type": "string"
+    },
+    "ai_cleaned": {
+      "type": "boolean",
+      "default": false
+    },
+    "updated_at": {
+      "type": "string"
     }
   },
   "required": [
