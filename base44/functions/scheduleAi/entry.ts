@@ -282,7 +282,6 @@ async function optimize(base44) {
   }
 
   const nameById = Object.fromEntries(students.map((s) => [s.id, `${s.first_name || ''} ${s.last_name || ''}`.trim()]));
-  const studentById = Object.fromEntries(students.map((s) => [s.id, s]));
   const goalCatsByStudent = {};
   for (const g of goals) {
     if (!g.student_id) continue;
@@ -354,6 +353,7 @@ async function optimize(base44) {
     for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) {
       const a = rows[i], b = rows[j];
       if (!overlaps(a, b) || a.id === b.id) continue;
+      if (a.group_name === b.group_name && a.start_time === b.start_time && a.end_time === b.end_time && JSON.stringify(idsForEntry(a).sort()) === JSON.stringify(idsForEntry(b).sort())) continue;
       const key = [studentId, a.day, a.id, b.id].sort().join('|');
       if (seenOverlap.has(key)) continue;
       seenOverlap.add(key);
