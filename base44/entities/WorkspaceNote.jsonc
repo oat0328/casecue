@@ -15,7 +15,8 @@
         "speech",
         "ot",
         "substitute",
-        "pe"
+        "pe",
+        "gen_ed"
       ]
     },
     "student_id": {
