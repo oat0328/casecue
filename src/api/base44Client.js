@@ -31,14 +31,15 @@ const sortStudentResult = (result) => {
   return result;
 };
 
-const studentEntity = base44.entities.Student;
-if (studentEntity) {
+['Student', 'ParaStudentAccess'].forEach((entityName) => {
+  const studentEntity = base44.entities[entityName];
+  if (!studentEntity) return;
   ['list', 'filter'].forEach((methodName) => {
     if (typeof studentEntity[methodName] !== 'function') return;
     const original = studentEntity[methodName].bind(studentEntity);
     studentEntity[methodName] = async (...args) => sortStudentResult(await original(...args));
   });
-}
+});
 
 // ===== Organization stamping =====
 const ORG_ENTITIES = [
