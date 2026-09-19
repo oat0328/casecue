@@ -11,6 +11,7 @@ import{Card}from'@/components/ui/cards';
 import ExportBar from'@/components/shared/ExportBar';
 import{workspaceFromPath}from'@/lib/workspaceCapabilities';
 import{WORKSPACES}from'@/lib/workspaces';
+import{userDisplayName}from'@/lib/userIdentity';
 
 const CATEGORIES=[
  ['general','General'],['behavior','Behavior'],['assessment','Assessment / Baseline'],['academic_support','Academic Support'],
@@ -27,7 +28,7 @@ const full=s=>s?(`${s.first_name||''} ${s.last_name||''}`.trim()):'';
 export default function WorkspaceNotes({workspaceKey:prop}){
  const inferred=workspaceFromPath(location.pathname,'para'),workspaceKey=prop||inferred;
  const meta=WORKSPACES[workspaceKey]||{name:'CaseCue',short:'Workspace'};
- const{user}=useAuth(),{toast}=useToast(),fileRef=useRef(null);
+ const{user}=useAuth(),{toast}=useToast(),fileRef=useRef(null);const staffName=userDisplayName(user,'CaseCue Staff');
  const para=workspaceKey==='para';
  const{data:rawStudents}=useAsync(()=>para?base44.entities.ParaStudentAccess.list('-last_name',500):base44.entities.Student.list('-last_name',700),[workspaceKey]);
  const students=useMemo(()=>para?(rawStudents||[]).filter(x=>x.active!==false).map(x=>({...x,id:x.student_id})):(rawStudents||[]).filter(x=>x.roster_status!=='archived'&&x.status!=='exited'),[para,rawStudents]);
@@ -69,7 +70,7 @@ export default function WorkspaceNotes({workspaceKey:prop}){
   setBusy(true);
   try{
    const payload={...f,organization_id:user?.organization_id||user?.data?.organization_id||'',user_id:user.id,workspace:workspaceKey,attachment_url:attachment,original_filename:filename,ai_cleaned:aiCleaned,updated_at:new Date().toISOString()};
-   if(editingId){await base44.entities.WorkspaceNote.update(editingId,payload);try{await base44.entities.AuditLog.create({action:'workspace_note_updated',entity_type:'WorkspaceNote',entity_id:editingId,details:`${meta.short} note updated by ${user?.full_name||user?.email||'staff'}`})}catch{}}else await base44.entities.WorkspaceNote.create(payload);
+   if(editingId){await base44.entities.WorkspaceNote.update(editingId,payload);try{await base44.entities.AuditLog.create({action:'workspace_note_updated',entity_type:'WorkspaceNote',entity_id:editingId,details:`${meta.short} note updated by ${staffName}`})}catch{}}else await base44.entities.WorkspaceNote.create(payload);
    await refetch();toast({title:editingId?'Note updated':'Note saved',description:editingId?'Your changes are reflected in exports and printouts immediately.':undefined});resetForm();
   }catch(e){toast({title:editingId?'Could not update note':'Could not save note',description:e.message,variant:'destructive'})}
   finally{setBusy(false)}
@@ -77,7 +78,7 @@ export default function WorkspaceNotes({workspaceKey:prop}){
  const remove=async n=>{if(!window.confirm('Delete this note?'))return;await base44.entities.WorkspaceNote.delete(n.id);if(editingId===n.id)resetForm();await refetch();toast({title:'Note deleted'})};
  const filtered=(notes||[]).filter(n=>{const q=search.toLowerCase();return !q||[n.title,n.body,label(n.category),name(n.student_id)].join(' ').toLowerCase().includes(q)});
  const sections=filtered.map(n=>({heading:`${fmt(n.date)} · ${label(n.category)}${n.student_id?` · ${name(n.student_id)}`:''}`,body:[n.title?`Title: ${n.title}`:'',n.setting?`Setting: ${n.setting}`:'',n.support_level&&n.support_level!=='Not applicable'?`Support: ${n.support_level}`:'',n.body].filter(Boolean).join('\n')}));
- const exportOpts={title:`${meta.name} Notes`,subtitle:`${user?.full_name||user?.email||'CaseCue user'} · ${filtered.length} note${filtered.length===1?'':'s'}`,filename:`casecue-${workspaceKey}-notes`,sections,banner:`CaseCue · ${meta.short} Workspace · Staff record for authorized educational use`};
+ const exportOpts={title:`${meta.name} Notes`,subtitle:`${staffName} · ${filtered.length} note${filtered.length===1?'':'s'}`,filename:`casecue-${workspaceKey}-notes`,sections,banner:`CaseCue · ${meta.short} Workspace · Staff record for authorized educational use`};
 
  return <div className="space-y-6">
   <section className="rounded-[30px] bg-slate-950 p-8 text-white"><div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">{meta.name} · Notes</div><h1 className="mt-3 text-3xl font-black">Capture it once. Clean it up. Keep the record usable.</h1><p className="mt-2 max-w-3xl text-slate-300">Behavior, assessments, push-in/pull-out support, sessions, handoffs, and quick working notes in one place.</p></section>
