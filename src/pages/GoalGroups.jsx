@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import EmptyState from "@/components/EmptyState";
 import SessionLogDialog from "@/components/goalGroups/SessionLogDialog";
 import GroupReports from "@/components/goalGroups/GroupReports";
+import { sortStudentsByName } from "@/lib/studentSort";
 
 export default function GoalGroups() {
   const { toast } = useToast();
@@ -33,7 +34,7 @@ export default function GoalGroups() {
       byArea.get(area).set(student.id, student);
     });
     return [...byArea.entries()]
-      .map(([goal_area, members]) => ({ goal_area, students: [...members.values()] }))
+      .map(([goal_area, members]) => ({ goal_area, students: sortStudentsByName([...members.values()]) }))
       .sort((a, b) => b.students.length - a.students.length);
   }, [students, goals]);
 
