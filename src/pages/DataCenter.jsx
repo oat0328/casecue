@@ -28,7 +28,8 @@ export default function DataCenter() {
   const { data: workEvidence } = useAsync(() => base44.entities.WorkEvidence.list('-date', 500), []);
   const { data: assignments } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 200), []);
   const { data: meetings } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
-  const { data: schedule } = useAsync(() => base44.entities.ScheduleEntry.list('-updated_date', 300), []);
+  const { data: rawSchedule } = useAsync(() => base44.entities.ScheduleEntry.list('-updated_date', 300), []);
+  const schedule = useMemo(() => (rawSchedule || []).filter((e) => (e.workspace || 'sped') === 'sped'), [rawSchedule]);
 
   const [form, setForm] = useState({ student_id: "", goal_id: "", date: new Date().toISOString().slice(0,10), correct: "", total: "", prompting_level: "independent", observation_notes: "" });
   const [saving, setSaving] = useState(false);
