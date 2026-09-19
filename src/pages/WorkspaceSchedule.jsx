@@ -68,7 +68,7 @@ export default function WorkspaceSchedule({workspaceKey:workspaceProp}){
   </Card>}
 
   <WeeklyScheduleBoard entries={entries} students={students} onEdit={setEditing} onDelete={remove}/>
-  <ScheduleExportPanel entries={active} students={students} timeFormat='12h'/>
+  <ScheduleExportPanel entries={active} students={students} timeFormat='12h' workspaceKey={workspaceKey}/>
 
   <AddGroupDialog
    workspaceKey={workspaceKey}
