@@ -44,7 +44,7 @@ export default function WorkEvidencePanel({students=[],goals=[],fixedStudentId='
    const machineEarned=Number(analysis.verification?.second_pass?.earned??analysis.score_earned??0),machinePossible=Number(analysis.verification?.second_pass?.possible??analysis.score_possible??0);
    const changedFromMachine=earned!==machineEarned||possible!==machinePossible||teacherChecked;
    const verificationStatus=isPara?'needs_teacher_review':manualMode?'teacher_confirmed':analysis.verification?.status==='verified'&&!changedFromMachine?'verified':'teacher_confirmed';
-   if(gradingRunId&&machineSnapshot){
+   if(gradingRunId&&machineSnapshot&&!isPara){
      const corrections=[];
      const addCorrection=(problemNumber,fieldChanged,originalValue,correctedValue)=>{if(String(originalValue??'')!==String(correctedValue??''))corrections.push({problem_number:String(problemNumber||''),field_changed:fieldChanged,original_value:String(originalValue??''),corrected_value:String(correctedValue??'')})};
      addCorrection('assignment','score_earned',machineSnapshot.score_earned,earned);addCorrection('assignment','score_possible',machineSnapshot.score_possible,possible);
@@ -78,7 +78,7 @@ export default function WorkEvidencePanel({students=[],goals=[],fixedStudentId='
   </Card>
 
   {analysis&&<Card className="border-amber-200 p-6">
-   <div className="flex flex-wrap items-start justify-between gap-3"><div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-amber-600"/><div><h3 className="font-black">{manualMode?'Manual grade review':'Review & fix the scan'}</h3><p className="text-sm text-slate-600">Nothing posts until you press Save. Change anything CaseCue got wrong.</p></div></div><div className="flex gap-2"><Button variant="outline" onClick={openFile}><Eye className="mr-1 h-4 w-4"/>View worksheet</Button>{!manualMode&&<Button variant="outline" onClick={analyze} disabled={busy}><RefreshCw className="mr-1 h-4 w-4"/>Re-read</Button>}</div></div>
+   <div className="flex flex-wrap items-start justify-between gap-3"><div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-amber-600"/><div><h3 className="font-black">{manualMode?'Manual grade review':'Review & fix the scan'}</h3><p className="text-sm text-slate-600">{isPara?'Nothing becomes teacher-approved here. Review the scan, then submit it for educator review.':'Nothing posts until you press Save. Change anything CaseCue got wrong.'}</p></div></div><div className="flex gap-2"><Button variant="outline" onClick={openFile}><Eye className="mr-1 h-4 w-4"/>View worksheet</Button>{!manualMode&&<Button variant="outline" onClick={analyze} disabled={busy}><RefreshCw className="mr-1 h-4 w-4"/>Re-read</Button>}</div></div>
 
    <div className="mt-5 grid gap-4 md:grid-cols-2">
     <div><Label>Student</Label><StudentSelector students={students} value={studentId} onChange={id=>{setStudentId(id);setGoalId('')}} noBottomSpace/></div>
