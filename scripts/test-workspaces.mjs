@@ -21,6 +21,16 @@ const paraBaselineDraft=read('base44/functions/draftParaBaselinePacket/entry.ts'
 const studentNotes=read('src/components/notes/StudentNotesPanel.jsx');
 const quickNote=read('src/components/notes/QuickNoteDialog.jsx');
 const exportBar=read('src/components/shared/ExportBar.jsx');
+const paraSupport=read('src/pages/ParaIEPGuide.jsx');
+const supportReader=read('base44/functions/processParaSupportDocument/entry.ts');
+const premiumAnalytics=read('src/components/shared/PremiumAnalytics.jsx');
+const analyticsExport=read('src/lib/analyticsExport.js');
+const speechHome=read('src/pages/SpeechHome.jsx');
+const otHome=read('src/pages/OTHome.jsx');
+const peHome=read('src/pages/PEHome.jsx');
+const subHome=read('src/pages/SubstituteHome.jsx');
+const genEdHome=read('src/pages/GenEdHome.jsx');
+const paraHome=read('src/pages/ParaHome.jsx');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
 for(const key of concreteHomes){
@@ -64,6 +74,12 @@ ok('Schedule export no hardcoded SPED promo',!scheduleExport.includes('Created w
 ok('Print HTML carries CaseCue footer',docExport.includes('CaseCue · getcasecue.com'),'premium footer missing');
 ok('Print header is simplified',!docExport.includes('CaseCue Record')&&!docExport.includes('page-number')&&docExport.includes('Printed'),'old decorative print badge or Page 0 logic returned');
 ok('Direct PDF is first-class export',exportBar.includes('Download PDF')&&docExport.includes('Page ${p} of ${pages}'),'direct premium PDF export missing');
+ok('Para Student Supports accepts IEP/BIP/504/health uploads',paraSupport.includes('Drag & drop')&&paraSupport.includes('Health Plan')&&paraSupport.includes('BIP')&&paraSupport.includes('504'),'Para support document upload missing');
+ok('Para support reader enforces assigned student',supportReader.includes('ParaStudentAccess.filter')&&supportReader.includes('not assigned to your Para account'),'Para support reader assignment check missing');
+ok('Para support reader separates eligibility from health condition',supportReader.includes('eligibility_categories')&&supportReader.includes('documented_disability_or_condition')&&supportReader.includes('health_safety_alerts'),'support extraction structure incomplete');
+ok('Shared premium analytics component exists',premiumAnalytics.includes('PremiumLineChart')&&premiumAnalytics.includes('PremiumDonutChart')&&premiumAnalytics.includes('PremiumBarChart'),'premium analytics library incomplete');
+ok('Analytics PDF draws graph data',analyticsExport.includes('drawBar')&&analyticsExport.includes('drawLine')&&analyticsExport.includes('Page ${p} of ${pages}'),'analytics PDF export missing graph rendering');
+for(const [role,text] of [['Para',paraHome],['Speech',speechHome],['OT',otHome],['PE',peHome],['Substitute',subHome],['Gen Ed',genEdHome]])ok(role+' dashboard uses premium analytics',text.includes('Premium')&&text.includes('AnalyticsPdfButton'),role+' analytics not wired');
 
 ok('Speech IEP queries selected student docs',speechIep.includes("Document.filter({student_id:form.student_id}")&&!speechIep.includes('Document.list('),'Speech IEP must not pre-load every org document');
 
