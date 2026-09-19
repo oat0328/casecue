@@ -14,7 +14,8 @@ const subjectOf=g=>String(g.group_name||'Unnamed group').split('·')[0].trim();
 const periodOf=g=>String(g.period||String(g.group_name||'').split('·').slice(1).join('·')||'').trim()||`${g.start_time||'?'}–${g.end_time||'?'}`;
 const rosterName=s=>`${s?.first_name||''} ${s?.last_name||''}`.replace(/\s+/g,' ').trim();
 
-export default function ScheduleReview({analysis,students,saving,onSave,onCancel}){
+export default function ScheduleReview({analysis,students,saving,onSave,onCancel,workspaceKey='sped'}){
+ const isPara=workspaceKey==='para';
  const[groups,setGroups]=useState(()=>(analysis.groups||[]).map(g=>({...g,included:true,assignments:{}})));
  const blocked=analysis.non_instructional_blocks||[],roster=students||[];
  const sortedRoster=useMemo(()=>sortStudentsAlpha(roster),[roster]);
@@ -117,7 +118,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   if(unresolved.length)return;
   const entries=groups.filter(g=>g.included).map(g=>({
    group_name:g.group_name||'Unnamed group',
-   delivery:['pull-out','push-in','consultation'].includes(g.delivery)?g.delivery:'pull-out',
+   delivery:(isPara?['pull-out','push-in','consultation','class','session','support','other']:['pull-out','push-in','consultation']).includes(g.delivery)?g.delivery:(isPara?'class':'pull-out'),
    day:normalizeDay(g.day),
    start_time:g.start_time||'',
    end_time:g.end_time||'',
@@ -149,7 +150,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   }));
   const blocks=blocked.map(b=>({
    group_name:b.label||'Unavailable',
-   delivery:'consultation',
+   delivery:isPara?'other':'consultation',
    day:normalizeDay(b.day),
    start_time:b.start_time||'',
    end_time:b.end_time||'',
@@ -168,26 +169,26 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
  };
 
  return <div className='space-y-5'>
-  <AiDisclaimer extra='Review the imported schedule and confirm roster matches before saving. CaseCue preserves unknown information instead of guessing.'/>
+  <AiDisclaimer extra={isPara?'Review the imported Para/student schedule and confirm assigned-student matches before saving. CaseCue preserves unknown information instead of guessing.':'Review the imported schedule and confirm roster matches before saving. CaseCue preserves unknown information instead of guessing.'}/>
 
   <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6'>
    {stats.map(([label,value])=><div key={label} className='rounded-xl border bg-card px-3 py-3 text-center'><div className='text-xl font-black'>{value}</div><div className='text-[11px] text-muted-foreground'>{label}</div></div>)}
   </div>
 
-  {!hasSourceDetails&&<div className='rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900'>
+  {!isPara&&!hasSourceDetails&&<div className='rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900'>
    <b>Gen Ed source schedules were not included.</b>
    <div className='mt-1 text-xs leading-5 text-sky-800'>That is okay for importing this SPED schedule. Pull-from class, teacher, and class-window details are intentionally hidden until a source-class schedule is added.</div>
   </div>}
 
   {unresolved.length===0&&missingRoster.length>0&&<div className='rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900'>
-   <b>{missingRoster.length} active roster student{missingRoster.length===1?' is':'s are'} not represented in this uploaded schedule.</b>
+   <b>{missingRoster.length} {isPara?'assigned':'active roster'} student{missingRoster.length===1?' is':'s are'} not represented in this uploaded schedule.</b>
    <div className='mt-1 text-xs leading-5 text-amber-800'>This does not automatically mean the schedule is wrong. Verify whether the source file intentionally omits the student or whether another schedule file should be uploaded before saving.</div>
    <div className='mt-2 flex flex-wrap gap-1.5'>{missingRoster.map(s=><span key={s.id} className='rounded-full border border-amber-300 bg-white px-2.5 py-1 text-xs font-bold'>{rosterName(s)}</span>)}</div>
   </div>}
 
   {unresolved.length>0&&<Card className='p-5 border-amber-300 bg-amber-50/40'>
    <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
-    <div><div className='text-xs font-black uppercase tracking-[.15em] text-amber-700'>Resolve roster names first</div><h3 className='mt-1 text-lg font-black'>{unresolved.length} name{unresolved.length===1?'':'s'} need confirmation</h3><p className='mt-1 text-sm text-slate-600'>Confirm each source name once. The choice applies everywhere that same name appears, including capitalization variants such as “Adonis Rose” and “Adonis rose.”</p></div>
+    <div><div className='text-xs font-black uppercase tracking-[.15em] text-amber-700'>{isPara?'Confirm assigned students first':'Resolve roster names first'}</div><h3 className='mt-1 text-lg font-black'>{unresolved.length} name{unresolved.length===1?'':'s'} need confirmation</h3><p className='mt-1 text-sm text-slate-600'>{isPara?'CaseCue found a student name in the schedule, but it will not attach that schedule to someone who is not assigned to this Para account. Have the student assigned first, then confirm the match.':'Confirm each source name once. The choice applies everywhere that same name appears, including capitalization variants such as “Adonis Rose” and “Adonis rose.”'}</p></div>
     {unresolved.length>0&&unresolved.every(item=>item.probableIds.length===1)&&<Button type='button' variant='outline' onClick={confirmAllSuggested} className='shrink-0 border-amber-300 bg-white text-amber-900'>Confirm all {unresolved.length} suggested matches</Button>}
    </div>
    <div className='mt-4 grid gap-3 md:grid-cols-2'>
@@ -214,8 +215,8 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
 
   <Card className='overflow-hidden'>
    <div className='border-b bg-slate-950 px-5 py-4 text-white'>
-    <div className='text-xs font-black uppercase tracking-[.15em] text-sky-300'>Weekly schedule preview</div>
-    <div className='mt-1 text-sm text-slate-300'>This mirrors the source grid. Multiple subjects can share one period without being treated as one combined group.</div>
+    <div className='text-xs font-black uppercase tracking-[.15em] text-sky-300'>{isPara?'Para / student schedule preview':'Weekly schedule preview'}</div>
+    <div className='mt-1 text-sm text-slate-300'>{isPara?'Class-context and support blocks are shown at their source times. Nothing becomes an IEP/service decision here.':'This mirrors the source grid. Multiple subjects can share one period without being treated as one combined group.'}</div>
    </div>
    <div className='overflow-x-auto'>
     <table className='min-w-[1000px] w-full border-collapse text-xs'>
@@ -245,7 +246,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
   </Card>
 
   <div>
-   <div className='mb-2 text-sm font-black'>Detailed group review</div>
+   <div className='mb-2 text-sm font-black'>{isPara?'Detailed block review':'Detailed group review'}</div>
    <div className='space-y-2'>
     {groups.map((g,gi)=><details key={gi} className={`rounded-xl border bg-card ${!g.included?'opacity-50':''}`}>
      <summary className='cursor-pointer list-none p-4'>
@@ -265,7 +266,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
          <div className='flex flex-wrap items-center justify-between gap-2'><div className='font-semibold text-sm'>{rs?rosterName(rs):st.name}</div><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${resolved?CONF.high:(CONF[st.confidence]||CONF.none)}`}>{resolved?'Confirmed':'Needs match'}</span></div>
          {st.name&&rs&&canon(st.name)!==canon(rosterName(rs))&&<div className='mt-1 text-[10px] text-slate-500'>Source name: {st.name}</div>}
          {hasSourceDetails&&(st.source_subject||st.source_teacher||st.source_period||st.class_start_time||st.class_end_time)&&<div className='mt-2 grid gap-2 text-xs'>
-          <div className='rounded-lg bg-white border px-3 py-2'><div className='font-bold text-slate-700 flex gap-1'><BookOpen className='h-3.5 w-3.5'/>Pull from</div><div className='mt-1'>{st.source_subject||'Subject not identified'}{st.source_period?` · ${st.source_period}`:''}</div><div className='text-muted-foreground'>{st.source_teacher||'Teacher not identified'}{st.source_room?` · Room ${st.source_room}`:''}</div></div>
+          <div className='rounded-lg bg-white border px-3 py-2'><div className='font-bold text-slate-700 flex gap-1'><BookOpen className='h-3.5 w-3.5'/>{isPara?'Source class':'Pull from'}</div><div className='mt-1'>{st.source_subject||'Subject not identified'}{st.source_period?` · ${st.source_period}`:''}</div><div className='text-muted-foreground'>{st.source_teacher||'Teacher not identified'}{st.source_room?` · Room ${st.source_room}`:''}</div></div>
           <div className='rounded-lg bg-white border px-3 py-2'><div className='font-bold text-slate-700 flex gap-1'><Clock className='h-3.5 w-3.5'/>Class / pull window</div><div className='mt-1'>Class: {st.class_start_time||'?'}–{st.class_end_time||'?'}</div><div className='text-blue-700 font-semibold'>Pull: {st.pull_start_time||g.start_time||'?'}–{st.pull_end_time||g.end_time||'?'}</div></div>
          </div>}
         </div>;
