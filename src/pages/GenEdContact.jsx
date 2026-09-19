@@ -4,6 +4,7 @@ import{Copy,Mail,MessageSquare,Trash2,Save,Users,Pencil,X}from'lucide-react';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{useAuth}from'@/lib/AuthContext';
+import{userDisplayName}from'@/lib/userIdentity';
 import{useToast}from'@/components/ui/use-toast';
 import{Button}from'@/components/ui/button';
 import{Input}from'@/components/ui/input';
@@ -14,12 +15,12 @@ const today=()=>new Date().toLocaleDateString('en-CA');
 const full=s=>s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student';
 
 export default function GenEdContact(){
- const{user}=useAuth(),{toast}=useToast();
+ const{user}=useAuth(),{toast}=useToast();const staffName=userDisplayName(user,'Teacher');
  const{data:students}=useAsync(()=>base44.entities.Student.list('-last_name',500),[]);
  const{data:notes,refetch}=useAsync(()=>base44.entities.WorkspaceNote.filter({workspace:'gen_ed'},'-date',300),[]);
  const empty=()=>({student_id:'',reason:'progress update',strength:'',concern:'',next:'',teacher:user?.full_name||'',date:today()});
  const[f,setF]=useState(empty),[editingId,setEditingId]=useState(''),[editingBody,setEditingBody]=useState('');
- const savingName=f.teacher||user?.full_name||user?.email||'Teacher';
+ const savingName=f.teacher||staffName;
  const student=(students||[]).find(s=>s.id===f.student_id);
  const studentName=student?full(student):'your student';
  let generated='Hello,\n\nI wanted to share a quick '+f.reason+' for '+studentName+'. ';
@@ -43,7 +44,7 @@ export default function GenEdContact(){
  const remove=async n=>{if(!window.confirm('Delete this saved parent-contact record?'))return;await base44.entities.WorkspaceNote.delete(n.id);if(editingId===n.id)reset();await refetch();toast({title:'Contact record deleted'})};
  const name=id=>full((students||[]).find(s=>s.id===id));
  const sections=(notes||[]).map(n=>({heading:(n.date||'')+' · '+(name(n.student_id)||'Student')+' · '+(n.title||'Family Contact'),body:n.body||''}));
- const exportOpts={title:'CaseCue Gen Ed · Family Communication Record',subtitle:user?.full_name||user?.email||'Teacher',filename:'casecue-gen-ed-family-contact',sections,banner:'CaseCue Gen Ed · Teacher communication record · Review before distribution'};
+ const exportOpts={title:'CaseCue Gen Ed · Family Communication Record',subtitle:staffName,filename:'casecue-gen-ed-family-contact',sections,banner:'CaseCue Gen Ed · Teacher communication record · Review before distribution'};
 
  return <div className="space-y-6">
   <section className="rounded-[30px] bg-slate-950 p-8 text-white"><div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">CaseCue Gen Ed · Family Communication</div><h1 className="mt-3 text-3xl font-black">Write the update. Save the contact. Keep the record.</h1><p className="mt-2 max-w-2xl text-slate-300">Build a warm classroom update, send it through your normal email app, and keep a dated teacher record in CaseCue.</p></section>
