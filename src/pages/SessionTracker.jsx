@@ -36,7 +36,8 @@ export default function SessionTracker() {
   const students = useMemo(() => [...(rawStudents || [])].sort((a,b)=>`${a.last_name||''},${a.first_name||''}`.localeCompare(`${b.last_name||''},${b.first_name||''}`,undefined,{sensitivity:'base'})), [rawStudents]);
   const { data: sessions, refetch: refetchSessions } = useAsync(() => base44.entities.SessionRecord.filter({}, '-date', 500), []);
   const { data: goals } = useAsync(() => base44.entities.Goal.list('-created_date',1000), []);
-  const { data: scheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list('-created_date',500), []);
+  const { data: rawScheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list('-created_date',500), []);
+  const scheduleEntries = useMemo(() => (rawScheduleEntries || []).filter((e) => (e.workspace || 'sped') === 'sped'), [rawScheduleEntries]);
 
   const recentActivities = useMemo(() => {
     const seen = [];
