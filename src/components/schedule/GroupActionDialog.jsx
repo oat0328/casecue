@@ -44,7 +44,7 @@ export default function GroupActionDialog({ action, entries, groupNames, student
   const rename = () => {
     if (!newName.trim()) { toast({ title: "Enter a new name", variant: "destructive" }); return; }
     run(async () => {
-      await base44.entities.ScheduleEntry.updateMany({ group_name: group }, { $set: { group_name: newName.trim() } });
+      await base44.entities.ScheduleEntry.bulkUpdate(groupEntries.map((e)=>({id:e.id,group_name:newName.trim()})));
     }, `Renamed to ${newName.trim()}`);
   };
 
@@ -62,6 +62,8 @@ export default function GroupActionDialog({ action, entries, groupNames, student
           teacher_classroom: e.teacher_classroom,
           notes: e.notes,
           student_ids: e.student_ids || [],
+          workspace: e.workspace || 'sped',
+          source_kind: e.source_kind || 'manual',
         }))
       );
     }, `Duplicated as ${newName.trim()}`);
@@ -78,7 +80,7 @@ export default function GroupActionDialog({ action, entries, groupNames, student
           student_ids: [...new Set([...(e.student_ids || []), ...sourceStudents])],
         }))
       );
-      await base44.entities.ScheduleEntry.updateMany({ group_name: group }, { $set: { archived: true } });
+      await base44.entities.ScheduleEntry.bulkUpdate(groupEntries.map((e)=>({id:e.id,archived:true})));
     }, `Merged ${group} into ${mergeTarget}`);
   };
 
@@ -107,7 +109,7 @@ export default function GroupActionDialog({ action, entries, groupNames, student
 
   const archive = () =>
     run(async () => {
-      await base44.entities.ScheduleEntry.updateMany({ group_name: group }, { $set: { archived: !isArchived } });
+      await base44.entities.ScheduleEntry.bulkUpdate(groupEntries.map((e)=>({id:e.id,archived:!isArchived})));
     }, isArchived ? `${group} restored` : `${group} archived`);
 
   const toggleSplit = (id) =>
