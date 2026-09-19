@@ -17,7 +17,7 @@ const SCHEMA={
   properties:{
     summary:{type:'string'},
     groups:{type:'array',items:{type:'object',properties:{
-      group_name:{type:'string'},delivery:{type:'string',enum:['pull-out','push-in','consultation']},day:{type:'string'},
+      group_name:{type:'string'},delivery:{type:'string',enum:['pull-out','push-in','consultation','class','session','support','other']},day:{type:'string'},
       start_time:{type:'string'},end_time:{type:'string'},service_minutes:{type:'number'},teacher_classroom:{type:'string'},
       notes:{type:'string'},period:{type:'string'},recurrence_note:{type:'string'},week_pattern:{type:'string'},
       cycle_day:{type:'string'},goal_focus:{type:'array',items:{type:'string'}},students:{type:'array',items:PULL}
@@ -213,6 +213,7 @@ Deno.serve(async(req)=>{
     const user=await base44.auth.me();
     if(!user)return Response.json({error:'Unauthorized'},{status:401});
     const body=await req.json();
+    const workspace=String(body.workspace||'sped');
     const uris=(body.file_uris||[]).filter(Boolean);
     const names=(body.file_names||[]).map(String);
     if(!uris.length)return Response.json({error:'Upload at least one schedule file.'},{status:400});
@@ -224,21 +225,50 @@ Deno.serve(async(req)=>{
     }
     if(!signedFiles.length)return Response.json({error:'The schedule uploaded, but CaseCue could not open the private file for analysis. Please retry the upload.'},{status:422});
 
-    const students=(await base44.entities.Student.list('-updated_date',300)).filter(s=>s.roster_status!=='archived'&&s.status!=='exited');
+    let students=[];
+    if(workspace==='para'){
+      const access=await base44.entities.ParaStudentAccess.list('-updated_at',500);
+      students=(access||[]).filter(s=>s.active!==false).map(s=>({...s,id:s.student_id}));
+    }else{
+      students=(await base44.entities.Student.list('-updated_date',300)).filter(s=>s.roster_status!=='archived'&&s.status!=='exited');
+    }
 
-    const docx=signedFiles.find(f=>/\.docx$/i.test(f.name));
+    const docx=workspace!=='para'&&signedFiles.find(f=>/\.docx$/i.test(f.name));
     if(docx){
       const parsed=await parseDocxSchedule(docx.url,students);
       if(parsed.groups.length===0)return Response.json({error:'Schedule Parsing Needs Review: CaseCue found the Word table but no instructional groups were extracted.',...parsed},{status:422});
       return Response.json(parsed);
     }
 
-    const goals=await base44.entities.Goal.list('-created_date',1000);
+    const goals=workspace==='sped'?await base44.entities.Goal.list('-created_date',1000):[];
     const goalsBy={};for(const g of goals||[]){(goalsBy[g.student_id]??=[]).push(g.goal_area||g.description||'IEP goal')}
-    const roster=students.map(s=>`- ${s.first_name} ${s.last_name} | id:${s.id} | aliases:${[`${s.first_name} ${String(s.last_name||'')[0]||''}`,`${String(s.first_name||'')[0]||''}${initials(s.last_name)}`].join(', ')} | grade:${s.grade||'?'} | weekly minutes:${s.service_minutes??'unknown'} | goal areas:${(goalsBy[s.id]||[]).join(', ')||'none recorded'} | services:${(s.services||[]).join(', ')||'none recorded'}`).join('\n');
+    const roster=students.map(s=>workspace==='para'
+      ?`- ${s.first_name} ${s.last_name} | id:${s.id} | grade:${s.grade||'?'} | approved supports:${(s.approved_supports||[]).join(', ')||'none listed'}`
+      :`- ${s.first_name} ${s.last_name} | id:${s.id} | aliases:${[`${s.first_name} ${String(s.last_name||'')[0]||''}`,`${String(s.first_name||'')[0]||''}${initials(s.last_name)}`].join(', ')} | grade:${s.grade||'?'} | weekly minutes:${s.service_minutes??'unknown'} | goal areas:${(goalsBy[s.id]||[]).join(', ')||'none recorded'} | services:${(s.services||[]).join(', ')||'none recorded'}`).join('\n');
     const rules=`Pull timing rule: ${body.pull_rule||'teacher choice'}; session length: ${body.session_minutes||30} minutes; max group size: ${body.max_group_size||4}; avoid: ${body.avoid||'none specified'}; preferred days: ${body.days||'Monday-Friday'}; delivery: ${body.delivery||'pull-out or push-in'}; additional request: ${body.pull_preferences||'none'}.`;
 
-    const prompt=`You are CaseCue's special education schedule IMPORTER and planner. Analyze ALL uploaded files together. A file may already BE the teacher's completed weekly SPED schedule. If so, PRESERVE it instead of redesigning it. PDFs may be visual calendar grids where raw text extraction is out of reading order; use the visual/table layout to preserve weekday columns and period rows.
+    const prompt=workspace==='para'?`You are CaseCue's PARAPROFESSIONAL schedule IMPORTER. Analyze ALL uploaded files together and preserve what the documents actually say. Do not redesign the schedule and do not require an IEP goal to import a schedule.
+
+ASSIGNED PARA STUDENTS:
+${roster||'- No students are currently assigned to this Para account.'}
+
+UPLOAD MAY BE ONE OF THESE:
+A) the para's own weekly support schedule,
+B) an individual student's daily class schedule,
+C) a bell schedule or a combination of files.
+
+CRITICAL PARA IMPORT RULES:
+- If the file is an INDIVIDUAL STUDENT DAILY SCHEDULE, that is valid Para input. Import each visible class period as class context instead of rejecting it for not being a SPED group grid.
+- If the document explicitly labels the table "Daily Schedule" or otherwise clearly indicates the same class schedule repeats each school day, create the visible timed class blocks for Monday-Friday. Use delivery='class'. Preserve subject, period/block, teacher, room, start time and end time exactly.
+- Attach the detected student name to each imported class block. Match ONLY against ASSIGNED PARA STUDENTS above. If the student is not assigned or cannot be matched uniquely, leave student_id blank and match_type='unmatched'; never guess.
+- Lunch/recess/PREP/unavailable time goes in non_instructional_blocks, not instructional groups.
+- A service table that gives frequency/minutes but NO day/time is useful context but is NOT a fixed schedule block. Put those facts in extraction_notes and do not invent a weekday or start time.
+- If a service or support block has an explicit day/time, import it with delivery='support', 'push-in', 'pull-out', or 'consultation' as the source supports.
+- If this is the para's own support schedule, preserve each real support block exactly and attach only students named in the source.
+- Do not invent students, accommodations, service minutes, rooms, teachers, disability information, or assignments.
+- Return groups=[] only when the document truly has no usable timed schedule blocks. An individual student's class timetable counts as usable schedule content.
+- extraction_notes must state what kind of schedule was detected, any unmatched student name, and any service/frequency information that could not be placed on a specific day/time.
+- Return JSON exactly matching the schema.`:`You are CaseCue's special education schedule IMPORTER and planner. Analyze ALL uploaded files together. A file may already BE the teacher's completed weekly SPED schedule. If so, PRESERVE it instead of redesigning it. PDFs may be visual calendar grids where raw text extraction is out of reading order; use the visual/table layout to preserve weekday columns and period rows.
 
 ACTIVE CASELOAD:
 ${roster}
@@ -266,7 +296,7 @@ Rules:
 11. Return JSON exactly matching the schema.`;
 
     const result=await base44.asServiceRole.integrations.Core.InvokeLLM({prompt,file_urls:signedFiles.map(f=>f.url),response_json_schema:SCHEMA});
-    if(!result||!Array.isArray(result.groups)||result.groups.length===0)return Response.json({error:'Schedule Parsing Needs Review: CaseCue opened the upload but could not reliably reconstruct any instructional groups from the weekday/time grid. Your original file is safe. Try a flattened/print-to-PDF copy or upload the bell schedule and student schedule separately.',groups:[],conflicts:[],non_instructional_blocks:result?.non_instructional_blocks||[],extraction_notes:result?.extraction_notes||['No instructional groups were confidently extracted.']},{status:422});
+    if(!result||!Array.isArray(result.groups)||result.groups.length===0)return Response.json({error:workspace==='para'?'Schedule Parsing Needs Review: CaseCue opened the file but could not find any reliable timed class/support blocks. Individual student schedules are supported; nothing was saved.':'Schedule Parsing Needs Review: CaseCue opened the upload but could not reliably reconstruct any instructional groups from the weekday/time grid. Your original file is safe. Try a flattened/print-to-PDF copy or upload the bell schedule and student schedule separately.',groups:[],conflicts:[],non_instructional_blocks:result?.non_instructional_blocks||[],extraction_notes:result?.extraction_notes||['No timed schedule blocks were confidently extracted.']},{status:422});
 
     for(const g of result.groups){
       for(const st of g.students||[]){
