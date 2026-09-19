@@ -8,6 +8,8 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const organizationId = String(user?.organization_id || user?.data?.organization_id || '');
+    if (!organizationId) return Response.json({ error: 'Your account is missing an organization.' }, { status: 400 });
 
     const body = await req.json();
     if (!body.workspace_id) return Response.json({ error: 'A workspace is required.' }, { status: 400 });
@@ -172,6 +174,7 @@ Return JSON matching the schema.`;
     await base44.entities.IepWorkspace.update(body.workspace_id, { draft, status: 'draft' });
     const sourceDocumentIds = Array.isArray(workspace.analysis?.source_documents) ? workspace.analysis.source_documents : [];
     const artifact = await base44.asServiceRole.entities.IepDraftArtifact.create({
+      organization_id: organizationId,
       student_id: workspace.student_id,
       workspace_id: body.workspace_id,
       source_document_ids: sourceDocumentIds,
@@ -182,6 +185,7 @@ Return JSON matching the schema.`;
     });
     if (sourceDocumentIds.length) {
       await base44.asServiceRole.entities.IepDraftSourceLink.bulkCreate(sourceDocumentIds.map((source_document_id) => ({
+        organization_id: organizationId,
         student_id: workspace.student_id,
         workspace_id: body.workspace_id,
         draft_artifact_id: artifact.id,
@@ -189,6 +193,7 @@ Return JSON matching the schema.`;
       })));
     }
     await base44.asServiceRole.entities.IepDraftReviewState.create({
+      organization_id: organizationId,
       student_id: workspace.student_id,
       draft_artifact_id: artifact.id,
       review_status: 'educator_review_required',
