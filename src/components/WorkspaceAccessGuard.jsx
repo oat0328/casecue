@@ -9,7 +9,7 @@ const SPED_PREFIXES = [
   '/command-center','/studio-workspace','/lesson-studio','/sub-plans','/smart-gradebook',
   '/schedule','/iep-studio','/iep-workspace','/documents','/behavior-studio','/iep-review',
   '/data-center','/session-tracker','/progress-monitoring-day','/goal-groups','/evidence-vault',
-  '/meetings','/meeting-navigator'
+  '/meetings','/meeting-navigator','/ask-casecue'
 ];
 
 function requiredWorkspace(pathname='') {
