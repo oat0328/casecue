@@ -36,7 +36,7 @@ export default async function(req){
   });
 
   try{
-   const signed=await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({file_uri:fileUri,expires_in:600});
+   const signed=await base44.integrations.Core.CreateFileSignedUrl({file_uri:fileUri,expires_in:600});
    const prompt=`You are CaseCue's Para Student Support reader. Read the entire uploaded student support document and create a day-to-day support brief for an authorized paraprofessional assigned to this student.
 
 The source may be an IEP, BIP, 504 plan, health plan, medical report, FBA, evaluation, or related school record.
