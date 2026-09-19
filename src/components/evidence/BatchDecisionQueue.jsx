@@ -10,7 +10,7 @@ const needsIdentity=x=>!x.student_id;
 const needsWritingApproval=x=>isWriting(x)&&(x.rubric_breakdown||[]).length>0&&!x.teacher_score_confirmed;
 const needsScore=x=>(!hasScore(x)||['not_scored','low'].includes(String(x.scoring_confidence||'').toLowerCase()))&&!x.teacher_score_confirmed;
 
-export default function BatchDecisionQueue({items=[],students=[],update,confirmStudent,openEvidence,onApproveGrades,approving=false}){
+export default function BatchDecisionQueue({items=[],students=[],update,confirmStudent,openEvidence,onApproveGrades,approving=false,submissionMode=false}){
  const [cursor,setCursor]=useState(0);
  const sorted=[...students].sort((a,b)=>(String(a.last_name||'')+', '+String(a.first_name||'')).localeCompare(String(b.last_name||'')+', '+String(b.first_name||''),undefined,{sensitivity:'base'}));
  const decisions=useMemo(()=>{
@@ -29,8 +29,8 @@ export default function BatchDecisionQueue({items=[],students=[],update,confirmS
  const next=()=>setCursor(0);
 
  if(!decisions.length)return<Card className='overflow-hidden'>
-  <div className='bg-emerald-950 p-6 text-white'><div className='text-[10px] font-black uppercase tracking-[.2em] text-emerald-300'>Batch Ready</div><h3 className='mt-1 text-2xl font-black'>No decisions left.</h3><p className='mt-2 text-sm text-emerald-100'>CaseCue graded what it could and you resolved the exceptions. Approve the grades, then CaseCue will check active IEP goals.</p></div>
-  <div className='p-5'><Button disabled={approving} onClick={onApproveGrades} className='bg-emerald-700 text-white'>{approving?<Loader2 className='mr-2 h-4 w-4 animate-spin'/>:<CheckCircle2 className='mr-2 h-4 w-4'/>}{approving?'Checking IEP evidence…':'Approve Grades & Check IEP Evidence'}<ArrowRight className='ml-2 h-4 w-4'/></Button></div>
+  <div className='bg-emerald-950 p-6 text-white'><div className='text-[10px] font-black uppercase tracking-[.2em] text-emerald-300'>Batch Ready</div><h3 className='mt-1 text-2xl font-black'>No decisions left.</h3><p className='mt-2 text-sm text-emerald-100'>{submissionMode?'CaseCue graded what it could and you resolved the exceptions. Submit these proposed scores for authorized educator review.':'CaseCue graded what it could and you resolved the exceptions. Approve the grades, then CaseCue will check active IEP goals.'}</p></div>
+  <div className='p-5'><Button disabled={approving} onClick={onApproveGrades} className='bg-emerald-700 text-white'>{approving?<Loader2 className='mr-2 h-4 w-4 animate-spin'/>:<CheckCircle2 className='mr-2 h-4 w-4'/>}{approving?(submissionMode?'Preparing submission…':'Checking IEP evidence…'):(submissionMode?'Continue to Teacher Review Submission':'Approve Grades & Check IEP Evidence')}<ArrowRight className='ml-2 h-4 w-4'/></Button></div>
  </Card>;
 
  return<div className='space-y-4'>
