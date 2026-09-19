@@ -48,6 +48,9 @@
     "source_assignment_id": {
       "type": "string"
     },
+    "case_manager_user_id": {
+      "type": "string"
+    },
     "source_kind": {
       "type": "string",
       "enum": [
