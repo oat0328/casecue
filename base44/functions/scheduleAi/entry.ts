@@ -365,19 +365,20 @@ async function optimize(base44) {
       const key = [studentId, a.day, a.id, b.id].sort().join('|');
       if (seenOverlap.has(key)) continue;
       seenOverlap.add(key);
+      const sameSlot = a.start_time === b.start_time && a.end_time === b.end_time;
       recommendations.push({
         type: 'block',
         review_level: 'educator_review',
-        title: `Resolve overlapping service assignments for ${nameById[studentId] || 'student'}`,
-        description: 'The same confirmed student is scheduled in two instructional blocks that overlap in time.',
+        title: sameSlot ? `Confirm multi-service block for ${nameById[studentId] || 'student'}` : `Resolve overlapping service assignments for ${nameById[studentId] || 'student'}`,
+        description: sameSlot ? 'The same confirmed student appears under two instructional areas in the exact same service period. This may be one intentional session addressing multiple goals.' : 'The same confirmed student is scheduled in two instructional blocks whose times partially overlap.',
         groups: [a.group_name || 'Group A', b.group_name || 'Group B'],
         evidence: [
           `${a.day}: ${a.group_name || 'Group A'} ${a.start_time || '?'}–${a.end_time || '?'}`,
           `${b.day}: ${b.group_name || 'Group B'} ${b.start_time || '?'}–${b.end_time || '?'}`,
         ],
-        could_affect: ['Student service minutes', 'Instructional focus', 'Pull-from class timing'],
-        verify_before_changing: ['Confirm whether the two records are truly simultaneous services or alternative/rotating groups.', 'Check required service minutes and source-class availability before moving or removing either block.'],
-        reasoning: 'This suggestion is based on a direct time overlap for the same confirmed student. CaseCue is not choosing which service should change.',
+        could_affect: sameSlot ? ['How the service period is labeled', 'Goal-area documentation', 'Minute counting if both labels are treated as separate sessions'] : ['Student service minutes', 'Instructional focus', 'Pull-from class timing'],
+        verify_before_changing: sameSlot ? ['Confirm this is one intentional service period addressing both instructional areas.', 'Do not count the exact same 30-minute period twice unless the underlying service documentation supports separate minutes.'] : ['Confirm whether the two records are truly separate services or alternative/rotating groups.', 'Check required service minutes and source-class availability before moving or removing either block.'],
+        reasoning: sameSlot ? 'CaseCue found two subject labels for the same confirmed student with identical start and end times. It is treating this as a multi-service review item, not automatically as a schedule conflict.' : 'CaseCue found a true partial time overlap for the same confirmed student. It is not choosing which service should change.',
       });
     }
   }
