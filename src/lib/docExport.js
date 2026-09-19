@@ -15,6 +15,7 @@ const esc = (t) => String(t == null ? "" : t)
 const safeName = (t) => String(t || "casecue-document").replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 
 export function buildDocHtml({ title, subtitle, sections, banner }) {
+  const printed = new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" });
   const body = (sections || [])
     .map((s, index) => {
       const img = s.image
@@ -29,13 +30,12 @@ export function buildDocHtml({ title, subtitle, sections, banner }) {
   *{box-sizing:border-box}
   body{font-family:Inter,Arial,Helvetica,sans-serif;color:#0f172a;margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page-shell{max-width:900px;margin:0 auto}
-  .brandbar{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #dbeafe;background:linear-gradient(135deg,#07101f,#0f2747);color:#fff;padding:18px 20px;border-radius:16px}
-  .brand{font-weight:900;letter-spacing:.12em;text-transform:uppercase;font-size:11px;color:#7dd3fc}
-  .hdr h1{margin:5px 0 0;font-size:24px;line-height:1.15;letter-spacing:-.02em}
-  .hdr .meta{font-size:11px;color:#cbd5e1;margin-top:6px}
-  .stamp{min-width:116px;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;text-align:right}
-  .stamp b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#bae6fd}
-  .stamp span{font-size:10px;color:#cbd5e1}
+  .brandbar{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;border:1px solid #dbeafe;background:linear-gradient(135deg,#07101f,#102b4d);color:#fff;padding:18px 20px;border-radius:14px}
+  .brand{font-weight:900;letter-spacing:.14em;text-transform:uppercase;font-size:10px;color:#7dd3fc}
+  .hdr h1{margin:5px 0 0;font-size:23px;line-height:1.15;letter-spacing:-.02em}
+  .hdr .meta{font-size:10.5px;color:#cbd5e1;margin-top:6px}
+  .printmeta{text-align:right;min-width:105px;color:#cbd5e1;font-size:9px;line-height:1.45}
+  .printmeta b{display:block;color:#fff;font-size:10px;margin-bottom:2px}
   .case-section{break-inside:avoid;margin-top:16px;border:1px solid #e2e8f0;border-radius:14px;padding:16px 17px;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.03)}
   .section-kicker{font-size:8px;font-weight:900;letter-spacing:.16em;color:#64748b}
   h2{color:#0f172a;font-size:14px;margin:4px 0 9px;padding-bottom:8px;border-bottom:1px solid #e2e8f0}
@@ -43,16 +43,15 @@ export function buildDocHtml({ title, subtitle, sections, banner }) {
   .imgwrap{margin-top:8px;border:1px solid #e2e8f0;border-radius:10px;padding:8px;text-align:center}
   .imgwrap img{max-width:100%;height:auto}
   .banner{margin-top:16px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;padding:10px 13px;border-radius:10px;font-size:9.5px;font-weight:700}
-  .footer{position:fixed;left:0.55in;right:0.55in;bottom:0.22in;display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:6px;font-size:8.5px;color:#64748b}
-  .page-number:after{content:counter(page)}
+  .footer{position:fixed;left:0.55in;right:0.55in;bottom:0.22in;display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:6px;font-size:8px;color:#64748b}
   @media print{.page-shell{max-width:none}.case-section{box-shadow:none}}
   </style></head><body>
   <div class="page-shell">
-   <div class="brandbar"><div class="hdr"><div class="brand">CaseCue</div><h1>${esc(title)}</h1>${subtitle ? `<div class="meta">${esc(subtitle)}</div>` : ""}</div><div class="stamp"><b>CaseCue Record</b><span>Clear · Organized · Review Ready</span></div></div>
+   <div class="brandbar"><div class="hdr"><div class="brand">CaseCue</div><h1>${esc(title)}</h1>${subtitle ? `<div class="meta">${esc(subtitle)}</div>` : ""}</div><div class="printmeta"><b>Printed</b>${esc(printed)}</div></div>
    ${body}
    <div class="banner">${esc(banner || DEFAULT_BANNER)}</div>
   </div>
-  <div class="footer"><span>CaseCue · getcasecue.com</span><span>Page <span class="page-number"></span></span></div>
+  <div class="footer"><span>CaseCue · getcasecue.com</span><span>Printed ${esc(printed)}</span></div>
   </body></html>`;
 }
 
