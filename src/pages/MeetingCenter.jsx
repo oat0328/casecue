@@ -26,7 +26,8 @@ export default function MeetingCenter() {
   const { toast } = useToast();
   const { data: meetings, refetch } = useAsync(() => base44.entities.Meeting.list('date', 100), []);
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
-  const { data: scheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list('-day', 500), []);
+  const { data: rawScheduleEntries } = useAsync(() => base44.entities.ScheduleEntry.list('-day', 500), []);
+  const scheduleEntries = (rawScheduleEntries || []).filter((e) => (e.workspace || 'sped') === 'sped');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ student_id: "", title: "", meeting_type: "IEP", date: "", time: "", location: "", agenda: "", parent_concerns: "", teacher_concerns: "" });
   const [saving, setSaving] = useState(false);
