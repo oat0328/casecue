@@ -7,6 +7,7 @@ import{Input}from'@/components/ui/input';
 import{Tabs,TabsContent,TabsList,TabsTrigger}from'@/components/ui/tabs';
 import{useToast}from'@/components/ui/use-toast';
 import{ClipboardCheck,FileUp,Loader2,Printer,Send,Sparkles,Target,ShieldCheck,CheckCircle2,AlertTriangle}from'lucide-react';
+import{printDoc}from'@/lib/docExport';
 
 const DOMAINS=['Reading','Writing','Math','Executive Function','Social-Emotional / Behavior','Communication','Functional / Adaptive'];
 const today=()=>new Date().toLocaleDateString('en-CA');
@@ -26,6 +27,7 @@ export default function ParaBaseline(){
  const[result,setResult]=useState(null);
  const[packet,setPacket]=useState(null);
  const meStudent=assigned.find(s=>s.student_id===studentId)||null;
+ const chooseFile=f=>{setFile(f||null);setResult(null);setPacket(null)};
 
  const selectRecord=rec=>{setCurrent(rec||null);const saved=rec?.analysis||{};setResult(saved.grading||null);setPacket(saved.teacher_packet||null)};
  const loadRecords=async(id=studentId,select='')=>{
@@ -86,6 +88,9 @@ export default function ParaBaseline(){
   finally{setBusy(false)}
  };
 
+ const printBaseline=()=>{if(!current?.assessment)return;const sections=(current.assessment.domains||[]).map(d=>({heading:d.domain,body:(d.items||[]).map((i,n)=>{const choices=(i.choices||[]).length?'\n'+i.choices.map((c,k)=>`   ${String.fromCharCode(65+k)}. ${c}`).join('\n'):'';return `${n+1}. ${i.skill}\n${i.prompt}${choices}\n\nResponse: ________________________________________________`;}).join('\n\n')}));printDoc({title:current.title||'Baseline Assessment',subtitle:`${full(meStudent)} · Grade ${meStudent?.grade||'—'} · CaseCue Para`,sections,filename:'casecue-para-baseline',banner:'CaseCue Para · Instructional baseline · Review scoring and student responses before educational use.'})};
+ const printPacket=()=>{if(!packet)return;const goalBody=(packet.goal_drafts||[]).map((g,i)=>[`Goal ${i+1}: ${g.goal_area||'Goal'}`,g.goal_text,`Baseline: ${g.baseline||'—'}`,`Suggested target: ${g.target||g.criterion||'—'}`,g.measurement_method?`Measure: ${g.measurement_method}`:'',g.progress_monitoring_method?`Progress monitoring: ${g.progress_monitoring_method}`:'',(g.objectives||[]).length?'Objectives:\n'+g.objectives.map((o,n)=>`${n+1}. ${o}`).join('\n'):''].filter(Boolean).join('\n')).join('\n\n');printDoc({title:`${full(meStudent)} · Baseline Teacher Packet`,subtitle:`${packet.score_summary||''} · CaseCue Para`,filename:'casecue-para-baseline-teacher-packet',banner:'CaseCue Para · DRAFT FOR EDUCATOR / IEP-TEAM REVIEW · Assessment results are evidence, not a final IEP decision.',sections:[{heading:'Teacher Handoff',body:packet.teacher_handoff||packet.overall_summary||''},{heading:'Strengths',body:(packet.strengths||[]).map(x=>`• ${x}`).join('\n')||'None listed'},{heading:'Needs',body:(packet.needs||[]).map(x=>`• ${x}`).join('\n')||'None listed'},{heading:'Present Levels Draft',body:packet.present_levels_draft||''},{heading:'Goal & Objective Drafts',body:goalBody||'No defensible goal draft was generated from this assessment.'},{heading:'Progress Monitoring / Next Data',body:(packet.progress_monitoring_recommendations||[]).map(x=>`• ${x}`).join('\n')||'None listed'},{heading:'Review Notes / Cautions',body:(packet.cautions||[]).map(x=>`• ${x}`).join('\n')||'Educator review required.'}]})};
+
  const send=async()=>{
   if(!packet||!result||!studentId)return;
   setBusy(true);
@@ -145,7 +150,7 @@ export default function ParaBaseline(){
     </Card>
     {records.length>0&&<Card className="p-4"><div className="text-sm font-black">Saved baselines</div><select className="mt-2 w-full rounded-lg border p-2 text-sm" value={current?.id||''} onChange={e=>selectRecord(records.find(r=>r.id===e.target.value)||null)}>{records.map(r=><option key={r.id} value={r.id}>{r.title} · {r.administered_date||'No date'} · {r.status}</option>)}</select></Card>}
     {current?.assessment&&<Card className="p-6 baseline-print-area">
-     <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Ready to administer</div><h2 className="text-2xl font-black">{current.title}</h2><div className="text-xs text-slate-500">{full(meStudent)} · Grade {meStudent?.grade||'—'}</div></div><Button variant="outline" onClick={()=>window.print()}><Printer className="mr-2 h-4 w-4"/>Print</Button></div>
+     <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Ready to administer</div><h2 className="text-2xl font-black">{current.title}</h2><div className="text-xs text-slate-500">{full(meStudent)} · Grade {meStudent?.grade||'—'}</div></div><Button variant="outline" onClick={printBaseline}><Printer className="mr-2 h-4 w-4"/>Print Student Baseline</Button></div>
      <p className="mt-4 text-sm">{current.assessment.directions}</p>
      <div className="mt-5 space-y-5">{(current.assessment.domains||[]).map(d=><div key={d.domain}><h3 className="font-black">{d.domain}</h3><div className="mt-2 space-y-2">{(d.items||[]).map((i,n)=><div key={i.id} className="rounded-xl border p-4"><div className="text-xs font-black text-blue-700">{n+1}. {i.skill}</div><div className="mt-1 whitespace-pre-wrap text-sm">{i.prompt}</div>{i.choices?.length>0&&<div className="mt-2 grid gap-1 sm:grid-cols-2">{i.choices.map((c,k)=><div key={k} className="rounded-lg bg-slate-50 px-3 py-2 text-xs">{String.fromCharCode(65+k)}. {c}</div>)}</div>}<details className="mt-2 print:hidden"><summary className="cursor-pointer text-xs font-bold text-slate-500">Scoring guide</summary><div className="mt-2 rounded-lg bg-amber-50 p-3 text-xs"><b>Answer:</b> {i.answer_key}<br/><b>Scoring:</b> {i.scoring_guidance}</div></details></div>)}</div></div>)}</div>
     </Card>}
@@ -156,8 +161,8 @@ export default function ParaBaseline(){
      <div className="flex items-center gap-2"><FileUp className="h-5 w-5 text-blue-700"/><h2 className="font-black">Scan the completed assessment</h2></div>
      <p className="mt-1 text-sm text-slate-500">{current?.assessment?'The saved CaseCue baseline is selected, so its answer key and scoring guide will be used automatically.':'You can scan another instructional baseline too; CaseCue will score only what it can defend from the page.'}</p>
      {current&&<div className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-900"><b>Selected baseline:</b> {current.title}</div>}
-     <input ref={fileRef} type="file" accept=".pdf,image/*" capture="environment" className="hidden" onChange={e=>{setFile(e.target.files?.[0]||null);setResult(null);setPacket(null)}}/>
-     <button onClick={()=>fileRef.current?.click()} className="mt-4 w-full rounded-2xl border-2 border-dashed p-8 text-center hover:bg-slate-50"><FileUp className="mx-auto h-9 w-9 text-blue-700"/><div className="mt-2 font-black">{file?file.name:'Take a photo or choose the completed assessment'}</div></button>
+     <input ref={fileRef} type="file" accept=".pdf,image/*" capture="environment" className="hidden" onChange={e=>chooseFile(e.target.files?.[0])}/>
+     <button onClick={()=>fileRef.current?.click()} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();chooseFile(e.dataTransfer.files?.[0])}} className="mt-4 w-full rounded-2xl border-2 border-dashed p-8 text-center hover:bg-slate-50"><FileUp className="mx-auto h-9 w-9 text-blue-700"/><div className="mt-2 font-black">{file?file.name:'Drag & drop the completed assessment here'}</div><div className="mt-1 text-xs text-slate-500">or click to take a photo / choose a PDF or image</div></button>
      <Button className="mt-4" onClick={scan} disabled={busy||!file||!studentId}>{busy?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<CheckCircle2 className="mr-2 h-4 w-4"/>}{busy?'Scoring & building teacher packet…':'Score Assessment & Build Teacher Packet'}</Button>
     </Card>
 
@@ -170,7 +175,7 @@ export default function ParaBaseline(){
      <Card className="p-6"><div className="flex items-center gap-2"><Target className="h-5 w-5 text-blue-700"/><h3 className="font-black">Goal & objective drafts</h3></div><div className="mt-4 space-y-4">{(packet.goal_drafts||[]).map((g,i)=><div key={i} className="rounded-2xl border p-4"><div className="font-black">{g.goal_area}</div><p className="mt-2 text-sm font-semibold">{g.goal_text}</p><div className="mt-3 grid gap-2 md:grid-cols-2 text-xs"><div className="rounded-xl bg-slate-50 p-3"><b>Baseline</b><div className="mt-1">{g.baseline}</div></div><div className="rounded-xl bg-slate-50 p-3"><b>Suggested target</b><div className="mt-1">{g.target||g.criterion}</div></div></div>{g.objectives?.length>0&&<div className="mt-3 rounded-xl bg-blue-50 p-3 text-sm"><b>Short-term objectives</b>{g.objectives.map((o,n)=><div key={o} className="mt-1">{n+1}. {o}</div>)}</div>}<div className="mt-3 text-xs text-slate-500">Measure: {g.measurement_method} · Progress monitoring: {g.progress_monitoring_method}</div></div>)}{!(packet.goal_drafts||[]).length&&<div className="rounded-xl border border-dashed p-4 text-sm text-slate-500">This baseline did not support a defensible goal draft. CaseCue kept the recommendation at “collect more data” instead of making one up.</div>}</div></Card>
      <Card className="p-5"><b>Progress monitoring / next data</b><ul className="mt-2 space-y-1 text-sm">{(packet.progress_monitoring_recommendations||[]).map(x=><li key={x}>• {x}</li>)}</ul></Card>
      {packet.cautions?.length>0&&<Card className="border-amber-200 bg-amber-50 p-5"><div className="flex gap-2"><AlertTriangle className="h-5 w-5 text-amber-700"/><div><b>Teacher review notes</b><div className="mt-2 text-sm">{packet.cautions.join(' · ')}</div></div></div></Card>}
-     <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>window.print()}><Printer className="mr-2 h-4 w-4"/>Print Teacher Packet</Button><Button onClick={send} disabled={busy}><Send className="mr-2 h-4 w-4"/>Send to Teacher</Button></div>
+     <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={printPacket}><Printer className="mr-2 h-4 w-4"/>Print Teacher Packet</Button><Button onClick={send} disabled={busy}><Send className="mr-2 h-4 w-4"/>Send to Teacher</Button></div>
     </div>}
    </TabsContent>
   </Tabs>
