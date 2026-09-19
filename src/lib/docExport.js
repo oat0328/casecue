@@ -16,26 +16,43 @@ const safeName = (t) => String(t || "casecue-document").replace(/[^a-z0-9]+/gi, 
 
 export function buildDocHtml({ title, subtitle, sections, banner }) {
   const body = (sections || [])
-    .map((s) => {
+    .map((s, index) => {
       const img = s.image
-        ? `<div class="imgwrap"><img src="${s.image}" style="max-width:100%;height:auto" /></div>`
+        ? `<div class="imgwrap"><img src="${s.image}" alt="" /></div>`
         : "";
       const text = s.body ? `<div class="ftext">${esc(s.body)}</div>` : "";
-      return `<h2>${esc(s.heading)}</h2>${img}${text}`;
+      return `<section class="case-section"><div class="section-kicker">SECTION ${String(index + 1).padStart(2, "0")}</div><h2>${esc(s.heading || "Details")}</h2>${img}${text}</section>`;
     })
     .join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
-  body{font-family:Calibri,Arial,sans-serif;color:#1a1a2e;margin:40px;}
-  .hdr{background:linear-gradient(135deg,#6d28d9,#2563eb);color:#fff;padding:24px;border-radius:10px;}
-  .hdr h1{margin:0 0 6px;font-size:22px;}
-  .hdr .meta{font-size:13px;opacity:.92;}
-  h2{color:#6d28d9;border-bottom:2px solid #e5e0f5;padding-bottom:4px;font-size:16px;margin-top:26px;}
-  .ftext{font-size:13px;line-height:1.55;white-space:pre-wrap;margin-top:6px;}
-  .banner{background:#fff7ed;border:1px solid #fdba74;color:#9a3412;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:24px;}
+  @page{size:auto;margin:0.55in 0.55in 0.7in;}
+  *{box-sizing:border-box}
+  body{font-family:Inter,Arial,Helvetica,sans-serif;color:#0f172a;margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page-shell{max-width:900px;margin:0 auto}
+  .brandbar{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #dbeafe;background:linear-gradient(135deg,#07101f,#0f2747);color:#fff;padding:18px 20px;border-radius:16px}
+  .brand{font-weight:900;letter-spacing:.12em;text-transform:uppercase;font-size:11px;color:#7dd3fc}
+  .hdr h1{margin:5px 0 0;font-size:24px;line-height:1.15;letter-spacing:-.02em}
+  .hdr .meta{font-size:11px;color:#cbd5e1;margin-top:6px}
+  .stamp{min-width:116px;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;text-align:right}
+  .stamp b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#bae6fd}
+  .stamp span{font-size:10px;color:#cbd5e1}
+  .case-section{break-inside:avoid;margin-top:16px;border:1px solid #e2e8f0;border-radius:14px;padding:16px 17px;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.03)}
+  .section-kicker{font-size:8px;font-weight:900;letter-spacing:.16em;color:#64748b}
+  h2{color:#0f172a;font-size:14px;margin:4px 0 9px;padding-bottom:8px;border-bottom:1px solid #e2e8f0}
+  .ftext{font-size:11.25px;line-height:1.58;white-space:pre-wrap;color:#334155}
+  .imgwrap{margin-top:8px;border:1px solid #e2e8f0;border-radius:10px;padding:8px;text-align:center}
+  .imgwrap img{max-width:100%;height:auto}
+  .banner{margin-top:16px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;padding:10px 13px;border-radius:10px;font-size:9.5px;font-weight:700}
+  .footer{position:fixed;left:0.55in;right:0.55in;bottom:0.22in;display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:6px;font-size:8.5px;color:#64748b}
+  .page-number:after{content:counter(page)}
+  @media print{.page-shell{max-width:none}.case-section{box-shadow:none}}
   </style></head><body>
-  <div class="hdr"><h1>${esc(title)}</h1>${subtitle ? `<div class="meta">${esc(subtitle)}</div>` : ""}</div>
-  ${body}
-  <div class="banner">${esc(banner || DEFAULT_BANNER)}</div>
+  <div class="page-shell">
+   <div class="brandbar"><div class="hdr"><div class="brand">CaseCue</div><h1>${esc(title)}</h1>${subtitle ? `<div class="meta">${esc(subtitle)}</div>` : ""}</div><div class="stamp"><b>CaseCue Record</b><span>Clear · Organized · Review Ready</span></div></div>
+   ${body}
+   <div class="banner">${esc(banner || DEFAULT_BANNER)}</div>
+  </div>
+  <div class="footer"><span>CaseCue · getcasecue.com</span><span>Page <span class="page-number"></span></span></div>
   </body></html>`;
 }
 
