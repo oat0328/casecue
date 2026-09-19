@@ -2,7 +2,7 @@ import React,{useMemo,useState}from'react';
 import{Check,AlertTriangle,Users,Clock,Coffee,BookOpen}from'lucide-react';
 import{Button}from'@/components/ui/button';
 import{Card}from'@/components/ui/cards';
-import{findConflicts,normalizeDay,DELIVERY_LABEL}from'@/lib/scheduleUtils';
+import{findConflicts,normalizeDay,DELIVERY_LABEL,sortStudentsAlpha}from'@/lib/scheduleUtils';
 import AiDisclaimer from'@/components/shared/AiDisclaimer';
 
 const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
@@ -17,6 +17,7 @@ const rosterName=s=>`${s?.first_name||''} ${s?.last_name||''}`.replace(/\s+/g,' 
 export default function ScheduleReview({analysis,students,saving,onSave,onCancel}){
  const[groups,setGroups]=useState(()=>(analysis.groups||[]).map(g=>({...g,included:true,assignments:{}})));
  const blocked=analysis.non_instructional_blocks||[],roster=students||[];
+ const sortedRoster=useMemo(()=>sortStudentsAlpha(roster),[roster]);
  const rosterById=useMemo(()=>Object.fromEntries(roster.map(s=>[s.id,s])),[roster]);
 
  const resolvedId=(g,st)=>{
@@ -70,7 +71,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
  const conflicts=useMemo(()=>overlapChecks.filter(c=>!c.same_slot),[overlapChecks]);
  const multiServiceReviews=useMemo(()=>overlapChecks.filter(c=>c.same_slot),[overlapChecks]);
  const matchedIds=useMemo(()=>new Set(groups.filter(g=>g.included).flatMap(resolveIds)),[groups]);
- const activeRoster=useMemo(()=>roster.filter(s=>s.roster_status!=='archived'&&s.status!=='exited'),[roster]);
+ const activeRoster=useMemo(()=>sortStudentsAlpha(roster.filter(s=>s.roster_status!=='archived'&&s.status!=='exited')),[roster]);
  const missingRoster=useMemo(()=>unresolved.length?[]:activeRoster.filter(s=>!matchedIds.has(s.id)),[activeRoster,matchedIds,unresolved.length]);
 
  const slotStats=useMemo(()=>{
@@ -198,7 +199,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
       {probableId&&<button type='button' onClick={()=>assignName(item.name,probableId)} className='mt-2 w-full rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-left text-xs font-bold text-amber-900'>Confirm suggested student: {probableName||rosterName(rosterById[probableId])}</button>}
       <select className='mt-2 w-full rounded-lg border bg-white px-2 py-2 text-xs' value='' onChange={e=>e.target.value&&assignName(item.name,e.target.value)}>
        <option value=''>Choose another student…</option>
-       {roster.map(s=><option key={s.id} value={s.id}>{s.last_name}, {s.first_name}</option>)}
+       {sortedRoster.map(s=><option key={s.id} value={s.id}>{s.last_name}, {s.first_name}</option>)}
       </select>
      </div>
     })}
@@ -258,7 +259,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
      </summary>
      <div className='border-t p-4'>
       <div className='grid gap-2 md:grid-cols-2'>
-       {(g.students||[]).map((st,si)=>{
+       {[...(g.students||[])].sort((a,b)=>{const ar=rosterById[resolvedId(g,a)],br=rosterById[resolvedId(g,b)];const ak=ar?`${ar.last_name} ${ar.first_name}`:String(a.name||'');const bk=br?`${br.last_name} ${br.first_name}`:String(b.name||'');return ak.localeCompare(bk,undefined,{sensitivity:'base'})}).map((st,si)=>{
         const id=resolvedId(g,st),rs=rosterById[id],resolved=Boolean(id);
         return <div key={si} className='rounded-xl border bg-slate-50/70 p-3'>
          <div className='flex flex-wrap items-center justify-between gap-2'><div className='font-semibold text-sm'>{rs?rosterName(rs):st.name}</div><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${resolved?CONF.high:(CONF[st.confidence]||CONF.none)}`}>{resolved?'Confirmed':'Needs match'}</span></div>
