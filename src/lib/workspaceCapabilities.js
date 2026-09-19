@@ -50,6 +50,7 @@ export const WORKSPACE_TOOLS = {
       ['Schedule','/w/speech/schedule',CalendarClock],
       ['Attendance','/w/speech/attendance',UserCheck],
       ['IEP & Speech Input','/w/speech/iep',FileText],
+      ['Notes & Handoffs','/w/speech/notes',StickyNote],
     ],
   },
   ot: {
@@ -58,6 +59,7 @@ export const WORKSPACE_TOOLS = {
       ['OT Sessions','/w/ot',Activity],
       ['Schedule','/w/ot/schedule',CalendarClock],
       ['Attendance','/w/ot/attendance',UserCheck],
+      ['Notes & Data','/w/ot/notes',StickyNote],
     ],
   },
   nurse: {
@@ -84,6 +86,7 @@ export const WORKSPACE_TOOLS = {
       ['Attendance','/w/substitute/attendance',UserCheck],
       ['Lesson Planner','/w/substitute/lesson',BookOpen],
       ['Gradebook','/w/substitute/grade',ScanLine],
+      ['Teacher Handoff','/w/substitute/notes',StickyNote],
     ],
   },
   pe: {
@@ -94,6 +97,7 @@ export const WORKSPACE_TOOLS = {
       ['Attendance','/w/pe/attendance',UserCheck],
       ['Lesson Planner','/w/pe/lesson',BookOpen],
       ['Gradebook','/w/pe/grade',ScanLine],
+      ['Class Notes','/w/pe/notes',StickyNote],
     ],
   },
 };
