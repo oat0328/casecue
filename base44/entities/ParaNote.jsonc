@@ -91,6 +91,9 @@
     "reviewer_user_id": {
       "type": "string"
     },
+    "baseline_assessment_id": {
+      "type": "string"
+    },
     "version": {
       "type": "number",
       "default": 1
