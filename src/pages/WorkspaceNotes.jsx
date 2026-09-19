@@ -69,7 +69,7 @@ export default function WorkspaceNotes({workspaceKey:prop}){
   setBusy(true);
   try{
    const payload={...f,organization_id:user?.organization_id||user?.data?.organization_id||'',user_id:user.id,workspace:workspaceKey,attachment_url:attachment,original_filename:filename,ai_cleaned:aiCleaned,updated_at:new Date().toISOString()};
-   if(editingId)await base44.entities.WorkspaceNote.update(editingId,payload);else await base44.entities.WorkspaceNote.create(payload);
+   if(editingId){await base44.entities.WorkspaceNote.update(editingId,payload);try{await base44.entities.AuditLog.create({action:'workspace_note_updated',entity_type:'WorkspaceNote',entity_id:editingId,details:`${meta.short} note updated by ${user?.full_name||user?.email||'staff'}`})}catch{}}else await base44.entities.WorkspaceNote.create(payload);
    await refetch();toast({title:editingId?'Note updated':'Note saved',description:editingId?'Your changes are reflected in exports and printouts immediately.':undefined});resetForm();
   }catch(e){toast({title:editingId?'Could not update note':'Could not save note',description:e.message,variant:'destructive'})}
   finally{setBusy(false)}
