@@ -3,11 +3,12 @@ import{Target,ShieldCheck}from'lucide-react';
 import{Card}from'@/components/ui/cards';
 import{Button}from'@/components/ui/button';
 
-export default function BatchIepEvidenceReview({items=[],goals=[],update,onFileScores,onFileGoals,saving=false}){
+export default function BatchIepEvidenceReview({items=[],goals=[],update,onFileScores,onFileGoals,saving=false,submissionMode=false}){
  const approved=items.filter(x=>x.approved);
  const eligible=approved.filter(x=>(x.iep_candidates||[]).length>0);
  const selected=eligible.filter(x=>x.iep_selected_goal_id).length;
  const goalName=id=>{const g=goals.find(v=>v.id===id);return g?((g.goal_area||'Goal')+' — '+String(g.goal_text||'').slice(0,150)):'Goal'};
+ if(submissionMode)return <div className='space-y-4'><Card className='overflow-hidden border-blue-100'><div className='bg-slate-950 p-6 text-white'><div className='text-[10px] font-black uppercase tracking-[.2em] text-sky-300'>Ready for Educator Review</div><h3 className='mt-1 text-2xl font-black'>{approved.length} proposed grade{approved.length===1?'':'s'} ready to submit.</h3><p className='mt-2 text-sm text-slate-300'>CaseCue Para will keep the original work and proposed score as pending evidence. It will not create IEP progress or mark the work teacher-approved.</p></div></Card><Card className='p-5'><Button disabled={saving||!approved.length} onClick={onFileScores} className='bg-blue-700 text-white'><ShieldCheck className='mr-1 h-4 w-4'/>Submit for Teacher Review ({approved.length})</Button></Card></div>;
  return<div className='space-y-4'>
   <Card className='overflow-hidden border-emerald-100'>
    <div className='bg-emerald-950 p-6 text-white'><div className='text-[10px] font-black uppercase tracking-[.2em] text-emerald-300'>Potential IEP Evidence</div><h3 className='mt-1 text-2xl font-black'>{eligible.length?('CaseCue found '+eligible.length+' work sample'+(eligible.length===1?'':'s')+' relevant to active goals.'):'No strong goal matches found.'}</h3><p className='mt-2 text-sm text-emerald-100'>Grades are already teacher-approved. Nothing becomes progress evidence unless you choose the goal here.</p></div>
