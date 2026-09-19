@@ -35,6 +35,7 @@ const spedDataCenter=read('src/pages/DataCenter.jsx');
 const weeklyFamily=read('src/pages/WeeklyFamilyUpdate.jsx');
 const weeklyGenerator=read('base44/functions/generateWeeklyFamilyUpdate/entry.ts');
 const weeklySchema=read('base44/entities/WeeklyFamilyUpdate.jsonc');
+const userIdentity=read('src/lib/userIdentity.js');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
 for(const key of concreteHomes){
@@ -69,6 +70,8 @@ ok('Para packet can rebuild without rescanning',paraBaseline.includes('rebuildPa
 ok('Workspace notes supports AI cleanup',workspaceNotes.includes("askCaseCue")&&workspaceNotes.includes('Clean Up with CaseCue'),'AI note cleanup missing');
 ok('Workspace notes supports drag/drop attachments',workspaceNotes.includes('onDrop=')&&workspaceNotes.includes('UploadPrivateFile'),'note drop attachment missing');
 ok('Workspace notes supports premium exports',workspaceNotes.includes('ExportBar'),'note export bar missing');
+ok('Branded note exports use display name not email fallback',workspaceNotes.includes("userDisplayName(user,'CaseCue Staff')")&&!workspaceNotes.includes("user?.full_name||user?.email"),'workspace note export can expose account email');
+ok('Shared user identity rejects email and email local-part as display name',userIdentity.includes("lower.includes('@')")&&userIdentity.includes('lower===local')&&userIdentity.includes('profile_display_name'),'display-name privacy guard missing');
 ok('Shared workspace notes can edit saved notes',workspaceNotes.includes('editingId')&&workspaceNotes.includes('WorkspaceNote.update')&&workspaceNotes.includes('Edit note'),'shared note editing missing');
 ok('SPED student notes can edit saved notes',studentNotes.includes('editingNote')&&quickNote.includes('StudentNote.update')&&quickNote.includes('Edit Student Note'),'SPED student note editing missing');
 ok('SPED student notes use shared export bar',studentNotes.includes('ExportBar'),'SPED notes are not using shared export behavior');
