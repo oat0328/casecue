@@ -2,7 +2,7 @@ import React,{useMemo}from'react';
 import{useNavigate}from'react-router-dom';
 import{AlertTriangle,Layers3}from'lucide-react';
 import{Card}from'@/components/ui/cards';
-import{studentName,scheduledMinutes,deliveredThisWeek,findConflicts,DELIVERY_LABEL}from'@/lib/scheduleUtils';
+import{studentName,scheduledMinutes,deliveredThisWeek,findConflicts,DELIVERY_LABEL,sortStudentsAlpha,sortStudentIdsAlpha}from'@/lib/scheduleUtils';
 
 export default function MinutesPanel({students,entries,sessionLogs}){
  const navigate=useNavigate();
@@ -16,7 +16,7 @@ export default function MinutesPanel({students,entries,sessionLogs}){
   for(const c of conflicts)for(const id of c.student_ids)out[id]=(out[id]||0)+1;
   return out;
  },[conflicts]);
- const roster=(students||[]).filter(s=>s.status!=='exited'&&s.roster_status!=='archived');
+ const roster=sortStudentsAlpha((students||[]).filter(s=>s.status!=='exited'&&s.roster_status!=='archived'));
  const rows=roster.map(s=>{
   const required=Number.isFinite(Number(s.service_minutes))&&String(s.service_minutes??'')!==''?Number(s.service_minutes):null;
   const sched=scheduled[s.id]||0,deliv=delivered[s.id]||0;
@@ -51,12 +51,12 @@ export default function MinutesPanel({students,entries,sessionLogs}){
   {multiService.length>0&&<Card className='p-4 border-amber-200'>
    <h3 className='font-semibold text-sm flex items-center gap-1.5 text-amber-700'><Layers3 className='h-4 w-4'/>Same-slot multi-service review ({multiService.length})</h3>
    <p className='mt-1 text-xs text-slate-600'>These exact same-time subject assignments are not counted as conflicts. Confirm they represent one intended session addressing multiple service areas.</p>
-   <ul className='mt-2 space-y-1.5 text-sm'>{multiService.map((c,i)=><li key={i}><span className='font-medium'>{c.a.day}</span>: {c.a.group_name} + {c.b.group_name} ({c.a.start_time}–{c.a.end_time}) for {c.student_ids.map(id=>studentName(students,id)).join(', ')}</li>)}</ul>
+   <ul className='mt-2 space-y-1.5 text-sm'>{multiService.map((c,i)=><li key={i}><span className='font-medium'>{c.a.day}</span>: {c.a.group_name} + {c.b.group_name} ({c.a.start_time}–{c.a.end_time}) for {sortStudentIdsAlpha(c.student_ids,students).map(id=>studentName(students,id)).join(', ')}</li>)}</ul>
   </Card>}
 
   {conflicts.length>0&&<Card className='p-4'>
    <h3 className='font-semibold text-sm flex items-center gap-1.5 text-rose-600'><AlertTriangle className='h-4 w-4'/>Scheduling Conflicts ({conflicts.length})</h3>
-   <ul className='mt-2 space-y-1.5 text-sm'>{conflicts.map((c,i)=><li key={i}><span className='font-medium'>{c.a.day}</span>: {c.a.group_name} ({c.a.start_time}–{c.a.end_time}, {DELIVERY_LABEL[c.a.delivery]||c.a.delivery}) overlaps {c.b.group_name} ({c.b.start_time}–{c.b.end_time}) for {c.student_ids.map(id=>studentName(students,id)).join(', ')}</li>)}</ul>
+   <ul className='mt-2 space-y-1.5 text-sm'>{conflicts.map((c,i)=><li key={i}><span className='font-medium'>{c.a.day}</span>: {c.a.group_name} ({c.a.start_time}–{c.a.end_time}, {DELIVERY_LABEL[c.a.delivery]||c.a.delivery}) overlaps {c.b.group_name} ({c.b.start_time}–{c.b.end_time}) for {sortStudentIdsAlpha(c.student_ids,students).map(id=>studentName(students,id)).join(', ')}</li>)}</ul>
   </Card>}
  </div>;
 }
