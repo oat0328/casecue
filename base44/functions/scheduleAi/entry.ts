@@ -304,23 +304,31 @@ async function optimize(base44) {
   }
 
   const emptyByGroup = new Map();
+  let importedZeroIdBlocks = 0;
   for (const e of entries) {
     if (idsForEntry(e).length) continue;
+    if (e.source_kind === 'generated_plan' || e.source_kind === 'resource_schedule') {
+      importedZeroIdBlocks++;
+      continue;
+    }
     const key = String(e.group_name || 'Unnamed service block');
     if (!emptyByGroup.has(key)) emptyByGroup.set(key, []);
     emptyByGroup.get(key).push(e);
+  }
+  if (importedZeroIdBlocks > 0) {
+    dataNotes.push(`${importedZeroIdBlocks} imported block${importedZeroIdBlocks === 1 ? '' : 's'} have zero confirmed roster IDs. CaseCue is not calling them empty because unresolved imported names may have been omitted during an earlier save. Re-import and confirm the roster suggestions before relying on optimization for those blocks.`);
   }
   for (const [name, rows] of emptyByGroup) {
     recommendations.push({
       type: 'improvement',
       review_level: 'safe_cleanup',
       title: `Review empty block: ${name}`,
-      description: 'This saved instructional block currently has zero confirmed students.',
+      description: 'This manually saved instructional block currently has zero confirmed students.',
       groups: [name],
       evidence: rows.slice(0, 8).map((e) => `${e.day} ${e.start_time || '?'}–${e.end_time || '?'}: 0 confirmed students`),
       could_affect: ['Removing the block would remove a saved placeholder from the weekly schedule.'],
       verify_before_changing: ['Confirm the block is not intentionally reserved for make-up services, consultation, or future placement.'],
-      reasoning: 'This is a cleanup candidate because the saved block has no confirmed student membership. CaseCue is not assuming the block is unnecessary.',
+      reasoning: 'CaseCue only surfaces this cleanup when the block was not imported from a schedule file, avoiding false empty-block warnings caused by unresolved imported names.',
     });
   }
 
