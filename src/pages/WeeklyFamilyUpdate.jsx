@@ -40,7 +40,7 @@ export default function WeeklyFamilyUpdate(){
    const r=await base44.functions.invoke('generateWeeklyFamilyUpdate',{student_id:studentId,workspace,week_start:weekStart,week_end:weekEnd});
    const data=r?.data||r;if(data?.error)throw new Error(data.error);
    setCurrent(data.update);setMessage(data.update.family_message||'');setSubject(data.update.subject_line||'');await refetchHistory();
-   toast({title:'Weekly family update ready',description:'CaseCue calculated the data first, then drafted the family message from those verified numbers.'});
+   toast(hasEvidence(data.update)?{title:'Weekly family update ready',description:'CaseCue calculated the data first, then drafted the family message from those verified numbers.'}:{title:'Not enough weekly data yet',description:'CaseCue skipped unsupported AI conclusions and created a data-coverage notice instead.'});
   }catch(e){toast({title:'Could not generate weekly update',description:e?.response?.data?.error||e?.data?.error||e.message,variant:'destructive'})}
   finally{setBusy(false)}
  };
@@ -113,8 +113,10 @@ export default function WeeklyFamilyUpdate(){
     {attendanceChart.some(x=>x.value>0)&&<PremiumDonutChart title="Attendance Recorded This Week" subtitle="Attendance marks saved by this user in the current workspace." data={attendanceChart}/>}
    </div>
 
+   {!covered&&<Card className="border-amber-300 bg-amber-50 p-5 text-amber-950"><AlertTriangle className="mr-2 inline h-4 w-4"/><b>Not enough reportable data for this week.</b><p className="mt-1 text-sm">CaseCue intentionally did not generate student strengths, weaknesses, trends, or next steps from missing records. Add grades, learning-goal data, attendance, support observations, or service/session records — or choose another week.</p></Card>}
+
    <Card className="overflow-hidden">
-    <div className="border-b bg-slate-50 p-6"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><div className="text-xs font-black uppercase tracking-[.16em] text-blue-700">AI-generated draft · grounded in saved CaseCue data</div><h2 className="mt-1 text-2xl font-black">{current.student_name} · {current.week_start} to {current.week_end}</h2></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>save()}><Save className="mr-2 h-4 w-4"/>Save Edits</Button><Button variant="outline" onClick={()=>save('ready')}><CheckCircle2 className="mr-2 h-4 w-4"/>{workspace==='para'?'Ready for Educator Review':'Mark Ready'}</Button><AnalyticsPdfButton label="Weekly PDF + Graphs" title="CaseCue Weekly Family Update" subtitle={current.student_name+' · '+fmtDate(current.week_start)+' - '+fmtDate(current.week_end)+' · '+roleName(workspace)} filename={filename} metrics={metricRows} charts={pdfCharts} sections={pdfSections} notes={pdfNotes}/></div></div></div>
+    <div className="border-b bg-slate-50 p-6"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><div className="text-xs font-black uppercase tracking-[.16em] text-blue-700">{covered?'AI-generated draft · grounded in saved CaseCue data':'Data coverage check · AI narrative skipped'}</div><h2 className="mt-1 text-2xl font-black">{current.student_name} · {fmtDate(current.week_start)} to {fmtDate(current.week_end)}</h2></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>save()}><Save className="mr-2 h-4 w-4"/>Save Edits</Button><Button variant="outline" onClick={()=>save('ready')} disabled={!covered}><CheckCircle2 className="mr-2 h-4 w-4"/>{workspace==='para'?'Ready for Educator Review':'Mark Ready'}</Button><AnalyticsPdfButton label="Weekly PDF + Graphs" title="CaseCue Weekly Family Update" subtitle={current.student_name+' · '+fmtDate(current.week_start)+' - '+fmtDate(current.week_end)+' · '+roleName(workspace)} filename={filename} metrics={metricRows} charts={pdfCharts} sections={pdfSections} notes={pdfNotes}/></div></div></div>
     <div className="space-y-4 p-6">
      <div><label className="text-sm font-black">Subject line</label><Input value={subject} onChange={e=>setSubject(e.target.value)}/></div>
      <div><label className="text-sm font-black">Family message</label><textarea className="mt-1 min-h-[320px] w-full rounded-2xl border p-4 text-sm leading-7" value={message} onChange={e=>setMessage(e.target.value)}/><div className="mt-2 text-xs text-slate-500">Edit anything before sharing. The numbers above remain the saved data snapshot for this weekly record.</div></div>
@@ -122,18 +124,18 @@ export default function WeeklyFamilyUpdate(){
     </div>
    </Card>
 
-   <div className="grid gap-4 lg:grid-cols-3">
+   {covered&&<div className="grid gap-4 lg:grid-cols-3">
     <Card className="p-5"><div className="flex items-center gap-2 font-black text-emerald-800"><TrendingUp className="h-4 w-4"/>What Went Well</div><div className="mt-3 space-y-2">{(current.strengths||[]).map((x,i)=><div key={i} className="rounded-xl bg-emerald-50 p-3 text-sm">{x}</div>)}{!(current.strengths||[]).length&&<div className="text-sm text-slate-500">No supported positive was generated from this week's records.</div>}</div></Card>
     <Card className="p-5"><div className="flex items-center gap-2 font-black text-amber-800"><ClipboardCheck className="h-4 w-4"/>Current Focus</div><div className="mt-3 space-y-2">{(current.focus_areas||[]).map((x,i)=><div key={i} className="rounded-xl bg-amber-50 p-3 text-sm">{x}</div>)}{!(current.focus_areas||[]).length&&<div className="text-sm text-slate-500">No current focus area was supported by the week's records.</div>}</div></Card>
     <Card className="p-5"><div className="flex items-center gap-2 font-black text-blue-800"><Clock3 className="h-4 w-4"/>Next Steps</div><div className="mt-3 space-y-2">{(current.next_steps||[]).map((x,i)=><div key={i} className="rounded-xl bg-blue-50 p-3 text-sm">{x}</div>)}{!(current.next_steps||[]).length&&<div className="text-sm text-slate-500">No next step was generated.</div>}</div></Card>
-   </div>
+   </div>}
 
    {(current.data_notes||[]).length>0&&<Card className="border-blue-200 bg-blue-50/50 p-5"><div className="font-black text-blue-950">Educator review notes</div><div className="mt-2 space-y-1 text-sm text-blue-900">{current.data_notes.map((x,i)=><div key={i}>• {x}</div>)}</div></Card>}
   </>}
 
   <Card className="p-5">
    <div className="flex items-center gap-2"><History className="h-5 w-5 text-slate-700"/><h2 className="font-black">Weekly Update History</h2></div><p className="mt-1 text-xs text-slate-500">Each saved record keeps the percentages and chart data used when that week's contact was generated.</p>
-   <div className="mt-4 space-y-2">{(history||[]).map(u=><div key={u.id} className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"><button className="min-w-0 flex-1 text-left" onClick={()=>openSaved(u)}><div className="font-black">{u.student_name||'Student'} · {u.week_start} to {u.week_end}</div><div className="mt-1 text-xs text-slate-500">{roleName(u.workspace)} · {u.status||'draft'} · Weekly average {u.metrics?.weekly_assignment_average==null?'—':u.metrics.weekly_assignment_average+'%'}</div></button><Button size="icon" variant="ghost" onClick={()=>remove(u)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></div>)}{!(history||[]).length&&<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">No weekly family updates saved yet.</div>}</div>
+   <div className="mt-4 space-y-2">{(history||[]).map(u=><div key={u.id} className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"><button className="min-w-0 flex-1 text-left" onClick={()=>openSaved(u)}><div className="font-black">{u.student_name||'Student'} · {u.week_start} to {u.week_end}</div><div className="mt-1 text-xs text-slate-500">{roleName(u.workspace)} · {u.status||'draft'} · Weekly average {u.metrics?.weekly_assignment_average==null?'N/A':u.metrics.weekly_assignment_average+'%'}</div></button><Button size="icon" variant="ghost" onClick={()=>remove(u)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></div>)}{!(history||[]).length&&<div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">No weekly family updates saved yet.</div>}</div>
   </Card>
  </div>;
 }
