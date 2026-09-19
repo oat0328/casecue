@@ -267,7 +267,7 @@ export default function ScheduleReview({analysis,students,saving,onSave,onCancel
          {st.name&&rs&&canon(st.name)!==canon(rosterName(rs))&&<div className='mt-1 text-[10px] text-slate-500'>Source name: {st.name}</div>}
          {hasSourceDetails&&(st.source_subject||st.source_teacher||st.source_period||st.class_start_time||st.class_end_time)&&<div className='mt-2 grid gap-2 text-xs'>
           <div className='rounded-lg bg-white border px-3 py-2'><div className='font-bold text-slate-700 flex gap-1'><BookOpen className='h-3.5 w-3.5'/>{isPara?'Source class':'Pull from'}</div><div className='mt-1'>{st.source_subject||'Subject not identified'}{st.source_period?` · ${st.source_period}`:''}</div><div className='text-muted-foreground'>{st.source_teacher||'Teacher not identified'}{st.source_room?` · Room ${st.source_room}`:''}</div></div>
-          <div className='rounded-lg bg-white border px-3 py-2'><div className='font-bold text-slate-700 flex gap-1'><Clock className='h-3.5 w-3.5'/>Class / pull window</div><div className='mt-1'>Class: {st.class_start_time||'?'}–{st.class_end_time||'?'}</div><div className='text-blue-700 font-semibold'>Pull: {st.pull_start_time||g.start_time||'?'}–{st.pull_end_time||g.end_time||'?'}</div></div>
+          <div className='rounded-lg bg-white border px-3 py-2'><div className='font-bold text-slate-700 flex gap-1'><Clock className='h-3.5 w-3.5'/>{isPara?'Time window':'Class / pull window'}</div><div className='mt-1'>{isPara?'Block':'Class'}: {st.class_start_time||g.start_time||'?'}–{st.class_end_time||g.end_time||'?'}</div>{!isPara&&<div className='text-blue-700 font-semibold'>Pull: {st.pull_start_time||g.start_time||'?'}–{st.pull_end_time||g.end_time||'?'}</div>}</div>
          </div>}
         </div>;
        })}
