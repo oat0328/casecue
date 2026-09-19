@@ -11,7 +11,7 @@ import { DAYS, DELIVERY_LABEL, durationMinutes } from "@/lib/scheduleUtils";
 const EMPTY = { group_name: "", delivery: "pull-out", days: ["Monday"], start_time: "", end_time: "", service_minutes: "", teacher_classroom: "", notes: "", student_ids: [] };
 
 // Add Group Manually: one form, multiple days — creates one entry per day.
-export default function AddGroupDialog({ open, onOpenChange, students, onSaved }) {
+export default function AddGroupDialog({ open, onOpenChange, students, onSaved, workspaceKey='sped', entityName='ScheduleEntry', ownerUserId='' }) {
   const { toast } = useToast();
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -28,8 +28,8 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved }
     setSaving(true);
     try {
       const minutes = parseFloat(form.service_minutes) || durationMinutes(form.start_time, form.end_time) || 0;
-      await base44.entities.ScheduleEntry.bulkCreate(
-        form.days.map((day) => ({
+      const user=await base44.auth.me();
+      const rows=form.days.map((day) => ({
           group_name: form.group_name,
           delivery: form.delivery,
           day,
@@ -39,8 +39,9 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved }
           teacher_classroom: form.teacher_classroom,
           notes: form.notes,
           student_ids: form.student_ids,
-        }))
-      );
+          ...(entityName==='ScheduleEntry'?{workspace:workspaceKey}:{para_user_id:ownerUserId||user.id,active:true,updated_at:new Date().toISOString()}),
+        }));
+      await base44.entities[entityName].bulkCreate(rows);
       toast({ title: "Group added", description: `${form.group_name} scheduled for ${form.days.length} day(s).` });
       setForm(EMPTY);
       onSaved?.();
@@ -56,8 +57,8 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Group Manually</DialogTitle>
-          <DialogDescription>Create a group and schedule it for one or more days.</DialogDescription>
+          <DialogTitle>{workspaceKey==='sped'?'Add Group Manually':'Add Schedule Block'}</DialogTitle>
+          <DialogDescription>{workspaceKey==='sped'?'Create a group and schedule it for one or more days.':'Add a class, session, support block, or other scheduled activity for one or more days.'}</DialogDescription>
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-4">
           <div><Label>Group name</Label><Input value={form.group_name} onChange={(e) => set("group_name", e.target.value)} className="mt-1" placeholder="e.g. Reading Group A" /></div>
@@ -68,7 +69,7 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved }
           </div>
           <div><Label>Start time</Label><Input type="time" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} className="mt-1" /></div>
           <div><Label>End time</Label><Input type="time" value={form.end_time} onChange={(e) => set("end_time", e.target.value)} className="mt-1" /></div>
-          <div><Label>Service minutes (per session)</Label><Input type="number" value={form.service_minutes} onChange={(e) => set("service_minutes", e.target.value)} className="mt-1" placeholder="Auto from times if blank" /></div>
+          <div><Label>{workspaceKey==='sped'?'Service minutes (per session)':'Minutes (per block)'}</Label><Input type="number" value={form.service_minutes} onChange={(e) => set("service_minutes", e.target.value)} className="mt-1" placeholder="Auto from times if blank" /></div>
           <div><Label>Teacher / location</Label><Input value={form.teacher_classroom} onChange={(e) => set("teacher_classroom", e.target.value)} className="mt-1" /></div>
           <div className="sm:col-span-2"><Label className="font-semibold">Days</Label>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -77,7 +78,7 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved }
               ))}
             </div>
           </div>
-          <div className="sm:col-span-2"><Label className="font-semibold">Students in group</Label>
+          <div className="sm:col-span-2"><Label className="font-semibold">Students {workspaceKey==='sped'?'in group':'in this block'}</Label>
             <div className="flex flex-wrap gap-2 mt-2">
               {(students || []).map((s) => (
                 <button key={s.id} onClick={() => toggleStudent(s.id)} className={`text-sm rounded-full px-3 py-1.5 border transition-colors ${form.student_ids.includes(s.id) ? "brand-gradient text-white border-transparent" : "bg-card border-border hover:border-primary/30"}`}>
@@ -90,7 +91,7 @@ export default function AddGroupDialog({ open, onOpenChange, students, onSaved }
         <DialogFooter className="mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={save} disabled={saving} className="brand-gradient text-white">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Add group
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} {workspaceKey==='sped'?'Add group':'Add block'}
           </Button>
         </DialogFooter>
       </DialogContent>
