@@ -1,17 +1,20 @@
-import React from'react';
+import React,{useState}from'react';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
-import{Users,ShieldCheck,GraduationCap}from'lucide-react';
+import{Users,ShieldCheck,GraduationCap,Trash2}from'lucide-react';
 import{Card}from'@/components/ui/cards';
+import{Button}from'@/components/ui/button';
+import{useToast}from'@/components/ui/use-toast';
 
 export default function ParaStudents(){
- const{data:rows}=useAsync(()=>base44.entities.ParaStudentAccess.list('-last_name',500),[]);
- const active=(rows||[]).filter(x=>x.active!==false);
+ const{toast}=useToast(),[clearing,setClearing]=useState(false);
+ const{data:rows,refetch}=useAsync(()=>base44.entities.ParaStudentAccess.list('-last_name',500),[]);
+ const active=(rows||[]).filter(x=>x.active!==false),demo=active.filter(x=>String(x.support_summary||'').startsWith('DEMO'));
+ const clearDemo=async()=>{if(!demo.length)return;if(!window.confirm(`Remove the ${demo.length} CaseCue demo students, demo schedule blocks, and demo assessment records from this Para workspace? Real assigned students will not be removed.`))return;setClearing(true);try{const r=await base44.functions.invoke('clearParaDemoData',{}),x=r?.data||r;if(x?.error)throw new Error(x.error);await refetch();toast({title:'Demo data removed',description:'Real school-assigned students were left alone.'})}catch(e){toast({title:'Could not remove demo data',description:e?.response?.data?.error||e.message,variant:'destructive'})}finally{setClearing(false)}};
  return <div className="space-y-6">
   <section className="rounded-[30px] bg-slate-950 p-8 text-white">
    <div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">CaseCue Para</div>
-   <h1 className="mt-3 text-3xl font-black">My Assigned Students</h1>
-   <p className="mt-2 max-w-2xl text-slate-300">Your Para workspace only shows students assigned to you by the school/case manager. Para accounts cannot add themselves to a student record.</p>
+   <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><h1 className="mt-3 text-3xl font-black">My Assigned Students</h1><p className="mt-2 max-w-2xl text-slate-300">Your Para workspace only shows students assigned to you by the school/case manager. Para accounts cannot add themselves to a student record.</p></div>{demo.length>0&&<Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white" onClick={clearDemo} disabled={clearing}><Trash2 className="mr-2 h-4 w-4"/>{clearing?'Removing Demo…':'Remove Demo Data'}</Button>}</div>
   </section>
   <Card className="border-blue-100 bg-blue-50/50 p-5">
    <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-blue-700"/><div><div className="font-black text-blue-950">Minimum-necessary student access</div><p className="mt-1 text-sm text-blue-900">If a student is missing, ask the authorized case manager or administrator to assign that student to your Para account. This prevents a Para account from browsing or creating student records outside its assignment.</p></div></div>
