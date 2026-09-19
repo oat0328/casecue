@@ -40,7 +40,7 @@ export function buildParaBaselinePacketHtml({student,assessmentTitle,packet,resu
  const percentage=Number.isFinite(pct)?`${Math.round(pct*10)/10}%`:'—';
  const supports=(packet?.support_recommendations||[]);
  const legacy=(packet?.accommodation_observations||[]);
- const supportHtml=supports.length?supports.map(supportCard).join(''):legacy.length?`<section class="panel"><div class="section-title"><span>05</span><div><div class="eyebrow">SUPPORT REVIEW</div><h2>Supports & Accommodation Considerations</h2></div></div><ul class="clean-list">${lines(legacy)}</ul><p class="section-note">Legacy packet format: teacher/IEP-team review is required before any support is adopted.</p></section>`:'';
+ const supportHtml=supports.length?supports.map(supportCard).join(''):legacy.length?`<div class="legacy-support"><ul class="clean-list">${lines(legacy)}</ul><p class="section-note">Legacy packet format: teacher/IEP-team review is required before any support is adopted.</p></div>`:'';
  const goalHtml=(packet?.goal_drafts||[]).map(goalCard).join('')||'<div class="empty">No defensible goal draft was generated from this assessment. Collect additional data before drafting a measurable annual goal.</div>';
  const cautions=(packet?.cautions||[]).length?`<section class="review-box avoid"><div class="review-icon">!</div><div><div class="eyebrow">REVIEW REQUIRED</div><h2>Teacher Review Notes</h2><ul>${lines(packet.cautions)}</ul></div></section>`:'';
 
@@ -106,6 +106,7 @@ export function buildParaBaselinePacketHtml({student,assessmentTitle,packet,resu
  .goal-footer{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px;color:#64748b;font-size:8.5px}
  .clean-list{margin:0;padding-left:17px}
  .section-note{color:#64748b;font-size:8.5px;margin-top:8px}
+ .legacy-support{margin-top:9px;border:1px dashed #bfdbfe;background:#f8fbff;border-radius:10px;padding:10px 11px}
  .review-box{display:grid;grid-template-columns:34px 1fr;gap:10px;border:1px solid #f3cd71;background:#fffbeb;border-radius:14px;padding:13px 14px;margin-top:12px}
  .review-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#f59e0b;color:white;font-weight:950}
  .review-box h2{font-size:13px}
