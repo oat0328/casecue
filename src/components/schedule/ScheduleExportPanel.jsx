@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import ExportBar from "@/components/shared/ExportBar";
 import { exportXlsx } from "@/lib/xlsxExport";
-import { scheduleSections, caseloadSections, rosterSections, scheduleRows, SCHEDULE_HEADERS, byGroup, studentName, DELIVERY_LABEL, formatScheduleTime } from "@/lib/scheduleUtils";
+import { scheduleSections, caseloadSections, rosterSections, scheduleRows, SCHEDULE_HEADERS, byGroup, studentName, DELIVERY_LABEL, formatScheduleTime, sortStudentsAlpha, sortStudentIdsAlpha } from "@/lib/scheduleUtils";
 
 const PROMO = "Created with CaseCue · Special Education Workspace";
 
@@ -28,8 +28,7 @@ export default function ScheduleExportPanel({ entries, students, timeFormat = "1
   const caseload = caseloadSections(entries, students, timeFormat);
   const roster = rosterSections(entries, students, timeFormat);
 
-  const caseloadRows = (students || [])
-    .filter((s) => s.status !== "exited")
+  const caseloadRows = sortStudentsAlpha((students || []).filter((s) => s.status !== "exited"))
     .flatMap((s) => {
       const list = (entries || []).filter((e) => !e.archived && (e.student_ids || []).includes(s.id));
       return list.length
@@ -38,7 +37,7 @@ export default function ScheduleExportPanel({ entries, students, timeFormat = "1
     });
 
   const rosterRows = byGroup(entries).flatMap((g) =>
-    g.entries.map((e) => [g.name, e.day, `${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)}`, e.teacher_classroom || "", [...g.studentIds].map((id) => studentName(students, id)).join(", ")])
+    g.entries.map((e) => [g.name, e.day, `${formatScheduleTime(e.start_time, timeFormat)}-${formatScheduleTime(e.end_time, timeFormat)}`, e.teacher_classroom || "", sortStudentIdsAlpha([...g.studentIds], students).map((id) => studentName(students, id)).join(", ")])
   );
 
   const exportExcel = () => {
