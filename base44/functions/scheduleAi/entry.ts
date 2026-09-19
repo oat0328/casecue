@@ -209,7 +209,7 @@ async function recommend(base44, body) {
   if (!student) return Response.json({ error: 'Student not found' }, { status: 404 });
 
   const goals = await base44.entities.Goal.filter({ student_id: studentId }, '-created_date', 20);
-  const entries = await base44.entities.ScheduleEntry.list('-day', 200);
+  const entries = (await base44.entities.ScheduleEntry.list('-day', 200)).filter((e) => (e.workspace || 'sped') === 'sped');
 
   const scheduleLines = (entries || [])
     .filter((e) => !e.archived)
@@ -267,7 +267,7 @@ const idsForEntry = (entry) => [...new Set([
 async function optimize(base44) {
   void OPTIMIZE_SCHEMA;
   const entries = (await base44.entities.ScheduleEntry.list('-day', 500))
-    .filter((x) => !x.archived && !String(x.notes || '').includes('NON-INSTRUCTIONAL / UNAVAILABLE'));
+    .filter((x) => (x.workspace || 'sped') === 'sped' && !x.archived && !String(x.notes || '').includes('NON-INSTRUCTIONAL / UNAVAILABLE'));
   const students = (await base44.entities.Student.list('-updated_date', 500))
     .filter((s) => s.roster_status !== 'archived' && s.status !== 'exited');
   const goals = (await base44.entities.Goal.list('-created_date', 1500))
