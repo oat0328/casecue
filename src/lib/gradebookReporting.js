@@ -2,6 +2,7 @@
 // recorded assignments and sessions — nothing invented.
 
 import { textSection, tableSection, sheetFromTable, safeFilename } from "@/lib/reportExport";
+import { sortStudentsByName } from "@/lib/studentSort";
 import { studentName } from "@/lib/caseReports";
 
 const round1 = (n) => Math.round(n * 10) / 10;
@@ -109,7 +110,7 @@ export function buildGoalGradeReport({ students = [], goals = [], assignments = 
 }
 
 export function buildCaseloadGradeReport({ students = [], assignments = [], goals = [] }) {
-  const rows = students.map((st) => {
+  const rows = sortStudentsByName(students).map((st) => {
     const sa = byDate(assignments.filter((a) => a.student_id === st.id));
     const pcts = sa.filter((a) => a.score_possible > 0).map(pctOf);
     return [
@@ -146,7 +147,7 @@ function buildRangeGradeReport(rangeLabel, defaultDays, { students = [], goals =
     filters.from || new Date(Date.now() - (defaultDays - 1) * 86400000).toISOString().slice(0, 10);
   const list = byDate(assignments.filter((a) => a.date && a.date >= from && a.date <= to));
 
-  const rows = students.map((st) => {
+  const rows = sortStudentsByName(students).map((st) => {
     const sa = list.filter((a) => a.student_id === st.id);
     const pcts = sa.filter((a) => a.score_possible > 0).map(pctOf);
     return [
