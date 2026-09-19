@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
+import { explicitUserWorkspaces, getUserWorkspaces } from '@/lib/workspaces';
 
 const AuthContext = createContext();
 
@@ -81,7 +82,25 @@ export const AuthProvider = ({ children }) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
+      let currentUser = await base44.auth.me();
+      const explicit = explicitUserWorkspaces(currentUser);
+      const multi = currentUser?.multi_workspace_access === true || currentUser?.data?.multi_workspace_access === true;
+      if (currentUser?.role !== 'admin' && explicit.length > 1 && !multi) {
+        const selected = getUserWorkspaces(currentUser)[0];
+        try {
+          await base44.auth.updateMe({ workspaces: [selected], active_workspace: selected, multi_workspace_access: false });
+          currentUser = { ...currentUser, workspaces: [selected], active_workspace: selected, multi_workspace_access: false };
+        } catch (workspaceError) {
+          console.error('Workspace entitlement normalization failed:', workspaceError);
+        }
+      } else if (explicit.length === 1 && currentUser?.active_workspace !== explicit[0]) {
+        try {
+          await base44.auth.updateMe({ active_workspace: explicit[0] });
+          currentUser = { ...currentUser, active_workspace: explicit[0] };
+        } catch (workspaceError) {
+          console.error('Active workspace normalization failed:', workspaceError);
+        }
+      }
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
