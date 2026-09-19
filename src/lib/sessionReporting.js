@@ -3,6 +3,7 @@
 // All figures come from recorded session data — nothing is invented.
 
 import { STATUS_LABEL, MISSED_STATUSES, DELIVERED_STATUSES, SERVICE_TYPES, computeQuantitative } from "@/lib/sessionCalc";
+import { sortStudentsByName } from "@/lib/studentSort";
 
 export const SERVICE_LABEL = (v) =>
   SERVICE_TYPES.find((s) => s.value === v)?.label || String(v || "").replace(/_/g, " ") || "—";
@@ -180,7 +181,7 @@ export function weeksElapsedIn(range, today = new Date()) {
 export function monthCompliance(sessions, students, range) {
   const inRange = filterByRange(sessions, range);
   const weeks = weeksElapsedIn(range);
-  const rows = (students || []).map((st) => {
+  const rows = sortStudentsByName(students || []).map((st) => {
     const ss = inRange.filter((s) => s.student_id === st.id);
     const sum = rangeSummary(ss);
     const requiredWeekly = Number(st.service_minutes) || 0;
