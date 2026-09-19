@@ -16,12 +16,11 @@ import AnalyticsPdfButton from'@/components/shared/AnalyticsPdfButton';
 const iso=d=>{const x=new Date(d),o=x.getTimezoneOffset();return new Date(x.getTime()-o*60000).toISOString().slice(0,10)};
 const schoolWeek=(offset=0)=>{const d=new Date();const weekday=(d.getDay()+6)%7;d.setDate(d.getDate()-weekday+(offset*7));const start=iso(d),f=new Date(d);f.setDate(f.getDate()+4);return{start,end:iso(f)}};
 const full=s=>s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student';
-const n=v=>Number.isFinite(Number(v))?Number(v):null;
 const roleName=w=>w==='para'?'Para':w==='gen_ed'?'Gen Ed':'SPED';
 
 export default function WeeklyFamilyUpdate(){
- const{user}=useAuth(),{toast}=useToast(),location=useLocation();
- const workspace=workspaceFromPath(location.pathname,'sped');
+ const{user}=useAuth(),{toast}=useToast(),routeLocation=useLocation();
+ const workspace=workspaceFromPath(routeLocation.pathname,'sped');
  const initial=schoolWeek(0);
  const[studentId,setStudentId]=useState(''),[weekStart,setWeekStart]=useState(initial.start),[weekEnd,setWeekEnd]=useState(initial.end),[busy,setBusy]=useState(false),[current,setCurrent]=useState(null),[message,setMessage]=useState(''),[subject,setSubject]=useState('');
 
@@ -53,7 +52,7 @@ export default function WeeklyFamilyUpdate(){
  };
  const remove=async u=>{if(!window.confirm('Delete this saved weekly family update?'))return;await base44.entities.WeeklyFamilyUpdate.delete(u.id);if(current?.id===u.id){setCurrent(null);setMessage('');setSubject('')}await refetchHistory();toast({title:'Weekly update deleted'})};
  const copy=async()=>{await navigator.clipboard.writeText((subject?subject+'\n\n':'')+message);toast({title:'Weekly family update copied'})};
- const email=()=>{location.href='mailto:?subject='+encodeURIComponent(subject||'Weekly student update')+'&body='+encodeURIComponent(message)};
+ const email=()=>{window.location.href='mailto:?subject='+encodeURIComponent(subject||'Weekly student update')+'&body='+encodeURIComponent(message)};
  const setWeek=offset=>{const w=schoolWeek(offset);setWeekStart(w.start);setWeekEnd(w.end)};
 
  const m=current?.metrics||{},charts=current?.chart_data||{};
