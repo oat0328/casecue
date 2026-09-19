@@ -34,19 +34,19 @@ export default function ExportBar({
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {onSave && has("save") && bar("Save", Save, onSave)}
 
+      {has("pdf") &&
+        (gated ? (
+          <ExportGate documentName={title} onExport={() => exportDocPdf(opts)}>
+            {bar("Download PDF", FileDown, () => {})}
+          </ExportGate>
+        ) : (
+          bar("Download PDF", FileDown, () => exportDocPdf(opts))
+        ))}
+
       {has("print") &&
         bar("Print", Printer, () => {
           if (!printDoc(opts)) toast({ title: "Allow pop-ups to print", variant: "destructive" });
         })}
-
-      {has("pdf") &&
-        (gated ? (
-          <ExportGate documentName={title} onExport={() => exportDocPdf(opts)}>
-            {bar("PDF", FileDown, () => {})}
-          </ExportGate>
-        ) : (
-          bar("PDF", FileDown, () => exportDocPdf(opts))
-        ))}
 
       {has("docx") &&
         (gated ? (
