@@ -36,10 +36,10 @@ export const WORKSPACE_TOOLS = {
       ['Today & Capture','/w/para',GraduationCap],
       ['Schedule','/w/para/schedule',CalendarClock],
       ['Attendance','/w/para/attendance',UserCheck],
-      ['My Students & Grades','/w/para/students',Users],
-      ['Grade Student Work','/w/para/grade',ScanLine],
-      ['Baseline Scanner','/w/para/baseline',FileText],
-      ['Student Support Guide','/w/para/iep-guide',FileText],
+      ['My Students','/w/para/students',Users],
+      ['Student Work','/w/para/grade',ScanLine],
+      ['Assessments','/w/para/baseline',FileText],
+      ['Student Supports','/w/para/iep-guide',FileText],
       ['My Notes','/w/para/notes',StickyNote],
     ],
   },
@@ -106,7 +106,7 @@ export function workspaceToolPath(key, tool) {
   const nav = WORKSPACE_TOOLS[key]?.nav || [];
   const aliases = {
     schedule: ['Schedule'],
-    gradebook: ['Gradebook','Super Grader','Grade Student Work'],
+    gradebook: ['Gradebook','Super Grader','Grade Student Work','Student Work'],
     lessons: ['Lessons','Lesson Planner'],
     attendance: ['Attendance'],
   };
