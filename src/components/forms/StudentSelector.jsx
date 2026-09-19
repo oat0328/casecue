@@ -1,6 +1,7 @@
 import React, { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { sortStudentsByName } from "@/lib/studentSort";
 
 /**
  * CaseCue standard Student Selector — the ONE component used everywhere a
@@ -27,12 +28,9 @@ export default function StudentSelector({
   const autoId = useId();
   const selectId = id || `student-select-${autoId}`;
   const labelFn = nameOf || ((s) => `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Unnamed student");
-  const sortedStudents = [...(students || [])].sort((a, b) => {
-    if (nameOf) return labelFn(a).localeCompare(labelFn(b), undefined, { sensitivity: "base", numeric: true });
-    const last = String(a.last_name || "").localeCompare(String(b.last_name || ""), undefined, { sensitivity: "base", numeric: true });
-    if (last !== 0) return last;
-    return String(a.first_name || "").localeCompare(String(b.first_name || ""), undefined, { sensitivity: "base", numeric: true });
-  });
+  const sortedStudents = nameOf
+    ? [...(students || [])].sort((a, b) => labelFn(a).localeCompare(labelFn(b), undefined, { sensitivity: "base", numeric: true }))
+    : sortStudentsByName(students || []);
 
   return (
     <div className={cn("w-full max-w-[480px]", !noBottomSpace && "mb-5", wrapperClassName)}>
