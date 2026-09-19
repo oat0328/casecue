@@ -2,6 +2,7 @@ import React,{useMemo,useState}from'react';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{useAuth}from'@/lib/AuthContext';
+import{userDisplayName}from'@/lib/userIdentity';
 import{Button}from'@/components/ui/button';
 import{Label}from'@/components/ui/label';
 import{Card}from'@/components/ui/cards';
@@ -10,7 +11,7 @@ import{ShieldCheck,Trash2,FileText}from'lucide-react';
 import ExportBar from'@/components/shared/ExportBar';
 
 export default function SpeechIEP(){
- const{user}=useAuth(),{toast}=useToast();
+ const{user}=useAuth(),{toast}=useToast();const staffName=userDisplayName(user,'Speech provider');
  const{data:students}=useAsync(()=>base44.entities.Student.list('-last_name',500),[]);
  const{data:rows,refetch}=useAsync(()=>base44.entities.SpeechIEPContribution.list('-updated_date',300),[]);
  const[form,setForm]=useState({student_id:'',present_levels:'',strengths:'',needs:'',observations:'',goal_drafts:'',service_recommendation:''});
@@ -52,6 +53,6 @@ export default function SpeechIEP(){
 
    <Card className="p-6"><h2 className="font-black">Build Speech-Language IEP Input</h2><p className="mt-1 text-sm text-slate-500">Draft from your own speech data and professional contribution. The IEP team reviews final language and service decisions.</p><div className="mt-5 space-y-4">{[['present_levels','Speech-language present levels'],['strengths','Strengths'],['needs','Needs'],['observations','Observations / assessment facts'],['goal_drafts','Goal drafts — one per line'],['service_recommendation','Service / minutes input for team review']].map(([k,l])=><div key={k}><Label>{l}</Label><textarea className="min-h-24 w-full rounded-xl border p-3 text-sm" value={form[k]} onChange={e=>setForm({...form,[k]:e.target.value})}/></div>)}<div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>save('draft')}>Save Draft</Button><Button onClick={()=>save('submitted')}>Submit to IEP Team</Button></div></div></Card>
   </div>}
-  {selected&&myRows.length>0&&<Card className="p-5"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><h3 className="font-black">Export Speech Contribution</h3><p className="text-xs text-slate-500">Print, PDF, Word, email, or share your contribution record.</p></div><ExportBar title="CaseCue Speech · IEP Contribution" subtitle={`${name(selected.id)} · ${user?.full_name||user?.email||'Speech provider'}`} filename="casecue-speech-iep-contribution" sections={sections} banner="CaseCue Speech · DRAFT FOR IEP-TEAM REVIEW · Provider contribution only"/></div></Card>}
+  {selected&&myRows.length>0&&<Card className="p-5"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><h3 className="font-black">Export Speech Contribution</h3><p className="text-xs text-slate-500">Print, PDF, Word, email, or share your contribution record.</p></div><ExportBar title="CaseCue Speech · IEP Contribution" subtitle={`${name(selected.id)} · ${staffName}`} filename="casecue-speech-iep-contribution" sections={sections} banner="CaseCue Speech · DRAFT FOR IEP-TEAM REVIEW · Provider contribution only"/></div></Card>}
  </div>;
 }
