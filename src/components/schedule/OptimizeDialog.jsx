@@ -1,11 +1,11 @@
 import React,{useEffect,useMemo,useState}from'react';
-import{Sparkles,Loader2,Broom,Lightbulb,ShieldAlert,CheckCircle2,Info,Users,Clock3}from'lucide-react';
+import{Sparkles,Loader2,Trash2,Lightbulb,ShieldAlert,CheckCircle2,Info,Users,Clock3}from'lucide-react';
 import{Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription}from'@/components/ui/dialog';
 import{base44}from'@/api/base44Client';
 
 const clean=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\bsvg\b/gi,' ').replace(/\s+/g,' ').trim();
 const LEVEL_META={
- safe_cleanup:{label:'Safe cleanup candidate',icon:Broom,wrap:'border-emerald-200 bg-emerald-50/40',badge:'bg-emerald-100 text-emerald-800'},
+ safe_cleanup:{label:'Safe cleanup candidate',icon:Trash2,wrap:'border-emerald-200 bg-emerald-50/40',badge:'bg-emerald-100 text-emerald-800'},
  planning_opportunity:{label:'Planning opportunity',icon:Lightbulb,wrap:'border-blue-200 bg-blue-50/40',badge:'bg-blue-100 text-blue-800'},
  educator_review:{label:'Educator / IEP review',icon:ShieldAlert,wrap:'border-amber-200 bg-amber-50/50',badge:'bg-amber-100 text-amber-900'}
 };
