@@ -51,6 +51,8 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const organizationId = String(user?.organization_id || user?.data?.organization_id || '');
+    if (!organizationId) return Response.json({ error: 'Your account is missing an organization.' }, { status: 400 });
 
     const body = await req.json().catch(() => ({}));
     docId = body.document_id;
@@ -132,6 +134,7 @@ If a page is unreadable or the file is not a document, say so in that page's sum
     // Persist the document's explicit questions/answers so IEP Studio can surface
     // and reuse them independently of the page-summary UI.
     const qaRows = pages.flatMap((p) => (p.questions_and_answers || []).map((qa) => ({
+      organization_id: organizationId,
       student_id: doc.student_id,
       document_id: docId,
       page_number: p.page_number,
@@ -142,6 +145,7 @@ If a page is unreadable or the file is not a document, say so in that page's sum
     }))).filter((qa) => qa.question && qa.answer);
     if (qaRows.length) await svc.entities.IepDocumentAnswer.bulkCreate(qaRows);
     await svc.entities.IepQuestionCoverage.create({
+      organization_id: organizationId,
       student_id: doc.student_id,
       document_id: docId,
       total_questions: qaRows.length,
@@ -155,6 +159,7 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       ...(p.goal_evidence || []).map((text) => ({ evidence_type: 'goal', text })),
       ...(p.evaluation_findings || []).map((text) => ({ evidence_type: 'evaluation', text })),
     ].map((item) => ({
+      organization_id: organizationId,
       student_id: doc.student_id,
       document_id: docId,
       page_number: p.page_number,
@@ -164,6 +169,7 @@ If a page is unreadable or the file is not a document, say so in that page's sum
     }))).filter((row) => row.text);
     if (evidenceRows.length) await svc.entities.IepSourceEvidence.bulkCreate(evidenceRows);
     await svc.entities.IepEvidenceCoverage.create({
+      organization_id: organizationId,
       student_id: doc.student_id,
       document_id: docId,
       present_level_items: evidenceRows.filter((row) => row.evidence_type === 'present_level').length,
@@ -172,6 +178,7 @@ If a page is unreadable or the file is not a document, say so in that page's sum
       generated_at: now,
     });
     await svc.entities.IepStudioProcessingVersion.create({
+      organization_id: organizationId,
       student_id: doc.student_id,
       document_id: docId,
       version: 'full-document-v2',
