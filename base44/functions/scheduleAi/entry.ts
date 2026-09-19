@@ -239,40 +239,186 @@ Return JSON matching the schema exactly.`;
   return Response.json(result);
 }
 
+const timeMinutes = (value = '') => {
+  const m = String(value || '').match(/^(\d{1,2}):(\d{2})$/);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+};
+const overlaps = (a, b) => {
+  if (String(a.day || '') !== String(b.day || '')) return false;
+  const as = timeMinutes(a.start_time), ae = timeMinutes(a.end_time), bs = timeMinutes(b.start_time), be = timeMinutes(b.end_time);
+  return [as, ae, bs, be].every(Number.isFinite) && Math.max(as, bs) < Math.min(ae, be);
+};
+const goalCategory = (value = '') => {
+  const s = String(value || '').toLowerCase();
+  if (/reading|fluency|comprehension|phonics|vocab/.test(s)) return 'reading';
+  if (/writing|written|sentence|paragraph|composition|convention/.test(s)) return 'writing';
+  if (/math|multiplication|division|fraction|decimal|number|algebra|geometry|computation/.test(s)) return 'math';
+  if (/behavior|self[- ]?regulation|social|sel|attention/.test(s)) return 'behavior';
+  if (/executive|organization|task initiation|planning/.test(s)) return 'executive functioning';
+  if (/speech|language|communication|articulation/.test(s)) return 'communication';
+  return String(value || '').trim().toLowerCase();
+};
+const groupCategory = (entry) => goalCategory(String(entry.group_name || '').split('·')[0]);
+const idsForEntry = (entry) => [...new Set([
+  ...(entry.student_ids || []),
+  ...((entry.student_pull_details || []).map((d) => d.student_id).filter(Boolean)),
+])];
+
 async function optimize(base44) {
-  const entries = await base44.entities.ScheduleEntry.list('-day', 200);
-  const students = await base44.entities.Student.list('-updated_date', 300);
-  const nameById = {};
-  for (const s of students || []) nameById[s.id] = `${s.first_name} ${s.last_name}`;
+  void OPTIMIZE_SCHEMA;
+  const entries = (await base44.entities.ScheduleEntry.list('-day', 500))
+    .filter((x) => !x.archived && !String(x.notes || '').includes('NON-INSTRUCTIONAL / UNAVAILABLE'));
+  const students = (await base44.entities.Student.list('-updated_date', 500))
+    .filter((s) => s.roster_status !== 'archived' && s.status !== 'exited');
+  const goals = (await base44.entities.Goal.list('-created_date', 1500))
+    .filter((g) => String(g.status || 'active') !== 'met');
 
-  const groups = {};
-  for (const e of (entries || []).filter((x) => !x.archived)) {
-    if (!groups[e.group_name]) groups[e.group_name] = { days: new Set(), students: new Set(), delivery: e.delivery, minutes: e.service_minutes || 0 };
-    const g = groups[e.group_name];
-    g.days.add(`${e.day} ${e.start_time || '?'}-${e.end_time || '?'}`);
-    for (const id of e.student_ids || []) if (nameById[id]) g.students.add(nameById[id]);
+  if (!entries.length) {
+    return Response.json({
+      summary: 'No confirmed instructional schedule exists yet, so CaseCue is not generating optimization suggestions.',
+      recommendations: [],
+      data_notes: ['Build and confirm the instructional schedule first. Suggestions run only against saved schedule data.'],
+    });
   }
-  const groupLines = Object.entries(groups)
-    .map(([name, g]) => `- ${name} | ${g.delivery} | ${[...g.days].join('; ')} | ${g.minutes} min/session | ${g.students.size} student(s): ${[...g.students].join(', ') || 'none'}`)
-    .join('\n');
 
-  const prompt = `You are reviewing a special education teacher's instructional groups and weekly schedule. The teacher remains in control — recommend, do not decide.
+  const nameById = Object.fromEntries(students.map((s) => [s.id, `${s.first_name || ''} ${s.last_name || ''}`.trim()]));
+  const studentById = Object.fromEntries(students.map((s) => [s.id, s]));
+  const goalCatsByStudent = {};
+  for (const g of goals) {
+    if (!g.student_id) continue;
+    const cat = goalCategory(g.goal_area || g.goal_text || '');
+    if (!cat) continue;
+    (goalCatsByStudent[g.student_id] ||= new Set()).add(cat);
+  }
 
-CURRENT GROUPS:
-${groupLines || '(no groups yet)'}
+  const recommendations = [];
+  const dataNotes = [];
+  const studentsScheduled = new Set(entries.flatMap(idsForEntry));
+  const missingGoalCount = [...studentsScheduled].filter((id) => !(goalCatsByStudent[id]?.size)).length;
+  const sourceDetailCount = entries.reduce((n, e) => n + (e.student_pull_details || []).filter((d) => d.source_subject || d.source_period || d.class_start_time || d.class_end_time).length, 0);
 
-TASK: Recommend improvements the teacher could make. Consider:
-- combination: groups that could be combined (same delivery, similar times, shared goal areas)
-- pairing: students who would work well grouped together based on the groupings shown
-- block: service blocks that could be consolidated or re-timed (e.g. several small groups back-to-back)
-- improvement: any scheduling problem you can see (gaps, overload, tiny groups)
-Base every recommendation only on the data above — never invent students, times, or facts. If the data is too sparse to support a recommendation, say so. Return JSON matching the schema exactly.`;
+  if (sourceDetailCount === 0) {
+    dataNotes.push('Gen Ed source-class schedules are not loaded. CaseCue will not recommend retiming students, reducing pull-outs, or moving students between periods.');
+  }
+  if (missingGoalCount > 0) {
+    dataNotes.push(`${missingGoalCount} scheduled student${missingGoalCount === 1 ? '' : 's'} do not have active goal-area data. CaseCue will not use those students to justify group-combination or pairing suggestions.`);
+  }
 
-  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt,
-    response_json_schema: OPTIMIZE_SCHEMA,
-  });
-  return Response.json(result);
+  const emptyByGroup = new Map();
+  for (const e of entries) {
+    if (idsForEntry(e).length) continue;
+    const key = String(e.group_name || 'Unnamed service block');
+    if (!emptyByGroup.has(key)) emptyByGroup.set(key, []);
+    emptyByGroup.get(key).push(e);
+  }
+  for (const [name, rows] of emptyByGroup) {
+    recommendations.push({
+      type: 'improvement',
+      review_level: 'safe_cleanup',
+      title: `Review empty block: ${name}`,
+      description: 'This saved instructional block currently has zero confirmed students.',
+      groups: [name],
+      evidence: rows.slice(0, 8).map((e) => `${e.day} ${e.start_time || '?'}–${e.end_time || '?'}: 0 confirmed students`),
+      could_affect: ['Removing the block would remove a saved placeholder from the weekly schedule.'],
+      verify_before_changing: ['Confirm the block is not intentionally reserved for make-up services, consultation, or future placement.'],
+      reasoning: 'This is a cleanup candidate because the saved block has no confirmed student membership. CaseCue is not assuming the block is unnecessary.',
+    });
+  }
+
+  const duplicateBuckets = new Map();
+  for (const e of entries) {
+    const ids = idsForEntry(e).sort();
+    const key = [e.day, e.start_time, e.end_time, e.group_name, e.delivery, ids.join(',')].join('|');
+    if (!duplicateBuckets.has(key)) duplicateBuckets.set(key, []);
+    duplicateBuckets.get(key).push(e);
+  }
+  for (const rows of duplicateBuckets.values()) {
+    if (rows.length < 2) continue;
+    const e = rows[0];
+    recommendations.push({
+      type: 'improvement',
+      review_level: 'safe_cleanup',
+      title: `Possible duplicate block: ${e.group_name || 'Unnamed group'}`,
+      description: 'Two or more saved entries have the same day, time, delivery, group name, and student membership.',
+      groups: [e.group_name || 'Unnamed group'],
+      evidence: [`${e.day} ${e.start_time || '?'}–${e.end_time || '?'} appears ${rows.length} times with the same confirmed students.`],
+      could_affect: ['Removing a true duplicate would reduce duplicate schedule records without changing the intended student group.'],
+      verify_before_changing: ['Confirm these records are not intentionally separate A/B week or rotation entries.'],
+      reasoning: 'The duplicate signature is based on saved schedule fields, not an AI interpretation.',
+    });
+  }
+
+  const seenOverlap = new Set();
+  for (const studentId of studentsScheduled) {
+    const rows = entries.filter((e) => idsForEntry(e).includes(studentId));
+    for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) {
+      const a = rows[i], b = rows[j];
+      if (!overlaps(a, b) || a.id === b.id) continue;
+      const key = [studentId, a.day, a.id, b.id].sort().join('|');
+      if (seenOverlap.has(key)) continue;
+      seenOverlap.add(key);
+      recommendations.push({
+        type: 'block',
+        review_level: 'educator_review',
+        title: `Resolve overlapping service assignments for ${nameById[studentId] || 'student'}`,
+        description: 'The same confirmed student is scheduled in two instructional blocks that overlap in time.',
+        groups: [a.group_name || 'Group A', b.group_name || 'Group B'],
+        evidence: [
+          `${a.day}: ${a.group_name || 'Group A'} ${a.start_time || '?'}–${a.end_time || '?'}`,
+          `${b.day}: ${b.group_name || 'Group B'} ${b.start_time || '?'}–${b.end_time || '?'}`,
+        ],
+        could_affect: ['Student service minutes', 'Instructional focus', 'Pull-from class timing'],
+        verify_before_changing: ['Confirm whether the two records are truly simultaneous services or alternative/rotating groups.', 'Check required service minutes and source-class availability before moving or removing either block.'],
+        reasoning: 'This suggestion is based on a direct time overlap for the same confirmed student. CaseCue is not choosing which service should change.',
+      });
+    }
+  }
+
+  const combinationSeen = new Set();
+  for (let i = 0; i < entries.length; i++) for (let j = i + 1; j < entries.length; j++) {
+    const a = entries[i], b = entries[j];
+    if (a.day !== b.day || a.start_time !== b.start_time || a.end_time !== b.end_time || a.delivery !== b.delivery) continue;
+    if (a.group_name === b.group_name) continue;
+    const aIds = idsForEntry(a), bIds = idsForEntry(b);
+    if (!aIds.length || !bIds.length) continue;
+    const combined = [...new Set([...aIds, ...bIds])];
+    if (combined.length > 4) continue;
+    const aCat = groupCategory(a), bCat = groupCategory(b);
+    if (!aCat || aCat !== bCat) continue;
+    if (combined.some((id) => !(goalCatsByStudent[id]?.size))) continue;
+    const common = combined
+      .map((id) => goalCatsByStudent[id])
+      .reduce((acc, set) => new Set([...acc].filter((x) => set.has(x))));
+    if (!common.has(aCat)) continue;
+    const key = [a.day, a.start_time, a.end_time, a.group_name, b.group_name].sort().join('|');
+    if (combinationSeen.has(key)) continue;
+    combinationSeen.add(key);
+    recommendations.push({
+      type: 'combination',
+      review_level: 'planning_opportunity',
+      title: `Possible ${aCat} group combination`,
+      description: 'These same-time groups share the same instructional area and every confirmed student has an active goal in that area.',
+      groups: [a.group_name, b.group_name],
+      evidence: [
+        `${a.day} ${a.start_time}–${a.end_time}: both groups use ${a.delivery} delivery.`,
+        `Combined confirmed group size would be ${combined.length}.`,
+        `Shared active goal area: ${aCat}.`,
+      ],
+      could_affect: ['Group size', 'Instructional intensity', 'Individual pacing', 'Service delivery experience'],
+      verify_before_changing: ['Confirm the students have compatible instructional levels and SDI needs.', 'Confirm the combined group size is allowed by your school/district expectations.', 'Confirm service minutes and source-class schedules remain appropriate.'],
+      reasoning: 'CaseCue found a same-time, same-area grouping opportunity with confirmed goal overlap. It is not recommending a merge based on time alone.',
+    });
+  }
+
+  const limited = recommendations.slice(0, 20);
+  const safe = limited.filter((r) => r.review_level === 'safe_cleanup').length;
+  const planning = limited.filter((r) => r.review_level === 'planning_opportunity').length;
+  const review = limited.filter((r) => r.review_level === 'educator_review').length;
+  const summary = limited.length
+    ? `CaseCue found ${limited.length} evidence-backed schedule item${limited.length === 1 ? '' : 's'} to review: ${safe} cleanup, ${planning} planning opportunit${planning === 1 ? 'y' : 'ies'}, and ${review} educator/IEP review item${review === 1 ? '' : 's'}.`
+    : 'CaseCue did not find enough confirmed evidence to support a schedule-change recommendation right now.';
+
+  return Response.json({ summary, recommendations: limited, data_notes: dataNotes });
 }
 
 export default async function (req) {
