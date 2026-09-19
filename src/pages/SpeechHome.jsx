@@ -1,4 +1,4 @@
-import React,{useMemo,useState}from'react';
+import React,{useState}from'react';
 import{Link}from'react-router-dom';
 import{Mic2,Clock3,FileText,Target,Plus,Trash2}from'lucide-react';
 import{base44}from'@/api/base44Client';
