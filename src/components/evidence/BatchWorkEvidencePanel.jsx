@@ -24,7 +24,7 @@ const pageGroups=pages=>{const nums=[...new Set((pages||[]).map(Number).filter(N
 const looksMixed=x=>{const s=String([x.detected_title,x.subject,...(x.skills||[])].join(' ')).toLowerCase(),math=/math|multiplication|division|fraction|decimal|number|algebra|geometry/.test(s),write=/writing|narrative|opinion|argument|story|paragraph/.test(s),read=/reading|fluency|comprehension|phonics|vocabulary/.test(s);return(math&&write)||(math&&read)||(write&&read);};
 const fingerprintFor=x=>[x.student_id||'',cleanText(x.detected_title).toLowerCase(),(x.source_pages||[]).join('-'),Number(x.score_possible||0)].join('|');
 
-export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=false,batchMode='guided'}){
+export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=false,batchMode='guided',workspaceKey='sped'}){
  const {toast}=useToast();
  const inputRef=useRef(null);
  const [file,setFile]=useState(null);
@@ -72,7 +72,7 @@ export default function BatchWorkEvidencePanel({students=[],goals=[],onSaved,v2=
     try{
      const chunkFile=prepared.src?await makeChunkFile(prepared.src,file.name,chunk.start,chunk.end):file;
      const up=chunks.length===1&&!prepared.src?original:await base44.integrations.Core.UploadPrivateFile({file:chunkFile});
-     const r=await base44.functions.invoke('stageBatchStudentWork',{file_uri:up.file_uri,mode:batchMode,expected_assignment_title:batchMode==='guided'?assignmentTitle:'',expected_subject:batchMode==='guided'?assignmentSubject:''});
+     const r=await base44.functions.invoke('stageBatchStudentWork',{file_uri:up.file_uri,mode:batchMode,workspace:workspaceKey,allowed_student_ids:students.map(s=>s.id),expected_assignment_title:batchMode==='guided'?assignmentTitle:'',expected_subject:batchMode==='guided'?assignmentSubject:''});
      const raw=(r.data?.items||r.items||[]).map((x,i)=>{const chunkLen=chunk.end-chunk.start+1;const abs=(x.source_pages||[]).map(n=>Number(n)).map(n=>{if(!Number.isFinite(n))return NaN;if(n>=1&&n<=chunkLen)return chunk.start-1+n;if(n>=chunk.start&&n<=chunk.end)return n;const corrected=n-(chunk.start-1);if(corrected>=chunk.start&&corrected<=chunk.end)return corrected;return n;}).filter(n=>Number.isFinite(n)&&n>=1&&n<=totalPages);return{...x,detected_title:cleanText(batchMode==='guided'?assignmentTitle:x.detected_title),subject:cleanText(batchMode==='guided'?assignmentSubject:x.subject),skills:(x.skills||[]).map(cleanText).filter(Boolean),source_pages:[...new Set(abs)],pages:abs.length?('Source page'+(abs.length===1?' ':'s ')+[...new Set(abs)].join(', ')):('Source pages '+chunk.start+'-'+chunk.end),_key:String(chunk.start)+'-'+String(i)+'-'+String(Date.now()),approved:false};});
      const found=raw.flatMap(x=>{const groups=pageGroups(x.source_pages),suspicious=groups.length>1||(x.source_pages?.length>1&&looksMixed(x));if(!suspicious)return[x];const split=groups.length>1?groups:(x.source_pages||[]).map(p=>[p]);return split.map((pages,gi)=>({...x,source_pages:pages,pages:'Source page'+(pages.length===1?' ':'s ')+pages.join(', '),_key:x._key+'-split-'+gi,grouping_confidence:'low',grouping_reason:'CaseCue separated this grouped result so each physical work sample can be checked independently.',cautions:[...(x.cautions||[]),'Page grouping needs teacher confirmation.']}));});
      for(const x of found){
