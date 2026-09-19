@@ -53,7 +53,7 @@ export default function SmartGraderV2({students=[],goals=[],onSaved}){
 
    {mode==='single'
      ?<WorkEvidencePanel students={students} goals={context.goals} compact v2/>
-     :<BatchWorkEvidencePanel key={mode} students={students} goals={context.goals} onSaved={onSaved} v2 batchMode={mode}/>} 
+     :<BatchWorkEvidencePanel key={mode} students={students} goals={context.goals} onSaved={onSaved} v2 batchMode={mode} workspaceKey={context.workspaceKey}/>} 
 
    <div className="flex items-center justify-center gap-2 pb-2 text-xs text-slate-400">
      <CheckCircle2 className="h-3.5 w-3.5"/><span>Smart Grader V2 · Separate → Resolve → Grade → Approve{context.goals.length?' → IEP Match':''} → File</span><ArrowRight className="h-3.5 w-3.5"/>
