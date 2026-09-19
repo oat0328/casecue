@@ -31,21 +31,21 @@ export default function Gradebook() {
   const canLinkIep = workspaceUsesIepGradeLinking(workspaceKey);
   const { toast } = useToast();
   const fileRef = useRef(null);
-  const { data: rawStudents } = useAsync(() => base44.entities.Student.list('-last_name', 500), []);
+  const { data: rawStudents } = useAsync(() => workspaceKey==='para' ? Promise.resolve([]) : base44.entities.Student.list('-last_name', 500), [workspaceKey]);
   const { data: paraAccess } = useAsync(() => workspaceKey==='para' ? base44.entities.ParaStudentAccess.list('-last_name',500) : Promise.resolve([]), [workspaceKey]);
   const students = useMemo(() => {
-    const roster=rawStudents||[];
-    if(workspaceKey!=='para')return sortStudentsByName(roster);
-    const allowed=new Set((paraAccess||[]).filter(x=>x.active!==false&&!String(x.student_id||'').startsWith('para_')).map(x=>x.student_id));
-    return sortStudentsByName(roster.filter(s=>allowed.has(s.id)));
+    if(workspaceKey!=='para')return sortStudentsByName(rawStudents||[]);
+    return sortStudentsByName((paraAccess||[]).filter(x=>x.active!==false&&!String(x.student_id||'').startsWith('para_')).map(x=>({...x,id:x.student_id})));
   }, [rawStudents,paraAccess,workspaceKey]);
-  const studentIds = useMemo(() => new Set(students.map(s=>s.id)), [students]);
+  const studentIdList = useMemo(() => students.map(s=>s.id).filter(Boolean), [students]);
+  const studentIds = useMemo(() => new Set(studentIdList), [studentIdList]);
+  const studentIdsKey = studentIdList.join('|');
   const { data: rawGoals } = useAsync(() => canLinkIep ? base44.entities.Goal.list('-updated_date', 300) : Promise.resolve([]), [canLinkIep]);
   const goals = useMemo(() => (rawGoals||[]).filter(g=>studentIds.has(g.student_id)), [rawGoals,studentIds]);
-  const { data: rawAssignments, refetch } = useAsync(() => base44.entities.GradebookAssignment.list('-date', 500), []);
-  const assignments = useMemo(() => workspaceKey==='para' ? (rawAssignments||[]).filter(a=>studentIds.has(a.student_id)) : (rawAssignments||[]), [rawAssignments,studentIds,workspaceKey]);
-  const { data: rawSessions } = useAsync(() => base44.entities.SessionRecord.list('-date', 1000), []);
-  const sessions = useMemo(() => workspaceKey==='para' ? (rawSessions||[]).filter(s=>studentIds.has(s.student_id)) : (rawSessions||[]), [rawSessions,studentIds,workspaceKey]);
+  const { data: rawAssignments, refetch } = useAsync(() => workspaceKey==='para' ? (studentIdList.length?Promise.all(studentIdList.map(id=>base44.entities.GradebookAssignment.filter({student_id:id},'-date',200))).then(rows=>rows.flat()):Promise.resolve([])) : base44.entities.GradebookAssignment.list('-date', 500), [workspaceKey,studentIdsKey]);
+  const assignments = rawAssignments||[];
+  const { data: rawSessions } = useAsync(() => workspaceKey==='para' ? (studentIdList.length?Promise.all(studentIdList.map(id=>base44.entities.SessionRecord.filter({student_id:id},'-date',300))).then(rows=>rows.flat()):Promise.resolve([])) : base44.entities.SessionRecord.list('-date', 1000), [workspaceKey,studentIdsKey]);
+  const sessions = rawSessions||[];
   const { data: rawDocuments } = useAsync(() => canLinkIep ? base44.entities.Document.list('-updated_date', 1000) : Promise.resolve([]), [canLinkIep]);
   const documents = useMemo(() => (rawDocuments||[]).filter(d=>studentIds.has(d.student_id)), [rawDocuments,studentIds]);
   const [form, setForm] = useState(emptyForm());
@@ -61,8 +61,10 @@ export default function Gradebook() {
     if (!form.student_id || !form.title) return toast({ title: "Student and assignment title required", variant: "destructive" });
     setSaving(true);
     try {
-      await base44.entities.GradebookAssignment.create({ ...form, score_earned: Number(form.score_earned) || 0, score_possible: Number(form.score_possible) || 0, current_grade_percent: form.current_grade_percent === "" ? null : Number(form.current_grade_percent) });
-      setForm(emptyForm()); refetch(); toast({ title: "Gen Ed grade added" });
+      const me=await base44.auth.me(),organization_id=me?.organization_id||me?.data?.organization_id||'';
+      const paraSubmission=workspaceKey==='para';
+      await base44.entities.GradebookAssignment.create({ ...form, organization_id, score_earned: Number(form.score_earned) || 0, score_possible: Number(form.score_possible) || 0, current_grade_percent: form.current_grade_percent === "" ? null : Number(form.current_grade_percent), source_type:paraSubmission?'para_manual_submission':'manual_grade_entry', verification_status:paraSubmission?'needs_teacher_review':'teacher_confirmed', approved_by:paraSubmission?'':me.id, approved_at:paraSubmission?'':new Date().toISOString() });
+      setForm(emptyForm()); refetch(); toast({ title: paraSubmission?"Grade draft submitted for teacher review":"Grade added" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
     finally { setSaving(false); }
   };
@@ -117,7 +119,7 @@ export default function Gradebook() {
         const payload={student_id: student.id, title: title || "Gen Ed grade update", course: idx.course>=0?clean(row[idx.course]):"", gen_ed_teacher: idx.teacher>=0?clean(row[idx.teacher]):"", assignment_type: idx.type>=0?clean(row[idx.type]):"", term: idx.term>=0?clean(row[idx.term]):"", score_earned: idx.earned>=0?Number(row[idx.earned])||0:0, score_possible: idx.possible>=0?Number(row[idx.possible])||0:0, current_grade_percent: idx.percent>=0?Number(String(row[idx.percent]).replace('%',''))||0:null, current_grade_letter: idx.letter>=0?clean(row[idx.letter]):"", missing_assignment: idx.missing>=0?["yes","true","1","missing"].includes(clean(row[idx.missing]).toLowerCase()):false, accommodations_provided: idx.accommodations>=0?(["yes","no"].includes(clean(row[idx.accommodations]).toLowerCase())?clean(row[idx.accommodations]).toLowerCase():"unknown"):"unknown", notes: idx.notes>=0?clean(row[idx.notes]):"", date};
         const fingerprint=[payload.student_id,normalize(payload.course),normalize(payload.title),normalize(payload.term),String(payload.date||''),Number(payload.current_grade_percent??-1),normalize(payload.current_grade_letter)].join('|');
         if(seen.has(fingerprint)){duplicates++;continue;}
-        await base44.entities.GradebookAssignment.create({...payload,source_type:'gen_ed_import'});seen.add(fingerprint);added++;
+        const me=await base44.auth.me();const paraSubmission=workspaceKey==='para';await base44.entities.GradebookAssignment.create({...payload,organization_id:me?.organization_id||me?.data?.organization_id||'',source_type:paraSubmission?'para_grade_import':'gen_ed_import',verification_status:paraSubmission?'needs_teacher_review':'not_run',approved_by:paraSubmission?'':me.id,approved_at:paraSubmission?'':new Date().toISOString()});seen.add(fingerprint);added++;
       }
       refetch(); toast({ title: `${added} new grade row${added===1?'':'s'} imported`, description: `${duplicates} duplicate${duplicates===1?'':'s'} skipped${skipped?` · ${skipped} unmatched row(s) need review`:''}.` });
     } catch (e) { toast({ title: "Import failed", description: e.message, variant: "destructive" }); }
@@ -131,7 +133,7 @@ export default function Gradebook() {
     const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download=`casecue-gen-ed-grades-${new Date().toISOString().slice(0,10)}.csv`; link.click(); URL.revokeObjectURL(url);
   };
 
-  const remove = async (id) => { await base44.entities.GradebookAssignment.delete(id); refetch(); };
+  const remove = async (a) => { if(workspaceKey==='para'&&!String(a?.source_type||'').startsWith('para_'))return toast({title:'Teacher-owned grade',description:'Para accounts cannot delete grades that were not submitted from the Para workspace.'}); await base44.entities.GradebookAssignment.delete(a.id); refetch(); };
   const openAssignment = async (a) => { try { let uri=a.file_url; if(!uri&&a.work_evidence_id){const ev=await base44.entities.WorkEvidence.filter({id:a.work_evidence_id},'-created_date',1);uri=ev?.[0]?.file_url;} if(!uri)throw new Error('No assignment image/PDF is linked to this grade yet.'); const r=await base44.functions.invoke('openPrivateFileUrl',{file_uri:uri});const s=r?.data||r;if(!s?.signed_url)throw new Error('Could not create a private viewing link.'); window.open(s.signed_url,'_blank','noopener,noreferrer'); } catch(e){toast({title:'Could not open assignment',description:e.message,variant:'destructive'})} };
   const iepForStudent=(studentId)=>canLinkIep?(documents||[]).find(d=>d.student_id===studentId&&/iep/i.test(String(d.document_type||d.type||d.title||''))):null;
   const openIep=async(studentId)=>{try{const d=iepForStudent(studentId);if(!d)throw new Error('No IEP document is currently linked to this student.');const r=await base44.functions.invoke('openDocumentUrl',{document_id:d.id});const s=r?.data||r;if(!s?.signed_url)throw new Error('Could not create an IEP viewing link.');window.open(s.signed_url,'_blank','noopener,noreferrer')}catch(e){toast({title:'Could not open IEP',description:e.message,variant:'destructive'})}};
@@ -141,14 +143,14 @@ export default function Gradebook() {
   const workLinked=(assignments||[]).filter(a=>a.file_url||a.work_evidence_id).length;
 
   return <div>
-    <PageHeader title="Gradebook" subtitle="Smart Grader V2: load one assignment or a whole batch, review only what needs attention, then file the final work to each student." icon={GraduationCap} />
+    <PageHeader title={workspaceKey==='para'?"Grades & Work Review":"Gradebook"} subtitle={workspaceKey==='para'?"Grade assigned student work, review CaseCue's score, and submit the result for teacher review. Para submissions do not become teacher-approved IEP evidence.":"Smart Grader V2: load one assignment or a whole batch, review only what needs attention, then file the final work to each student."} icon={GraduationCap} />
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6"><Card className="p-5 bg-gradient-to-br from-slate-950 to-slate-800 text-white"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-slate-300">Average grade</div><div className="text-3xl font-black mt-1">{avgGrade}%</div></div><TrendingUp className="h-7 w-7 text-sky-300"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Students with grades</div><div className="text-3xl font-black mt-1">{studentsWithGrades}</div></div><Users className="h-7 w-7 text-blue-600"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Assignments</div><div className="text-3xl font-black mt-1">{(assignments||[]).length}</div></div><ClipboardCheck className="h-7 w-7 text-emerald-600"/></div></Card><Card className="p-5"><div className="flex items-center justify-between"><div><div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Work attached</div><div className="text-3xl font-black mt-1">{workLinked}</div></div><FileText className="h-7 w-7 text-violet-600"/></div></Card></div>
     <Tabs defaultValue="smart">
       <TabsList className="mb-4 flex flex-wrap h-auto"><TabsTrigger value="smart">Smart Grader</TabsTrigger><TabsTrigger value="assignments">Saved Grades</TabsTrigger><TabsTrigger value="import">School Grade Import</TabsTrigger><TabsTrigger value="charts">Data & Trends</TabsTrigger><TabsTrigger value="reports">Reports & Exports</TabsTrigger></TabsList>
       <TabsContent value="smart"><SmartGraderV2 students={students||[]} goals={goals||[]} onSaved={refetch}/></TabsContent>
       <TabsContent value="assignments">
         <Card className="p-6 mb-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary"/> Add Gen Ed grade</h3>
+          <h3 className="font-semibold mb-4 flex items-center gap-2"><Plus className="h-4 w-4 text-primary"/> {workspaceKey==='para'?'Submit grade draft':'Add Gen Ed grade'}</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StudentSelector students={students||[]} value={form.student_id} onChange={(id)=>setForm({...form,student_id:id,goal_id:""})} placeholder="Select student…" noBottomSpace />
             <div><Label>Course / Subject</Label><Input value={form.course} onChange={e=>setForm({...form,course:e.target.value})}/></div>
@@ -166,10 +168,10 @@ export default function Gradebook() {
             <label className="flex items-center gap-2 text-sm mt-6"><input type="checkbox" checked={form.missing_assignment} onChange={e=>setForm({...form,missing_assignment:e.target.checked})}/> Missing assignment</label>
             <div className="sm:col-span-2"><Label>Notes</Label><Input value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></div>
           </div>
-          <Button onClick={add} disabled={saving} className="brand-gradient text-white mt-5"><Plus className="h-4 w-4 mr-1"/>{saving?"Saving…":"Add Grade"}</Button>
+          <Button onClick={add} disabled={saving} className="brand-gradient text-white mt-5"><Plus className="h-4 w-4 mr-1"/>{saving?"Saving…":workspaceKey==='para'?"Submit for Teacher Review":"Add Grade"}</Button>
         </Card>
         <div className="flex justify-end mb-3"><Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-2"/>Export CSV</Button></div>
-        <div className="space-y-2">{[...(assignments||[])].sort((a,b)=>studentName(a.student_id).localeCompare(studentName(b.student_id),undefined,{sensitivity:'base'})||String(b.date||'').localeCompare(String(a.date||''))).map(a=><Card key={a.id} className="p-4"><div className="flex flex-wrap items-start gap-4"><div className="flex-1 min-w-[240px]"><div className="font-black">{studentName(a.student_id)} · {a.course||"Resource"}</div><div className="text-sm font-semibold mt-0.5">{a.title}</div><div className="text-xs text-muted-foreground mt-1">{a.gen_ed_teacher||((a.source_type==='resource_assignment')?'Resource assignment':'Teacher not entered')} · {a.date}{a.term?` · ${a.term}`:""}{a.accommodations_provided?` · Accommodations: ${a.accommodations_provided}`:""}</div>{a.quantitative_note&&<div className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-900"><b>Quantitative:</b> {a.quantitative_note}</div>}{(a.qualitative_note||a.notes)&&<div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700"><b>Qualitative:</b> {a.qualitative_note||a.notes}</div>}</div><div className="text-right"><div className="font-black text-lg">{a.current_grade_percent!=null?`${a.current_grade_percent}%`:a.score_possible>0?`${a.score_earned}/${a.score_possible} · ${pct(a)}%`:"—"}</div><div className="text-sm">{a.current_grade_letter||""}</div>{a.missing_assignment&&<div className="text-xs text-rose-600 font-medium">Missing</div>}</div><div className="flex flex-wrap gap-1">{(a.file_url||a.work_evidence_id)&&<Button variant="outline" size="sm" onClick={()=>openAssignment(a)}><Eye className="h-3.5 w-3.5 mr-1"/>View work</Button>}{iepForStudent(a.student_id)&&<Button variant="outline" size="sm" onClick={()=>openIep(a.student_id)}><FileText className="h-3.5 w-3.5 mr-1"/>View IEP</Button>}<Button variant="outline" size="sm" onClick={()=>navigate(`/students/${a.student_id}?tab=work-grades`)}><FolderOpen className="h-3.5 w-3.5 mr-1"/>Student Folder</Button><Button variant="ghost" size="icon" onClick={()=>remove(a.id)}><Trash2 className="h-4 w-4 text-rose-500"/></Button></div></div></Card>)}</div>
+        <div className="space-y-2">{[...(assignments||[])].sort((a,b)=>studentName(a.student_id).localeCompare(studentName(b.student_id),undefined,{sensitivity:'base'})||String(b.date||'').localeCompare(String(a.date||''))).map(a=><Card key={a.id} className="p-4"><div className="flex flex-wrap items-start gap-4"><div className="flex-1 min-w-[240px]"><div className="font-black">{studentName(a.student_id)} · {a.course||"Resource"}</div><div className="text-sm font-semibold mt-0.5">{a.title}</div><div className="text-xs text-muted-foreground mt-1">{a.gen_ed_teacher||((a.source_type==='resource_assignment')?'Resource assignment':'Teacher not entered')} · {a.date}{a.term?` · ${a.term}`:""}{a.accommodations_provided?` · Accommodations: ${a.accommodations_provided}`:""}</div>{a.quantitative_note&&<div className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-900"><b>Quantitative:</b> {a.quantitative_note}</div>}{(a.qualitative_note||a.notes)&&<div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-700"><b>Qualitative:</b> {a.qualitative_note||a.notes}</div>}</div><div className="text-right"><div className="font-black text-lg">{a.current_grade_percent!=null?`${a.current_grade_percent}%`:a.score_possible>0?`${a.score_earned}/${a.score_possible} · ${pct(a)}%`:"—"}</div><div className="text-sm">{a.current_grade_letter||""}</div>{a.missing_assignment&&<div className="text-xs text-rose-600 font-medium">Missing</div>}{a.verification_status==='needs_teacher_review'&&<div className="mt-1 text-xs font-black text-amber-700">Needs teacher review</div>}</div><div className="flex flex-wrap gap-1">{(a.file_url||a.work_evidence_id)&&<Button variant="outline" size="sm" onClick={()=>openAssignment(a)}><Eye className="h-3.5 w-3.5 mr-1"/>View work</Button>}{iepForStudent(a.student_id)&&<Button variant="outline" size="sm" onClick={()=>openIep(a.student_id)}><FileText className="h-3.5 w-3.5 mr-1"/>View IEP</Button>}{workspaceKey!=='para'&&<Button variant="outline" size="sm" onClick={()=>navigate(`/students/${a.student_id}?tab=work-grades`)}><FolderOpen className="h-3.5 w-3.5 mr-1"/>Student Folder</Button>}{(workspaceKey!=='para'||String(a.source_type||'').startsWith('para_'))&&<Button variant="ghost" size="icon" onClick={()=>remove(a)}><Trash2 className="h-4 w-4 text-rose-500"/></Button>}</div></div></Card>)}</div>
       </TabsContent>
       <TabsContent value="import">
         <Card className={`p-8 border-2 border-dashed text-center transition ${dragging?'border-primary bg-primary/5':'border-border'}`} onDragOver={e=>{e.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);importFile(e.dataTransfer.files?.[0])}}>
