@@ -31,6 +31,7 @@ const peHome=read('src/pages/PEHome.jsx');
 const subHome=read('src/pages/SubstituteHome.jsx');
 const genEdHome=read('src/pages/GenEdHome.jsx');
 const paraHome=read('src/pages/ParaHome.jsx');
+const spedDataCenter=read('src/pages/DataCenter.jsx');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
 for(const key of concreteHomes){
@@ -76,10 +77,13 @@ ok('Print header is simplified',!docExport.includes('CaseCue Record')&&!docExpor
 ok('Direct PDF is first-class export',exportBar.includes('Download PDF')&&docExport.includes('Page ${p} of ${pages}'),'direct premium PDF export missing');
 ok('Para Student Supports accepts IEP/BIP/504/health uploads',paraSupport.includes('Drag & drop')&&paraSupport.includes('Health Plan')&&paraSupport.includes('BIP')&&paraSupport.includes('504'),'Para support document upload missing');
 ok('Para support reader enforces assigned student',supportReader.includes('ParaStudentAccess.filter')&&supportReader.includes('not assigned to your Para account'),'Para support reader assignment check missing');
+ok('Para support reader signs private file in user scope',supportReader.includes('base44.integrations.Core.CreateFileSignedUrl')&&!supportReader.includes('asServiceRole.integrations.Core.CreateFileSignedUrl'),'Para support reader must not service-sign an arbitrary client file URI');
 ok('Para support reader separates eligibility from health condition',supportReader.includes('eligibility_categories')&&supportReader.includes('documented_disability_or_condition')&&supportReader.includes('health_safety_alerts'),'support extraction structure incomplete');
 ok('Shared premium analytics component exists',premiumAnalytics.includes('PremiumLineChart')&&premiumAnalytics.includes('PremiumDonutChart')&&premiumAnalytics.includes('PremiumBarChart'),'premium analytics library incomplete');
 ok('Analytics PDF draws graph data',analyticsExport.includes('drawBar')&&analyticsExport.includes('drawLine')&&analyticsExport.includes('Page ${p} of ${pages}'),'analytics PDF export missing graph rendering');
 for(const [role,text] of [['Para',paraHome],['Speech',speechHome],['OT',otHome],['PE',peHome],['Substitute',subHome],['Gen Ed',genEdHome]])ok(role+' dashboard uses premium analytics',text.includes('Premium')&&text.includes('AnalyticsPdfButton'),role+' analytics not wired');
+ok('SPED Data Center uses shared premium analytics',spedDataCenter.includes('PremiumLineChart')&&spedDataCenter.includes('PremiumDonutChart')&&spedDataCenter.includes('AnalyticsPdfButton'),'SPED premium analytics not wired');
+ok('Para avoids raw browser prompts and handwritten print pages',!paraHome.includes('window.prompt(')&&!paraHome.includes('window.print(')&&paraHome.includes('AddGroupDialog')&&paraHome.includes('ExportBar'),'Para raw prompt/print regression returned');
 
 ok('Speech IEP queries selected student docs',speechIep.includes("Document.filter({student_id:form.student_id}")&&!speechIep.includes('Document.list('),'Speech IEP must not pre-load every org document');
 
