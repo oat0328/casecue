@@ -4,7 +4,7 @@ export const navItems=[
  {label:'Students',path:'/students',icon:Users},
  {label:'Instruction',path:'/instruction',icon:BookOpen},
  {label:'Attendance',path:'/attendance',icon:UserCheck},
- {label:'Gradebook',path:'/gradebook',icon:ScanLine},
+ {label:'GradeCue',path:'/gradebook',icon:ScanLine},
  {label:'Goals & Progress',path:'/progress',icon:BarChart3},
  {label:'Session Tracker',path:'/progress/sessions',icon:TimerReset},
  {label:'IEP Center',path:'/ieps',icon:FileEdit},
