@@ -177,34 +177,77 @@ const parseCellGroups=(text,{day,period,start_time,end_time,students})=>{
 
 const parseDocxSchedule=async(signedUrl,students)=>{
   const rows=await parseDocxRows(signedUrl);
-  if(rows.length<2||rows[0].length<6)throw new Error('The Word file does not look like a Monday-Friday schedule table.');
-  const headers=rows[0].map(x=>String(x||'').trim());
-  const days=headers.slice(1,6);
+  if(rows.length<2)throw new Error('The Word file does not contain enough schedule rows.');
+
+  // Format A: classic weekly grid (Time/Period + Monday-Friday columns).
+  if(rows[0].length>=6){
+    const headers=rows[0].map(x=>String(x||'').trim());
+    const days=headers.slice(1,6);
+    const groups=[],non_instructional_blocks=[],unmatched=[];
+    for(const row of rows.slice(1)){
+      const first=String(row[0]||'');
+      const period=(first.match(/\b(\d+(?:st|nd|rd|th)\s+period)\b/i)||[])[1]||'';
+      const tm=first.match(/(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/);
+      if(!tm)continue;
+      const start_time=to24(tm[1]),end_time=to24(tm[2]);
+      for(let i=0;i<5;i++){
+        const day=days[i]||['Monday','Tuesday','Wednesday','Thursday','Friday'][i];
+        const parsed=parseCellGroups(row[i+1]||'',{day,period,start_time,end_time,students});
+        groups.push(...parsed.groups);non_instructional_blocks.push(...parsed.blocks);unmatched.push(...parsed.unmatched);
+      }
+    }
+    if(groups.length||non_instructional_blocks.length)return{
+      summary:`Imported ${groups.length} instructional groups from a structured Word schedule table.`,
+      groups,conflicts:[],unmatched_names:[...new Set(unmatched)],non_instructional_blocks,
+      extraction_notes:['Parsed directly from the DOCX table structure; weekday columns and period rows were preserved without visual reconstruction.','Student names were matched only against the active CaseCue roster; unresolved names remain unmatched for educator review.','IEP goals were not required to reconstruct the uploaded schedule.']
+    };
+  }
+
+  // Format B: resource matrix like "TIME | R - READING | W - WRITING | M - MATH".
+  // Each time row contains student entries with recurrence text (Daily, M/W/F, T/Th, Tue, Thu).
+  const header=rows[0].map(x=>String(x||'').trim());
+  const isResourceMatrix=header.some(x=>/^time$/i.test(x))&&header.some(x=>/reading/i.test(x))&&header.some(x=>/writing/i.test(x))&&header.some(x=>/math/i.test(x));
+  if(!isResourceMatrix)throw new Error('The Word file does not look like a supported weekly grid or resource schedule matrix.');
+
   const groups=[],non_instructional_blocks=[],unmatched=[];
+  const dayMap={m:'Monday',mon:'Monday',monday:'Monday',tue:'Tuesday',tues:'Tuesday',tuesday:'Tuesday',w:'Wednesday',wed:'Wednesday',wednesday:'Wednesday',th:'Thursday',thu:'Thursday',thur:'Thursday',thurs:'Thursday',thursday:'Thursday',f:'Friday',fri:'Friday',friday:'Friday'};
+  const recurrenceDays=value=>{
+    const s=String(value||'').toLowerCase();
+    if(/\bdaily\b|mon\s*[-–]\s*fri|m\s*[-–]\s*f/.test(s))return['Monday','Tuesday','Wednesday','Thursday','Friday'];
+    if(/m\s*\/\s*w\s*\/\s*f/.test(s))return['Monday','Wednesday','Friday'];
+    if(/t\s*\/\s*th|tue\s*\/\s*thu|tues\s*\/\s*thurs/.test(s))return['Tuesday','Thursday'];
+    if(/m\s*\/\s*w\b/.test(s))return['Monday','Wednesday'];
+    const out=[];for(const [k,v] of Object.entries(dayMap))if(new RegExp(`\\b${k}\\b`,'i').test(s)&&!out.includes(v))out.push(v);
+    return out;
+  };
+  const subjectFor=(idx)=>/reading/i.test(header[idx]||'')?'Reading':/writing/i.test(header[idx]||'')?'Writing':/math/i.test(header[idx]||'')?'Math':'Service';
+  let currentStart='',currentEnd='';
   for(const row of rows.slice(1)){
-    const first=String(row[0]||'');
-    const period=(first.match(/\b(\d+(?:st|nd|rd|th)\s+period)\b/i)||[])[1]||'';
-    const tm=first.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
-    if(!period||!tm)continue;
-    const start_time=to24(tm[1]),end_time=to24(tm[2]);
-    for(let i=0;i<5;i++){
-      const day=days[i]||['Monday','Tuesday','Wednesday','Thursday','Friday'][i];
-      const parsed=parseCellGroups(row[i+1]||'',{day,period,start_time,end_time,students});
-      groups.push(...parsed.groups);non_instructional_blocks.push(...parsed.blocks);unmatched.push(...parsed.unmatched);
+    const timeCell=String(row[0]||'').trim();
+    const tm=timeCell.match(/(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/);
+    if(tm){currentStart=to24(tm[1]);currentEnd=to24(tm[2]);}
+    if(/lunch|planning|session tracking|cm hub|iep meeting/i.test(row.join(' '))){
+      const label=row.join(' ').replace(/\s+/g,' ').trim();
+      const days=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      if(currentStart&&currentEnd)days.forEach(day=>non_instructional_blocks.push({label,day,start_time:currentStart,end_time:currentEnd,notes:'Imported directly from resource schedule matrix.'}));
+      continue;
+    }
+    if(!currentStart||!currentEnd)continue;
+    for(let col=1;col<row.length;col++){
+      const subject=subjectFor(col),cell=String(row[col]||'').trim();if(!cell)continue;
+      const lines=cell.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+      for(const line of lines){
+        const m=line.match(/^(.+?)\s*-\s*(Daily|M\/W\/F|T\/Th|Tue(?:sday)?|Thu(?:rsday)?|M\/W)\b/i);
+        if(!m)continue;
+        const name=m[1].replace(/\([^)]*\)/g,'').trim();
+        const rec=m[2],days=recurrenceDays(rec);if(!name||!days.length)continue;
+        const st=makeStudent(name,students);if(!st.student_id)unmatched.push(name);
+        const room=(line.match(/\(([^()]*(?:\d{3}|room)[^()]*)\)/i)||[])[1]||'';
+        for(const day of days)groups.push({group_name:`${subject} · ${currentStart}`,delivery:'pull-out',day,start_time:currentStart,end_time:currentEnd,service_minutes:minutesBetween(currentStart,currentEnd),teacher_classroom:room,notes:'Imported deterministically from Word resource schedule matrix.',period:'',recurrence_note:rec,week_pattern:'every_week',cycle_day:'',goal_focus:[subject],students:[{...st,pull_start_time:currentStart,pull_end_time:currentEnd,pull_rule:rec}]});
+      }
     }
   }
-  return{
-    summary:`Imported ${groups.length} instructional groups from a structured Word schedule table.`,
-    groups,
-    conflicts:[],
-    unmatched_names:[...new Set(unmatched)],
-    non_instructional_blocks,
-    extraction_notes:[
-      'Parsed directly from the DOCX table structure; weekday columns and period rows were preserved without visual reconstruction.',
-      'Student names were matched only against the active CaseCue roster; unresolved names remain unmatched for educator review.',
-      'IEP goals were not required to reconstruct the uploaded schedule.'
-    ]
-  };
+  return{summary:`Imported ${groups.length} student service entries from a structured Word resource schedule matrix.`,groups,conflicts:[],unmatched_names:[...new Set(unmatched)],non_instructional_blocks,extraction_notes:['Parsed directly from the DOCX resource matrix using TIME and Reading/Writing/Math columns.','Daily, M/W/F, T/Th, M/W, Tuesday, and Thursday recurrence patterns were expanded into weekday entries.','Student names were matched only against the active CaseCue roster; unresolved names remain unmatched for educator review.']};
 };
 
 Deno.serve(async(req)=>{
