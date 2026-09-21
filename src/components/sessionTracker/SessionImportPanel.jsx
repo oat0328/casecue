@@ -211,11 +211,43 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
     return '';
   };
 
-  const goalFor = (sid, text) => {
-    if (!sid || !text) return ''; const q = normalize(text); const matches = goals.filter(g => g.student_id === sid);
-    const exact = matches.filter(g => normalize(g.goal_area) === q || normalize(g.goal_text) === q); if (exact.length === 1) return exact[0].id;
-    const strong = matches.filter(g => { const area = normalize(g.goal_area); const gt = normalize(g.goal_text); return (area.length >= 4 && (q.includes(area) || area.includes(q))) || (q.length >= 8 && gt.includes(q)); });
-    return strong.length === 1 ? strong[0].id : '';
+  const goalCategory = (v = '') => {
+    const s = normalize(v);
+    if (/reading|comprehension|phonics|decoding|vocab|fluency/.test(s)) return 'reading';
+    if (/writing|written|sentence|paragraph|composition|convention|spelling/.test(s)) return 'writing';
+    if (/math|number|computation|multiplication|division|fraction|decimal|algebra|geometry/.test(s)) return 'math';
+    if (/behavior|social|interpersonal|sel|self regulation|attention|engagement/.test(s)) return 'behavior';
+    if (/executive|organization|task initiation|work completion|planning/.test(s)) return 'executive';
+    if (/speech|language|communication|articulation/.test(s)) return 'speech';
+    if (/occupational|fine motor|handwriting|ot/.test(s)) return 'ot';
+    return '';
+  };
+
+  // Returns a goal only when the row itself provides enough evidence. A student
+  // having a goal is never, by itself, evidence that the session addressed it.
+  const goalFor = (sid, ...evidence) => {
+    if (!sid) return '';
+    const text = evidence.filter(Boolean).join(' | ');
+    const q = normalize(text); if (!q) return '';
+    const matches = goals.filter(g => g.student_id === sid && String(g.status || 'active') !== 'met');
+    const exact = matches.filter(g => normalize(g.goal_area) === q || normalize(g.goal_text) === q);
+    if (exact.length === 1) return exact[0].id;
+    const rowCat = goalCategory(q);
+    const ranked = matches.map(g => {
+      const area = normalize(g.goal_area), gt = normalize(g.goal_text);
+      const cat = goalCategory(`${area} ${gt}`);
+      let score = 0;
+      if (area && q.includes(area)) score += 5;
+      if (gt && gt.length >= 12 && q.includes(gt)) score += 7;
+      if (rowCat && cat === rowCat) score += 4;
+      const meaningful = new Set(q.split(' ').filter(x => x.length >= 5));
+      const overlap = gt.split(' ').filter(x => meaningful.has(x)).length;
+      score += Math.min(overlap, 4);
+      return { g, score };
+    }).sort((a,b) => b.score-a.score);
+    if (!ranked[0] || ranked[0].score < 5) return '';
+    if (ranked[1] && ranked[0].score - ranked[1].score < 2) return '';
+    return ranked[0].g.id;
   };
 
   // Tracker rows often have no start time and reuse the same service-area label.
@@ -341,7 +373,7 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
         const total = map.total != null ? (num(get(r, map, 'total')) ?? parsedQuant.total) : parsedQuant.total;
         let pct = map.percentage != null ? percentValue(get(r, map, 'percentage')) : parsedQuant.percentage;
         if (pct == null && correct != null && total > 0) pct = Math.round((correct / total) * 1000) / 10;
-        const goalText = get(r, map, 'goal') || get(r, map, 'service_type'); const gid = goalFor(sid, goalText); const activity = get(r, map, 'activity') || get(r, map, 'service_type') || goalText || 'Imported session';
+        const explicitGoal = get(r, map, 'goal'); const serviceArea = get(r, map, 'service_type'); const activity = get(r, map, 'activity') || serviceArea || explicitGoal || 'Imported session'; const goalText = explicitGoal || serviceArea; const gid = goalFor(sid, explicitGoal, serviceArea, activity, rawQuant, qualitative);
         const deliveredFinal = delivered ?? duration ?? null;
         const key = fingerprintOf({ student_id: sid, date, start_time: start, activity, delivered_minutes: deliveredFinal, quantitative_note: rawQuant, qualitative });
         const testingLike = /\b(map|testing|assessment|diagnostic|benchmark)\b/i.test(`${activity} ${goalText}`);
@@ -459,9 +491,27 @@ export default function SessionImportPanel({ students = [], goals = [], sessions
       const freshReady = ready.filter(r => !existing.has(fingerprintOf(r)));
       const sessionRecords = freshReady.map(r => ({ student_id: r.student_id, date: r.date, start_time: r.start_time || undefined, end_time: r.end_time || undefined, duration_minutes: r.duration_minutes ?? undefined, provider: r.provider || undefined, service_type: r.service_type, delivery: r.delivery, setting: r.setting, location: r.location || undefined, goal_id: r.goal_id || undefined, activity: r.activity, scheduled_minutes: r.scheduled_minutes ?? undefined, delivered_minutes: r.delivered_minutes ?? undefined, status: r.status, quantitative: (r.correct != null || r.total != null || r.percentage != null || r.quantitative_note) ? { correct: r.correct, total: r.total, percentage: r.percentage, raw: r.quantitative_note || undefined } : undefined, qualitative: r.qualitative || undefined, follow_up_needed: !!r.follow_up_note, follow_up_note: r.follow_up_note || undefined, source_fingerprint: fingerprintOf(r), source_file: fileName || undefined, source_row: r.row, tags: ['Imported spreadsheet'] }));
       await base44.entities.SessionRecord.bulkCreate(sessionRecords);
+
+      // Session evidence also becomes service-attendance evidence. Upsert one
+      // schedule-block attendance record per student/date/session so imports do not
+      // create duplicate attendance. Completed/partial/makeup/refused sessions prove
+      // the student was seen; explicit student absence becomes absent. Provider
+      // absence/cancellation/reschedule/school activity do not assert student attendance.
+      const me = await base44.auth.me();
+      const org = me?.organization_id || me?.data?.organization_id || '';
+      const attendanceCandidates = freshReady.filter(r => ['completed','partially_completed','makeup_session','refused','student_absent'].includes(r.status));
+      for (const r of attendanceCandidates) {
+        const attendanceStatus = r.status === 'student_absent' ? 'absent' : 'present';
+        const existingAttendance = await base44.entities.AttendanceRecord.filter({ user_id: me.id, workspace: 'sped', student_id: r.student_id, date: r.date, scope: 'schedule_block', schedule_start_time: r.start_time || '' }, '-updated_at', 5);
+        const student = students.find(s => s.id === r.student_id);
+        const payload = { organization_id: org, user_id: me.id, workspace: 'sped', student_id: r.student_id, student_name_snapshot: student ? `${student.first_name || ''} ${student.last_name || ''}`.trim() : r.student_name, grade_snapshot: student?.grade || '', date: r.date, status: attendanceStatus, note: `Auto-synced from Session Tracker import${r.activity ? `: ${r.activity}` : ''}`, scope: 'schedule_block', schedule_label: r.activity || r.service_type || 'Session Tracker', schedule_start_time: r.start_time || '', schedule_end_time: r.end_time || '', recorded_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+        if (existingAttendance?.[0]?.id) await base44.entities.AttendanceRecord.update(existingAttendance[0].id, payload);
+        else await base44.entities.AttendanceRecord.create(payload);
+      }
+
       const progressRecords = freshReady.filter(r => r.goal_id && (r.correct != null || r.total != null || r.percentage != null || r.qualitative)).map(r => ({ student_id: r.student_id, goal_id: r.goal_id, date: r.date, correct: r.correct ?? undefined, total: r.total ?? undefined, percentage: r.percentage ?? undefined, decimal: r.percentage != null ? Math.round((r.percentage / 100) * 100) / 100 : undefined, qualitative_notes: r.qualitative || undefined, observation_notes: r.qualitative || undefined, prompting_level: 'independent' }));
       if (progressRecords.length) await base44.entities.ProgressData.bulkCreate(progressRecords);
-      setSummary({ sessions: sessionRecords.length, progress: progressRecords.length, skipped: rows.length - freshReady.length }); setRows([]); if (onImported) await onImported();
+      setSummary({ sessions: sessionRecords.length, progress: progressRecords.length, attendance: attendanceCandidates.length, skipped: rows.length - freshReady.length }); setRows([]); if (onImported) await onImported();
       toast({ title: 'Session import complete', description: `${sessionRecords.length} sessions imported${progressRecords.length ? ` and ${progressRecords.length} progress points created` : ''}.` });
     } catch (e) { toast({ title: 'Import failed', description: e.message, variant: 'destructive' }); } finally { setBusy(false); }
   };
