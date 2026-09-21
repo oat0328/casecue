@@ -276,11 +276,17 @@ Deno.serve(async(req)=>{
       students=(await base44.entities.Student.list('-updated_date',300)).filter(s=>s.roster_status!=='archived'&&s.status!=='exited');
     }
 
+    // DOCX gets a deterministic fast path when its structure is recognized.
+    // IMPORTANT: an unfamiliar DOCX layout must NOT fail the import. Fall through
+    // to the multimodal/LLM importer so CaseCue can reason over arbitrary schedules.
     const docx=workspace!=='para'&&signedFiles.find(f=>/\.docx$/i.test(f.name));
     if(docx){
-      const parsed=await parseDocxSchedule(docx.url,students);
-      if(parsed.groups.length===0)return Response.json({error:'Schedule Parsing Needs Review: CaseCue found the Word table but no instructional groups were extracted.',...parsed},{status:422});
-      return Response.json(parsed);
+      try{
+        const parsed=await parseDocxSchedule(docx.url,students);
+        if(Array.isArray(parsed.groups)&&parsed.groups.length>0)return Response.json(parsed);
+      }catch(docxErr){
+        console.warn('DOCX deterministic parser did not recognize layout; using intelligent fallback.',docxErr?.message||docxErr);
+      }
     }
 
     const goals=workspace==='sped'?await base44.entities.Goal.list('-created_date',1000):[];
@@ -320,7 +326,16 @@ TEACHER RULES:
 ${rules}
 
 CRITICAL IMPORT MODE:
+- Treat schedule FORMAT as unknown. The upload may be a weekly grid, daily timetable, resource matrix, bell schedule, student-by-student schedule, teacher schedule, service-minute table, rotating A/B schedule, block schedule, narrative list, spreadsheet, screenshot/photo, exported SIS report, or a combination of multiple files. Infer the document structure from headings, legends, repeated time patterns, column relationships, merged cells, spatial layout, and notes before extracting entries.
+- First classify each uploaded source internally as one or more of: completed SPED/resource schedule, student Gen Ed schedule, bell schedule, teacher availability/unavailability schedule, service/minutes reference, or unknown. Use that classification to decide what becomes a saved service block versus context only.
 - When a weekly SPED/resource schedule is present, each visible weekday/time/service block is the source of truth. Import those blocks exactly. Do NOT apply the generic pull timing rule to replace times already printed on the schedule.
+- When a schedule uses recurrence shorthand (Daily, M-F, M/W/F, T/Th, Mon/Wed, every other week, A/B day, etc.), expand only what is explicitly supported and preserve the original recurrence wording.
+- When rows or cells combine multiple students, subjects, rooms, teachers, or times, split them into the minimum number of accurate schedule blocks needed to preserve the source meaning.
+- When multiple files are uploaded, reconcile them: bell schedule supplies period boundaries, student schedules supply availability/source classes, service tables supply required context, and a completed resource schedule supplies actual service blocks. Do not let one file type overwrite the meaning of another.
+- If a time is written in 12-hour format, normalize it to 24-hour HH:MM only when AM/PM or surrounding school-day context makes the conversion unambiguous. Otherwise flag it instead of guessing.
+- Never reject a file merely because its layout differs from a known template. Use semantic/visual reasoning as the fallback parser.
+- If part of a schedule is readable and part is ambiguous, return the high-confidence blocks and describe the ambiguous portions in extraction_notes. Only return zero groups when no instructional/timed blocks can be reconstructed with reasonable confidence.
+- Before returning, perform a self-check against the source: account for every visible time row/period, every weekday or recurrence marker, every named student/service block, and every explicit teacher unavailable block. If something cannot be represented safely, list it in extraction_notes instead of silently dropping it.
 - Recognize service labels such as R=Reading, W=Writing, M=Math, and SEL when the document uses them. Keep unknown local abbreviations in notes; do not invent their meaning.
 - Names may be abbreviated. Reconcile ONLY against the ACTIVE CASELOAD above. If more than one roster student could match, set student_id='' and match_type='unmatched'. NEVER guess.
 - Preserve starred/check-in notes, PREP, meetings, homebound, lunch/recess, and other non-instructional blocks when visible.
