@@ -73,7 +73,7 @@ export default function Reports() {
         actions={
           <DataExportBar
             title="Caseload Status Snapshot"
-            subtitle={`Generated ${new Date().toLocaleDateString()} · ${s.length} student(s)`}
+            subtitle={`Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${s.length} student(s)`}
             sections={snapshotSections}
             sheets={[sheetFromTable("Caseload", ["Student", "Grade", "Eligibility", "IEP Date", "Review Due", "Reeval Due", "Status"], caseloadRows)]}
             json={{

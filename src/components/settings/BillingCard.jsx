@@ -192,7 +192,7 @@ export default function BillingCard() {
                 <div className="min-w-0">
                   <div className="text-sm font-medium">{p.productName || "CaseCue subscription"}</div>
                   <div className="text-xs text-muted-foreground">
-                    {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : "—"} · {p.amount ? `${p.amount} ${p.currency || "USD"}` : "—"}
+                    {p.paidAt ? new Date(p.paidAt).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : "—"} · {p.amount ? `${p.amount} ${p.currency || "USD"}` : "—"}
                   </div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => exportReceiptPdf(p, user)}>

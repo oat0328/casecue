@@ -458,7 +458,7 @@ export function exportSessionLogPdf(student, sessions) {
 export function exportServiceMinutesPdf(student, summary, flags, thisWeekSessions) {
   const doc = newDoc("Service Minutes Report");
   let y = MARGIN + 28;
-  y = studentHeader(doc, y, student || {}, `Week of ${new Date().toLocaleDateString()}`);
+  y = studentHeader(doc, y, student || {}, `Week of ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}`);
 
   y = writeBlock(doc, y, `Required weekly minutes: ${summary?.required || "not recorded"}`, { size: 11, bold: true, gap: 2 });
   y = writeBlock(doc, y, `Scheduled: ${summary?.scheduled || 0} min · Delivered: ${summary?.delivered || 0} min · Remaining: ${summary?.remaining || 0} min`, { size: 10, gap: 2 });

@@ -48,7 +48,7 @@ export default function MeetingMode({ student, record, onSave, onExit, onOpenOri
     return [
       `IEP MEETING SUMMARY — DRAFT (educator review required before finalizing)`,
       `Student: ${student ? `${student.first_name} ${student.last_name}` : ""}`,
-      `Date: ${new Date().toLocaleDateString()}`,
+      `Date: ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}`,
       ``,
       `Attendance: ${(meeting.attendance || []).join(", ") || "— record attendance —"}`,
       ``,

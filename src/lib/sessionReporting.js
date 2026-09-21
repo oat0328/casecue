@@ -66,7 +66,7 @@ export function weekRange(refStr) {
   start.setDate(r.getDate() - dow);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  return { start: fmtLocal(start), end: fmtLocal(end), label: `Week of ${start.toLocaleDateString()}` };
+  return { start: fmtLocal(start), end: fmtLocal(end), label: `Week of ${start.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}` };
 }
 
 export function monthRange(ymStr) {

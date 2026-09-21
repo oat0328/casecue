@@ -31,7 +31,7 @@ export default function UsersTable({ users }) {
                   <Badge variant="secondary" className={badge.className}>{badge.label}</Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {u.created_date ? new Date(u.created_date).toLocaleDateString() : "—"}
+                  {u.created_date ? new Date(u.created_date).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : "—"}
                 </TableCell>
               </TableRow>
             );

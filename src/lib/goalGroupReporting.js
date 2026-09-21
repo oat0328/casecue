@@ -58,7 +58,7 @@ export function buildGroupSummaryReport({ groups = [], students = [], goals = []
 
   return {
     title: "Goal Group Summary",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${groups.length} group(s) · ${rosterRows.length} student placement(s)`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${groups.length} group(s) · ${rosterRows.length} student placement(s)`,
     sections: [
       textSection("Overview", [
         `${groups.length} goal group(s) formed from IEP goal areas.`,
@@ -128,7 +128,7 @@ export function buildGroupReport({ group, students = [], goals = [], progress = 
 
   return {
     title: `Goal Group Report — ${area}`,
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${group.students.length} student(s) · ${groupSessions.length} session(s) · ${totalMinutes} total minutes`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${group.students.length} student(s) · ${groupSessions.length} session(s) · ${totalMinutes} total minutes`,
     sections: [
       textSection("Overview", [
         `Goal group: ${area}`,

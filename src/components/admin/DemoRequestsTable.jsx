@@ -33,7 +33,7 @@ export default function DemoRequestsTable({ requests }) {
                 <TableCell className="text-muted-foreground">{r.email}</TableCell>
                 <TableCell className="text-muted-foreground">{r.organization || "—"}</TableCell>
                 <TableCell className="text-muted-foreground">
-                  {r.created_date ? new Date(r.created_date).toLocaleDateString() : "—"}
+                  {r.created_date ? new Date(r.created_date).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : "—"}
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary" className={badge.className}>{badge.label}</Badge>

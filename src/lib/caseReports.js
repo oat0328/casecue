@@ -73,7 +73,7 @@ export function buildStudentDataReport({ student, goals = [], progress = [], ses
 
   return {
     title: `Student Report — ${studentName(student)}`,
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${sGoals.length} goal(s) · ${sProg.length} progress point(s) · ${sSess.length} session(s) · ${sAsg.length} assignment(s)`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${sGoals.length} goal(s) · ${sProg.length} progress point(s) · ${sSess.length} session(s) · ${sAsg.length} assignment(s)`,
     sections: [
       textSection("Student Snapshot", infoRows.map(([k, v]) => `${k}: ${v}`)),
       sGoals.length
@@ -134,7 +134,7 @@ export function buildCaseloadDataReport({ students = [], goals = [], progress = 
 
   return {
     title: "Caseload Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${students.length} student(s) · ${goals.length} goal(s) · ${sessions.length} session(s)`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${students.length} student(s) · ${goals.length} goal(s) · ${sessions.length} session(s)`,
     sections: [
       textSection("Overview", [
         `Students: ${students.length}`,
@@ -196,7 +196,7 @@ export function buildProgressMonitoringReport({ students = [], goals = [], progr
 
   return {
     title: "Progress Monitoring Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${progress.length} data point(s) across ${students.length} student(s)`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${progress.length} data point(s) across ${students.length} student(s)`,
     sections: [
       textSection("Summary", [
         `${progress.length} progress data point(s) recorded (after filters).`,
@@ -250,7 +250,7 @@ export function buildServiceDeliveryReport({ students = [], sessions = [], sched
 
   return {
     title: "Service Delivery Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · scheduled minutes from Instruction & Schedule, delivered minutes from logged sessions`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · scheduled minutes from Instruction & Schedule, delivered minutes from logged sessions`,
     sections: [
       textSection("How to Read This Report", [
         "Scheduled minutes come from your Instruction & Schedule groups; delivered minutes come from logged sessions.",
@@ -299,7 +299,7 @@ export function buildComplianceReport({ students = [], goals = [], progress = []
 
   return {
     title: "Compliance Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · deadline and data-gap overview from recorded dates`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · deadline and data-gap overview from recorded dates`,
     sections: [
       textSection("Important", [
         "This report lists potential issues based on recorded dates and data. CaseCue does not certify legal, state, or district compliance — educator review required.",
@@ -388,7 +388,7 @@ export function buildMeetingPrepReport({ meetings = [], students = [], goals = [
 
   return {
     title: "Meeting Preparation Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${upcoming.length} upcoming meeting(s)`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${upcoming.length} upcoming meeting(s)`,
     sections,
     sheets: [sheetFromTable("Meetings", ["Title", "Date", "Type", "Location", "Student"], meetingRows)],
     filename: safeFilename("Meeting-Prep-Report"),
@@ -424,7 +424,7 @@ export function buildParentProgressReport({ student, goals = [], progress = [], 
 
   return {
     title: `Parent Report — ${studentName(student)}`,
-    subtitle: `Generated ${new Date().toLocaleDateString()} · plain-language summary of recorded progress`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · plain-language summary of recorded progress`,
     sections: [
       textSection("Overview", [
         `This report summarizes ${student.first_name}'s recorded progress on IEP goals, in everyday language.`,

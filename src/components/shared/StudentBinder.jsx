@@ -64,7 +64,7 @@ export default function StudentBinder({ student }) {
               (a, i) =>
                 `${i + 1}. ${a.content?.amendment?.amendment_language || "Saved amendment"} (saved ${new Date(
                   a.created_date
-                ).toLocaleDateString()})`
+                ).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})})`
             )
             .join("\n")
         : na;
@@ -77,7 +77,7 @@ export default function StudentBinder({ student }) {
               const grs = (r.content?.goal_reports || [])
                 .map((gr) => `${gr.goal_area}: ${gr.statement}`)
                 .join("\n");
-              return `Report ${i + 1} (saved ${new Date(r.created_date).toLocaleDateString()}):\n${grs}${
+              return `Report ${i + 1} (saved ${new Date(r.created_date).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}):\n${grs}${
                 r.content?.overall_summary ? `\nOverall: ${r.content.overall_summary}` : ""
               }`;
             })
@@ -207,7 +207,7 @@ export default function StudentBinder({ student }) {
 
       return {
         title: `Student Binder — ${student.first_name} ${student.last_name}`,
-        subtitle: `Complete compiled binder · exported ${new Date().toLocaleDateString()}`,
+        subtitle: `Complete compiled binder · exported ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}`,
         filename: `Student-Binder-${student.first_name}-${student.last_name}`,
         banner:
           "DRAFT — Educator Review Required. Compiled by CaseCue from your verified records; sections marked 'Not on file' are stated, never invented.",

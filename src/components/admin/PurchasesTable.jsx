@@ -33,7 +33,7 @@ export default function PurchasesTable({ purchases }) {
                   <Badge variant="secondary" className={badge.className}>{badge.label}</Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {(p.paidAt || p.created_date) ? new Date(p.paidAt || p.created_date).toLocaleDateString() : "—"}
+                  {(p.paidAt || p.created_date) ? new Date(p.paidAt || p.created_date).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : "—"}
                 </TableCell>
               </TableRow>
             );

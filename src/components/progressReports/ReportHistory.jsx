@@ -18,7 +18,7 @@ export default function ReportHistory({ reports, onLoad, onDelete }) {
     <div className="space-y-2">
       {list.map((r) => {
         const content = r.content || {};
-        const genDate = r.created_date ? new Date(r.created_date).toLocaleDateString() : "";
+        const genDate = r.created_date ? new Date(r.created_date).toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : "";
         return (
           <Card key={r.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex-1 min-w-0">

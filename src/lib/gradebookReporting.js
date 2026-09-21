@@ -45,7 +45,7 @@ export function buildStudentGradeReport({ student, assignments = [], goals = [] 
 
   return {
     title: `Student Grade Report — ${studentName(student)}`,
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${sAsg.length} assignment(s) · average ${pcts.length ? round1(pcts.reduce((x, y) => x + y, 0) / pcts.length) + "%" : "—"}`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${sAsg.length} assignment(s) · average ${pcts.length ? round1(pcts.reduce((x, y) => x + y, 0) / pcts.length) + "%" : "—"}`,
     sections: [
       textSection("Overview", [
         `Student: ${studentName(student)} · Grade ${student.grade || "—"}`,
@@ -101,7 +101,7 @@ export function buildGoalGradeReport({ students = [], goals = [], assignments = 
 
   return {
     title: "Goal-Based Grade Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · grades grouped by IEP goal area`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · grades grouped by IEP goal area`,
     sections,
     sheets: [sheetFromTable("Summary", ["Goal Area", "Assignments", "Average %"], summaryRows), ...sheets],
     filename: safeFilename("Goal-Based-Grade-Report"),
@@ -127,7 +127,7 @@ export function buildCaseloadGradeReport({ students = [], assignments = [], goal
 
   return {
     title: "Caseload Grade Report",
-    subtitle: `Generated ${new Date().toLocaleDateString()} · ${assignments.length} assignment(s) across ${students.length} student(s)`,
+    subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${assignments.length} assignment(s) across ${students.length} student(s)`,
     sections: [
       textSection("Overview", [
         `Caseload average: ${allPcts.length ? round1(allPcts.reduce((x, y) => x + y, 0) / allPcts.length) + "%" : "No scored assignments yet"}`,

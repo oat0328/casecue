@@ -59,7 +59,7 @@ export default function SessionReportGenerator({ sessions, students, goals, onSa
 
     setReport({
       title: `${typeLabel} — ${student.first_name} ${student.last_name}`,
-      subtitle: `Generated ${new Date().toLocaleDateString()} · ${studentSessions.length} recorded session(s)`,
+      subtitle: `Generated ${new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})} · ${studentSessions.length} recorded session(s)`,
       sections,
       filename: `CaseCue-${typeLabel.replace(/\s+/g, "-")}-${student.first_name}-${student.last_name}`,
     });
