@@ -32,17 +32,20 @@ export default function NotificationsBell(){
   // SPED-only alerts stay inside SPED. Other paid workspaces do not inherit
   // IEP due dates, SPED meetings, service-data gaps, or SPED task links.
   if(activeWorkspace==='sped'){
-   const[students,meetings,tasks,sessions]=await Promise.all([
+   const[students,meetings,tasks,sessions,progressPoints,gradeRows]=await Promise.all([
     base44.entities.Student.list().catch(()=>[]),
     base44.entities.Meeting.filter({status:'scheduled'}).catch(()=>[]),
     base44.entities.Task.list().catch(()=>[]),
-    base44.entities.SessionRecord.list('-date',200).catch(()=>[])
+    base44.entities.SessionRecord.list('-date',500).catch(()=>[]),
+    base44.entities.ProgressData.list('-date',500).catch(()=>[]),
+    base44.entities.GradebookAssignment.list('-date',500).catch(()=>[])
    ]);
    const name=s=>`${s.first_name||''} ${s.last_name||''}`.trim();
    (students||[]).forEach(s=>[['annual_review_due','Annual IEP review'],['reevaluation_due','Reevaluation']].forEach(([f,t])=>{const d=daysUntil(s[f]);if(d===null||d>30)return;items.push({id:`${s.id}-${f}`,tone:d<=14?'red':'amber',icon:FileWarning,title:`${name(s)} — ${t}`,sub:d<0?`${Math.abs(d)}d overdue · ${formatDate(s[f])}`:d===0?'Due today':`${d}d left · ${formatDate(s[f])}`,link:`/students/${s.id}`})}));
    (meetings||[]).forEach(m=>{const d=daysUntil(m.date);if(d===null||d<0||d>7)return;items.push({id:m.id,tone:'blue',icon:CalendarDays,title:m.title||'Meeting',sub:`${formatDate(m.date)}${m.time?' · '+m.time:''}`,link:'/meetings'})});
-   const last={};(sessions||[]).forEach(r=>{if(!last[r.student_id])last[r.student_id]=r.date});
-   (students||[]).forEach(s=>{const v=last[s.id];if(!v)return;const gap=Math.round((Date.now()-new Date(v).getTime())/86400000);if(gap>=14)items.push({id:`gap-${s.id}`,tone:'amber',icon:ClipboardList,title:`${name(s)} — data gap`,sub:`No session logged in ${gap} days`,link:'/session-tracker'})});
+   const last={};[...(sessions||[]),...(progressPoints||[]),...(gradeRows||[])].forEach(r=>{if(r.student_id&&r.date&&(!last[r.student_id]||String(r.date)>String(last[r.student_id])))last[r.student_id]=r.date});
+   const weekday=new Date().getDay();
+   (students||[]).filter(s=>s.status!=='exited'&&s.roster_status!=='archived').forEach(s=>{const v=last[s.id];const gap=v?Math.floor((new Date(`${dayKey}T12:00:00`)-new Date(`${String(v).slice(0,10)}T12:00:00`))/86400000):99;if(gap>=14)items.push({id:`gap-${s.id}`,tone:'amber',icon:ClipboardList,title:`${name(s)} — data gap`,sub:`No student evidence logged in ${gap} days`,link:'/progress-reports'});if(weekday>=2&&weekday<=5&&gap>=2)items.push({id:`family-friday-${s.id}`,tone:weekday>=4?'amber':'blue',icon:ClipboardList,title:`${name(s)} — Family Friday needs data`,sub:v?`Last evidence ${formatDate(v)} · add work, IXL, progress, or a session note`:'No evidence yet · add work, IXL, progress, or a session note',link:'/progress-reports'})});
    (tasks||[]).filter(t=>t.status!=='done'&&t.due_date).forEach(t=>{const d=daysUntil(t.due_date);if(d!==null&&d<=7)items.push({id:`task-${t.id}`,tone:d<0?'red':'amber',icon:ListTodo,title:t.title,sub:d<0?`${Math.abs(d)}d overdue`:`Due ${formatDate(t.due_date)}`,link:'/app'})});
   }
 
