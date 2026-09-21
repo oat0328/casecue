@@ -15,10 +15,10 @@ function studentNames(lesson, students) {
     .filter(Boolean);
 }
 
-function goalLabels(lesson, goals) {
-  return (lesson.goal_ids || [])
-    .map((id) => { const g = (goals || []).find((x) => x.id === id); return g ? `${g.goal_area || "Goal"}: ${(g.goal_text || "").slice(0, 120)}` : null; })
-    .filter(Boolean);
+function iepConnectionText(lesson) {
+  const plan = lesson?.plan || {};
+  const match = String(plan.iep_goal_matches || "").trim();
+  return match || "No verified IEP goal match found.";
 }
 
 const escapeAttr = (u) => String(u).replace(/"/g, "%22");
@@ -64,7 +64,7 @@ export function buildLessonHtml(lesson, students, goals) {
     Subject / skill: ${esc(plan.subject_skill)} &nbsp;·&nbsp; ${esc(plan.grade_group)} &nbsp;·&nbsp; Duration: ${esc(plan.duration)}<br>
     Students / group: ${esc(studentNames(lesson, students).join(", ") || lesson.group_label || "")}
   </div></div>
-  <h2>IEP Goals Addressed</h2><ul>${goalLabels(lesson, goals).map((g) => `<li>${esc(g)}</li>`).join("") || "<li>No specific goals attached.</li>"}</ul>
+  <h2>IEP Connection</h2><div class="ftext">${esc(iepConnectionText(lesson))}</div>
   ${sections.join("")}
   <h2>Accommodations</h2>
   <div class="ftext"><strong>Only use accommodations documented in the student's IEP.</strong> System suggestions below are ideas to review against the IEP.</div>
@@ -271,10 +271,8 @@ export function exportLessonPdf(lesson, students, goals) {
     writeBlock(names.join(", ") || lesson.group_label, 10, false, 6);
   }
 
-  const gLabels = goalLabels(lesson, goals);
-  writeHeading("IEP Goals Addressed");
-  gLabels.forEach((g) => writeBlock(`• ${g}`, 10, false, 2));
-  if (!gLabels.length) writeBlock("No specific goals attached.", 10, false, 8);
+  writeHeading("IEP Connection");
+  writeBlock(iepConnectionText(lesson), 10, false, 8);
   y += 6;
 
   LESSON_GROUPS.forEach((group) => {
