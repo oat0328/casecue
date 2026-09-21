@@ -185,10 +185,7 @@ export default function StudentDetail() {
       <Label className="text-xs text-muted-foreground">{label}</Label>
       {editing ? (
         name === "eligibility_category" ? (
-          <Select value={draft[name] || ""} onValueChange={(v) => setDraft({ ...draft, [name]: v })}>
-            <SelectTrigger><SelectValue placeholder="Select eligibility" /></SelectTrigger>
-            <SelectContent>{ELIGIBILITY_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
-          </Select>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">{ELIGIBILITY_OPTIONS.map((o)=>{const cats=Array.isArray(draft.eligibility_categories)&&draft.eligibility_categories.length?draft.eligibility_categories:(draft.eligibility_category?[draft.eligibility_category]:[]);const selected=cats.includes(o);return <button type="button" key={o} onClick={()=>setDraft(d=>{const current=Array.isArray(d.eligibility_categories)&&d.eligibility_categories.length?d.eligibility_categories:(d.eligibility_category?[d.eligibility_category]:[]);const next=selected?current.filter(x=>x!==o):[...current,o];return {...d,eligibility_categories:next,eligibility_category:next[0]||''}})} className={`rounded-xl border px-3 py-2 text-left text-sm ${selected?'border-blue-500 bg-blue-50 text-blue-800':'border-slate-200 bg-white'}`}>{selected?'✓ ':''}{o}</button>})}<div className="sm:col-span-2 text-xs text-slate-500">Select every category documented in the student's record. The first selected category is treated as primary.</div></div>
         ) : <Input value={draft[name] ?? ""} onChange={(e) => setDraft({ ...draft, [name]: e.target.value })} />
       ) : <div className="mt-0.5 text-sm font-medium">{value || "—"}</div>}
     </div>
@@ -210,7 +207,7 @@ export default function StudentDetail() {
             <div>
               <div className="text-[10px] font-black uppercase tracking-[.18em] text-sky-300">Student 360</div>
               <h1 className="mt-1 text-3xl sm:text-4xl font-black tracking-tight">{student.first_name} {student.last_name}</h1>
-              <p className="mt-1 text-slate-300">Grade {student.grade || "—"} · {student.eligibility_category || "Eligibility not entered"}</p>
+              <p className="mt-1 text-slate-300">Grade {student.grade || "—"} · {(student.eligibility_categories?.length?student.eligibility_categories.join(' · '):student.eligibility_category) || "Eligibility not entered"}</p>
             </div>
           </div>
           {editing ? (
@@ -267,7 +264,7 @@ export default function StudentDetail() {
               <Field label="First name" value={student.first_name} name="first_name" />
               <Field label="Last name" value={student.last_name} name="last_name" />
               <Field label="Grade" value={student.grade} name="grade" />
-              <Field label="Eligibility category" value={student.eligibility_category} name="eligibility_category" />
+              <Field label="Eligibility categories" value={(student.eligibility_categories?.length?student.eligibility_categories.join(', '):student.eligibility_category)} name="eligibility_category" />
               <Field label="IEP date" value={student.iep_date} name="iep_date" />
               <Field label="Annual review due" value={student.annual_review_due} name="annual_review_due" />
               <Field label="Reevaluation due" value={student.reevaluation_due} name="reevaluation_due" />
