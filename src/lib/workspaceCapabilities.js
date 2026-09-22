@@ -42,7 +42,6 @@ export const WORKSPACE_TOOLS = {
       ['Student Work','/w/para/grade',ScanLine],
       ['Assessments','/w/para/baseline',FileText],
       ['Student Supports','/w/para/iep-guide',FileText],
-      ['Weekly Family Update','/w/para/weekly-contact',StickyNote],
       ['My Notes','/w/para/notes',StickyNote],
     ],
   },
