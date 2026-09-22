@@ -104,7 +104,9 @@ export default function StudentDetail() {
     if (!newGoal.goal_text) { toast({ title: "Goal text is required", variant: "destructive" }); return; }
     setSavingGoal(true);
     try {
-      await base44.entities.Goal.create({ ...newGoal, student_id: id });
+      const me = await base44.auth.me();
+      const organization_id = me?.organization_id || me?.data?.organization_id || student.organization_id || '';
+      await base44.entities.Goal.create({ ...newGoal, student_id: id, organization_id });
       setNewGoal({ goal_area: "", goal_text: "", baseline: "", target: "", criterion: "", measurement_method: "" });
       refetchGoals(); toast({ title: "Goal added" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
@@ -121,7 +123,9 @@ export default function StudentDetail() {
     const decimal = total > 0 ? Math.round((correct / total) * 100) / 100 : 0;
     setSavingProg(true);
     try {
-      await base44.entities.ProgressData.create({ ...newProg, correct, total, percentage, decimal, student_id: id });
+      const me = await base44.auth.me();
+      const organization_id = me?.organization_id || me?.data?.organization_id || student.organization_id || '';
+      await base44.entities.ProgressData.create({ ...newProg, correct, total, percentage, decimal, student_id: id, organization_id });
       setNewProg({ date: new Date().toISOString().slice(0,10), goal_id: "", correct: "", total: "", observation_notes: "", prompting_level: "independent" });
       refetchProgress(); toast({ title: "Progress data logged" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
