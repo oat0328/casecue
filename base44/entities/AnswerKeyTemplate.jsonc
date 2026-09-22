@@ -1,0 +1,56 @@
+{
+  "name": "AnswerKeyTemplate",
+  "type": "object",
+  "properties": {
+    "organization_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "assignment_type": {
+      "type": "string"
+    },
+    "score_possible": {
+      "type": "number"
+    },
+    "answer_key": {
+      "type": "string"
+    },
+    "rubric": {
+      "type": "string"
+    },
+    "teacher_directions": {
+      "type": "string"
+    },
+    "last_used_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "organization_id",
+    "user_id",
+    "title",
+    "answer_key"
+  ],
+  "rls": {
+    "read": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "create": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "update": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    },
+    "delete": {
+      "data.organization_id": "{{user.data.organization_id}}"
+    }
+  }
+}
