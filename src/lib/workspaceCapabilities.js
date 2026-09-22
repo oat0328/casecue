@@ -25,7 +25,7 @@ export const WORKSPACE_TOOLS = {
       ['Schedule','/w/gen_ed/schedule',CalendarClock],
       ['Attendance','/w/gen_ed/attendance',UserCheck],
       ['Lessons','/instruction/lessons',BookOpen],
-      ['Super Grader','/w/gen_ed/grade',ScanLine],
+      ['GradeCue','/w/gen_ed/grade',ScanLine],
       ['Groups & Reteach','/w/gen_ed/groups',Users],
       ['IEP & Accommodations','/w/gen_ed/iep-access',FileText],
       ['Weekly Family Update','/w/gen_ed/weekly-contact',StickyNote],
@@ -113,7 +113,7 @@ export function workspaceToolPath(key, tool) {
   const nav = WORKSPACE_TOOLS[key]?.nav || [];
   const aliases = {
     schedule: ['Schedule'],
-    gradebook: ['Gradebook','Super Grader','Grade Student Work','Student Work'],
+    gradebook: ['GradeCue','Gradebook','Super Grader','Grade Student Work','Student Work'],
     lessons: ['Lessons','Lesson Planner'],
     attendance: ['Attendance'],
   };
