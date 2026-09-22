@@ -58,6 +58,30 @@
         "type": "string"
       }
     },
+    "documented_strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "documented_needs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "present_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "goals_and_objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "accommodations": {
       "type": "array",
       "items": {
@@ -89,6 +113,18 @@
       }
     },
     "services_and_supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "service_delivery_details": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "classroom_strategies": {
       "type": "array",
       "items": {
         "type": "string"
