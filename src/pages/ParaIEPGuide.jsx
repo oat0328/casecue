@@ -42,11 +42,19 @@ export default function ParaIEPGuide(){
  },{
   heading:'Documented Eligibility / Disability / Condition',body:[...arr(latest.eligibility_categories),...arr(latest.documented_disability_or_condition)].map(x=>`• ${x}`).join('\n')||'None explicitly documented.'
  },{
+  heading:'Strengths, Needs & Present Levels',body:[...arr(latest.documented_strengths),...arr(latest.documented_needs),...arr(latest.present_levels)].map(x=>`• ${x}`).join('\n')||'None explicitly documented.'
+ },{
+  heading:'Goals & Objectives',body:arr(latest.goals_and_objectives).map(x=>`• ${x}`).join('\n')||'None explicitly documented.'
+ },{
   heading:'Accommodations & Testing Supports',body:[...arr(latest.accommodations),...arr(latest.testing_supports)].map(x=>`• ${x}`).join('\n')||'None explicitly documented.'
  },{
   heading:'Behavior & Communication Supports',body:[...arr(latest.behavior_supports),...arr(latest.communication_supports)].map(x=>`• ${x}`).join('\n')||'None explicitly documented.'
  },{
   heading:'Health / Safety',body:[...arr(latest.health_safety_alerts),...arr(latest.emergency_actions)].map(x=>`• ${x}`).join('\n')||'No health/safety direction was explicitly documented in this uploaded record.'
+ },{
+  heading:'Services & Delivery',body:[...arr(latest.services_and_supports),...arr(latest.service_delivery_details)].map(x=>`• ${x}`).join('\n')||'No service delivery details were explicitly documented.'
+ },{
+  heading:'Classroom Strategies',body:arr(latest.classroom_strategies).map(x=>`• ${x}`).join('\n')||'No additional classroom strategies were explicitly documented.'
  },{
   heading:'What To Do',body:arr(latest.what_to_do).map(x=>`• ${x}`).join('\n')||'No additional day-to-day action steps were explicitly documented.'
  },{
@@ -96,6 +104,11 @@ export default function ParaIEPGuide(){
     </div>
 
     <div className="grid gap-4 lg:grid-cols-2">
+     <Card className="p-6"><div className="text-[10px] font-black uppercase tracking-wider text-emerald-700">Student Snapshot</div><h3 className="mt-1 font-black">Strengths & Needs</h3><div className="mt-4 grid gap-4 sm:grid-cols-2"><div><div className="text-xs font-black text-emerald-700">Strengths</div><ItemList items={latest.documented_strengths}/></div><div><div className="text-xs font-black text-amber-700">Needs</div><ItemList items={latest.documented_needs}/></div></div><div className="mt-5 text-xs font-black uppercase tracking-wider text-slate-500">Present levels / current performance</div><ItemList items={latest.present_levels}/></Card>
+     <Card className="p-6"><div className="text-[10px] font-black uppercase tracking-wider text-violet-700">What the student is working toward</div><h3 className="mt-1 font-black">Goals & Objectives</h3><ItemList items={latest.goals_and_objectives} empty="No goals/objectives were explicitly documented in this uploaded record."/></Card>
+    </div>
+
+    <div className="grid gap-4 lg:grid-cols-2">
      <Card className="p-6"><div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-blue-700"/><h3 className="font-black">Accommodations</h3></div><ItemList items={latest.accommodations}/><div className="mt-5 text-xs font-black uppercase tracking-wider text-slate-500">Testing supports</div><ItemList items={latest.testing_supports}/></Card>
      <Card className="p-6"><div className="flex items-center gap-2"><Brain className="h-4 w-4 text-violet-700"/><h3 className="font-black">Behavior & Communication</h3></div><div className="mt-3 text-xs font-black uppercase tracking-wider text-slate-500">Behavior supports</div><ItemList items={latest.behavior_supports}/><div className="mt-5 text-xs font-black uppercase tracking-wider text-slate-500">Communication supports</div><ItemList items={latest.communication_supports}/></Card>
     </div>
@@ -107,7 +120,7 @@ export default function ParaIEPGuide(){
 
     {arr(latest.emergency_actions).length>0&&<Card className="border-rose-200 bg-rose-50 p-6"><div className="flex items-center gap-2 text-rose-900"><HeartPulse className="h-5 w-5"/><h3 className="font-black">Documented Emergency / Safety Actions</h3></div><ItemList items={latest.emergency_actions}/><p className="mt-3 text-xs text-rose-800">Follow the original school/health plan and emergency procedures. CaseCue only summarizes what the uploaded record explicitly states.</p></Card>}
 
-    {arr(latest.services_and_supports).length>0&&<Card className="p-6"><div className="flex items-center gap-2"><TestTube2 className="h-4 w-4 text-slate-700"/><h3 className="font-black">Services / Supports Documented</h3></div><ItemList items={latest.services_and_supports}/></Card>}
+    {(arr(latest.services_and_supports).length>0||arr(latest.service_delivery_details).length>0||arr(latest.classroom_strategies).length>0)&&<div className="grid gap-4 lg:grid-cols-2"><Card className="p-6"><div className="flex items-center gap-2"><TestTube2 className="h-4 w-4 text-slate-700"/><h3 className="font-black">Services / Supports Documented</h3></div><ItemList items={latest.services_and_supports}/><div className="mt-5 text-xs font-black uppercase tracking-wider text-slate-500">Service delivery details</div><ItemList items={latest.service_delivery_details}/></Card><Card className="p-6"><div className="flex items-center gap-2"><ClipboardCheck className="h-4 w-4 text-blue-700"/><h3 className="font-black">Classroom Strategies</h3></div><ItemList items={latest.classroom_strategies} empty="No classroom strategies were explicitly documented in this uploaded record."/></Card></div>}
    </div>}
   </>}
 
