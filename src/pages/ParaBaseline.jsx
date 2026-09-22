@@ -11,6 +11,7 @@ import{printDoc}from'@/lib/docExport';
 import{printParaBaselinePacket}from'@/lib/paraBaselinePrint';
 
 const DOMAINS=['Reading','Writing','Math','Executive Function','Social-Emotional / Behavior','Communication','Functional / Adaptive'];
+const STYLES=[['mixed','Mixed skill probe'],['passage_evidence','Passage + text evidence'],['computation_grid','Computation grid'],['fluency_probe','Reading fluency / WCPM'],['word_problems','Math word problems'],['sentence_conventions','Sentence conventions / conjunctions'],['fractions','Fractions'],['math_fluency','Math fluency facts']];
 const today=()=>new Date().toLocaleDateString('en-CA');
 const full=s=>s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student';
 
@@ -21,6 +22,7 @@ export default function ParaBaseline(){
  const[studentId,setStudentId]=useState('');
  const[domains,setDomains]=useState(['Reading','Math']);
  const[itemsPerDomain,setItemsPerDomain]=useState(5);
+ const[templateStyle,setTemplateStyle]=useState('mixed');
  const[records,setRecords]=useState([]);
  const[current,setCurrent]=useState(null);
  const[file,setFile]=useState(null);
@@ -46,7 +48,7 @@ export default function ParaBaseline(){
   setBusy(true);
   try{
    const me=await base44.auth.me();
-   const r=await base44.functions.invoke('generateBaselineAssessment',{workspace:'para',student_id:studentId,domains,items_per_domain:Number(itemsPerDomain)||5});
+   const r=await base44.functions.invoke('generateBaselineAssessment',{workspace:'para',student_id:studentId,domains,items_per_domain:Number(itemsPerDomain)||5,template_style:templateStyle});
    const a=r?.data?.assessment||r?.assessment;
    if(!a?.domains?.length)throw new Error('CaseCue did not return assessment items.');
    const rec=await base44.entities.BaselineAssessment.create({
@@ -148,7 +150,7 @@ export default function ParaBaseline(){
      <div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-blue-700"/><h2 className="font-black">Build an instructional baseline</h2></div>
      <p className="mt-1 text-sm text-slate-500">Pick the areas the teacher needs data for. CaseCue creates original, grade-appropriate items and an answer/scoring guide.</p>
      <div className="mt-4 flex flex-wrap gap-2">{DOMAINS.map(d=><button key={d} onClick={()=>toggle(d)} className={"rounded-full border px-3 py-2 text-xs font-bold "+(domains.includes(d)?'border-blue-600 bg-blue-50 text-blue-800':'bg-white text-slate-600')}>{domains.includes(d)?'✓ ':''}{d}</button>)}</div>
-     <div className="mt-4 flex flex-wrap items-end gap-3"><div><div className="text-xs font-black">Items per area</div><Input className="mt-1 w-28" type="number" min="3" max="10" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><Button onClick={generate} disabled={busy||!studentId}>{busy?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<ClipboardCheck className="mr-2 h-4 w-4"/>}Create Baseline</Button></div>
+     <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_auto]"><div><div className="text-xs font-black">Assessment example style</div><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={templateStyle} onChange={e=>setTemplateStyle(e.target.value)}>{STYLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><div className="mt-1 text-[11px] text-slate-500">Uses the same kinds of formats as your sample packet—original CaseCue content, not copied worksheets.</div></div><div><div className="text-xs font-black">Items per area</div><Input className="mt-1 w-28" type="number" min="3" max="10" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><div className="self-end"><Button onClick={generate} disabled={busy||!studentId}>{busy?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<ClipboardCheck className="mr-2 h-4 w-4"/>}Create Baseline</Button></div>
     </Card>
     {records.length>0&&<Card className="p-4"><div className="text-sm font-black">Saved baselines</div><select className="mt-2 w-full rounded-lg border p-2 text-sm" value={current?.id||''} onChange={e=>selectRecord(records.find(r=>r.id===e.target.value)||null)}>{records.map(r=><option key={r.id} value={r.id}>{r.title} · {r.administered_date||'No date'} · {r.status}</option>)}</select></Card>}
     {current?.assessment&&<Card className="p-6 baseline-print-area">
