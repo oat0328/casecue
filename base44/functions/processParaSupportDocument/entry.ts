@@ -5,18 +5,24 @@ const SCHEMA={type:'object',properties:{
  eligibility_categories:{type:'array',items:{type:'string'}},
  documented_disability_or_condition:{type:'array',items:{type:'string'}},
  educational_impact:{type:'array',items:{type:'string'}},
+ documented_strengths:{type:'array',items:{type:'string'}},
+ documented_needs:{type:'array',items:{type:'string'}},
+ present_levels:{type:'array',items:{type:'string'}},
+ goals_and_objectives:{type:'array',items:{type:'string'}},
  accommodations:{type:'array',items:{type:'string'}},
  behavior_supports:{type:'array',items:{type:'string'}},
  communication_supports:{type:'array',items:{type:'string'}},
  health_safety_alerts:{type:'array',items:{type:'string'}},
  emergency_actions:{type:'array',items:{type:'string'}},
  services_and_supports:{type:'array',items:{type:'string'}},
+ service_delivery_details:{type:'array',items:{type:'string'}},
+ classroom_strategies:{type:'array',items:{type:'string'}},
  testing_supports:{type:'array',items:{type:'string'}},
  what_to_do:{type:'array',items:{type:'string'}},
  what_to_avoid:{type:'array',items:{type:'string'}},
  plain_language_summary:{type:'string'},
  source_notes:{type:'array',items:{type:'string'}}
-},required:['document_type','eligibility_categories','documented_disability_or_condition','educational_impact','accommodations','behavior_supports','communication_supports','health_safety_alerts','emergency_actions','services_and_supports','testing_supports','what_to_do','what_to_avoid','plain_language_summary','source_notes']};
+},required:['document_type','eligibility_categories','documented_disability_or_condition','educational_impact','documented_strengths','documented_needs','present_levels','goals_and_objectives','accommodations','behavior_supports','communication_supports','health_safety_alerts','emergency_actions','services_and_supports','service_delivery_details','classroom_strategies','testing_supports','what_to_do','what_to_avoid','plain_language_summary','source_notes']};
 
 export default async function(req){
  try{
@@ -47,11 +53,13 @@ STRICT EVIDENCE RULES:
 - Keep IDEA eligibility/disability categories separate from medical diagnoses/conditions.
 - If a medical or health condition is documented, state it exactly enough for safe school support, but do not invent medical advice.
 - Health/safety alerts and emergency actions must be copied or closely paraphrased from explicit school/medical-plan directions. If no emergency direction is present, do not make one up.
+- Extract documented strengths, needs, present levels/current performance, and current goals/objectives when explicitly present. Keep goal wording close enough to the source to preserve meaning, but summarize long legal text for day-to-day Para use.
 - Accommodations should include classroom, testing, timing, setting, presentation, response, organization, communication, sensory, and other explicitly documented supports.
 - Behavior supports should capture antecedent/prevention strategies, reinforcement, prompting/redirection, replacement behavior supports, crisis/safety directions, and staff response steps only when explicitly documented.
 - what_to_do should translate explicit school directions into concise Para action steps without changing their meaning.
 - what_to_avoid should only contain explicit restrictions, prohibited responses, known triggers, contraindications, or clearly stated practices to avoid.
-- services_and_supports may summarize related services/support frequencies only when they are stated. Do not assign service minutes or change placement.
+- services_and_supports may summarize related services/supports only when they are stated. service_delivery_details should capture explicit frequency, minutes, setting, group/individual delivery, and provider role when stated. Do not invent service minutes or change placement.
+- classroom_strategies should surface explicit instructional strategies, prompting hierarchy, visual supports, chunking, repetition, reinforcement, organizational supports, or other implementation directions the Para can actually use.
 - plain_language_summary should help a Para understand the student across the school day without pretending this replaces the original document or case-manager directions.
 - source_notes should identify uncertainties, unreadable sections, conflicting directions, expired/unclear dates, or items that require case-manager clarification.
 - Do not expose unrelated family history, financial information, or sensitive details that are not necessary to implement school support.
