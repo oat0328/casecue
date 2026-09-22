@@ -111,8 +111,10 @@ export default function UploadCenterTab({ student, onProfileBuilt, onNavigate })
     setUploading(true);
     try {
       const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+      const me = await base44.auth.me();
+      const organization_id = me?.organization_id || me?.data?.organization_id || student.organization_id || '';
       const record = await base44.entities.Document.create({
-        filename: file.name, file_url: file_uri, student_id: student.id,
+        filename: file.name, file_url: file_uri, student_id: student.id, organization_id,
         document_type: docType, iep_role: docType === "IEP" ? iepRole : "supporting", date_uploaded: new Date().toISOString().slice(0, 10),
         extraction_status: "pending", review_status: "none", is_private: true,
       });
