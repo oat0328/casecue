@@ -24,6 +24,8 @@ const CATEGORY_LABELS = {
 export default function IEPReview() {
   const { toast } = useToast();
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
+  const { data: allGoals } = useAsync(() => base44.entities.Goal.list('-updated_date', 1000), []);
+  const { data: allDocs } = useAsync(() => base44.entities.Document.list('-date_uploaded', 1000), []);
   const [studentId, setStudentId] = useState("");
   const [running, setRunning] = useState(false);
   const [review, setReview] = useState(null);
@@ -60,10 +62,15 @@ export default function IEPReview() {
 
   const findings = review?.findings || [];
   const attentionCount = findings.filter((f) => f.level !== "good").length;
+  const activeStudents=(students||[]).filter(s=>s.status!=='exited'&&s.roster_status!=='archived');
+  const healthRows=activeStudents.map(s=>{const gs=(allGoals||[]).filter(g=>g.student_id===s.id&&String(g.status||'active')!=='met');const ds=(allDocs||[]).filter(d=>d.student_id===s.id);const hasIep=ds.some(d=>d.document_type==='IEP'&&d.extraction_status==='processed');const missing=[];if(!hasIep)missing.push('processed IEP');if(!gs.length)missing.push('active goals');if(!String(s.accommodations||'').trim())missing.push('accommodations');if(!(s.services||[]).length&&!Number(s.service_minutes||0))missing.push('services/minutes');if(!s.annual_review_due)missing.push('annual review date');if(!s.reevaluation_due)missing.push('reevaluation date');return {s,missing,hasIep,goals:gs.length}});
+  const healthyCount=healthRows.filter(x=>x.missing.length===0).length,needsDataCount=healthRows.length-healthyCount;
 
   return (
     <div>
       <PageHeader title="CaseCue Check" subtitle="Review IEP readiness, missing information, data alignment, services/accommodations, progress monitoring, and document consistency. This is a quality-support check — not a legal compliance determination." icon={ShieldCheck} />
+
+      <Card className="p-6 mb-6"><div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-blue-700">Caseload Data Health</div><h2 className="mt-1 text-xl font-black">IEP completeness before you work</h2><p className="mt-1 text-sm text-slate-500">This checks whether CaseCue has the core structured data it needs. Missing items are review prompts, not legal compliance findings.</p></div><div className="flex gap-2"><div className="rounded-xl bg-emerald-50 px-4 py-3 text-center"><div className="text-2xl font-black text-emerald-800">{healthyCount}</div><div className="text-[10px] font-black uppercase text-emerald-700">Complete</div></div><div className="rounded-xl bg-amber-50 px-4 py-3 text-center"><div className="text-2xl font-black text-amber-800">{needsDataCount}</div><div className="text-[10px] font-black uppercase text-amber-700">Needs review</div></div></div></div><div className="mt-4 max-h-72 overflow-auto rounded-xl border"><div className="divide-y">{healthRows.map(({s,missing,goals})=><button key={s.id} onClick={()=>{setStudentId(s.id);setReview(null);setFixResult({})}} className="flex w-full items-center justify-between gap-3 p-3 text-left hover:bg-slate-50"><div><div className="font-bold">{s.last_name}, {s.first_name}</div><div className="text-xs text-slate-500">{goals} active goal{goals===1?'':'s'}</div></div><div className={`text-right text-xs font-bold ${missing.length?'text-amber-700':'text-emerald-700'}`}>{missing.length?`Review: ${missing.join(' · ')}`:'Core IEP data present'}</div></button>)}</div></div></Card>
 
       <Card className="p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
