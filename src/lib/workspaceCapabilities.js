@@ -70,6 +70,7 @@ export const WORKSPACE_TOOLS = {
       ['Nurse Today','/w/nurse',HeartPulse],
       ['Schedule','/w/nurse/schedule',CalendarClock],
       ['Attendance','/w/nurse/attendance',UserCheck],
+      ['Notes & Follow-Up','/w/nurse/notes',StickyNote],
     ],
   },
   psych: {
@@ -78,6 +79,7 @@ export const WORKSPACE_TOOLS = {
       ['Psych Workspace','/w/psych',Brain],
       ['Schedule','/w/psych/schedule',CalendarClock],
       ['Attendance','/w/psych/attendance',UserCheck],
+      ['Notes & Observations','/w/psych/notes',StickyNote],
     ],
   },
   substitute: {
