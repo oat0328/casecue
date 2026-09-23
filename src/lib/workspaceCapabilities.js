@@ -36,6 +36,7 @@ export const WORKSPACE_TOOLS = {
   para: {
     home: '/w/para',
     nav: [
+      ['Family Friday','/w/para/weekly-contact',StickyNote],
       ['Today & Capture','/w/para',GraduationCap],
       ['Schedule','/w/para/schedule',CalendarClock],
       ['Attendance','/w/para/attendance',UserCheck],
@@ -49,6 +50,7 @@ export const WORKSPACE_TOOLS = {
   speech: {
     home: '/w/speech',
     nav: [
+      ['Family Friday','/w/speech/weekly-contact',StickyNote],
       ['Today & Sessions','/w/speech',GraduationCap],
       ['Schedule','/w/speech/schedule',CalendarClock],
       ['Attendance','/w/speech/attendance',UserCheck],
@@ -60,6 +62,7 @@ export const WORKSPACE_TOOLS = {
   ot: {
     home: '/w/ot',
     nav: [
+      ['Family Friday','/w/ot/weekly-contact',StickyNote],
       ['OT Sessions','/w/ot',Activity],
       ['Schedule','/w/ot/schedule',CalendarClock],
       ['Attendance','/w/ot/attendance',UserCheck],
@@ -70,6 +73,7 @@ export const WORKSPACE_TOOLS = {
   nurse: {
     home: '/w/nurse',
     nav: [
+      ['Family Friday','/w/nurse/weekly-contact',StickyNote],
       ['Nurse Today','/w/nurse',HeartPulse],
       ['Schedule','/w/nurse/schedule',CalendarClock],
       ['Attendance','/w/nurse/attendance',UserCheck],
@@ -80,6 +84,7 @@ export const WORKSPACE_TOOLS = {
   psych: {
     home: '/w/psych',
     nav: [
+      ['Family Friday','/w/psych/weekly-contact',StickyNote],
       ['Psych Workspace','/w/psych',Brain],
       ['Schedule','/w/psych/schedule',CalendarClock],
       ['Attendance','/w/psych/attendance',UserCheck],
@@ -90,6 +95,7 @@ export const WORKSPACE_TOOLS = {
   substitute: {
     home: '/w/substitute',
     nav: [
+      ['Family Friday','/w/substitute/weekly-contact',StickyNote],
       ['Substitute Day','/w/substitute',GraduationCap],
       ['Schedule','/w/substitute/schedule',CalendarClock],
       ['Attendance','/w/substitute/attendance',UserCheck],
@@ -102,6 +108,7 @@ export const WORKSPACE_TOOLS = {
   pe: {
     home: '/w/pe',
     nav: [
+      ['Family Friday','/w/pe/weekly-contact',StickyNote],
       ['PE Planner','/w/pe',GraduationCap],
       ['Schedule','/w/pe/schedule',CalendarClock],
       ['Attendance','/w/pe/attendance',UserCheck],

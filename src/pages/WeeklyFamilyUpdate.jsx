@@ -12,6 +12,7 @@ import{Input}from'@/components/ui/input';
 import{Card}from'@/components/ui/cards';
 import{PremiumLineChart,PremiumBarChart,PremiumDonutChart}from'@/components/shared/PremiumAnalytics';
 import AnalyticsPdfButton from'@/components/shared/AnalyticsPdfButton';
+import FamilyFridayLottery from'@/components/progressReports/FamilyFridayLottery';
 
 const iso=d=>{const x=new Date(d),o=x.getTimezoneOffset();return new Date(x.getTime()-o*60000).toISOString().slice(0,10)};
 const schoolWeek=(offset=0)=>{const d=new Date();const weekday=(d.getDay()+6)%7;d.setDate(d.getDate()-weekday+(offset*7));const start=iso(d),f=new Date(d);f.setDate(f.getDate()+4);return{start,end:iso(f)}};
@@ -88,6 +89,8 @@ export default function WeeklyFamilyUpdate(){
   </section>
 
   {workspace==='para'&&<Card className="border-amber-200 bg-amber-50 p-5 text-sm text-amber-950"><AlertTriangle className="mr-2 inline h-4 w-4"/><b>Para workflow:</b> CaseCue can draft the update from the assigned student's records and your documented support data, but the family-facing message should be reviewed by the teacher/case manager before it is distributed.</Card>}
+
+  <FamilyFridayLottery workspace={workspace} students={students} weekStart={weekStart} weekEnd={weekEnd} onPick={setStudentId}/>
 
   <Card className="p-6">
    <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr_1fr_auto]">
