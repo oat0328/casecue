@@ -57,9 +57,18 @@ export default function GroupSessionForm({ students, goals, recentActivities, on
       qualitative: p.note || "",
       tags: p.tags || [],
       group_session_id: groupId,
+      organization_id:user?.organization_id||user?.data?.organization_id||'',
     };
     await base44.entities.SessionRecord.create(record);
-    if (!silent) toast({ title: "Session saved", description: "A separate private record was created for this student." });
+    const attendanceStatuses=['completed','partially_completed','makeup_session','refused','student_absent'];
+    if(attendanceStatuses.includes(record.status)){
+      const attendanceStatus=record.status==='student_absent'?'absent':'present';
+      const existing=await base44.entities.AttendanceRecord.filter({user_id:user.id,workspace:'sped',student_id:record.student_id,date:record.date,scope:'schedule_block',schedule_start_time:record.start_time||''},'-updated_at',5);
+      const student=(students||[]).find(s=>s.id===record.student_id);
+      const attendance={organization_id:record.organization_id,user_id:user.id,workspace:'sped',student_id:record.student_id,student_name_snapshot:student?`${student.first_name||''} ${student.last_name||''}`.trim():'',grade_snapshot:student?.grade||'',date:record.date,status:attendanceStatus,note:`Auto-synced from Session Tracker${record.activity?`: ${record.activity}`:''}`,scope:'schedule_block',schedule_label:record.activity||record.service_type||'Session Tracker',schedule_start_time:record.start_time||'',schedule_end_time:record.end_time||'',recorded_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+      if(existing?.[0]?.id)await base44.entities.AttendanceRecord.update(existing[0].id,attendance);else await base44.entities.AttendanceRecord.create(attendance);
+    }
+    if (!silent) toast({ title: "Session saved", description: "A separate private record was created and service attendance synced when applicable." });
   };
 
   const saveCurrentAndNext = async () => {
@@ -92,6 +101,7 @@ export default function GroupSessionForm({ students, goals, recentActivities, on
           quantitative: p.correct != null || p.total != null ? { measurement_type: "accuracy", correct: p.correct ?? "", total: p.total ?? "" } : {},
           qualitative: p.note || "", tags: p.tags || [],
           group_session_id: gid,
+          organization_id:user?.organization_id||user?.data?.organization_id||'',
         };
       });
       await base44.entities.SessionRecord.bulkCreate(records);
