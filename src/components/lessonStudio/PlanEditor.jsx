@@ -13,7 +13,6 @@ const ORDER_KEY = "casecue.lessonStudio.sectionOrder.v1";
 // and the accommodations block with verified IEP accommodations kept separate
 // from System suggestions.
 export default function PlanEditor({ plan, onChange, verifiedAccommodations = [] }) {
-  if (!plan) return null;
   const set = (key, value) => onChange({ ...plan, [key]: value });
   const defaults = useMemo(() => LESSON_GROUPS.map(g => g.title), []);
   const [order, setOrder] = useState(() => {
@@ -35,6 +34,7 @@ export default function PlanEditor({ plan, onChange, verifiedAccommodations = []
     });
     setDragged(null);
   };
+  if (!plan) return null;
 
   return (
     <div className="space-y-6">
