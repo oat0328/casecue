@@ -110,7 +110,7 @@ export default function ParaBaseline(){
     teacher_confirmed:false,review_status:'needs_review',verification_status:'needs_teacher_review',evidence_strength:'needs_review'
    });
    const note=await base44.entities.ParaNote.create({
-    student_id:studentId,para_user_id:me.id,date:today(),context:'assessment',
+    student_id:studentId,organization_id:org,para_user_id:me.id,date:today(),context:'assessment',
     activity:'Baseline assessment package',objective_observation:packet.teacher_handoff||packet.overall_summary||'Baseline assessment package submitted.',
     follow_up:'Draft present levels, goal options, short-term objectives, and progress-monitoring recommendations are attached in the CaseCue assessment package.',
     status:'complete',review_status:'not_sent',baseline_assessment_id:current?.id||''
