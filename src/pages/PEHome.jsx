@@ -9,6 +9,7 @@ import{useAuth}from'@/lib/AuthContext';
 import{userDisplayName}from'@/lib/userIdentity';
 import{PremiumBarChart,PremiumDonutChart}from'@/components/shared/PremiumAnalytics';
 import AnalyticsPdfButton from'@/components/shared/AnalyticsPdfButton';
+import PEGameLibrary from'@/components/pe/PEGameLibrary';
 
 const bank={K:['Animal Adventure','Color Cone Chase','Freeze & Balance'],1:['Locomotor Quest','Beanbag Balance Relay','Mirror Moves'],2:['Shuttle Challenge','Throw & Catch Islands','Fitness Bingo'],3:['Cone Capture','Agility Quest','Target Toss'],4:['End-Zone Dash','Fitness Stations','Cooperative Challenge'],5:['Modified Handball','Circuit Challenge','Strategy Relay'],6:['Basketball Skill Quest','Interval Challenge','Ultimate Passing'],7:['Small-Sided Soccer','Agility Tournament','Strength Circuit'],8:['Volleyball Stations','Team Tournament','Conditioning Challenge']};
 
@@ -36,5 +37,6 @@ export default function PEHome(){
     <Link to='/w/pe/grade' className='block rounded-2xl border bg-white p-5 font-black'><ScanLine className='mr-2 inline h-5 w-5'/>Open Shared Gradebook →</Link>
    </section>
   </div>
+  <PEGameLibrary onUse={g=>{setFocus(g.skill);setEquipment(g.equipment);setPlan({warm:`5 min movement warm-up for ${g.skill}`,games:[{name:g.name,minutes:Math.max(10,Number(minutes)-10),how:`Setup: ${g.setup} Rules: ${g.rules.join(' ')}`}],close:'5 min cool-down + quick reflection'})}}/>
  </div>;
 }
