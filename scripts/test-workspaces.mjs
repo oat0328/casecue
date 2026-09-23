@@ -37,7 +37,7 @@ const weeklyGenerator=read('base44/functions/generateWeeklyFamilyUpdate/entry.ts
 const weeklySchema=read('base44/entities/WeeklyFamilyUpdate.jsonc');
 const userIdentity=read('src/lib/userIdentity.js');
 
-const concreteHomes=['para','speech','ot','substitute','pe','nurse'];
+const concreteHomes=['para','speech','ot','substitute','pe','nurse','psych','gen_ed'];
 for(const key of concreteHomes){
   ok('concrete home '+key,new RegExp('path="\\/w\\/'+key+'"').test(app),'missing concrete /w/'+key+' route');
 }
@@ -46,7 +46,7 @@ for(const generic of ['/w/:workspace/schedule','/w/:workspace/attendance','/w/:w
 }
 
 const requiredNav=[
- '/w/para/schedule','/w/para/attendance','/w/para/students','/w/para/grade','/w/para/baseline','/w/para/iep-guide','/w/para/weekly-contact','/w/para/notes',
+ '/w/para/schedule','/w/para/attendance','/w/para/students','/w/para/grade','/w/para/baseline','/w/para/iep-guide','/w/para/notes',
  '/w/speech/schedule','/w/speech/attendance','/w/speech/iep','/w/speech/notes',
  '/w/ot/schedule','/w/ot/attendance','/w/ot/notes',
  '/w/substitute/schedule','/w/substitute/attendance','/w/substitute/lesson','/w/substitute/grade','/w/substitute/notes',
@@ -91,8 +91,13 @@ ok('Analytics PDF draws graph data',analyticsExport.includes('drawBar')&&analyti
 for(const [role,text] of [['Para',paraHome],['Speech',speechHome],['OT',otHome],['PE',peHome],['Substitute',subHome],['Gen Ed',genEdHome]])ok(role+' dashboard uses premium analytics',text.includes('Premium')&&text.includes('AnalyticsPdfButton'),role+' analytics not wired');
 ok('SPED Data Center uses shared premium analytics',spedDataCenter.includes('PremiumLineChart')&&spedDataCenter.includes('PremiumDonutChart')&&spedDataCenter.includes('AnalyticsPdfButton'),'SPED premium analytics not wired');
 ok('Para avoids raw browser prompts and handwritten print pages',!paraHome.includes('window.prompt(')&&!paraHome.includes('window.print(')&&paraHome.includes('AddGroupDialog')&&paraHome.includes('ExportBar'),'Para raw prompt/print regression returned');
-ok('Weekly family update routes exist for SPED Gen Ed and Para',app.includes('path="/weekly-contact"')&&app.includes('path="/w/gen_ed/weekly-contact"')&&app.includes('path="/w/para/weekly-contact"'),'weekly family routes missing');
-ok('Weekly family update nav exists for all three roles',caps.includes("'/weekly-contact'")&&caps.includes("'/w/gen_ed/weekly-contact'")&&caps.includes("'/w/para/weekly-contact'"),'weekly family nav missing');
+ok('Para observation supports fact-preserving AI cleanup',paraHome.includes('Clean Up with CaseCue AI')&&paraHome.includes('Preserve every fact')&&paraHome.includes('Do not diagnose'),'Para AI observation cleanup missing');
+const peGames=read('src/components/pe/PEGameLibrary.jsx');
+ok('PE includes real visual game library',peHome.includes('PEGameLibrary')&&peGames.includes('Capture the Flag')&&peGames.includes('Four Square')&&peGames.includes('Kickball')&&peGames.includes('Ultimate Frisbee')&&peGames.includes('Diagram'),'PE real-game visual library missing');
+const workspaceStudents=read('src/pages/WorkspaceStudents.jsx');
+ok('Shared workspaces have student roster route',app.includes('path="/w/:workspace/students"')&&workspaceStudents.includes('entities.Student.create'),'shared student roster/create flow missing');
+ok('Weekly family update routes exist for SPED and Gen Ed only',app.includes('path="/weekly-contact"')&&app.includes('path="/w/gen_ed/weekly-contact"')&&!app.includes('path="/w/para/weekly-contact"'),'family update route boundary is wrong');
+ok('Para has no family contact navigation',!caps.includes("'/w/para/weekly-contact'")&&!caps.includes("'/w/para/contact'"),'Para family contact navigation returned');
 ok('Weekly family generator enforces Para assignment',weeklyGenerator.includes('ParaStudentAccess.filter')&&weeklyGenerator.includes('not assigned to your Para account'),'weekly family Para assignment guard missing');
 ok('Weekly family math separates course grade and assignment score',weeklyGenerator.includes('scorePct')&&weeklyGenerator.includes('weekly_assignment_average')&&weeklyGenerator.includes('latest_course_grades'),'weekly grade math separation missing');
 ok('Weekly family AI forbids invented scores and diagnoses',weeklyGenerator.includes('Never invent grades')&&weeklyGenerator.includes('Do not mention disability'),'weekly family grounding rules missing');
