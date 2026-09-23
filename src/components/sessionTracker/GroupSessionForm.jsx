@@ -105,7 +105,15 @@ export default function GroupSessionForm({ students, goals, recentActivities, on
         };
       });
       await base44.entities.SessionRecord.bulkCreate(records);
-      toast({ title: `${records.length} sessions saved`, description: "Each student has a separate private record." });
+      const attendanceStatuses=['completed','partially_completed','makeup_session','refused','student_absent'];
+      for(const record of records.filter(r=>attendanceStatuses.includes(r.status))){
+        const attendanceStatus=record.status==='student_absent'?'absent':'present';
+        const existing=await base44.entities.AttendanceRecord.filter({user_id:user.id,workspace:'sped',student_id:record.student_id,date:record.date,scope:'schedule_block',schedule_start_time:record.start_time||''},'-updated_at',5);
+        const student=(students||[]).find(s=>s.id===record.student_id);
+        const attendance={organization_id:record.organization_id,user_id:user.id,workspace:'sped',student_id:record.student_id,student_name_snapshot:student?`${student.first_name||''} ${student.last_name||''}`.trim():'',grade_snapshot:student?.grade||'',date:record.date,status:attendanceStatus,note:`Auto-synced from Session Tracker${record.activity?`: ${record.activity}`:''}`,scope:'schedule_block',schedule_label:record.activity||record.service_type||'Session Tracker',schedule_start_time:record.start_time||'',schedule_end_time:record.end_time||'',recorded_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+        if(existing?.[0]?.id)await base44.entities.AttendanceRecord.update(existing[0].id,attendance);else await base44.entities.AttendanceRecord.create(attendance);
+      }
+      toast({ title: `${records.length} sessions saved`, description: "Each student has a separate private record; service attendance synced when applicable." });
       setPer({});
       setSelectedIds([]);
       setActiveIdx(0);
