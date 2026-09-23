@@ -75,6 +75,8 @@ export default function Gradebook() {
     try {
       const me=await base44.auth.me(),organization_id=me?.organization_id||me?.data?.organization_id||'';
       const paraSubmission=workspaceKey==='para';
+      const duplicate=(assignments||[]).find(a=>a.student_id===form.student_id&&normalize(a.title)===normalize(form.title)&&String(a.date||'')===String(form.date||'')&&Number(a.score_earned||0)===Number(form.score_earned||0)&&Number(a.score_possible||0)===Number(form.score_possible||0));
+      if(duplicate)throw new Error('That grade is already saved for this student and date. Edit the existing grade instead of adding a duplicate.');
       await base44.entities.GradebookAssignment.create({ ...form, organization_id, score_earned: Number(form.score_earned) || 0, score_possible: Number(form.score_possible) || 0, current_grade_percent: form.current_grade_percent === "" ? null : Number(form.current_grade_percent), source_type:paraSubmission?'para_manual_submission':`${workspaceKey}_manual_grade`, verification_status:paraSubmission?'needs_teacher_review':'teacher_confirmed', approved_by:paraSubmission?'':me.id, approved_at:paraSubmission?'':new Date().toISOString() });
       setForm(emptyForm()); refetch(); toast({ title: paraSubmission?"Grade draft submitted for teacher review":"Grade added" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
