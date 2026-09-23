@@ -7,7 +7,7 @@ import{Button}from'@/components/ui/button';
 import{PremiumLineChart,PremiumDonutChart}from'@/components/shared/PremiumAnalytics';
 import AnalyticsPdfButton from'@/components/shared/AnalyticsPdfButton';
 
-const actions=[['Teach','Open lessons and classroom resources.','/instruction/lessons',BookOpen],['Grade My Class','Scan a stack or import classroom grades.','/w/gen_ed/grade',ClipboardCheck],['Groups & Reteach','Use verified performance to plan tomorrow.','/w/gen_ed/groups',Users],['Parent Contact','Create a clear classroom update.','/w/gen_ed/contact',MessageSquare]];
+const actions=[['Teach','Open lessons and classroom resources.','/w/gen_ed/lesson',BookOpen],['Grade My Class','Scan a stack or import classroom grades.','/w/gen_ed/grade',ClipboardCheck],['Groups & Reteach','Use verified performance to plan tomorrow.','/w/gen_ed/groups',Users],['Parent Contact','Create a clear classroom update.','/w/gen_ed/contact',MessageSquare]];
 const pct=x=>x.current_grade_percent!=null?Number(x.current_grade_percent):(Number(x.score_possible)>0?Number(x.score_earned)/Number(x.score_possible)*100:null);
 
 export default function GenEdHome(){
