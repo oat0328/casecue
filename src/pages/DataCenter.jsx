@@ -51,7 +51,8 @@ export default function DataCenter() {
     const decimal = total > 0 ? Math.round((correct / total) * 100) / 100 : 0;
     setSaving(true);
     try {
-      await base44.entities.ProgressData.create({ ...form, correct, total, percentage, decimal });
+      const me=await base44.auth.me();
+      await base44.entities.ProgressData.create({ ...form, correct, total, percentage, decimal, organization_id:me?.organization_id||me?.data?.organization_id||'' });
       setForm({ student_id: "", goal_id: "", date: new Date().toISOString().slice(0,10), correct: "", total: "", prompting_level: "independent", observation_notes: "" });
       refetch(); toast({ title: "Progress data logged" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
