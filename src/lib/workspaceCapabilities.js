@@ -24,7 +24,7 @@ export const WORKSPACE_TOOLS = {
       ['Today','/w/gen_ed',GraduationCap],
       ['Schedule','/w/gen_ed/schedule',CalendarClock],
       ['Attendance','/w/gen_ed/attendance',UserCheck],
-      ['Lessons','/instruction/lessons',BookOpen],
+      ['Lessons','/w/gen_ed/lesson',BookOpen],
       ['GradeCue','/w/gen_ed/grade',ScanLine],
       ['Groups & Reteach','/w/gen_ed/groups',Users],
       ['IEP & Accommodations','/w/gen_ed/iep-access',FileText],
