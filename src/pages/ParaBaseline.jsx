@@ -11,6 +11,7 @@ import{printDoc}from'@/lib/docExport';
 import{printParaBaselinePacket}from'@/lib/paraBaselinePrint';
 
 const DOMAINS=['Reading','Writing','Math','Executive Function','Social-Emotional / Behavior','Communication','Functional / Adaptive'];
+const GRADES=['K','1','2','3','4','5','6','7','8','9','10','11','12'];
 const STYLES=[['mixed','Mixed skill probe'],['passage_evidence','Passage + text evidence'],['computation_grid','Computation grid'],['fluency_probe','Reading fluency / WCPM'],['word_problems','Math word problems'],['sentence_conventions','Sentence conventions / conjunctions'],['fractions','Fractions'],['math_fluency','Math fluency facts']];
 const today=()=>new Date().toLocaleDateString('en-CA');
 const full=s=>s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student';
@@ -21,6 +22,7 @@ export default function ParaBaseline(){
  const assigned=(students||[]).filter(s=>s.active!==false&&!String(s.student_id||'').startsWith('para_'));
  const[studentId,setStudentId]=useState('');
  const[domains,setDomains]=useState(['Reading','Math']);
+ const[gradeLevel,setGradeLevel]=useState('');
  const[itemsPerDomain,setItemsPerDomain]=useState(5);
  const[templateStyle,setTemplateStyle]=useState('mixed');
  const[records,setRecords]=useState([]);
@@ -40,20 +42,21 @@ export default function ParaBaseline(){
   const pick=(rows||[]).find(x=>x.id===select)||(rows||[])[0]||null;
   selectRecord(pick);
  };
- const chooseStudent=async id=>{setStudentId(id);setFile(null);setResult(null);setPacket(null);await loadRecords(id)};
+ const chooseStudent=async id=>{setStudentId(id);const picked=assigned.find(s=>s.student_id===id);setGradeLevel(String(picked?.grade||''));setFile(null);setResult(null);setPacket(null);await loadRecords(id)};
 
  const toggle=d=>setDomains(v=>v.includes(d)?v.filter(x=>x!==d):[...v,d]);
  const generate=async()=>{
   if(!studentId||!domains.length)return toast({title:'Choose a student and at least one assessment area'});
+  if(!gradeLevel)return toast({title:'Choose a K-12 grade level'});
   setBusy(true);
   try{
    const me=await base44.auth.me();
-   const r=await base44.functions.invoke('generateBaselineAssessment',{workspace:'para',student_id:studentId,domains,items_per_domain:Number(itemsPerDomain)||5,template_style:templateStyle});
+   const r=await base44.functions.invoke('generateBaselineAssessment',{workspace:'para',student_id:studentId,grade_level:gradeLevel,domains,items_per_domain:Number(itemsPerDomain)||5,template_style:templateStyle});
    const a=r?.data?.assessment||r?.assessment;
    if(!a?.domains?.length)throw new Error('CaseCue did not return assessment items.');
    const rec=await base44.entities.BaselineAssessment.create({
     student_id:studentId,organization_id:me?.organization_id||me?.data?.organization_id||'',
-    title:a.title||'Baseline Assessment',grade:meStudent?.grade||'',domains,status:'ready',
+    title:a.title||'Baseline Assessment',grade:gradeLevel,domains,status:'ready',
     assessment:a,results:{items:[]},administered_date:today()
    });
    await loadRecords(studentId,rec.id);
@@ -129,8 +132,8 @@ export default function ParaBaseline(){
 
  return <div className="space-y-6">
   <section className="rounded-[30px] bg-slate-950 p-8 text-white">
-   <div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">CaseCue Para · Assessments</div>
-   <h1 className="mt-3 text-3xl font-black">Give the assessment. Scan it. Hand the teacher the facts.</h1>
+   <div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">BaselineCue · K-12 Assessment + Grading</div>
+   <h1 className="mt-3 text-3xl font-black">Create it. Give it. Scan it. Grade it. One spot.</h1>
    <p className="mt-3 max-w-3xl text-slate-300">Create an instructional baseline or upload one the teacher gave you. CaseCue scores the completed work and prepares the measurable facts, draft present levels, goal options, short-term objectives, and progress-monitoring ideas for teacher review.</p>
   </section>
 
@@ -150,7 +153,7 @@ export default function ParaBaseline(){
      <div className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-blue-700"/><h2 className="font-black">Build an instructional baseline</h2></div>
      <p className="mt-1 text-sm text-slate-500">Pick the areas the teacher needs data for. CaseCue creates original, grade-appropriate items and an answer/scoring guide.</p>
      <div className="mt-4 flex flex-wrap gap-2">{DOMAINS.map(d=><button key={d} onClick={()=>toggle(d)} className={"rounded-full border px-3 py-2 text-xs font-bold "+(domains.includes(d)?'border-blue-600 bg-blue-50 text-blue-800':'bg-white text-slate-600')}>{domains.includes(d)?'✓ ':''}{d}</button>)}</div>
-     <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_auto]"><div><div className="text-xs font-black">Assessment example style</div><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={templateStyle} onChange={e=>setTemplateStyle(e.target.value)}>{STYLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><div className="mt-1 text-[11px] text-slate-500">Uses the same kinds of formats as your sample packet—original CaseCue content, not copied worksheets.</div></div><div><div className="text-xs font-black">Items per area</div><Input className="mt-1 w-28" type="number" min="3" max="10" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><div className="self-end"><Button onClick={generate} disabled={busy||!studentId}>{busy?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<ClipboardCheck className="mr-2 h-4 w-4"/>}Create Baseline</Button></div></div>
+     <div className="mt-4 grid gap-3 md:grid-cols-[150px_1fr_auto_auto]"><div><div className="text-xs font-black">K-12 grade</div><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={gradeLevel} onChange={e=>setGradeLevel(e.target.value)}><option value="">Choose grade</option>{GRADES.map(g=><option key={g} value={g}>{g==='K'?'Kindergarten':`Grade ${g}`}</option>)}</select></div><div><div className="text-xs font-black">Assessment example style</div><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={templateStyle} onChange={e=>setTemplateStyle(e.target.value)}>{STYLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><div className="mt-1 text-[11px] text-slate-500">Uses the same kinds of formats as your sample packet—original CaseCue content, not copied worksheets.</div></div><div><div className="text-xs font-black">Items per area</div><Input className="mt-1 w-28" type="number" min="3" max="10" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><div className="self-end"><Button onClick={generate} disabled={busy||!studentId}>{busy?<Loader2 className="mr-2 h-4 w-4 animate-spin"/>:<ClipboardCheck className="mr-2 h-4 w-4"/>}Create Baseline</Button></div></div>
     </Card>
     {records.length>0&&<Card className="p-4"><div className="text-sm font-black">Saved baselines</div><select className="mt-2 w-full rounded-lg border p-2 text-sm" value={current?.id||''} onChange={e=>selectRecord(records.find(r=>r.id===e.target.value)||null)}>{records.map(r=><option key={r.id} value={r.id}>{r.title} · {r.administered_date||'No date'} · {r.status}</option>)}</select></Card>}
     {current?.assessment&&<Card className="p-6 baseline-print-area">
