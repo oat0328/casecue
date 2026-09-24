@@ -28,7 +28,7 @@ export const WORKSPACE_TOOLS = {
       ['Students','/w/gen_ed/students',Users],
       ['Lessons','/w/gen_ed/lesson',BookOpen],
       ['GradeCue','/w/gen_ed/grade',ScanLine],
-      ['BaselineCue','/w/para/baseline',FileText],
+      ['BaselineCue','/w/gen_ed/baseline',FileText],
       ['Groups & Reteach','/w/gen_ed/groups',Users],
       ['IEP & Accommodations','/w/gen_ed/iep-access',FileText],
       ['Weekly Family Update','/w/gen_ed/weekly-contact',StickyNote],
