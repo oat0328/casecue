@@ -18,8 +18,10 @@ const full=s=>s?((s.first_name||'')+' '+(s.last_name||'')).trim():'Student';
 
 export default function ParaBaseline(){
  const{toast}=useToast(),fileRef=useRef(null);
- const{data:students}=useAsync(()=>base44.entities.ParaStudentAccess.list('-last_name',500),[]);
- const assigned=(students||[]).filter(s=>s.active!==false&&!String(s.student_id||'').startsWith('para_'));
+ const{data:paraStudents}=useAsync(()=>base44.entities.ParaStudentAccess.list('-last_name',500),[]);
+ const{data:rosterStudents}=useAsync(()=>base44.entities.Student.list('last_name',500),[]);
+ const path=window.location.pathname;const genEdMode=path.includes('/w/gen_ed/');
+ const assigned=genEdMode?(rosterStudents||[]).filter(s=>s.status!=='inactive'&&s.roster_status!=='withdrawn').map(s=>({...s,student_id:s.id})):(paraStudents||[]).filter(s=>s.active!==false&&!String(s.student_id||'').startsWith('para_'));
  const[studentId,setStudentId]=useState('');
  const[domains,setDomains]=useState(['Reading','Math']);
  const[gradeLevel,setGradeLevel]=useState('');
@@ -32,6 +34,7 @@ export default function ParaBaseline(){
  const[result,setResult]=useState(null);
  const[packet,setPacket]=useState(null);
  const meStudent=assigned.find(s=>s.student_id===studentId)||null;
+ const workspaceLabel=genEdMode?'Gen Ed':'Para';
  const chooseFile=f=>{setFile(f||null);setResult(null);setPacket(null)};
 
  const selectRecord=rec=>{setCurrent(rec||null);const saved=rec?.analysis||{};setResult(saved.grading||null);setPacket(saved.teacher_packet||null)};
@@ -51,7 +54,7 @@ export default function ParaBaseline(){
   setBusy(true);
   try{
    const me=await base44.auth.me();
-   const r=await base44.functions.invoke('generateBaselineAssessment',{workspace:'para',student_id:studentId,grade_level:gradeLevel,domains,items_per_domain:Number(itemsPerDomain)||5,template_style:templateStyle});
+   const r=await base44.functions.invoke('generateBaselineAssessment',{workspace:genEdMode?'gen_ed':'para',student_id:studentId,grade_level:gradeLevel,domains,items_per_domain:Number(itemsPerDomain)||5,template_style:templateStyle});
    const a=r?.data?.assessment||r?.assessment;
    if(!a?.domains?.length)throw new Error('CaseCue did not return assessment items.');
    const rec=await base44.entities.BaselineAssessment.create({
@@ -132,17 +135,17 @@ export default function ParaBaseline(){
 
  return <div className="space-y-6">
   <section className="rounded-[30px] bg-slate-950 p-8 text-white">
-   <div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">BaselineCue · K-12 Assessment + Grading</div>
+   <div className="text-xs font-black uppercase tracking-[.2em] text-sky-300">BaselineCue · {workspaceLabel} · K-12 Assessment + Grading</div>
    <h1 className="mt-3 text-3xl font-black">Create it. Give it. Scan it. Grade it. One spot.</h1>
    <p className="mt-3 max-w-3xl text-slate-300">Create an instructional baseline or upload one the teacher gave you. CaseCue scores the completed work and prepares the measurable facts, draft present levels, goal options, short-term objectives, and progress-monitoring ideas for teacher review.</p>
   </section>
 
   <Card className="p-5">
-   <div className="text-sm font-black">Assigned student</div>
+   <div className="text-sm font-black">{genEdMode?'Student':'Assigned student'}</div>
    <select className="mt-2 w-full max-w-xl rounded-lg border bg-white p-2 text-sm" value={studentId} onChange={e=>chooseStudent(e.target.value)}>
     <option value="">Choose student…</option>{assigned.map(s=><option key={s.id} value={s.student_id}>{s.last_name}, {s.first_name} · Grade {s.grade||'—'}</option>)}
    </select>
-   {!assigned.length&&<div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">No students are assigned to this Para account yet.</div>}
+   {!assigned.length&&<div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{genEdMode?'No students are available in this workspace yet.':'No students are assigned to this Para account yet.'}</div>}
   </Card>
 
   <Tabs defaultValue="create">
