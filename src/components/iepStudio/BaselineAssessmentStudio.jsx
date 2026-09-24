@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ClipboardCheck, Sparkles, Printer, Save, BarChart3, Target, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 
 const DOMAINS=["Reading","Writing","Math","Executive Function","Social-Emotional / Behavior","Communication","Functional / Adaptive"];
+const GRADES=['K','1','2','3','4','5','6','7','8','9','10','11','12'];
 const STYLES=[["mixed","Mixed skill probe"],["passage_evidence","Passage + text evidence"],["computation_grid","Computation grid"],["fluency_probe","Reading fluency / WCPM"],["word_problems","Math word problems"],["sentence_conventions","Sentence conventions / conjunctions"],["fractions","Fractions"],["math_fluency","Math fluency facts"]];
 const localISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const prettyDate=v=>{if(!v)return 'Not entered';const [y,m,d]=String(v).split('-');return y&&m&&d?`${m}/${d}/${y}`:v};
@@ -15,6 +16,7 @@ const prettyDate=v=>{if(!v)return 'Not entered';const [y,m,d]=String(v).split('-
 export default function BaselineAssessmentStudio({student}){
   const {toast}=useToast();
   const [domains,setDomains]=useState(["Reading","Writing","Math"]);
+  const [gradeLevel,setGradeLevel]=useState(String(student.grade||''));
   const [itemsPerDomain,setItemsPerDomain]=useState(6);
   const [templateStyle,setTemplateStyle]=useState('mixed');
   const [records,setRecords]=useState([]);
@@ -29,7 +31,7 @@ export default function BaselineAssessmentStudio({student}){
     const pick=(rows||[]).find(x=>x.id===selectId)||(rows||[])[0]||null;
     setCurrent(pick);
   };
-  useEffect(()=>{setCurrent(null);setScored({});setGoalSaved({});load().catch(()=>setRecords([]));},[student.id]);
+  useEffect(()=>{setCurrent(null);setScored({});setGoalSaved({});setGradeLevel(String(student.grade||''));load().catch(()=>setRecords([]));},[student.id]);
   useEffect(()=>{
     const map={}; for(const r of current?.results?.items||[]) map[r.item_id]={earned_points:r.earned_points??'',teacher_note:r.teacher_note||''}; setScored(map);
   },[current?.id]);
@@ -44,11 +46,12 @@ export default function BaselineAssessmentStudio({student}){
   const toggle=d=>setDomains(v=>v.includes(d)?v.filter(x=>x!==d):[...v,d]);
   const generate=async()=>{
     if(!domains.length)return toast({title:'Choose at least one assessment area',variant:'destructive'});
+    if(!gradeLevel)return toast({title:'Choose a K-12 grade level',description:'Use the student grade or select an instructional grade for this probe.',variant:'destructive'});
     setBusy(true);try{
-      const r=await base44.functions.invoke('generateBaselineAssessment',{student_id:student.id,domains,items_per_domain:Number(itemsPerDomain),template_style:templateStyle});
+      const r=await base44.functions.invoke('generateBaselineAssessment',{student_id:student.id,grade_level:gradeLevel,domains,items_per_domain:Number(itemsPerDomain),template_style:templateStyle});
       const a=r.data?.assessment||r.assessment;
       if(!a?.domains?.length)throw new Error('No assessment items were returned.');
-      const me=await base44.auth.me();const organization_id=me?.organization_id||me?.data?.organization_id||student.organization_id||'';const rec=await base44.entities.BaselineAssessment.create({organization_id,student_id:student.id,title:a.title||`${student.first_name} Baseline Assessment`,grade:student.grade||'',domains,status:'ready',assessment:a,results:{items:[]},administered_date:localISO()});
+      const me=await base44.auth.me();const organization_id=me?.organization_id||me?.data?.organization_id||student.organization_id||'';const rec=await base44.entities.BaselineAssessment.create({organization_id,student_id:student.id,title:a.title||`${student.first_name} Baseline Assessment`,grade:gradeLevel,domains,status:'ready',assessment:a,results:{items:[]},administered_date:localISO()});
       await load(rec.id); toast({title:'Baseline assessment created',description:'Review the original items before administering. Print it or score it directly in CaseCue after the student completes it.'});
     }catch(e){toast({title:'Could not create baseline assessment',description:e?.response?.data?.error||e.message,variant:'destructive'})}finally{setBusy(false)}
   };
@@ -76,7 +79,7 @@ export default function BaselineAssessmentStudio({student}){
   return <div className="space-y-5">
     <Card className="overflow-hidden border-indigo-100">
       <div className="bg-gradient-to-br from-slate-950 via-indigo-950 to-blue-900 p-6 text-white"><div className="flex items-start justify-between gap-4"><div><div className="text-[10px] font-black uppercase tracking-[.2em] text-indigo-300">Baseline → PLAAFP → Goals</div><h3 className="mt-1 text-2xl font-black">Baseline Assessment Studio</h3><p className="mt-2 max-w-3xl text-sm text-slate-300">Generate an original skill probe, score the student's actual performance, then turn the verified baseline into educator-review present levels and measurable goal drafts.</p></div><ClipboardCheck className="h-11 w-11 text-indigo-300"/></div></div>
-      <div className="p-6"><div className="text-sm font-black">1. Choose baseline areas</div><div className="mt-3 flex flex-wrap gap-2">{DOMAINS.map(d=><button key={d} type="button" onClick={()=>toggle(d)} className={`rounded-full border px-3 py-2 text-xs font-bold ${domains.includes(d)?'border-blue-600 bg-blue-50 text-blue-800':'bg-white text-slate-600'}`}>{domains.includes(d)?'✓ ':''}{d}</button>)}</div><div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto_auto]"><div><Label>Assessment example style</Label><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={templateStyle} onChange={e=>setTemplateStyle(e.target.value)}>{STYLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><div className="mt-1 text-[11px] text-slate-500">Choose a familiar classroom probe format; CaseCue creates original items.</div></div><div><Label>Items per area</Label><Input className="w-32" type="number" min="3" max="12" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><div className="self-end"><Button onClick={generate} disabled={busy} className="bg-slate-950 text-white"><Sparkles className="mr-2 h-4 w-4"/>{busy?'Working…':'Generate Baseline'}</Button></div></div><div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"><b>Instructional baseline only.</b> This does not replace a standardized evaluation or determine eligibility. CaseCue creates original items and requires educator review before administration or IEP use.</div></div>
+      <div className="p-6"><div className="text-sm font-black">1. Choose baseline areas</div><div className="mt-3 flex flex-wrap gap-2">{DOMAINS.map(d=><button key={d} type="button" onClick={()=>toggle(d)} className={`rounded-full border px-3 py-2 text-xs font-bold ${domains.includes(d)?'border-blue-600 bg-blue-50 text-blue-800':'bg-white text-slate-600'}`}>{domains.includes(d)?'✓ ':''}{d}</button>)}</div><div className="mt-4 grid gap-3 md:grid-cols-[160px_1fr_auto_auto]"><div><Label>K-12 grade level</Label><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={gradeLevel} onChange={e=>setGradeLevel(e.target.value)}><option value="">Choose grade</option>{GRADES.map(g=><option key={g} value={g}>{g==='K'?'Kindergarten':`Grade ${g}`}</option>)}</select><div className="mt-1 text-[11px] text-slate-500">Defaults to the student record. Change only when you intentionally need an instructional-level probe.</div></div><div><Label>Assessment example style</Label><select className="mt-1 h-10 w-full rounded-lg border bg-white px-3 text-sm" value={templateStyle} onChange={e=>setTemplateStyle(e.target.value)}>{STYLES.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><div className="mt-1 text-[11px] text-slate-500">Choose a familiar classroom probe format; CaseCue creates original items.</div></div><div><Label>Items per area</Label><Input className="w-32" type="number" min="3" max="12" value={itemsPerDomain} onChange={e=>setItemsPerDomain(e.target.value)}/></div><div className="self-end"><Button onClick={generate} disabled={busy} className="bg-slate-950 text-white"><Sparkles className="mr-2 h-4 w-4"/>{busy?'Working…':'Generate Baseline'}</Button></div></div><div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"><b>Instructional baseline only.</b> This does not replace a standardized evaluation or determine eligibility. CaseCue creates original items and requires educator review before administration or IEP use.</div></div>
     </Card>
 
     {records.length>0&&<Card className="p-4"><div className="flex flex-wrap items-center gap-3"><div className="text-sm font-bold">Saved baselines</div><select className="h-10 min-w-[280px] rounded-lg border bg-white px-3 text-sm" value={current?.id||''} onChange={e=>{const r=records.find(x=>x.id===e.target.value);setCurrent(r||null)}}>{records.map(r=><option key={r.id} value={r.id}>{r.title||'Baseline Assessment'} · {prettyDate(r.administered_date)} · {r.status}</option>)}</select><Button variant="outline" size="sm" onClick={()=>load(current?.id)}><RefreshCw className="mr-1 h-3.5 w-3.5"/>Refresh</Button></div></Card>}
