@@ -15,7 +15,7 @@ export const WORKSPACE_TOOLS = {
       ['Schedule','/instruction/schedule',CalendarClock],
       ['Attendance','/attendance',UserCheck],
       ['GradeCue','/gradebook',ScanLine],
-      ['Baseline Testing','/ieps/studio?tab=baseline',FileText],
+      ['Baseline Center','/baseline-center',FileText],
       ['Weekly Family Update','/weekly-contact',StickyNote],
     ],
   },
