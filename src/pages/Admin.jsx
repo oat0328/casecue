@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Users, UserCheck, DollarSign, ShieldCheck, ShieldAlert, CalendarClock } from "lucide-react";
+import { Users, UserCheck, DollarSign, ShieldCheck, ShieldAlert, CalendarClock, LockKeyhole } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import PageHeader from "@/components/PageHeader";
@@ -60,7 +60,7 @@ export default function Admin() {
         <StatCard label="Payments collected" value={`$${collected.toFixed(2)}`} icon={DollarSign} tone="amber" sublabel={`${paidPurchases.length} paid order${paidPurchases.length === 1 ? "" : "s"}`} />
       </div>
 
-      <DistrictAnalytics />
+      <Card className="p-5 mb-6 border-blue-200 bg-blue-50/40"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><div className="font-black">Security & Privacy Center</div><p className="text-sm text-slate-600">Review access, privacy requests, audit activity and student-data safeguards.</p></div><a href="/security-center" className="inline-flex items-center rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white"><LockKeyhole className="mr-2 h-4 w-4"/>Open Security Center</a></div></Card>\n\n      <DistrictAnalytics />
 
       <FeedbackReviewCenter />
 
