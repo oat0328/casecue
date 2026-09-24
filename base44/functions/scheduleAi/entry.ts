@@ -130,12 +130,14 @@ const OPTIMIZE_SCHEMA = {
 
 async function analyze(base44, body) {
   const fileUris = Array.isArray(body.file_uris) ? body.file_uris.filter(Boolean) : (body.file_uri ? [body.file_uri] : []);
+  const isPrivateUploadUri=(value:any)=>{const v=String(value||'').trim();return !!v&&!/^https?:\/\//i.test(v)&&!/^(file|data|javascript):/i.test(v)&&v.length<4096};
+  if(fileUris.some((u:any)=>!isPrivateUploadUri(u)))return Response.json({error:'Invalid schedule file reference. Re-upload the file through CaseCue.'},{status:400});
   const fileUrls = [];
   for (const fileUri of fileUris.slice(0, 20)) {
-    const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: String(fileUri), expires_in: 600 });
+    const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: String(fileUri), expires_in: 300 });
     if (signed?.signed_url) fileUrls.push(signed.signed_url);
   }
-  if (body.file_url && /^https?:\/\//.test(String(body.file_url))) fileUrls.push(String(body.file_url));
+  // Public client-supplied URLs are intentionally not accepted for student schedules.
   if (!fileUrls.length) return Response.json({ error: 'At least one schedule file is required.' }, { status: 400 });
   const pullPreferences = String(body.pull_preferences || '').trim();
 

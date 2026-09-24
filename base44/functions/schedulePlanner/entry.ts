@@ -261,9 +261,13 @@ Deno.serve(async(req)=>{
     const names=(body.file_names||[]).map(String);
     if(!uris.length)return Response.json({error:'Upload at least one schedule file.'},{status:400});
 
+    // UploadPrivateFile returns opaque private URIs to the authenticated caller. Restrict
+    // service-role signing to that URI shape; never sign client-supplied web/file URLs.
+    const isPrivateUploadUri=(value:any)=>{const v=String(value||'').trim();return !!v&&!/^https?:\/\//i.test(v)&&!/^(file|data|javascript):/i.test(v)&&v.length<4096};
+    if(uris.some((u:any)=>!isPrivateUploadUri(u)))return Response.json({error:'Invalid schedule file reference. Re-upload the file through CaseCue.'},{status:400});
     const signedFiles=[];
     for(let i=0;i<Math.min(uris.length,20);i++){
-      const s=await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({file_uri:String(uris[i]),expires_in:600});
+      const s=await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({file_uri:String(uris[i]),expires_in:300});
       if(s?.signed_url)signedFiles.push({url:s.signed_url,name:names[i]||''});
     }
     if(!signedFiles.length)return Response.json({error:'The schedule uploaded, but CaseCue could not open the private file for analysis. Please retry the upload.'},{status:422});
