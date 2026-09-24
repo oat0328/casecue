@@ -53,7 +53,7 @@ const TAB_TIPS = [
 export default function IEPStudio() {
   const { data: students } = useAsync(() => base44.entities.Student.list('-updated_date', 200), []);
   const [studentId, setStudentId] = useState(() => new URLSearchParams(window.location.search).get("student") || "");
-  const [tab, setTab] = useState("flow");
+  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get("tab") || "flow");
   const [meetingAuto, setMeetingAuto] = useState(false);
   const student = (students || []).find((s) => s.id === studentId);
 

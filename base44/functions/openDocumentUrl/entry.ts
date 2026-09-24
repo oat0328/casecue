@@ -25,7 +25,7 @@ export default async function(req) {
       expires_in: 900,
     });
 
-    return Response.json({ signed_url });
+    await base44.entities.SecurityAuditEvent.create({organization_id:org,actor_user_id:user.id,actor_email:user.email||'',action:'document_view',resource_type:'Document',resource_id:document.id,student_id:document.student_id||'',workspace:user.active_workspace||'sped',detail:'Private student document opened with short-lived signed access.',occurred_at:new Date().toISOString(),severity:'info'}).catch(()=>{});\n    return Response.json({ signed_url });
   } catch (error) {
     console.error('openDocumentUrl failed:', error);
     return Response.json({ error: error.message }, { status: 500 });

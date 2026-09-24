@@ -48,7 +48,7 @@ export default function BaselineAssessmentStudio({student}){
       const r=await base44.functions.invoke('generateBaselineAssessment',{student_id:student.id,domains,items_per_domain:Number(itemsPerDomain),template_style:templateStyle});
       const a=r.data?.assessment||r.assessment;
       if(!a?.domains?.length)throw new Error('No assessment items were returned.');
-      const rec=await base44.entities.BaselineAssessment.create({student_id:student.id,title:a.title||`${student.first_name} Baseline Assessment`,grade:student.grade||'',domains,status:'ready',assessment:a,results:{items:[]},administered_date:localISO()});
+      const me=await base44.auth.me();const organization_id=me?.organization_id||me?.data?.organization_id||student.organization_id||'';const rec=await base44.entities.BaselineAssessment.create({organization_id,student_id:student.id,title:a.title||`${student.first_name} Baseline Assessment`,grade:student.grade||'',domains,status:'ready',assessment:a,results:{items:[]},administered_date:localISO()});
       await load(rec.id); toast({title:'Baseline assessment created',description:'Review the original items before administering. Print it or score it directly in CaseCue after the student completes it.'});
     }catch(e){toast({title:'Could not create baseline assessment',description:e?.response?.data?.error||e.message,variant:'destructive'})}finally{setBusy(false)}
   };
