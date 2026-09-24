@@ -13,7 +13,7 @@ export default async function(req) {
 
     const document = await base44.entities.Document.get(body.document_id);
     if (!document) return Response.json({ error: 'Document not found.' }, { status: 404 });
-    if (!document.file_url) return Response.json({ error: 'This document has no stored file.' }, { status: 400 });
+    if (!document.file_url) return Response.json({ error: 'This document has no stored file.' }, { status: 400 });\n    const org=String(user.organization_id||user.data?.organization_id||'');\n    if(!org||String(document.organization_id||'')!==org)return Response.json({error:'Document not found.'},{status:404});
 
     // Legacy public uploads — already viewable.
     if (String(document.file_url).startsWith('http')) {
@@ -22,7 +22,7 @@ export default async function(req) {
 
     const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({
       file_uri: document.file_url,
-      expires_in: 3600,
+      expires_in: 900,
     });
 
     return Response.json({ signed_url });
