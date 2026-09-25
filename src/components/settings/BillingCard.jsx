@@ -72,6 +72,16 @@ export default function BillingCard() {
         setPromo(res.data);
         if (res.data.promo?.founding_member) await base44.auth.updateMe({ founding_member: true });
         if (res.data.promo?.beta_tester) await base44.auth.updateMe({ beta_tester: true });
+        // Extended-trial promos are access grants, not merely checkout previews. Redeem
+        // immediately so an expired user is reopened without being forced through checkout.
+        if (res.data.promo?.discount_type === "trial_extension") {
+          const redeemed = await base44.functions.invoke("redeemPromoAccess", { code: res.data.promo.code });
+          if (!redeemed.data?.ok) throw new Error(redeemed.data?.reason || "Could not restore trial access");
+          toast({ title: `Promo code ${res.data.promo.code} redeemed`, description: redeemed.data.message || "Your CaseCue access has been restored." });
+          await checkUserAuth();
+          window.location.reload();
+          return;
+        }
         toast({ title: `Promo code ${res.data.promo.code} applied` });
       }
     } catch (e) {
@@ -162,7 +172,7 @@ export default function BillingCard() {
                 {promoBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
               </Button>
             </div>
-            {promo && (
+            {promo && promo.promo?.discount_type !== "trial_extension" && (
               <div className="mt-3 text-sm bg-muted rounded-lg p-3 space-y-1">
                 <div className="flex justify-between"><span className="text-muted-foreground">Original price</span><span>{promo.breakdown.original_price}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Discount</span><span className="text-emerald-600 font-medium">{promo.breakdown.discount_label}</span></div>
@@ -174,10 +184,10 @@ export default function BillingCard() {
               </div>
             )}
           </div>
-          <Button onClick={startCheckout} disabled={startingCheckout} className="brand-gradient text-white mt-4">
+          {promo?.promo?.discount_type !== "trial_extension" && <Button onClick={startCheckout} disabled={startingCheckout} className="brand-gradient text-white mt-4">
             {startingCheckout ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CreditCard className="h-4 w-4 mr-1" />}
             {startingCheckout ? "Opening checkout…" : `Start subscription${promo ? ` — ${promo.breakdown.final_price}` : " — $29.99/mo"}`}
-          </Button>
+          </Button>}
         </div>
       )}
 
