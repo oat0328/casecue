@@ -11,7 +11,10 @@ import{useToast}from'@/components/ui/use-toast';
 export default function GenEdIEPAccess(){
  const{user}=useAuth(),{toast}=useToast(),ref=useRef(null);
  const[selected,setSelected]=useState(''),[uploading,setUploading]=useState(false);
- const{data:students}=useAsync(()=>base44.entities.Student.list('-last_name',500),[]);
+ const{data:allStudents}=useAsync(()=>base44.entities.Student.list('-last_name',500),[]);
+ const{data:teacherAccess}=useAsync(()=>user?.id?base44.entities.IEPTeacherAccess.filter({teacher_user_id:user.id},'-updated_date',500):Promise.resolve([]),[user?.id]);
+ const allowedIds=new Set((teacherAccess||[]).map(x=>x.student_id).filter(Boolean));
+ const students=user?.role==='admin'?(allStudents||[]):((allStudents||[]).filter(s=>allowedIds.has(s.id)));
  const{data:goals}=useAsync(()=>base44.entities.Goal.list('-updated_date',1000),[]);
  const student=(students||[]).find(s=>s.id===selected)||null;
  const studentGoals=(goals||[]).filter(g=>g.student_id===selected&&String(g.status||'active')!=='met');
