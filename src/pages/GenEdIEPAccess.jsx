@@ -12,7 +12,9 @@ export default function GenEdIEPAccess(){
  const{user}=useAuth(),{toast}=useToast(),ref=useRef(null);
  const[selected,setSelected]=useState(''),[uploading,setUploading]=useState(false);
  const{data:students}=useAsync(()=>base44.entities.Student.list('-last_name',500),[]);
+ const{data:goals}=useAsync(()=>base44.entities.Goal.list('-updated_date',1000),[]);
  const student=(students||[]).find(s=>s.id===selected)||null;
+ const studentGoals=(goals||[]).filter(g=>g.student_id===selected&&String(g.status||'active')!=='met');
  const{data:docs,refetch}=useAsync(()=>selected?base44.entities.Document.filter({student_id:selected},'-updated_date',200):Promise.resolve([]),[selected]);
  const ieps=(docs||[]).filter(d=>/iep/i.test(String(d.document_type||d.type||d.title||'')));
 
@@ -39,8 +41,9 @@ export default function GenEdIEPAccess(){
 
   {student&&<>
    <div className="grid gap-4 lg:grid-cols-2">
-    <Card className="p-6"><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Classroom accommodations</div><h2 className="mt-1 text-xl font-black">{student.first_name} {student.last_name}</h2><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{Array.isArray(student.accommodations)?student.accommodations.join('\n• '):(student.accommodations||'No accommodations are recorded on this CaseCue student profile yet.')}</p></Card>
-    <Card className="p-6"><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Recorded services / minutes</div><div className="mt-3 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-slate-50 p-4"><b>Services</b><div className="mt-1 text-sm">{(student.services||[]).join(', ')||'—'}</div></div><div className="rounded-xl bg-slate-50 p-4"><b>Service minutes</b><div className="mt-1 text-sm">{student.service_minutes!=null?student.service_minutes+' min':'—'}</div></div></div></Card>
+    <Card className="p-6"><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Classroom accommodations</div><h2 className="mt-1 text-xl font-black">{student.first_name} {student.last_name}</h2><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{Array.isArray(student.accommodations)?student.accommodations.map(x=>`• ${x}`).join('\n'):(student.accommodations||'No accommodations are recorded on this CaseCue student profile yet.')}</p></Card>
+    <Card className="p-6"><div className="text-[10px] font-black uppercase tracking-wider text-violet-700">Active IEP goals</div><h2 className="mt-1 text-xl font-black">Goals for classroom support</h2>{studentGoals.length?<div className="mt-3 space-y-3">{studentGoals.map(g=><div key={g.id} className="rounded-xl border border-violet-100 bg-violet-50/50 p-3"><div className="text-sm font-black text-violet-950">{g.goal_area||'IEP Goal'}</div><div className="mt-1 text-sm leading-5 text-slate-700">{g.goal_text}</div>{(g.baseline||g.target||g.criterion)&&<div className="mt-2 text-xs text-slate-500">{g.baseline&&<>Baseline: {g.baseline}</>}{g.target&&<> · Target: {g.target}</>}{g.criterion&&<> · Criterion: {g.criterion}</>}</div>}</div>)}</div>:<p className="mt-3 text-sm text-slate-600">No active IEP goals are stored for this student yet. If an IEP was uploaded but goals are missing, the document still needs to be processed into the student profile.</p>}</Card>
+    <Card className="p-6 lg:col-span-2"><div className="text-[10px] font-black uppercase tracking-wider text-blue-700">Recorded services / minutes</div><div className="mt-3 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-slate-50 p-4"><b>Services</b><div className="mt-1 text-sm">{(student.services||[]).join(', ')||'—'}</div></div><div className="rounded-xl bg-slate-50 p-4"><b>Service minutes</b><div className="mt-1 text-sm">{student.service_minutes!=null?student.service_minutes+' min':'—'}</div></div></div></Card>
    </div>
 
    <Card className="overflow-hidden">
