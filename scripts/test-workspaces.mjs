@@ -36,6 +36,9 @@ const weeklyFamily=read('src/pages/WeeklyFamilyUpdate.jsx');
 const weeklyGenerator=read('base44/functions/generateWeeklyFamilyUpdate/entry.ts');
 const weeklySchema=read('base44/entities/WeeklyFamilyUpdate.jsonc');
 const userIdentity=read('src/lib/userIdentity.js');
+const batchWork=read('src/components/evidence/BatchWorkEvidencePanel.jsx');
+const studentWorkFolder=read('src/components/students/StudentWorkFolder.jsx');
+const privateFileGate=read('base44/functions/openPrivateFileUrl/entry.ts');
 
 const concreteHomes=['para','speech','ot','substitute','pe','nurse','psych','gen_ed'];
 for(const key of concreteHomes){
@@ -89,6 +92,9 @@ ok('Shared workspace notes can edit saved notes',workspaceNotes.includes('editin
 ok('SPED student notes can edit saved notes',studentNotes.includes('editingNote')&&quickNote.includes('StudentNote.update')&&quickNote.includes('Edit Student Note'),'SPED student note editing missing');
 ok('SPED student notes use shared export bar',studentNotes.includes('ExportBar'),'SPED notes are not using shared export behavior');
 ok('Shared workspace timer mounted',nowBar.includes('WorkspaceTimer'),'shared timer missing');
+ok('Student original work uses verified record reference',studentWorkFolder.includes("record_type:'GradebookAssignment'")&&studentWorkFolder.includes("record_id:row.id"),'student work viewer can call private file gate without a verified grade record');
+ok('Batch history exposes original uploaded packet',batchWork.includes('View Batch')&&batchWork.includes("record_type:'SmartStackRun'")&&batchWork.includes('openRun(r)'),'batch history cannot reopen uploaded work');
+ok('Private file gate supports verified batch/artifact records',privateFileGate.includes("SmartStackRun:'SmartStackRun'")&&privateFileGate.includes("WorkArtifact:'WorkArtifact'")&&privateFileGate.includes('artifact_file_uri'),'private file gate cannot validate batch/artifact files');
 
 ok('Schedule export is role-aware',scheduleExport.includes('workspaceKey')&&scheduleExport.includes('workspaceLabel'),'schedule export not role-aware');
 ok('Schedule export no hardcoded SPED promo',!scheduleExport.includes('Created with CaseCue · Special Education Workspace'),'hardcoded SPED export branding returned');
