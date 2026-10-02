@@ -1,6 +1,6 @@
 
 import React,{useRef,useState}from'react';
-import{Eye,FileText,ShieldCheck,UploadCloud,Trash2}from'lucide-react';
+import{Eye,FileText,ShieldCheck,UploadCloud,Trash2,AlertTriangle}from'lucide-react';
 import{base44}from'@/api/base44Client';
 import{useAsync}from'@/lib/useAsync';
 import{useAuth}from'@/lib/AuthContext';
