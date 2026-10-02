@@ -66,7 +66,8 @@ export default async function(req:any) {
     if(!fileUri)fileUri=await repairMissingFile(base44,evidence,organizationId);
     if (String(fileUri).startsWith('http')) return Response.json({error:'Legacy public evidence must be migrated to private storage before it can be opened.'},{status:409});
     const { signed_url } = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({file_uri:fileUri,expires_in:900});
-    await base44.entities.SecurityAuditEvent.create({organization_id:organizationId,actor_user_id:user.id,actor_email:user.email||'',action:'evidence_view',resource_type:'WorkEvidence',resource_id:evidence.id,student_id:evidence.student_id||'',workspace:user.active_workspace||'sped',detail:'Student work evidence opened with short-lived signed access.',occurred_at:new Date().toISOString(),severity:'info'}).catch(()=>{});\n    return Response.json({ signed_url, repaired:!evidence.file_url });
+    await base44.entities.SecurityAuditEvent.create({organization_id:organizationId,actor_user_id:user.id,actor_email:user.email||'',action:'evidence_view',resource_type:'WorkEvidence',resource_id:evidence.id,student_id:evidence.student_id||'',workspace:user.active_workspace||'sped',detail:'Student work evidence opened with short-lived signed access.',occurred_at:new Date().toISOString(),severity:'info'}).catch(()=>{});
+    return Response.json({ signed_url, repaired:!evidence.file_url });
   } catch (error:any) {
     console.error('openEvidenceUrl failed:', error);
     return Response.json({ error: error.message }, { status: 500 });
