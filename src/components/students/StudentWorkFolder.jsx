@@ -132,7 +132,7 @@ export default function StudentWorkFolder({student,goals=[]}){
 
  const resetFilters=()=>{setSearch('');setSubjectFilter('all');setTypeFilter('all');setGoalFilter('all');setVerificationFilter('all');setWorkOnly(false);setDateFrom('');setDateTo('')};
  const focusRow=id=>{if(!id)return;setSelectedId(id);requestAnimationFrame(()=>document.getElementById('work-'+id)?.scrollIntoView({behavior:'smooth',block:'center'}))};
- const openWork=async row=>{try{if(row.evidence?.id){const r=await base44.functions.invoke('openEvidenceUrl',{evidence_id:row.evidence.id});const u=r?.data?.signed_url||r?.signed_url;if(u){window.open(u,'_blank','noopener,noreferrer');return}}if(row.file){const r=await base44.functions.invoke('openPrivateFileUrl',{file_uri:row.file});const d=r?.data||r;if(d?.signed_url){window.open(d.signed_url,'_blank','noopener,noreferrer');return}}throw new Error('No saved worksheet is attached to this grade.')}catch(e){toast({title:'Could not open student work',description:e.message,variant:'destructive'})}};
+ const openWork=async row=>{try{if(row.evidence?.id){const r=await base44.functions.invoke('openEvidenceUrl',{evidence_id:row.evidence.id});const u=r?.data?.signed_url||r?.signed_url;if(u){window.open(u,'_blank','noopener,noreferrer');return}}if(row.file){const r=await base44.functions.invoke('openPrivateFileUrl',{file_uri:row.file,record_type:'GradebookAssignment',record_id:row.id});const d=r?.data||r;if(d?.signed_url){window.open(d.signed_url,'_blank','noopener,noreferrer');return}}throw new Error('No saved worksheet is attached to this grade.')}catch(e){toast({title:'Could not open student work',description:e.message,variant:'destructive'})}};
 
  const empty=!rows.length;
 
