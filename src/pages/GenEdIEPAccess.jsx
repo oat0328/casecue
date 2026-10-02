@@ -20,6 +20,12 @@ export default function GenEdIEPAccess(){
  const studentGoals=(goals||[]).filter(g=>g.student_id===selected&&String(g.status||'active')!=='met');
  const{data:docs,refetch}=useAsync(()=>selected?base44.entities.Document.filter({student_id:selected},'-updated_date',200):Promise.resolve([]),[selected]);
  const ieps=(docs||[]).filter(d=>/iep/i.test(String(d.document_type||d.type||d.title||'')));
+ const latestProcessed=ieps.find(d=>d.extraction_status==='processed'&&Array.isArray(d.processing_results?.pages));
+ const extractedPages=latestProcessed?.processing_results?.pages||[];
+ const extractedGoals=extractedPages.filter(p=>/iep goals?/i.test(String(p.section_name||''))).flatMap(p=>p.important_facts||[]).filter(Boolean);
+ const extractedAccommodations=extractedPages.filter(p=>/supplementary aids|services and accommodations|participation in assessments/i.test(String(p.section_name||''))).flatMap(p=>p.important_facts||[]).filter(x=>/accommodation|include|support|extra time|text.to.speech|small group|multiplication|graphic organizer|seating|break|reduction|retake|notes|directions|calculator|speech.to.text/i.test(String(x)));
+ const accommodationText=Array.isArray(student?.accommodations)?student.accommodations.filter(Boolean).join('\n'):String(student?.accommodations||'').trim();
+ const hasStoredAccommodations=Boolean(accommodationText);
 
  const open=async d=>{try{const r=await base44.functions.invoke('openDocumentUrl',{document_id:d.id}),x=r?.data||r;if(!x?.signed_url)throw Error('Could not create a private viewing link.');window.open(x.signed_url,'_blank','noopener,noreferrer')}catch(e){toast({title:'Could not open IEP',description:e.message,variant:'destructive'})}};
  const upload=async file=>{
