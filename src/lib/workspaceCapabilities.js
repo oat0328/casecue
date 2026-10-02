@@ -1,4 +1,4 @@
-import { CalendarClock, ScanLine, BookOpen, Users, FileText, StickyNote, Activity, HeartPulse, Brain, GraduationCap, UserCheck } from 'lucide-react';
+import { CalendarClock, ScanLine, BookOpen, Users, FileText, StickyNote, Activity, HeartPulse, Brain, GraduationCap, UserCheck, BarChart3, TimerReset, MessagesSquare, FileBarChart } from 'lucide-react';
 
 /**
  * Central CaseCue workspace capability registry.
@@ -11,12 +11,20 @@ export const WORKSPACE_TOOLS = {
   sped: {
     home: '/app',
     nav: [
-      ['Today','/app',GraduationCap],
+      ['Command Center','/app',GraduationCap],
+      ['Students','/students',Users],
+      ['Instruction','/instruction',BookOpen],
       ['Schedule','/instruction/schedule',CalendarClock],
       ['Attendance','/attendance',UserCheck],
       ['GradeCue','/gradebook',ScanLine],
       ['Baseline Center','/baseline-center',FileText],
+      ['Goals & Progress','/progress',BarChart3],
+      ['Session Tracker','/progress/sessions',TimerReset],
+      ['IEP Center','/ieps',FileText],
       ['Weekly Family Update','/weekly-contact',StickyNote],
+      ['Communication','/communication',MessagesSquare],
+      ['Case Log','/notes',StickyNote],
+      ['Reports','/reports',FileBarChart],
     ],
   },
   gen_ed: {
