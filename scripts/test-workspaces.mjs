@@ -41,8 +41,21 @@ const concreteHomes=['para','speech','ot','substitute','pe','nurse','psych','gen
 for(const key of concreteHomes){
   ok('concrete home '+key,new RegExp('path="\\/w\\/'+key+'"').test(app),'missing concrete /w/'+key+' route');
 }
-for(const generic of ['/w/:workspace/schedule','/w/:workspace/attendance','/w/:workspace/notes']){
+for(const generic of ['/w/:workspace/schedule','/w/:workspace/attendance','/w/:workspace/notes','/w/:workspace/students','/w/:workspace/weekly-contact']){
   ok('generic route '+generic,app.includes('path="'+generic+'"'),'missing '+generic);
+}
+
+ok('no misleading generic workspace home shell',!app.includes('path="/w/:workspace"')&&!app.includes('WorkspaceComingSoon'),'unknown workspace roots must fall through to PageNotFound instead of a fake ready shell');
+
+const appRoutes=[...app.matchAll(/<Route\s+path="([^"]+)"/g)].map(m=>m[1]);
+const navPaths=[...caps.matchAll(/['"](\/w\/[^'"]+)['"]/g)].map(m=>m[1]);
+const routeMatches=(path,route)=>{
+  const p=path.split('/').filter(Boolean),r=route.split('/').filter(Boolean);
+  if(p.length!==r.length)return false;
+  return r.every((part,i)=>part.startsWith(':')||part===p[i]);
+};
+for(const path of [...new Set(navPaths)]){
+  ok('nav resolves '+path,appRoutes.some(route=>routeMatches(path,route)),'no App route matches '+path);
 }
 
 const requiredNav=[
