@@ -13,7 +13,9 @@ export default async function(req) {
 
     const document = await base44.entities.Document.get(body.document_id);
     if (!document) return Response.json({ error: 'Document not found.' }, { status: 404 });
-    if (!document.file_url) return Response.json({ error: 'This document has no stored file.' }, { status: 400 });\n    const org=String(user.organization_id||user.data?.organization_id||'');\n    if(!org||String(document.organization_id||'')!==org)return Response.json({error:'Document not found.'},{status:404});
+    if (!document.file_url) return Response.json({ error: 'This document has no stored file.' }, { status: 400 });
+    const org=String(user.organization_id||user.data?.organization_id||'');
+    if(!org||String(document.organization_id||'')!==org)return Response.json({error:'Document not found.'},{status:404});
 
     // Legacy public uploads — already viewable.
     if (String(document.file_url).startsWith('http')) {
@@ -25,7 +27,8 @@ export default async function(req) {
       expires_in: 900,
     });
 
-    await base44.entities.SecurityAuditEvent.create({organization_id:org,actor_user_id:user.id,actor_email:user.email||'',action:'document_view',resource_type:'Document',resource_id:document.id,student_id:document.student_id||'',workspace:user.active_workspace||'sped',detail:'Private student document opened with short-lived signed access.',occurred_at:new Date().toISOString(),severity:'info'}).catch(()=>{});\n    return Response.json({ signed_url });
+    await base44.entities.SecurityAuditEvent.create({organization_id:org,actor_user_id:user.id,actor_email:user.email||'',action:'document_view',resource_type:'Document',resource_id:document.id,student_id:document.student_id||'',workspace:user.active_workspace||'sped',detail:'Private student document opened with short-lived signed access.',occurred_at:new Date().toISOString(),severity:'info'}).catch(()=>{});
+    return Response.json({ signed_url });
   } catch (error) {
     console.error('openDocumentUrl failed:', error);
     return Response.json({ error: error.message }, { status: 500 });
