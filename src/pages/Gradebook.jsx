@@ -91,12 +91,10 @@ export default function Gradebook() {
   const rowsFromFile = async (file) => {
     if (/\.pdf$/i.test(file.name)) {
       const up = await base44.integrations.Core.UploadPrivateFile({ file });
-      const signedResult = await base44.functions.invoke('openPrivateFileUrl',{file_uri:up.file_uri});
-      const signed = signedResult?.data || signedResult;
-      if(!signed?.signed_url) throw new Error('CaseCue could not securely open the uploaded grade report.');
+      if(!up?.file_uri) throw new Error('CaseCue could not store the uploaded grade report privately.');
       const schema = {type:'object',properties:{rows:{type:'array',items:{type:'object',properties:{student:{type:'string'},course:{type:'string'},teacher:{type:'string'},assignment:{type:'string'},assignment_type:{type:'string'},points_earned:{type:'number'},points_possible:{type:'number'},current_grade_percent:{type:'number'},letter_grade:{type:'string'},missing:{type:'boolean'},accommodations:{type:'string'},term:{type:'string'},date:{type:'string'},notes:{type:'string'}},required:['student','course','current_grade_percent','letter_grade']}}},required:['rows']};
-      const result = await base44.integrations.Core.InvokeLLM({prompt:'Extract the Gen Ed grade report into one row per visible course for each student. Preserve the visible student name, course/subject, teacher, current grade percent, letter grade, term/quarter and report date. Do not invent missing values. A course grade is Gen Ed context only, not IEP progress.',file_urls:[signed.signed_url],response_json_schema:schema,model:'gpt_5_6_luna'});
-      const data = typeof result === 'object' ? result : JSON.parse(result);
+      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({file_url:up.file_uri,json_schema:schema});
+      const data = result?.output||result?.data||result||{};
       return [["Student","Course","Teacher","Assignment","Assignment Type","Points Earned","Points Possible","Current Grade Percent","Letter Grade","Missing","Accommodations","Quarter/Term","Date","Notes"],...(data.rows||[]).map(r=>[r.student,r.course,r.teacher,r.assignment||'Gen Ed grade report',r.assignment_type||'Grade report',r.points_earned??'',r.points_possible??'',r.current_grade_percent??'',r.letter_grade,r.missing?'Yes':'No',r.accommodations||'Unknown',r.term,r.date,r.notes])];
     }
     if (/\.xlsx?$/i.test(file.name)) return await readXlsxFile(file);
