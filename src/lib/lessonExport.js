@@ -1,3 +1,4 @@
+import {LESSON_FLOW,FIELD_LABEL} from '@/lib/lessonFlow';
 import { jsPDF } from "jspdf";
 import { LESSON_HEADER_FIELDS, LESSON_GROUPS, SPECIAL_ACCOMMODATION_KEY } from "@/lib/lessonPlanSchema";
 import { sortStudentIdsByName } from "@/lib/studentSort";
@@ -26,7 +27,7 @@ const escapeAttr = (u) => String(u).replace(/"/g, "%22");
 export function buildLessonHtml(lesson, students, goals) {
   const plan = lesson.plan || {};
   const sections = [];
-  LESSON_GROUPS.forEach((group) => {
+  LESSON_FLOW.map(([title,keys])=>({title,fields:keys.map(key=>({key,label:FIELD_LABEL(key)}))})).forEach((group) => {
     const rows = group.fields.map((f) =>
       `<div class="field"><div class="flabel">${esc(f.label)}</div><div class="ftext">${esc(plan[f.key]) || "<em>—</em>"}</div></div>`
     ).join("");
@@ -69,7 +70,7 @@ export function buildLessonHtml(lesson, students, goals) {
   <h2>Accommodations</h2>
   <div class="ftext"><strong>Only use accommodations documented in the student's IEP.</strong> System suggestions below are ideas to review against the IEP.</div>
   <div class="ftext" style="margin-top:8px">${esc(acc) || "<em>—</em>"}</div>
-  ${videos ? `<h2>Approved Instructional Videos</h2><ul>${videos}</ul>` : ""}
+  ${videos ? `<h2>Instructional Video Resources — Preview Before Use</h2><ul>${videos}</ul>` : ""}
   ${resources ? `<h2>Saved Resource Links</h2><ul>${resources}</ul>` : ""}
   ${practice ? `<h2>Original Practice Materials</h2>${practice}` : ""}
   <div class="banner ${lesson.status === "approved" ? "approved" : ""}">
@@ -275,7 +276,7 @@ export function exportLessonPdf(lesson, students, goals) {
   writeBlock(iepConnectionText(lesson), 10, false, 8);
   y += 6;
 
-  LESSON_GROUPS.forEach((group) => {
+  LESSON_FLOW.map(([title,keys])=>({title,fields:keys.map(key=>({key,label:FIELD_LABEL(key)}))})).forEach((group) => {
     writeHeading(group.title);
     group.fields.forEach((f) => {
       const val = plan[f.key];
@@ -298,7 +299,7 @@ export function exportLessonPdf(lesson, students, goals) {
   writeBlock(plan[SPECIAL_ACCOMMODATION_KEY] || "—", 10, false, 8);
 
   if ((lesson.videos || []).length) {
-    writeHeading("Approved Instructional Videos");
+    writeHeading("Instructional Video Resources — Preview Before Use");
     lesson.videos.forEach((v) => writeBlock(`• ${v.label ? `${v.label} — ` : ""}${v.url}${v.usage_point ? ` (${v.usage_point})` : ""}`, 10, false, 2));
     y += 6;
   }
@@ -324,8 +325,9 @@ export function exportLessonPdf(lesson, students, goals) {
     const banner = lesson.status === "approved"
       ? "Teacher-reviewed and approved in CaseCue · CaseCue never guarantees IEP compliance"
       : "Draft — Teacher Review Required · CaseCue never guarantees IEP compliance";
-    doc.text(banner, M, H - 28);
-    doc.text(`CaseCue Lesson Plan · Page ${p} of ${pages}`, W - M, H - 28, { align: "right" });
+    doc.text(`${plan.teacher||''} | ${plan.date||''} | ${lesson.title||''}`.slice(0,95), M, H - 20);
+    doc.text(banner, M, H - 12);
+    doc.text(`CaseCue Lesson Plan · Page ${p} of ${pages}`, W - M, H - 20, { align: "right" });
   }
 
   doc.save(`${safeName(lesson.title)}.pdf`);
