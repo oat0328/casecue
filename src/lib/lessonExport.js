@@ -1,3 +1,4 @@
+import {installLessonFont} from './lessonPdfFont.js';
 import {parseLessonTable} from './lessonTable.mjs';
 import {asList} from '../../base44/shared/lessonQuality.ts';
 import {LESSON_FLOW,FIELD_LABEL} from '@/lib/lessonFlow';
@@ -160,6 +161,7 @@ function tableColumnWidths(headers, total) {
 export function exportLessonPdf(lesson, students, goals) {
   const plan = lesson.plan || {};
   const doc = new jsPDF({ unit: "pt", format: "letter" });
+  installLessonFont(doc);
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   const M = 48;
@@ -168,7 +170,7 @@ export function exportLessonPdf(lesson, students, goals) {
   doc.setCharSpace(0);
 
   const wrap = (text, size, bold) => {
-    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFont("LessonSans", bold ? "bold" : "normal");
     doc.setFontSize(size);
     const lines = doc.splitTextToSize(pdfSafe(text), CW);
     return lines;
@@ -197,7 +199,7 @@ export function exportLessonPdf(lesson, students, goals) {
       doc.setFillColor(109, 40, 217);
       doc.rect(M, y, CW, headH, "F");
       doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(size);
+      doc.setFont("LessonSans", "bold"); doc.setFontSize(size);
       cellLines.forEach((l, i) => doc.text(l, xFor(i) + pad, y + pad + size - 2));
       y += headH;
       doc.setTextColor(26, 26, 46);
@@ -211,7 +213,7 @@ export function exportLessonPdf(lesson, students, goals) {
       doc.setDrawColor(203, 196, 229);
       doc.setLineWidth(0.75);
       cells.forEach((_, i) => doc.rect(xFor(i), y, widths[i], rowH));
-      doc.setFont("helvetica", "normal"); doc.setFontSize(size);
+      doc.setFont("LessonSans", "normal"); doc.setFontSize(size);
       cellLines.forEach((l, i) => doc.text(l, xFor(i) + pad, y + pad + size - 2));
       y += rowH;
     });
@@ -232,7 +234,7 @@ export function exportLessonPdf(lesson, students, goals) {
     ensure(46);
     doc.setDrawColor(109, 40, 217);
     doc.setLineWidth(1.4);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(76, 29, 149);
+    doc.setFont("LessonSans", "bold"); doc.setFontSize(13); doc.setTextColor(76, 29, 149);
     doc.text(pdfSafe(text), M, y);
     y += 4;
     doc.line(M, y, W - M, y);
@@ -244,9 +246,9 @@ export function exportLessonPdf(lesson, students, goals) {
   doc.setFillColor(109, 40, 217);
   doc.rect(0, 0, W, 96, "F");
   doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold"); doc.setFontSize(17);
+  doc.setFont("LessonSans", "bold"); doc.setFontSize(17);
   doc.text(pdfSafe(String(plan.title || lesson.title).slice(0, 70)), M, 34, { maxWidth: CW });
-  doc.setFontSize(10); doc.setFont("helvetica", "normal");
+  doc.setFontSize(10); doc.setFont("LessonSans", "normal");
   doc.text(pdfSafe(`Teacher: ${plan.teacher || "-"}   Date: ${plan.date || "-"}`), M, 54);
   doc.text(pdfSafe(`Subject / skill: ${String(plan.subject_skill || "-").slice(0, 60)}   Duration: ${plan.duration || "-"}`), M, 68);
   doc.text(pdfSafe(String(plan.grade_group || lesson.group_label || "").slice(0, 80)), M, 82);
@@ -267,7 +269,7 @@ export function exportLessonPdf(lesson, students, goals) {
       const val = plan[f.key];
       if (val) {
         ensure(30);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+        doc.setFont("LessonSans", "bold"); doc.setFontSize(9);
         doc.setTextColor(107, 114, 128);
         doc.text(pdfSafe(f.label).toUpperCase(), M, y);
         y += 12;
@@ -308,7 +310,7 @@ export function exportLessonPdf(lesson, students, goals) {
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(120, 120, 140);
+    doc.setFont("LessonSans", "normal"); doc.setFontSize(8); doc.setTextColor(120, 120, 140);
     const banner = lesson.status === "approved"
       ? "Teacher-reviewed and approved in CaseCue · CaseCue never guarantees IEP compliance"
       : "Draft — Teacher Review Required · CaseCue never guarantees IEP compliance";
