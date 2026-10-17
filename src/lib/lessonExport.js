@@ -68,7 +68,7 @@ export function buildLessonHtml(lesson, students, goals) {
     Subject / skill: ${esc(plan.subject_skill)} &nbsp;·&nbsp; ${esc(plan.grade_group)} &nbsp;·&nbsp; Duration: ${esc(plan.duration)}<br>
     Students / group: ${esc(studentNames(lesson, students).join(", ") || lesson.group_label || "")}
   </div></div>
-  <h2>IEP Connection</h2><div class="ftext">${esc(iepConnectionText(lesson))}</div>
+  ${plan.iep_goal_matches&&!/^no verified/i.test(plan.iep_goal_matches)?`<h2>IEP Connection</h2><div class="ftext">${esc(iepConnectionText(lesson))}</div>`:""}
   ${sections.join("")}
   <h2>Accommodations</h2>
   <div class="ftext"><strong>Only use accommodations documented in the student's IEP.</strong> System suggestions below are ideas to review against the IEP.</div>
@@ -259,9 +259,7 @@ export function exportLessonPdf(lesson, students, goals) {
     writeBlock(names.join(", ") || lesson.group_label, 10, false, 6);
   }
 
-  writeHeading("IEP Connection");
-  writeBlock(iepConnectionText(lesson), 10, false, 8);
-  y += 6;
+  if(plan.iep_goal_matches&&!/^no verified/i.test(plan.iep_goal_matches)){writeHeading("IEP Connection");writeBlock(iepConnectionText(lesson),10,false,8);y+=6;}
 
   LESSON_FLOW.map(([title,keys])=>({title,fields:keys.map(key=>({key,label:FIELD_LABEL(key)}))})).forEach((group) => {
     writeHeading(group.title);
