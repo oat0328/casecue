@@ -1,3 +1,4 @@
+import {asList} from '../../base44/shared/lessonQuality.ts';
 import {LESSON_FLOW,FIELD_LABEL} from '@/lib/lessonFlow';
 import { jsPDF } from "jspdf";
 import { LESSON_HEADER_FIELDS, LESSON_GROUPS, SPECIAL_ACCOMMODATION_KEY } from "@/lib/lessonPlanSchema";
@@ -317,6 +318,8 @@ export function exportLessonPdf(lesson, students, goals) {
     });
   }
 
+  const checklist=asList(plan.observation_checklist);
+  if(checklist.length){writeHeading('Private preparation checklist — planned evidence');writeBlock('Planned opportunities only. Complete this with actual evidence after teaching; no rating is claimed.',10,false,5);checklist.forEach(c=>{writeBlock(c.id+' | '+c.phase,11,true,2);writeBlock('Teacher: '+c.teacher_action,10,false,2);writeBlock('Student: '+c.student_action,10,false,2);writeBlock('Collect: '+c.evidence,10,false,6);});}
   // Footers on every page
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
