@@ -37,6 +37,7 @@ A special education teacher uploaded a classroom assignment. Analyze it so the t
 
 STRICT RULES:
 - Base every field ONLY on what the source actually contains. If something cannot be determined, write "Not detected" — never guess.
+- Classify source_kind accurately: worksheet means the actual student assignment; lesson_plan means a generated or teacher lesson plan, not the original worksheet. Never treat problem references or a key inside a lesson plan as verified original assignment content. For a mixed file extract only actual assignment pages.
 - Preserve readable worksheet source in source_text and every actual question in source_items with exact wording, page, and answer/evidence only when supported. For source answers you cannot verify, leave answer empty. List unreadable_pages explicitly. Do not substitute a summary for the assignment.
 - For scanned or multi-page files, work page by page: the page_summary must have one entry per page.
 - In citations, give the source for each key finding (e.g. "Page 2", "Pasted text", "Linked page").
