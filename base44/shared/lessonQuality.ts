@@ -11,6 +11,7 @@ if(!/\d/.test(String(plan?.reteach_plan||'')))issues.push('Include a numerical r
 if(/\b(rubric|highly effective|coaching|artificial intelligence|AI)\b/i.test(String(plan?.admin_plan||'')))issues.push('Remove private observation/coaching language from the admin plan.');
 if(String(plan?.teacher_walkaround||'').trim().split(/\s+/).filter(Boolean).length<180)issues.push('Walk-around script needs at least 180 actual words; a length claim is not a script.');const table=String(plan?.quantitative_table||'');if(!/\n\s*\|?\s*:?-{2,}/.test(table)||table.split('\n').length<3)issues.push('Provide a printable multiline student-by-skill data table with blank rows.');
 if(!asList(plan?.verified_standard_sources).length)issues.push('Official standard source has not been verified; check the standard and task connection before use.');
+if(plan?.source_review_required)issues.push(String(plan.source_review_required));
 const expected={anticipatory_set:2,mini_lecture:6,i_do:4,we_do:6,you_do:8,quick_check:4};for(const [key,min] of Object.entries(expected)){for(const match of String(plan?.[key]||'').matchAll(/\b(\d+)\s*[-–]?\s*minutes?\b/gi))if(Number(match[1])!==min)issues.push('Conflicting phase timing in '+key);}
 let bundle=plan?.assessment_bundle;try{if(typeof bundle==='string')bundle=JSON.parse(bundle);}catch{bundle=null;}if(!bundle?.exit?.answer||!bundle?.exit?.explanation_answer||!bundle?.exit?.reflection_question)issues.push('A linked exit task, reasoning, reflection and matching private key are required.');
 return [...new Set(issues)];}
