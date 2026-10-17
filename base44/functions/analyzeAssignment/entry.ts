@@ -41,6 +41,7 @@ STRICT RULES:
 - Preserve readable worksheet source in source_text and every actual question in source_items with exact wording, page, and answer/evidence only when supported. For source answers you cannot verify, leave answer empty. List unreadable_pages explicitly. Do not substitute a summary for the assignment.
 - For scanned or multi-page files, work page by page: the page_summary must have one entry per page.
 - In citations, give the source for each key finding (e.g. "Page 2", "Pasted text", "Linked page").
+- standards_alignment may contain only standards explicitly supplied in the source with their source location; leave it empty when the source provides none. Do not invent or infer verified standard codes.
 - Suggested accommodations are IDEAS for the IEP team to review — never present them as required or IEP-mandated.
 
 Return JSON matching the schema exactly.
