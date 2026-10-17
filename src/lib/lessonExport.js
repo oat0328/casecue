@@ -1,3 +1,4 @@
+import {parseLessonTable} from './lessonTable.mjs';
 import {asList} from '../../base44/shared/lessonQuality.ts';
 import {LESSON_FLOW,FIELD_LABEL} from '@/lib/lessonFlow';
 import { jsPDF } from "jspdf";
@@ -25,12 +26,13 @@ function iepConnectionText(lesson) {
 
 const escapeAttr = (u) => String(u).replace(/"/g, "%22");
 
+const tableHtml=t=>'<table style="border-collapse:collapse;width:100%;font-size:11px"><thead><tr>'+t.headers.map(h=>'<th style="border:1px solid #aaa;padding:6px">'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+t.rows.map(r=>'<tr>'+r.map(c=>'<td style="border:1px solid #aaa;padding:8px">'+esc(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
 export function buildLessonHtml(lesson, students, goals) {
   const plan = lesson.plan || {};
   const sections = [];
   LESSON_FLOW.map(([title,keys])=>({title,fields:keys.map(key=>({key,label:FIELD_LABEL(key)}))})).forEach((group) => {
     const rows = group.fields.map((f) =>
-      `<div class="field"><div class="flabel">${esc(f.label)}</div><div class="ftext">${esc(plan[f.key]) || "<em>—</em>"}</div></div>`
+      `<div class="field"><div class="flabel">${esc(f.label)}</div><div class="ftext">${f.key==='quantitative_table'&&parseLessonTable(plan[f.key])?tableHtml(parseLessonTable(plan[f.key])):esc(plan[f.key]) || "<em>—</em>"}</div></div>`
     ).join("");
     sections.push(`<h2>${esc(group.title)}</h2>${rows}`);
   });
@@ -134,23 +136,7 @@ const pdfSafe = (t) => String(t == null ? "" : t)
 
 // Parses the markdown-style pipe table the plan stores in quantitative_table
 // into headers + normalized rows, so the PDF can draw a real bordered table.
-function parsePipeTable(text) {
-  if (!text || String(text).indexOf("|") === -1) return null;
-  const rows = [];
-  String(text).split(/\n/).forEach((raw) => {
-    const line = raw.trim();
-    if (!line.includes("|")) return;
-    const cells = line.replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
-    if (cells.filter((c) => c !== "").length === 0) return;
-    if (cells.every((c) => c === "" || /^:?-{2,}:?$/.test(c))) return;
-    rows.push(cells);
-  });
-  if (rows.length < 2) return null;
-  const headers = rows[0].map(pdfSafe);
-  const dataRows = rows.slice(1)
-    .map((r) => Array.from({ length: headers.length }, (_, i) => pdfSafe(r[i] != null ? r[i] : "")));
-  return { headers, rows: dataRows };
-}
+function parsePipeTable(text){const t=parseLessonTable(text);return t?{headers:t.headers.map(pdfSafe),rows:t.rows.map(r=>r.map(pdfSafe))}:null;}
 
 // Column widths sized for the standard data-collection headers (Date, Trial,
 // Correct, Total, Percentage, Prompt Level, Notes), scaled to fit the page.
