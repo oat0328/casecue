@@ -1,6 +1,0 @@
-import {exportLessonPdf,buildLessonHtml} from '../src/lib/lessonExport.js';
-import {assembleAssessment,enforcePhaseTimes,assembleAdminPlan} from '../base44/shared/lessonAssembly.ts';
-import {multiplicationSource,multiplicationBundle} from '../base44/shared/multiplicationChecks.ts';
-import {applyLearningRoutines} from '../base44/shared/lessonRoutines.ts';
-import fs from 'node:fs';
-const analysis={source_items:[{id:'1',question:'14 × 83'},{id:'2',question:'93 × 65'}]};const source=multiplicationSource(analysis);let p={teacher:'Mr. Edy Dollisme',date:'2026-10-17',title:'Multiplication Print QA',subject_skill:'2-digit multiplication',grade_group:'Grades 6–7 resource',duration:'30 minutes',essential_question:'How does place value help us multiply?',standards_rationale:'QA fixture — not a completed lesson',accommodations_note:'No verified accommodations supplied.',source_answer_key:source.map(s=>s.answer).join(', ')};assembleAssessment(p,multiplicationBundle({},source),analysis);applyLearningRoutines(p);enforcePhaseTimes(p);assembleAdminPlan(p);exportLessonPdf({title:p.title,plan:p},[],[]);fs.writeFileSync('/tmp/qa-lesson.html',buildLessonHtml({title:p.title,plan:p},[],[]));console.log('PDF created');
