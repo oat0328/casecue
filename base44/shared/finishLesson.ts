@@ -1,5 +1,5 @@
 import {installLessonEvidence} from './lessonEvidence.ts';
-import {multiplicationSource,multiplicationBundle} from './multiplicationChecks.ts';
+import {multiplicationSource,multiplicationBundle,multiplicationLecture} from './multiplicationChecks.ts';
 import {createAssessmentBundle,assembleAssessment,enforcePhaseTimes,assembleAdminPlan} from './lessonAssembly.ts';
 import {lookupLessonStandards,installStandards} from './lessonStandards.ts';
 import {applyLearningRoutines,coherentRectangleLesson} from './lessonRoutines.ts';
@@ -28,6 +28,7 @@ export async function finishLesson(invoke,plan,analysis,files,verifiedAccommodat
  const products=/multipli/i.test((analysis.skills||[]).join(' '))?multiplicationSource(analysis):[];const linked=products.length?multiplicationBundle(bundle,products):bundle;
  if(products.length)plan.source_answer_key=products.map(p=>'Source item '+p.id+': '+p.a+' × '+p.b+' = '+p.answer+'; partial products '+p.ones+' + '+p.tens).join('\n');
  assembleAssessment(plan,linked,analysis);
+ if(products.length){plan.mini_lecture=multiplicationLecture(linked);plan.example_student_response=linked.models[0].solution;plan.example_explanation="Illustrative response to the original teaching example, not a recorded student result.";plan.next_step="Use actual skill and exit evidence to decide whether to reteach or extend; give a fresh independent check before increasing complexity.";}
  if(products.length)plan.brain_teaser_choices=[{question:'What is 24 × 10? Explain the place value.',answer:'240; each digit shifts one place left.'},{question:'What is 12 × 11 using two partial products?',answer:'12 × 10 + 12 × 1 = 120 + 12 = 132.'},{question:'Must two two-digit factors give a four-digit product?',answer:'No. For example, 10 × 10 = 100 has three digits.'}];
  coherentRectangleLesson(plan,verified,analysis.grade_level||plan.grade_group);if(verified.length){const supplied=verifiedAccommodations.length?'Verified accommodations supplied: '+verifiedAccommodations.map(a=>String(a.student||'Student')+': '+String(a.accommodations||'')).join('; '):'No verified accommodations were supplied.';for(const key of ['accommodations_note','admin_plan'])plan[key]=String(plan[key]||'').replace('Preserve any verified accommodations supplied with the lesson.',supplied);}applyLearningRoutines(plan);
  if(products.length)plan.teacher_walkaround+='\n\nCRITERION-SPECIFIC FEEDBACK — use only when supported by the visible work:\nOnes partial product: SAY: "You used the ones value and recorded the regrouped ten. Check that you added it in the next column. Show that check."\nTens place value: SAY: "Your second row represents tens. Point to the zero in its ones place and explain the value of this row. Revise its alignment if needed."\nSum and verify: SAY: "You aligned the partial products by place value. Re-add each column, then compare your result with your estimate. Tell me whether the estimate supports it and why."';
