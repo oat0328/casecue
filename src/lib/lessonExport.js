@@ -314,7 +314,8 @@ export function exportLessonPdf(lesson, students, goals) {
     const banner = lesson.status === "approved"
       ? "Teacher-reviewed and approved in CaseCue · CaseCue never guarantees IEP compliance"
       : "Draft — Teacher Review Required · CaseCue never guarantees IEP compliance";
-    doc.text(`${plan.teacher||''} | ${plan.date||''} | ${lesson.title||''}`.slice(0,95), M, H - 20);
+    doc.text(doc.splitTextToSize(pdfSafe(lesson.title||plan.title||''),CW)[0]||'',M,H-31);
+    doc.text(pdfSafe(`${plan.teacher||''} | ${plan.date||''}`), M, H - 20);
     doc.text(banner, M, H - 12);
     doc.text(`CaseCue Lesson Plan · Page ${p} of ${pages}`, W - M, H - 20, { align: "right" });
   }
