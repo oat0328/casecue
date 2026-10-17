@@ -12,8 +12,9 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
+    if(typeof body.pasted_text==='string'&&body.pasted_text.length>60000)return Response.json({error:'Assignment text exceeds 60,000 characters. Split it into smaller assignments; no text was silently skipped.'},{status:400});
     const fileUrl = typeof body.file_url === 'string' ? body.file_url.trim() : '';
-    const pastedText = typeof body.pasted_text === 'string' ? body.pasted_text.slice(0, 20000) : '';
+    const pastedText = typeof body.pasted_text === 'string' ? body.pasted_text.slice(0, 60000) : '';
     const pageUrl = typeof body.page_url === 'string' ? body.page_url.trim() : '';
     const gradeHint = typeof body.grade_hint === 'string' ? body.grade_hint.slice(0, 50) : '';
     const subjectHint = typeof body.subject_hint === 'string' ? body.subject_hint.slice(0, 50) : '';
@@ -36,6 +37,7 @@ A special education teacher uploaded a classroom assignment. Analyze it so the t
 
 STRICT RULES:
 - Base every field ONLY on what the source actually contains. If something cannot be determined, write "Not detected" — never guess.
+- Preserve readable worksheet source in source_text and every actual question in source_items with exact wording, page, and answer/evidence only when supported. For source answers you cannot verify, leave answer empty. List unreadable_pages explicitly. Do not substitute a summary for the assignment.
 - For scanned or multi-page files, work page by page: the page_summary must have one entry per page.
 - In citations, give the source for each key finding (e.g. "Page 2", "Pasted text", "Linked page").
 - Suggested accommodations are IDEAS for the IEP team to review — never present them as required or IEP-mandated.
@@ -57,7 +59,7 @@ ${sourceParts.join('\n\n')}`;
       response_json_schema: ASSIGNMENT_ANALYSIS_SCHEMA
     });
     const analysis = typeof result === 'object' ? result : JSON.parse(result);
-    return Response.json({ analysis });
+    return Response.json({ analysis:{...analysis,source_file_url:fileUrl||'',source_pasted_text:pastedText||''} });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
