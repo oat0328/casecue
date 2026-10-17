@@ -9,4 +9,4 @@ const checklist=asList(plan?.observation_checklist);for(const c of OBSERVATION_C
 const data=String(plan?.progress_monitoring||'')+' '+String(plan?.quantitative_table||'');if(!/\bY\b/.test(data)||! /\bN\b/.test(data)||! /\bP\b/.test(data))issues.push('Define and record Y (independent success), N (not yet), P (prompted), by student and skill.');
 if(!/\d/.test(String(plan?.reteach_plan||'')))issues.push('Include a numerical reteach trigger.');
 if(/\b(rubric|highly effective|coaching|artificial intelligence|AI)\b/i.test(String(plan?.admin_plan||'')))issues.push('Remove private observation/coaching language from the admin plan.');
-return [...new Set(issues)];}
+if(String(plan?.teacher_walkaround||'').trim().split(/\s+/).filter(Boolean).length<180)issues.push('Walk-around script needs at least 180 actual words; a length claim is not a script.');return [...new Set(issues)];}
